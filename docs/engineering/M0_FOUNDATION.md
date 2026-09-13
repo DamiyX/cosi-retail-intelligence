@@ -68,7 +68,10 @@ Local Windows results on 2026-09-13:
   this does not simulate Android's physical back button.
 - Expo Doctor: 21/21 checks passed after clean dependency resolution.
 - Android development and preview JavaScript/assets exports passed (1,242 modules).
-- EAS CLI version command passed with the patch overrides; account is not signed in.
+- EAS CLI version command passed with the patch overrides. Signup/sign-in is now
+  complete as damiy_x, Owner of damiyxs-team. `eas project:info` verified the user-created
+  @damiyxs-team/cosi project, ID 737ed99c-2c20-4612-ac80-a8a868b827cb. App config records
+  these public identifiers; typecheck/lint passed after linking.
 - Supabase init generated local config. Seed references were disabled because M0
   has no seed/schema. Local migration listing could parse config but could not connect
   to a local database, as expected without the optional local Docker stack.

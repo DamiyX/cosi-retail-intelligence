@@ -74,10 +74,13 @@ Copy-Item apps/mobile/.env.example apps/mobile/.env.local
 Invalid values fail configuration. EAS profiles set their value explicitly.
 Never use NODE_ENV to select the business environment.
 
-`EAS_OWNER` and `EAS_PROJECT_ID` are optional non-secret build identifiers.
-When a real project is selected, record these identifiers in the configuration
-or documented EAS setup so another laptop can use the same project.
-Do not fabricate an ID to make a build appear configured.
+The user-created Expo project is `@damiyxs-team/cosi`, project ID
+`737ed99c-2c20-4612-ac80-a8a868b827cb`. These non-secret defaults are recorded in
+app.config.ts so a second laptop targets the same project. The Expo slug is `cosi`
+to match that hosted project; domain and Android identifiers stay unchanged.
+`EAS_OWNER` and `EAS_PROJECT_ID` may override these identifiers only for a deliberate
+project change. Each laptop signs in separately using `npm exec -- eas login`
+from apps/mobile, then confirms access with `npm exec -- eas whoami`.
 
 M0 does not consume Supabase credentials. Later client configuration may contain
 only a project URL and publishable key. Privileged keys, passwords, signing

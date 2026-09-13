@@ -32,9 +32,9 @@ Do not interpret export success as native-build or physical-device acceptance.
 
 - CI passed on Windows and Ubuntu for scaffold commit 588b215:
   https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34761033840
-- EAS CLI is not signed in. User has no prior Expo account; signup page was opened
-  for private user completion. A Terra/medium helper was delegated account setup only.
-  Resume with `eas whoami`, then link the user-confirmed project and build APKs.
+- EAS CLI sign-in verified as `damiy_x`, Owner of `damiyxs-team`.
+  User-created project `@damiyxs-team/cosi` is linked in app config; project:info
+  verified ID `737ed99c-2c20-4612-ac80-a8a868b827cb`. Terra/medium handled sign-in only.
 - Development/preview APK builds and physical Android launch/back/offline checks pending.
 - Galaxy A15 5G (SM-A156E), Android 16: USB debugging authorized and adb connected.
   App installation/launch has not been tested because APK builds are pending.
@@ -47,7 +47,7 @@ Do not interpret export success as native-build or physical-device acceptance.
 
 ## Next action
 
-Finish Expo signup/sign-in and confirm project ownership. Build development/preview
+Build development/preview
 APKs and test launch/navigation/back/airplane-mode behavior on the connected phone.
 Record native evidence and second-laptop reproduction before declaring M0 complete
 or beginning M1. Local automated checks and Windows/Linux CI already passed.
