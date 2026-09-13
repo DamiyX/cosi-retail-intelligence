@@ -1,0 +1,42 @@
+{
+  "name": "retail-intelligence-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": "24.21.0",
+    "npm": "11.19.0"
+  },
+  "packageManager": "npm@11.19.0",
+  "scripts": {
+    "check:environment": "node tools/scripts/check-environment.mjs",
+    "typecheck": "npm run typecheck --workspace @retail/mobile",
+    "lint": "npm run lint --workspace @retail/mobile",
+    "test": "npm run test --workspace @retail/mobile --",
+    "validate": "npm run check:environment && npm run typecheck && npm run lint && npm test -- --runInBand",
+    "mobile:start": "npm run start --workspace @retail/mobile",
+    "mobile:export": "npm run export:android --workspace @retail/mobile",
+    "mobile:doctor": "npm run doctor --workspace @retail/mobile",
+    "mobile:build:development": "npm run build:development --workspace @retail/mobile",
+    "mobile:build:preview": "npm run build:preview --workspace @retail/mobile"
+  },
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native-reanimated": "4.5.1",
+    "react-native-worklets": "0.10.1",
+    "eas-cli": {
+      "minimatch": "5.1.8",
+      "nanoid": "3.3.18",
+      "tar": "7.5.21"
+    }
+  },
+  "devDependencies": {
+    "eas-cli": "24.3.0",
+    "expo-doctor": "1.20.4",
+    "supabase": "2.117.0"
+  }
+}
