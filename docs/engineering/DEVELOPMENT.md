@@ -18,6 +18,10 @@ active source of truth. Other laptops can clone into any ordinary local path.
 - A physical Android device for native acceptance.
 - An Expo account authorized for the intended EAS project for cloud builds.
 - Optional Android SDK/platform-tools (adb) for USB installation/debugging.
+  Download from https://developer.android.com/tools/releases/platform-tools.
+  The initial laptop uses portable platform-tools 37.0.1 outside the repository;
+  add your chosen platform-tools directory to your terminal PATH to use `adb`.
+  Enable USB debugging on the phone and authorize only your intended development laptop.
 - Optional Java/Android SDK for local native builds; Docker only for local Supabase.
 
 This project does not depend on a Codex runtime or any particular AI tool.

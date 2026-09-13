@@ -88,9 +88,15 @@ physical/native/remote acceptance is incomplete. Architecture boundaries are pre
 Imported unchanged source-of-truth documents were verified separately from scaffold
 code. Remaining dependency findings and deprecated lint tooling are recorded above;
 no claim of external-release readiness is made.
-- GitHub CI, native APK builds, physical phone and second-laptop checks are pending.
+- Scaffold commit 588b215 was pushed; draft PR #1 opened. GitHub CI run
+  https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34761033840 passed
+  on both Windows and Ubuntu for commit 588b215. Each ran npm ci, validation,
+  Expo dependency checks, preview Android export and clean working-tree check.
+- Galaxy A15 5G (SM-A156E), Android 16 is detected and authorized over USB using
+  official Android platform-tools 37.0.1. No APK installed yet.
+- Native APK builds, physical app behavior and second-laptop checks are pending.
 
-M0 acceptance has NOT passed: native/device and remote checks remain required.
+M0 acceptance has NOT passed: native/device and second-laptop checks remain required.
 
 A browser showing the private repository proves browser access only. The successful
 Git clone verifies Git read authentication separately. Push/build/CI/native results
