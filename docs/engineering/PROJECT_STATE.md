@@ -1,8 +1,8 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-13
-Current milestone: M0 Project Foundation — implementation and verification in progress.
-Completed engineering milestones: none; M0 acceptance remains open.
+Current milestone: M0 Project Foundation — complete, with the second-laptop check deferred.
+Completed engineering milestones: M0 Project Foundation.
 
 ## Active checkout
 
@@ -48,7 +48,9 @@ Do not interpret export success as native-build or physical-device acceptance.
   These checks used COSI APKs, not Expo Go.
 - CI also passed for linked-project commit `beb7a81`:
   https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34761941894
-  Current local TypeScript normalization/doc changes have not been committed or run in CI.
+- Final device-evidence commit `eddae3b` passed on both Windows and Ubuntu:
+  https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34778987136
+  https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34778985181
 - Second-laptop reproduction is explicitly deferred by the user on 2026-09-13.
   CI has exercised clean installs on Windows and Ubuntu, but it is not a substitute
   for that future physical-laptop check. Java and Docker are not available on PATH;
@@ -60,11 +62,11 @@ Do not interpret export success as native-build or physical-device acceptance.
 
 ## Next action
 
-The native acceptance checks are complete and the second-laptop check is deferred.
-Preserve the reviewed Expo-generated TypeScript normalization and local handoff
-documentation. Notify the user before commit/push or other utility/external actions.
-Commit/push the reviewed changes and verify CI on that commit. M0 acceptance remains
-open; do not begin M1 yet.
+M0 is complete for the approved scope. The second-laptop reproduction check is deferred
+and must be completed before external beta readiness. Before M1, create and approve an
+M1 Domain + Local Database plan that respects the documented transaction, inventory,
+package-unit, and outbox decisions. Notify the user before commit/push or other
+utility/external actions.
 
 See `DEVELOPMENT.md` for reproducible setup and `M0_FOUNDATION.md` for reviewed scope,
 retained documentation gaps and evidence. Established architecture decisions remain

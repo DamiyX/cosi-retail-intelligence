@@ -154,8 +154,14 @@ installs on Windows and Ubuntu remain useful reproducibility evidence, but do no
 the deferred physical-laptop check. Notify the user before Git commit/push utility work;
 the reviewed local changes then need CI on their resulting commit.
 
-M0 acceptance has NOT passed: publishing/CI of the final reviewed changes remains open.
-The second-laptop check is deferred rather than passed. No M1 work has started.
+M0 acceptance passed for the approved scope. Device-evidence commit `eddae3b` passed CI
+on both Windows and Ubuntu (branch and draft-PR triggers):
+
+- https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34778987136
+- https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34778985181
+
+The second-laptop check is deferred rather than passed and remains a requirement before
+external beta readiness. No M1 work has started.
 
 A browser showing the private repository proves browser access only. The successful
 Git clone verifies Git read authentication separately. Push/build/CI/native results
