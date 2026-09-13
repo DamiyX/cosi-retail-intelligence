@@ -12,7 +12,7 @@ active source of truth. Other laptops can clone into any ordinary local path.
 
 ## Prerequisites
 
-- Git with access to the private repository.
+- Git; the canonical repository is public. Write access is required to push changes.
 - Node **24.21.0**, including npm **11.19.0**. Install from nodejs.org.
   `.node-version`, package engines, CI, and EAS pin the same Node release.
 - A physical Android device for native acceptance.
@@ -57,6 +57,11 @@ This starts Metro for the **development client**, not Expo Go. Install a matchin
 development APK once, then connect the phone to Metro on the same network.
 For USB use adb reverse when appropriate; a native dependency or app-config
 change requires a new binary. Ordinary JS changes use Fast Refresh.
+
+On the initial Windows laptop, forcing Metro to localhost bound only IPv6 loopback,
+which prevented IPv4 access through adb reverse. Starting Metro with `--host lan`
+resolved the listener issue; selecting its discovered LAN address worked on the phone.
+Do not treat that LAN result as verification of USB-only connectivity.
 
 The app has Welcome and About screens only. There is no authentication, SQLite,
 catalogue, business data, sync, or scanner yet.
@@ -145,7 +150,10 @@ Record build IDs, source commit, Android device/OS, tester and outcome:
 1. Install development APK; launch and connect to Metro.
 2. Tap About; confirm content and Android hardware back returns to Welcome.
 3. Install preview APK; stop Metro.
-4. Enable airplane mode, force-stop/reopen; navigate and return successfully.
+4. Record initial connectivity, enable airplane mode, and confirm Wi-Fi and mobile data
+   are disconnected. Force-stop/reopen preview; visit About, press Android back, and
+   observe Welcome before another restart. Repeat cold launch, then restore prior
+   connectivity. Record each observation separately.
 5. Repeat documented clone/setup on laptop B with the same lockfile.
 
 Do not use real retailer data in M0. If a native check cannot be performed, leave

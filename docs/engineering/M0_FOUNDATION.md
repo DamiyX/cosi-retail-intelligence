@@ -25,7 +25,7 @@ business data or schema migration. No M1+ or recognition implementation is inclu
   until there is code to isolate/share.
 - Use generated native projects from app config; native folders are not tracked.
 - Development and preview have distinct Android IDs and explicit environments.
-- Supabase configuration only; no remote project or business schema.
+- Supabase configuration only; no linked Supabase remote project or business schema.
 - Source-control workflow and scripts are usable without any particular AI tool.
 - React, React DOM, Reanimated and Worklets are constrained at the workspace root
   to Expo's compatible versions. Without those constraints npm selected newer
@@ -87,7 +87,7 @@ Local Windows results on 2026-09-13:
   credentials. Markdown hard-break spaces are preserved; git diff --check passed.
 
 Self-review against baseline a393498: M0 specification is implemented locally;
-physical/native/remote acceptance is incomplete. Architecture boundaries are preserved.
+remaining acceptance checks are listed below. Architecture boundaries are preserved.
 Imported unchanged source-of-truth documents were verified separately from scaffold
 code. Remaining dependency findings and deprecated lint tooling are recorded above;
 no claim of external-release readiness is made.
@@ -95,11 +95,67 @@ no claim of external-release readiness is made.
   https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34761033840 passed
   on both Windows and Ubuntu for commit 588b215. Each ran npm ci, validation,
   Expo dependency checks, preview Android export and clean working-tree check.
-- Galaxy A15 5G (SM-A156E), Android 16 is detected and authorized over USB using
-  official Android platform-tools 37.0.1. No APK installed yet.
-- Native APK builds, physical app behavior and second-laptop checks are pending.
+- CI also passed on linked-project commit beb7a81:
+  https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34761941894.
+  Local changes made after that commit still require their own CI result.
 
-M0 acceptance has NOT passed: native/device and second-laptop checks remain required.
+Native build requests from linked-project commit `beb7a8183ee914966d9e87695ae341d793477381`:
+
+- Development: `cc7fcfe2-a642-454b-81a8-d5d28992ea4b` — FINISHED, APK artifact present,
+  no build error; package `com.damiyx.retailintelligence.dev`.
+- Preview: `12b2a32d-4c97-4cb5-9d3c-2d28e656015c` — FINISHED, APK artifact present,
+  no build error; package `com.damiyx.retailintelligence.preview`.
+- Both use EAS-managed signing credentials generated for their separate Android IDs.
+  No keystores or credentials are stored in Git. Check current build status before
+  retrying; do not submit duplicates merely because a session was interrupted.
+
+Post-startup configuration review: installed Expo CLI's
+`startTypescriptTypeGenerationAsync` deliberately removes `expo-env.d.ts` and its
+generated-type include entries when experiments.typedRoutes is false/absent.
+This app has not enabled typed routes. Accept the generated deletion and simplified
+tsconfig includes; strict mode and explicit test/React/Node types remain enabled.
+Applying Expo's normalization function again produces no updates. This change
+affects TypeScript tooling, not the already-built APKs' runtime configuration.
+Typecheck, zero-warning lint and both Jest suites (10 tests) passed after this review.
+
+## Physical-device evidence and final review
+
+Executed in the same task under Terra, reviewed under Astra on 2026-09-13.
+Device: Galaxy A15 5G (SM-A156E), Android 16; official adb 37.0.1 over authorized USB.
+Both APKs above installed successfully. UIAutomator observations support these results:
+
+- Development: Welcome displayed the development environment; About content displayed;
+  Android back returned to Welcome, observed before any restart. Metro bundled the app.
+- Preview: with Metro stopped and airplane-mode setting verified as 1, force-stop and
+  launch displayed Welcome with the preview environment. About content displayed.
+  A second force-stop/relaunch displayed Welcome again without Metro.
+- Follow-up preview check: Wi-Fi and mobile-data settings were explicitly changed from
+  1 to 0; with airplane mode still 1, cold launch displayed Welcome, About displayed,
+  and Android back immediately displayed Welcome before any restart.
+- Airplane mode, Wi-Fi, and mobile data started at 0/1/1 and were restored to 0/1/1.
+  Metro was stopped throughout the preview check.
+
+The settings provide credible device-side evidence for the offline shell smoke check;
+they do not establish every possible carrier/network behavior. No business persistence
+or sync exists in M0; these are shell smoke checks only.
+
+Development connection troubleshooting: Windows Metro in localhost mode listened only
+on IPv6 loopback; IPv4 access failed. Restarting with `--host lan` served successfully,
+and the phone selected the discovered LAN address. USB reverse was configured, but
+this run does not establish that the app loaded through the USB tunnel.
+
+Downloaded APK SHA256 checksums (artifacts remain outside Git):
+
+- Development: `AA02EC00BCCC6C6012345D9CA7975593937DDA14633580D150D740598F8E8484`
+- Preview: `268DA53333E77AB1C6216D21E0FA7A981D8572327CCD3D84D192F5DB1FBE5F06`
+
+Second-laptop reproduction is explicitly deferred by the user on 2026-09-13. CI clean
+installs on Windows and Ubuntu remain useful reproducibility evidence, but do not replace
+the deferred physical-laptop check. Notify the user before Git commit/push utility work;
+the reviewed local changes then need CI on their resulting commit.
+
+M0 acceptance has NOT passed: publishing/CI of the final reviewed changes remains open.
+The second-laptop check is deferred rather than passed. No M1 work has started.
 
 A browser showing the private repository proves browser access only. The successful
 Git clone verifies Git read authentication separately. Push/build/CI/native results

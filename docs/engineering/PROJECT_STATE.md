@@ -35,10 +35,23 @@ Do not interpret export success as native-build or physical-device acceptance.
 - EAS CLI sign-in verified as `damiy_x`, Owner of `damiyxs-team`.
   User-created project `@damiyxs-team/cosi` is linked in app config; project:info
   verified ID `737ed99c-2c20-4612-ac80-a8a868b827cb`. Terra/medium handled sign-in only.
-- Development/preview APK builds and physical Android launch/back/offline checks pending.
+- Development and preview EAS builds succeeded; both expose APK artifacts without build errors.
+  Both APKs installed and launched on the physical phone; see evidence limits below.
+  Builds submitted from `beb7a81`: development `cc7fcfe2-a642-454b-81a8-d5d28992ea4b`,
+  preview `12b2a32d-4c97-4cb5-9d3c-2d28e656015c`. Check existing requests before retrying.
 - Galaxy A15 5G (SM-A156E), Android 16: USB debugging authorized and adb connected.
-  App installation/launch has not been tested because APK builds are pending.
-- Second-laptop reproduction pending. Java and Docker are not available on PATH;
+  Development Home/About/Android back passed with Metro. Preview cold launch and
+  About navigation passed with Metro stopped and airplane mode enabled, including
+  another force-stop/relaunch. A follow-up confirmed Wi-Fi and mobile data settings
+  were off, and observed Android back return to Welcome before any restart.
+  Airplane mode, Wi-Fi, and mobile data were restored to their original enabled state.
+  These checks used COSI APKs, not Expo Go.
+- CI also passed for linked-project commit `beb7a81`:
+  https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34761941894
+  Current local TypeScript normalization/doc changes have not been committed or run in CI.
+- Second-laptop reproduction is explicitly deferred by the user on 2026-09-13.
+  CI has exercised clean installs on Windows and Ubuntu, but it is not a substitute
+  for that future physical-laptop check. Java and Docker are not available on PATH;
   Java/Docker are optional for the selected cloud-build/hosted-backend workflow.
 - User made the repository public. Repository description now uses COSI.
 - npm audit retains 21 moderate and 1 low upstream dependency findings after compatible
@@ -47,10 +60,11 @@ Do not interpret export success as native-build or physical-device acceptance.
 
 ## Next action
 
-Build development/preview
-APKs and test launch/navigation/back/airplane-mode behavior on the connected phone.
-Record native evidence and second-laptop reproduction before declaring M0 complete
-or beginning M1. Local automated checks and Windows/Linux CI already passed.
+The native acceptance checks are complete and the second-laptop check is deferred.
+Preserve the reviewed Expo-generated TypeScript normalization and local handoff
+documentation. Notify the user before commit/push or other utility/external actions.
+Commit/push the reviewed changes and verify CI on that commit. M0 acceptance remains
+open; do not begin M1 yet.
 
 See `DEVELOPMENT.md` for reproducible setup and `M0_FOUNDATION.md` for reviewed scope,
 retained documentation gaps and evidence. Established architecture decisions remain
