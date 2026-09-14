@@ -6,6 +6,14 @@ import {
   type TemporaryProductGraph,
 } from './createTemporaryProduct';
 import {
+  addProductIdentifier,
+  updateProductIdentity,
+  type AddProductIdentifierInput,
+  type AddProductIdentifierResult,
+  type ProductIdentityResult,
+  type UpdateProductIdentityInput,
+} from './updateProductIdentity';
+import {
   getProductVariantById,
   getStoreProductById,
   listDevicesByStore,
@@ -48,6 +56,7 @@ export interface ProductDetail {
 }
 
 export type { TemporaryProductGraph };
+export type { AddProductIdentifierResult, ProductIdentityResult };
 
 export interface CatalogueClient {
   readonly storeId: string;
@@ -55,6 +64,12 @@ export interface CatalogueClient {
   listProducts(query: string, filter?: ProductLifecycleFilter): ProductSearchHit[];
   createTemporaryProduct(input: QuickAddInput): TemporaryProductGraph;
   getProductDetail(productId: string): ProductDetail | null;
+  updateProductIdentity(
+    input: Omit<UpdateProductIdentityInput, 'storeId' | 'deviceId'> & { storeProductId: string },
+  ): ProductIdentityResult;
+  addProductIdentifier(
+    input: Omit<AddProductIdentifierInput, 'storeId' | 'deviceId'> & { storeProductId: string },
+  ): AddProductIdentifierResult;
 }
 
 export function createCatalogueClient(
@@ -96,6 +111,24 @@ export function createCatalogueClient(
         packages: listPackageUnitsByVariant(adapter, variant.id),
         identifiers: listProductIdentifiers(adapter, variant.id),
       };
+    },
+    updateProductIdentity(
+      input: Omit<UpdateProductIdentityInput, 'storeId' | 'deviceId'> & { storeProductId: string },
+    ): ProductIdentityResult {
+      return updateProductIdentity(
+        adapter,
+        { ...input, storeId: store.id, deviceId: device.id },
+        { generateId },
+      );
+    },
+    addProductIdentifier(
+      input: Omit<AddProductIdentifierInput, 'storeId' | 'deviceId'> & { storeProductId: string },
+    ): AddProductIdentifierResult {
+      return addProductIdentifier(
+        adapter,
+        { ...input, storeId: store.id, deviceId: device.id },
+        { generateId },
+      );
     },
   };
 }

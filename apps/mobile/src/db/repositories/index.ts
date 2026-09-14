@@ -28,6 +28,7 @@ export type { CreatePackageUnitInput, PackageUnitRow, UpdatePackageUnitInput } f
 export {
   createProductIdentifier,
   deactivateProductIdentifier,
+  findActiveExactIdentifier,
   findActiveIdentifier,
   getProductIdentifierById,
   listProductIdentifiers,

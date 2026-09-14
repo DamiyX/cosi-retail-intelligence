@@ -94,7 +94,10 @@ export function createProductIdentifier(
   const normalizedValue = normalizeIdentifierValue(value);
   const countryMarket = optionalText(input.countryMarket, 'country market', 8);
   if (EXACT_TYPES.includes(input.type)) {
-    const clash = findActiveIdentifier(adapter, input.type, normalizedValue);
+    // Scannable digits identify the package regardless of symbology
+    // (UPC-A lives inside the EAN-13 namespace), so a digit collision under
+    // any exact type is one ambiguous claim (OFFLINE_SYNC section 29).
+    const clash = findActiveExactIdentifier(adapter, normalizedValue);
     if (clash) {
       throw new DomainError(
         'INVALID_VALUE',
@@ -132,6 +135,19 @@ export function getProductIdentifierById(
   const row = adapter.getFirstRow<IdentifierRecord>(
     `SELECT ${COLUMNS} FROM product_identifiers WHERE id = ?;`,
     [requireId(id)],
+  );
+  return row ? mapRow(row) : null;
+}
+
+/** Active exact-type identifier by normalized value, any variant or symbology. */
+export function findActiveExactIdentifier(
+  adapter: DatabaseAdapter,
+  normalizedValue: string,
+): ProductIdentifierRow | null {
+  const row = adapter.getFirstRow<IdentifierRecord>(
+    `SELECT ${COLUMNS} FROM product_identifiers
+     WHERE normalized_value = ? AND type IN ('EAN', 'UPC', 'QR') AND status = 'ACTIVE';`,
+    [normalizedValue],
   );
   return row ? mapRow(row) : null;
 }

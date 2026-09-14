@@ -2,8 +2,10 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import {
   createCatalogueClient,
+  type AddProductIdentifierResult,
   type CatalogueClient,
   type ProductDetail,
+  type ProductIdentityResult,
   type QuickAddInput,
   type TemporaryProductGraph,
 } from '../src/catalogue/client';
@@ -22,6 +24,12 @@ function stubClient(overrides: Partial<CatalogueClient> = {}): CatalogueClient {
       throw new Error('Stub catalogue cannot save.');
     },
     getProductDetail: (_productId: string): ProductDetail | null => null,
+    updateProductIdentity: (): ProductIdentityResult => {
+      throw new Error('Stub catalogue cannot save.');
+    },
+    addProductIdentifier: (): AddProductIdentifierResult => {
+      throw new Error('Stub catalogue cannot save.');
+    },
     ...overrides,
   };
 }
@@ -232,6 +240,56 @@ describe('ProductDetailScreen', () => {
       expect(screen.getByText('Product unavailable')).toBeTruthy();
       fireEvent.press(screen.getByText('Go back'));
       expect(retried).toEqual(['back']);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('edits name and SKU while leaving prices and packages untouched', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const client = createCatalogueClient(
+        fixture.adapter,
+        fixture.context.store,
+        fixture.context.device,
+        deterministicIds(8100),
+      );
+      const graph = client.createTemporaryProduct({ name: 'Milo 400g' });
+      render(<ProductDetailScreen client={client} productId={graph.storeProduct.id} onBack={() => undefined} />);
+      fireEvent.press(screen.getByText('Edit name or SKU'));
+      fireEvent.changeText(screen.getByTestId('detail-name'), 'Milo 800g');
+      fireEvent.changeText(screen.getByTestId('detail-sku'), 'ML-800');
+      fireEvent.press(screen.getByText('Save changes'));
+      expect(screen.getByText('Milo 800g')).toBeTruthy();
+      expect(screen.getByText('Local SKU: ML-800')).toBeTruthy();
+      expect(screen.getByText('Base unit: piece')).toBeTruthy();
+      expect(countRows(fixture.adapter, 'outbox_operations')).toBe(2);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('adds a barcode and rejects a duplicate with a field error', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const client = createCatalogueClient(
+        fixture.adapter,
+        fixture.context.store,
+        fixture.context.device,
+        deterministicIds(8200),
+      );
+      const graph = client.createTemporaryProduct({ name: 'Milo 400g' });
+      render(<ProductDetailScreen client={client} productId={graph.storeProduct.id} onBack={() => undefined} />);
+      expect(screen.getByText('No barcode or store code yet.')).toBeTruthy();
+      fireEvent.changeText(screen.getByTestId('detail-identifier'), '6001234567890');
+      fireEvent.press(screen.getByText('Add code'));
+      expect(screen.getByText(/6001234567890 \(EAN\)/)).toBeTruthy();
+      fireEvent.changeText(screen.getByTestId('detail-identifier'), '6001 2345-67890');
+      fireEvent.press(screen.getByText('UPC barcode'));
+      fireEvent.press(screen.getByText('Add code'));
+      expect(
+        screen.getByText('That barcode is already attached to another product; merge or correct it instead of duplicating.'),
+      ).toBeTruthy();
     } finally {
       fixture.closeAndDelete();
     }

@@ -153,7 +153,7 @@ export const MIGRATIONS: Migration[] = [
         created_at TEXT NOT NULL
       );`,
       `CREATE UNIQUE INDEX uq_identifiers_exact
-        ON product_identifiers(type, normalized_value)
+        ON product_identifiers(normalized_value)
         WHERE type IN ('EAN', 'UPC', 'QR') AND status = 'ACTIVE';`,
       `CREATE UNIQUE INDEX uq_identifiers_internal
         ON product_identifiers(product_variant_id, type, normalized_value)

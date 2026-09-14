@@ -4,13 +4,14 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in-progress",
-  "current_state": "m2-02-search-and-enrich",
+  "current_state": "m2-03-exact-packages",
   "completed_states": [
     "m1-independent-audit",
     "m2-architecture-gates",
     "m2-design-gate",
     "m2-ticket-review",
-    "m2-01-offline-temporary-product"
+    "m2-01-offline-temporary-product",
+    "m2-02-search-and-enrich"
   ],
   "owner": {
     "agent": "external-implementation-agent",
@@ -44,6 +45,11 @@
       "kind": "tests",
       "path": "tickets.md",
       "claim": "M2-01 complete: D-034 quantity module, migration 2 catalogue schema, atomic provisional-product operation with single outbox envelope, Products shell/list/Quick Add/detail UI. Full validate green (126 domain + 78 mobile tests, typecheck, zero-warning lint)."
+    },
+    {
+      "kind": "tests",
+      "path": "tickets.md",
+      "claim": "M2-02 complete: atomic identity/identifier operations with replay and ownership checks, cross-symbology barcode uniqueness, detail edit UI, no-match Quick Add prefill. Full validate green (126 domain + 93 mobile tests)."
     }
   ],
   "acceptance_gates": [
@@ -172,7 +178,7 @@
     }
   ],
   "blockers": [],
-  "next_action": "Implement M2-02 (search + enrich): identifier/detail/edit UI on the M2-01 base, atomic identity operations with outbox envelopes, ownership-boundary tests, then M2-03 packages. Keep checks green and update evidence per ticket.",
+  "next_action": "Implement M2-03 (exact packages): package create/edit/deactivate operations with StorePackageSetting persistence, conversion preview UI, one-active-base enforcement, then M2-04 lifecycle. Keep checks green and update evidence per ticket.",
   "created_at": "2026-09-14T03:00:00Z",
   "updated_at": "2026-09-14T08:28:46Z",
   "archived": false

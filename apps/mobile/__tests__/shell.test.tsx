@@ -74,6 +74,17 @@ describe('M2 product shell', () => {
     ).toBeTruthy();
   });
 
+  it('offers Quick Add with the query as the proposed name on no match', async () => {
+    renderRouter(ROUTES, { initialUrl: '/products' });
+    expect(await screen.findByText('No products yet')).toBeTruthy();
+    fireEvent.changeText(screen.getByPlaceholderText('Search name, local SKU, or barcode'), 'Zobo Mix');
+    expect(await screen.findByText('No matching product')).toBeTruthy();
+    fireEvent.press(screen.getAllByText('Add product')[0]);
+    const nameInput = await screen.findByTestId('quick-add-name');
+    expect(nameInput.props.value).toBe('Zobo Mix');
+    expect(nameInput.props.value).not.toBe('');
+  });
+
   it('saves a quick-add product offline and lands on its detail with local save state', async () => {
     const router = renderRouter(ROUTES, { initialUrl: '/products/new' });
     fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Milo 400g');

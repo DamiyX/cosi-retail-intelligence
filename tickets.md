@@ -81,7 +81,7 @@ green: 126 domain + 78 mobile tests, typecheck, zero-warning lint.
 
 ## Ticket M2-02: Find and enrich a store product
 
-**Status:** Ready  
+**Status:** Complete (committed with M2-01 follow-up)  
 **Outcome:** A retailer can find a product and add useful identity details later
 without losing the temporary product or changing store commercial facts.  
 **Blocked by:** M2-01 (complete)
@@ -101,16 +101,27 @@ selling-price history, bulk import.
 
 **Acceptance:**
 
-- [ ] Offline search finds expected products by name, local SKU, and exact
+- [x] Offline search finds expected products by name, local SKU, and exact
       barcode; quotes/SQL-like text remains data and cannot alter queries.
-- [ ] Editing identity or store SKU survives restart and creates one matching
+- [x] Editing identity or store SKU survives restart and creates one matching
       outbox operation; injected failure rolls back both sides.
-- [ ] Identity edits cannot overwrite local SKU, store selling-price fields, or
+- [x] Identity edits cannot overwrite local SKU, store selling-price fields, or
       package settings, proven by repository integration tests; the boundary
       leaves later cost, stock, and supplier ownership outside identity updates.
-- [ ] No-match search offers Quick Add with the query as a proposed editable
+- [x] No-match search offers Quick Add with the query as a proposed editable
       name; loading, empty, validation, inactive, and local-save states match
       `DESIGN.md`.
+
+**Evidence (2026-09-14):** `updateProductIdentity` (rename/SKU + one
+PRODUCT_IDENTITY_UPDATED envelope) and `addProductIdentifier` (+ one
+PRODUCT_IDENTIFIER_ADDED envelope) commit atomically with operation-ID
+replay and store-ownership checks; identity writes are column-restricted so
+prices, settings, and variant ownership are unreachable. Exact-type barcode
+uniqueness is cross-symbology by normalized digits (OFFLINE_SYNC section
+29); the unreleased migration-2 index was corrected in place to
+`(normalized_value)` before any device holds it. Detail screen supports
+edit, identifier add with type choice, and field-mapped errors; no-match
+search prefills Quick Add. Full validate green.
 
 ## Ticket M2-03: Configure packages with exact conversions
 
