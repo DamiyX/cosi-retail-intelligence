@@ -32,16 +32,31 @@ The next agent should recover context from:
 
 1. `AGENTS.md`
 2. `docs/engineering/PROJECT_STATE.md`
-3. the relevant milestone in `docs/engineering/BUILD_PLAN.md`
-4. `docs/decisions/DECISION_LOG.md`
-5. relevant product/architecture documents
-6. current Git branch
-7. `git status`
-8. recent Git commits
-9. current uncommitted `git diff`, if any
-10. tests/build results and code itself
+3. `.agents/workflows/index.json` and the unarchived task record
+4. `.agents/contexts/project-context.md`
+5. `tickets.md` when it exists for the active milestone
+6. the relevant milestone in `docs/engineering/BUILD_PLAN.md`
+7. `docs/decisions/DECISION_LOG.md`
+8. relevant product/architecture documents
+9. relevant app-flow, stack, design, and audit context
+10. current Git branch
+11. `git status`
+12. recent Git commits
+13. current uncommitted `git diff`, if any
+14. tests/build results and code itself
 
 Do not depend on the previous AI chat transcript.
+
+`PROJECT_STATE.md` answers where the project is now. The active workflow JSON
+answers which resumable task and gate comes next. `tickets.md`, when published
+for the active milestone, provides the verified execution breakdown. These
+artifacts complement each other and must not carry conflicting status.
+
+The implementation agent must stop after the active milestone and hand the
+branch back for the independent audit defined in
+`docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md`. A new model may perform the
+audit, but it must inspect the actual diff and evidence rather than accepting the
+implementer's completion claim.
 
 ---
 
@@ -227,15 +242,17 @@ When a new AI agent takes over an existing task, tell it to:
 
 1. read `AGENTS.md`;
 2. read `PROJECT_STATE.md`;
-3. read current milestone/task requirements;
-4. inspect current branch;
-5. inspect `git status`;
-6. inspect recent commit history;
-7. inspect uncommitted diff;
-8. run or inspect relevant tests;
-9. summarize what is already complete;
-10. identify what remains;
-11. continue without restarting the feature from scratch.
+3. read `.agents/workflows/index.json` and the active task record;
+4. read `tickets.md`, the milestone requirements, and relevant context files;
+5. read `docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md`;
+6. inspect current branch;
+7. inspect `git status`;
+8. inspect recent commit history;
+9. inspect uncommitted diff;
+10. run or inspect relevant tests;
+11. summarize what is already complete;
+12. identify what remains;
+13. continue without restarting the feature from scratch.
 
 If it finds broken/incomplete prior work, it should repair it rather than blindly extending it.
 

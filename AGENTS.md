@@ -25,11 +25,18 @@ Use COSI at project/repository level only. Do not create names such as `CosiProd
 Before meaningful work:
 
 1. Read `docs/engineering/PROJECT_STATE.md`.
-2. Read the relevant milestone in `docs/engineering/BUILD_PLAN.md`.
-3. If continuing work started by another AI/model or another laptop, read `docs/engineering/MULTI_AGENT_WORKFLOW.md` and inspect Git state before changing code.
-4. Read only the product/architecture documents needed for the task.
-5. Inspect the current code before proposing changes.
-6. Check `docs/decisions/DECISION_LOG.md` before reopening an established decision.
+2. Read `.agents/workflows/index.json` and the unarchived task record, when one
+   exists.
+3. Read `.agents/contexts/project-context.md`.
+4. Read `tickets.md` when it exists for the active milestone.
+5. Read the relevant milestone in `docs/engineering/BUILD_PLAN.md`.
+6. If continuing work started by another AI/model or another laptop, read
+   `docs/engineering/MULTI_AGENT_WORKFLOW.md` and inspect Git state before
+   changing code.
+7. Read only the product/architecture documents needed for the task.
+8. Inspect the current code before proposing changes.
+9. Check `docs/decisions/DECISION_LOG.md` before reopening an established
+   decision.
 
 For a first-time project intake, read the full source-of-truth set.
 
@@ -58,10 +65,24 @@ For a first-time project intake, read the full source-of-truth set.
 - `docs/engineering/BUILD_PLAN.md`
 - `docs/engineering/PROJECT_STATE.md`
 - `docs/engineering/MULTI_AGENT_WORKFLOW.md`
+- `docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md`
+- `docs/engineering/TICKETING.md`
 
 ### Decisions
 
 - `docs/decisions/DECISION_LOG.md`
+
+### Continuity Context
+
+- `.agents/contexts/project-context.md`
+- `.agents/contexts/stack-context.md`
+- `.agents/contexts/app-flow.md`
+- `.agents/workflows/index.json`
+- `docs/design/README.md`
+- `tickets.md`, while it represents the active milestone
+
+Context files summarize and route work. They do not override the approved
+product, architecture, engineering, or decision documents above.
 
 ---
 
@@ -73,11 +94,12 @@ If documents appear to conflict, use this order:
 2. current architecture/domain documents;
 3. PRD;
 4. Product Inception;
-5. old chat history.
+5. continuity context under `.agents/`;
+6. old chat history.
 
 Do not silently choose between conflicting requirements.
 
-Flag the conflict.
+Flag the conflict and correct any stale context summary.
 
 ---
 
@@ -198,6 +220,22 @@ Before a new major milestone, produce a concise plan containing:
 - risks;
 - architecture conflicts;
 - genuinely blocking questions.
+
+Then draft the active milestone's vertical tickets and dependency edges. Ask the
+founder to verify their granularity and dependencies before publishing
+`tickets.md` or external tracker items. Follow
+`docs/engineering/TICKETING.md`; do not pre-write detailed tickets for every
+future milestone. The founder may explicitly delegate this technical judgment to
+the planning agent.
+
+An implementation agent may complete all published tickets inside one milestone.
+It must then stop for the independent audit defined in
+`docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md` before starting the next
+milestone.
+
+Before substantial product UI work, read `.agents/contexts/app-flow.md` and run
+the design gate in `docs/design/README.md`. Do not infer final navigation or a
+design system from the M0 placeholder screens.
 
 Do not ask questions that can be answered from the repository.
 
@@ -474,6 +512,10 @@ Expected structure:
 ```text
 /
 ├── AGENTS.md
+├── .agents/
+│   ├── contexts/
+│   ├── schemas/
+│   └── workflows/
 ├── apps/
 │   ├── mobile/
 │   └── recognition-lab/
@@ -486,6 +528,7 @@ Expected structure:
 │   ├── functions/
 │   └── tests/
 ├── docs/
+│   ├── design/
 │   ├── product/
 │   ├── architecture/
 │   ├── recognition/
@@ -577,6 +620,7 @@ At the end of a milestone, report:
 - manual checks performed;
 - unresolved risks;
 - documentation updated;
+- workflow-state and ticket statuses updated;
 - whether the milestone acceptance criteria passed;
 - recommended next action.
 

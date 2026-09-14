@@ -17,6 +17,13 @@ See [developer setup](docs/engineering/DEVELOPMENT.md) for device builds,
 environment configuration and moving to another laptop.
 
 - [Current state and next action](docs/engineering/PROJECT_STATE.md)
+- [Whole-project context](.agents/contexts/project-context.md)
+- [MVP application flow](.agents/contexts/app-flow.md)
+- [Active workflow tasks](.agents/workflows/index.json)
+- [Product design gate](docs/design/README.md)
+- [Ticketing policy](docs/engineering/TICKETING.md)
+- [Active M1 tickets](tickets.md)
+- [Implementation and audit workflow](docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md)
 - [M0 scope and verification](docs/engineering/M0_FOUNDATION.md)
 - [Engineering guide](AGENTS.md)
 - [Build plan](docs/engineering/BUILD_PLAN.md)

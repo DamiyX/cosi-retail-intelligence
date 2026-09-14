@@ -1,7 +1,7 @@
 # PROJECT_STATE — COSI
 
-Last updated: 2026-09-13
-Current milestone: M0 Project Foundation — complete, with the second-laptop check deferred.
+Last updated: 2026-09-14
+Current milestone: M1 Domain + Local Database — ready for implementation.
 Completed engineering milestones: M0 Project Foundation.
 
 ## Active checkout
@@ -27,6 +27,13 @@ Local typecheck, lint, all 10 tests and Expo Doctor (21/21) passed. Development 
 preview Android JavaScript exports succeeded. npm ci passed with unchanged lockfile
 SHA256. Typecheck, lint and all 10 tests also passed against that clean install.
 Do not interpret export success as native-build or physical-device acceptance.
+
+The project now has a repository continuity layer under `.agents/`: whole-project,
+stack, and application-flow contexts; versioned workflow-state schemas; and an M1
+task record. The approved M1 implementation tickets are published in `tickets.md`.
+The milestone must stop for independent audit before M2. The design gate is documented
+in `docs/design/README.md`; `DESIGN.md` and `DESIGN.json` remain intentionally absent
+until the design gate runs.
 
 ## Verification and open acceptance blockers
 
@@ -63,10 +70,13 @@ Do not interpret export success as native-build or physical-device acceptance.
 ## Next action
 
 M0 is complete for the approved scope. The second-laptop reproduction check is deferred
-and must be completed before external beta readiness. Before M1, create and approve an
-M1 Domain + Local Database plan that respects the documented transaction, inventory,
-package-unit, and outbox decisions. Notify the user before commit/push or other
-utility/external actions.
+and must be completed before external beta readiness. Commit and push the reviewed
+continuity/ticket changes with the user's chosen utility model, then give the external
+implementation agent the prompt in
+`docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md`. First accept the M0 pull request
+and create `feat/m1-domain-local-database` from that accepted baseline. That agent
+should execute M1-01 through M1-05 from `tickets.md` and stop for independent audit
+before M2. Notify the user before commit/push or other utility/external actions.
 
 See `DEVELOPMENT.md` for reproducible setup and `M0_FOUNDATION.md` for reviewed scope,
 retained documentation gaps and evidence. Established architecture decisions remain
@@ -74,5 +84,9 @@ unchanged. Recognition model/runtime selection is deferred to benchmarks.
 
 ## Continuity
 
-Read AGENTS.md and MULTI_AGENT_WORKFLOW.md, inspect Git status/history/diff, and continue
-this task branch. The repository documents and Git history are the project memory.
+Read `AGENTS.md`, `.agents/contexts/project-context.md`,
+`.agents/workflows/index.json`, the active task record, and
+`MULTI_AGENT_WORKFLOW.md`. Read `tickets.md` and
+`docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md` before implementation. Inspect Git
+status/history/diff and continue this task branch. The repository documents and Git
+history are the project memory.

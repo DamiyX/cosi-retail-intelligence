@@ -441,6 +441,16 @@ Build the first sync protocol around:
 
 Do not make PowerSync or another managed engine a foundational dependency yet.
 
+### Implementation sequence clarification — 2026-09-14
+
+- M1 establishes the reusable SQLite transaction boundary but does not create a
+  feature outbox before a synchronizable business aggregate exists.
+- M2 adds the durable outbox operation envelope and requires catalogue mutation
+  plus enqueue to commit atomically.
+- M3–M6 reuse that capture boundary for completed business transactions.
+- M7 adds network push/pull, acknowledgement, retry, revision, and conflict
+  behavior over the already captured operations.
+
 ### Rationale
 
 The product requires:

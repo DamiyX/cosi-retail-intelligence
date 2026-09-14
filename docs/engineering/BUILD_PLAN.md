@@ -141,18 +141,58 @@ At the beginning of every major milestone chat:
 
 1. Read `AGENTS.md`.
 2. Read `PROJECT_STATE.md`.
-3. Read the current milestone in `BUILD_PLAN.md`.
-4. Read only the architecture/product documents relevant to that milestone.
-5. Inspect existing code before proposing changes.
-6. Produce concise implementation plan.
-7. Identify conflicts/questions.
-8. Wait for approval if changes are architectural.
+3. Read `.agents/workflows/index.json` and the active task record.
+4. Read `.agents/contexts/project-context.md`.
+5. Read the current milestone in `BUILD_PLAN.md`.
+6. Read only the architecture/product documents relevant to that milestone.
+7. Inspect existing code before proposing changes.
+8. Produce a concise implementation plan and proposed ticket dependency map.
+9. Identify conflicts/questions.
+10. Wait for approval if changes are architectural.
 
 This prevents unnecessary context loading.
 
 ---
 
-# 6A. Interchangeable AI Continuation
+# 6A. Context, Design, and Ticket Gates
+
+`BUILD_PLAN.md` defines the complete M0–M13 roadmap. Detailed tickets are
+created one milestone at a time so they reflect the code, evidence, and
+decisions that actually exist when that milestone starts.
+
+Before publishing an active milestone's `tickets.md`:
+
+1. draft vertical, independently verifiable tickets;
+2. identify acceptance criteria and blocking dependencies;
+3. ask the founder to verify ticket granularity and dependency edges;
+4. publish only after that verification.
+
+Follow `docs/engineering/TICKETING.md`. Do not create speculative detailed
+tickets for all remaining milestones.
+
+The implementation agent may finish every published ticket in the active
+milestone without waiting between tickets. It must stop at milestone completion
+for the independent review in
+`docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md`. The next milestone's tickets
+are created only after that audit, using the implementation and evidence that
+now exist.
+
+Before the first substantial product UI work, review
+`.agents/contexts/app-flow.md` with the founder and complete the design gate in
+`docs/design/README.md`. Under the current sequence this must happen before M2
+Catalogue + Package Units UI, or earlier if M1 introduces material user-facing
+screens. Create `docs/design/DESIGN.md` after the flow and direction are
+approved. Create `DESIGN.json` only when an actual machine consumer exists.
+
+Every resumable milestone task must have
+`.agents/workflows/<task-id>.json` registered in
+`.agents/workflows/index.json`. The record states the current gate, evidence,
+blockers, and exact next action; it does not replace `PROJECT_STATE.md` or the
+decision log.
+
+---
+
+# 6B. Interchangeable AI Continuation
 
 The AI model/tool may change at any point.
 
@@ -189,7 +229,8 @@ At the end of every milestone:
 4. Perform required manual device checks.
 5. Update `PROJECT_STATE.md`.
 6. Update `DECISION_LOG.md` if a durable decision changed.
-7. Summarize:
+7. Update the active workflow record and ticket statuses with evidence.
+8. Summarize:
    - what changed;
    - what remains incomplete;
    - known risks;
@@ -406,6 +447,11 @@ Allow a retailer to build the catalogue progressively.
 - package conversion configuration;
 - product search;
 - recent/frequent product support if easy.
+- durable local outbox operation envelope;
+- atomic catalogue mutation + outbox enqueue;
+
+M2 captures operations durably but does not implement network push/pull,
+conflict resolution, or retry workers. Those remain M7 scope.
 
 ## UX
 
@@ -418,6 +464,9 @@ Do not require full product details.
 - add package units;
 - package conversion works;
 - product survives restart;
+- successful mutable catalogue operations commit their outbox work atomically;
+- failed catalogue operations leave neither partial business rows nor orphaned
+  outbox entries;
 - editing shared-style identity cannot overwrite store-specific price/cost fields.
 
 ---

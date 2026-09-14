@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://antigravity-os.dev/schemas/workflow-state.schema.json",
+  "title": "Anti-Gravity task-scoped workflow state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "workflow_id",
+    "mode",
+    "status",
+    "current_state",
+    "completed_states",
+    "owner",
+    "workspace",
+    "evidence",
+    "artifacts",
+    "approvals",
+    "blockers",
+    "next_action",
+    "created_at",
+    "updated_at",
+    "archived"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "task_id": { "type": "string", "pattern": "^[a-zA-Z0-9._-]+$" },
+    "workflow_id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "mode": {
+      "enum": ["diagnose", "propose", "implement", "incident-mitigate"]
+    },
+    "status": {
+      "enum": ["pending", "in_progress", "blocked", "complete", "cancelled"]
+    },
+    "current_state": { "type": "string", "minLength": 1 },
+    "completed_states": { "type": "array", "items": { "type": "string" } },
+    "owner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent", "thread"],
+      "properties": {
+        "agent": { "type": "string", "minLength": 1 },
+        "thread": { "type": "string", "minLength": 1 },
+        "worktree": { "type": ["string", "null"] }
+      }
+    },
+    "workspace": { "type": "string", "minLength": 1 },
+    "lease": {
+      "type": ["object", "null"],
+      "properties": {
+        "holder": { "type": "string" },
+        "expires_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["holder", "expires_at"],
+      "additionalProperties": false
+    },
+    "evidence": { "type": "array", "items": { "type": "object" } },
+    "acceptance_gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "claim",
+          "owner",
+          "required",
+          "status",
+          "depends_on",
+          "verification",
+          "evidence",
+          "limitations",
+          "blocker",
+          "waiver"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-zA-Z0-9._-]+$" },
+          "claim": { "type": "string", "minLength": 1 },
+          "owner": { "type": "string", "minLength": 1 },
+          "required": { "type": "boolean" },
+          "status": { "enum": ["pending", "met", "blocked", "waived"] },
+          "depends_on": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string", "pattern": "^[a-zA-Z0-9._-]+$" }
+          },
+          "verification": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "procedure", "success_condition"],
+            "properties": {
+              "kind": { "enum": ["command", "test", "inspection", "review"] },
+              "procedure": { "type": "string", "minLength": 1 },
+              "success_condition": { "type": "string", "minLength": 1 }
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["result"],
+              "properties": {
+                "result": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" },
+                "source": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" },
+                "observed_at": { "type": "string", "format": "date-time" }
+              }
+            }
+          },
+          "limitations": { "type": "array", "items": { "type": "string" } },
+          "blocker": { "type": ["string", "null"] },
+          "waiver": {
+            "type": ["object", "null"],
+            "additionalProperties": false,
+            "required": ["reason", "approved_by"],
+            "properties": {
+              "reason": { "type": "string", "minLength": 1 },
+              "approved_by": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "artifacts": { "type": "array", "items": { "type": "string" } },
+    "approvals": { "type": "array", "items": { "type": "object" } },
+    "blockers": { "type": "array", "items": { "type": "string" } },
+    "next_action": { "type": ["string", "null"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "archived": { "type": "boolean" }
+  }
+}
