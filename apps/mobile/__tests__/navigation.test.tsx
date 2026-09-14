@@ -3,7 +3,7 @@ import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 import RootLayout from '../app/_layout';
 import MoreScreen from '../app/(tabs)/more';
 import ProductsLayout from '../app/(tabs)/products/_layout';
-import ProductDetailRoute from '../app/(tabs)/products/[id]';
+import ProductDetailRoute from '../app/(tabs)/products/[id]/index';
 import ProductsIndexRoute from '../app/(tabs)/products/index';
 import QuickAddRoute from '../app/(tabs)/products/new';
 import SellScreen from '../app/(tabs)/sell';
@@ -35,7 +35,7 @@ const ROUTES = {
   '(tabs)/products/_layout': ProductsLayout,
   '(tabs)/products/index': ProductsIndexRoute,
   '(tabs)/products/new': QuickAddRoute,
-  '(tabs)/products/[id]': ProductDetailRoute,
+  '(tabs)/products/[id]/index': ProductDetailRoute,
 } as never;
 
 describe('M2 tab navigation', () => {

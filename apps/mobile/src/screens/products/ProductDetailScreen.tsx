@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { CatalogueClient, ProductDetail } from '../../catalogue/client';
 import type { IdentifierType } from '../../db/repositories';
 import { ErrorPanel, Field, PrimaryButton, SecondaryButton, StatusNote } from '../../ui/components';
+import { displayMoney } from '../../ui/money';
 import { theme } from '../../ui/theme';
 
 interface ProductDetailScreenProps {
@@ -12,6 +13,8 @@ interface ProductDetailScreenProps {
   productId: string;
   justSaved?: boolean;
   onBack: () => void;
+  onAddPackage: () => void;
+  onEditPackage: (packageUnitId: string) => void;
 }
 
 interface DetailState {
@@ -44,6 +47,8 @@ export default function ProductDetailScreen({
   productId,
   justSaved = false,
   onBack,
+  onAddPackage,
+  onEditPackage,
 }: ProductDetailScreenProps) {
   const [state, setState] = useState<DetailState>(() => load(client, productId));
   const [editing, setEditing] = useState(false);
@@ -256,14 +261,41 @@ export default function ProductDetailScreen({
           </View>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Packages</Text>
-            {detail.packages.map((packageUnit) => (
-              <Text key={packageUnit.id} style={styles.line}>
-                {packageUnit.isBaseUnit ? 'Base unit: ' : ''}{packageUnit.name}
-                {packageUnit.isBaseUnit
-                  ? ''
-                  : ` — 1 ${packageUnit.name} = ${formatQuantityMicros(packageUnit.conversionToBaseMicros)} base units`}
-              </Text>
-            ))}
+            {detail.packages.map((packageUnit) => {
+              const setting = detail.settings.find((entry) => entry.packageUnitId === packageUnit.id);
+              const price = displayMoney(setting?.defaultSellingPriceMinor, client.storeCurrencyCode);
+              const markers: string[] = [];
+              if (packageUnit.isBaseUnit) {
+                markers.push('Base unit');
+              }
+              if (packageUnit.status === 'INACTIVE') {
+                markers.push('Inactive');
+              }
+              if (setting?.isPreferredForSale) {
+                markers.push('Preferred for sale');
+              }
+              return (
+                <Pressable
+                  key={packageUnit.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Edit ${packageUnit.name} package`}
+                  onPress={() => onEditPackage(packageUnit.id)}
+                  style={styles.packageRow}
+                >
+                  <Text style={styles.line}>
+                    {packageUnit.name}
+                    {markers.length > 0 ? ` (${markers.join(' · ')})` : ''}
+                  </Text>
+                  {!packageUnit.isBaseUnit ? (
+                    <Text style={styles.line}>
+                      1 {packageUnit.name} = {formatQuantityMicros(packageUnit.conversionToBaseMicros)} base units
+                    </Text>
+                  ) : null}
+                  {price ? <Text style={styles.line}>Selling price: {price}</Text> : null}
+                </Pressable>
+              );
+            })}
+            <SecondaryButton title="Add package" onPress={onAddPackage} />
           </View>
           <SecondaryButton title="Back to products" onPress={onBack} />
         </View>
@@ -288,6 +320,15 @@ const styles = StyleSheet.create({
   },
   sectionTitle: { color: theme.color.textPrimary, fontSize: theme.fontSize.body, fontWeight: '700' },
   line: { color: theme.color.textSecondary, fontSize: theme.fontSize.body, lineHeight: 26 },
+  packageRow: {
+    borderColor: theme.color.border,
+    borderWidth: 1,
+    borderRadius: theme.radius.card,
+    minHeight: theme.minTouchTarget,
+    paddingHorizontal: theme.spacing(3),
+    paddingVertical: theme.spacing(2),
+    justifyContent: 'center',
+  },
   row: { gap: theme.spacing(2) },
   typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing(2) },
   typeOption: {

@@ -125,7 +125,7 @@ search prefills Quick Add. Full validate green.
 
 ## Ticket M2-03: Configure packages with exact conversions
 
-**Status:** Ready  
+**Status:** Complete (committed)  
 **Outcome:** A retailer can add a carton, pack, weight, or other package and see
 an exact conversion to the product's base unit.  
 **Blocked by:** M2-01 (complete)
@@ -145,17 +145,26 @@ server reconciliation.
 
 **Acceptance:**
 
-- [ ] Representative whole and fractional conversions round-trip through SQLite
+- [x] Representative whole and fractional conversions round-trip through SQLite
       and display as canonical decimal text without binary-float drift.
-- [ ] The UI previews a sentence such as `1 carton = 40 pieces` before save and
+- [x] The UI previews a sentence such as `1 carton = 40 pieces` before save and
       gives field-specific errors for zero, negative, excess-precision, or
       unsafe values.
-- [ ] Package plus store setting plus one outbox envelope commit atomically;
+- [x] Package plus store setting plus one outbox envelope commit atomically;
       deterministic failures leave no partial rows or orphaned envelopes.
-- [ ] Database constraints reject a second active base unit and cross-store or
+- [x] Database constraints reject a second active base unit and cross-store or
       cross-variant package references.
-- [ ] Package component tests cover add, edit, deactivate, text scaling, labels,
+- [x] Package component tests cover add, edit, deactivate, text scaling, labels,
       and Android Back handling for dirty forms.
+
+**Evidence (2026-09-14):** `createPackage`/`updatePackage`/`deactivatePackage`
+commit package + store price/preference setting + one envelope atomically
+with operation-ID replay; conversion text parses to D-034 micro-units
+(excess precision rejected); conversion is immutable after creation
+(deactivate-plus-create); the active base cannot be deactivated and
+preference falls back to it; prices use the store's currency; package form
+shows the live conversion sentence, field errors, two-step deactivate
+confirmation, and dirty-form Back/cancel confirmation. Full validate green.
 
 ## Ticket M2-04: Manage catalogue lifecycle without losing ownership
 

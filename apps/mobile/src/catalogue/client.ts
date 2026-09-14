@@ -14,12 +14,22 @@ import {
   type UpdateProductIdentityInput,
 } from './updateProductIdentity';
 import {
+  createPackage,
+  deactivatePackage,
+  updatePackage,
+  type CreatePackageInput,
+  type DeactivatePackageInput,
+  type PackageResult,
+  type UpdatePackageInput,
+} from './managePackages';
+import {
   getProductVariantById,
   getStoreProductById,
   listDevicesByStore,
   listPackageUnitsByVariant,
   listProductIdentifiers,
   listStores,
+  listStorePackageSettings,
   listStoreProducts,
   type DeviceRow,
   type PackageUnitRow,
@@ -27,6 +37,7 @@ import {
   type ProductLifecycleFilter,
   type ProductSearchHit,
   type ProductVariantRow,
+  type StorePackageSettingRow,
   type StoreProductRow,
   type StoreRow,
 } from '../db/repositories';
@@ -53,14 +64,17 @@ export interface ProductDetail {
   variant: ProductVariantRow;
   packages: PackageUnitRow[];
   identifiers: ProductIdentifierRow[];
+  settings: StorePackageSettingRow[];
 }
 
 export type { TemporaryProductGraph };
 export type { AddProductIdentifierResult, ProductIdentityResult };
+export type { PackageResult };
 
 export interface CatalogueClient {
   readonly storeId: string;
   readonly storeName: string;
+  readonly storeCurrencyCode: string;
   listProducts(query: string, filter?: ProductLifecycleFilter): ProductSearchHit[];
   createTemporaryProduct(input: QuickAddInput): TemporaryProductGraph;
   getProductDetail(productId: string): ProductDetail | null;
@@ -70,6 +84,13 @@ export interface CatalogueClient {
   addProductIdentifier(
     input: Omit<AddProductIdentifierInput, 'storeId' | 'deviceId'> & { storeProductId: string },
   ): AddProductIdentifierResult;
+  createPackage(
+    input: Omit<CreatePackageInput, 'storeId' | 'deviceId'> & { storeProductId: string },
+  ): PackageResult;
+  updatePackage(
+    input: Omit<UpdatePackageInput, 'storeId' | 'deviceId'> & { packageUnitId: string },
+  ): PackageResult;
+  deactivatePackage(input: Omit<DeactivatePackageInput, 'storeId' | 'deviceId'>): PackageResult;
 }
 
 export function createCatalogueClient(
@@ -81,6 +102,7 @@ export function createCatalogueClient(
   return {
     storeId: store.id,
     storeName: store.name,
+    storeCurrencyCode: store.currencyCode,
     listProducts(query: string, filter: ProductLifecycleFilter = 'ALL'): ProductSearchHit[] {
       return listStoreProducts(adapter, store.id, query, filter);
     },
@@ -110,6 +132,7 @@ export function createCatalogueClient(
         variant,
         packages: listPackageUnitsByVariant(adapter, variant.id),
         identifiers: listProductIdentifiers(adapter, variant.id),
+        settings: listStorePackageSettings(adapter, product.id),
       };
     },
     updateProductIdentity(
@@ -125,6 +148,23 @@ export function createCatalogueClient(
       input: Omit<AddProductIdentifierInput, 'storeId' | 'deviceId'> & { storeProductId: string },
     ): AddProductIdentifierResult {
       return addProductIdentifier(
+        adapter,
+        { ...input, storeId: store.id, deviceId: device.id },
+        { generateId },
+      );
+    },
+    createPackage(
+      input: Omit<CreatePackageInput, 'storeId' | 'deviceId'> & { storeProductId: string },
+    ): PackageResult {
+      return createPackage(adapter, { ...input, storeId: store.id, deviceId: device.id }, { generateId });
+    },
+    updatePackage(
+      input: Omit<UpdatePackageInput, 'storeId' | 'deviceId'> & { packageUnitId: string },
+    ): PackageResult {
+      return updatePackage(adapter, { ...input, storeId: store.id, deviceId: device.id }, { generateId });
+    },
+    deactivatePackage(input: Omit<DeactivatePackageInput, 'storeId' | 'deviceId'>): PackageResult {
+      return deactivatePackage(
         adapter,
         { ...input, storeId: store.id, deviceId: device.id },
         { generateId },

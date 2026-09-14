@@ -1,9 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { Alert, BackHandler } from 'react-native';
 
 import {
   createCatalogueClient,
   type AddProductIdentifierResult,
   type CatalogueClient,
+  type PackageResult,
   type ProductDetail,
   type ProductIdentityResult,
   type QuickAddInput,
@@ -11,6 +13,7 @@ import {
 } from '../src/catalogue/client';
 import type { ProductLifecycleFilter, ProductSearchHit } from '../src/db/repositories';
 import ProductDetailScreen from '../src/screens/products/ProductDetailScreen';
+import PackageFormScreen from '../src/screens/products/PackageFormScreen';
 import ProductsListScreen from '../src/screens/products/ProductsListScreen';
 import QuickAddProductScreen from '../src/screens/products/QuickAddProductScreen';
 import { countRows, deterministicIds, openCatalogueFixture, type CatalogueFixture } from './catalogueSupport';
@@ -19,6 +22,7 @@ function stubClient(overrides: Partial<CatalogueClient> = {}): CatalogueClient {
   return {
     storeId: 'stub-store',
     storeName: 'Stub Store',
+    storeCurrencyCode: 'NGN',
     listProducts: (_query: string, _filter?: ProductLifecycleFilter): ProductSearchHit[] => [],
     createTemporaryProduct: (_input: QuickAddInput): TemporaryProductGraph => {
       throw new Error('Stub catalogue cannot save.');
@@ -28,6 +32,15 @@ function stubClient(overrides: Partial<CatalogueClient> = {}): CatalogueClient {
       throw new Error('Stub catalogue cannot save.');
     },
     addProductIdentifier: (): AddProductIdentifierResult => {
+      throw new Error('Stub catalogue cannot save.');
+    },
+    createPackage: (): PackageResult => {
+      throw new Error('Stub catalogue cannot save.');
+    },
+    updatePackage: (): PackageResult => {
+      throw new Error('Stub catalogue cannot save.');
+    },
+    deactivatePackage: (): PackageResult => {
       throw new Error('Stub catalogue cannot save.');
     },
     ...overrides,
@@ -212,6 +225,8 @@ describe('ProductDetailScreen', () => {
           productId={graph.storeProduct.id}
           justSaved
           onBack={() => undefined}
+          onAddPackage={() => undefined}
+          onEditPackage={() => undefined}
         />,
       );
       expect(screen.getByText('Milo 400g')).toBeTruthy();
@@ -219,7 +234,7 @@ describe('ProductDetailScreen', () => {
       expect(screen.getByText('Saved on this device. It has not been sent anywhere.')).toBeTruthy();
       expect(screen.getByText('Local SKU: ML-400')).toBeTruthy();
       expect(screen.getByText('Status: Active')).toBeTruthy();
-      expect(screen.getByText('Base unit: piece')).toBeTruthy();
+      expect(screen.getByText('piece (Base unit)')).toBeTruthy();
     } finally {
       fixture.closeAndDelete();
     }
@@ -235,6 +250,8 @@ describe('ProductDetailScreen', () => {
           client={{ ...client, getProductDetail: () => null }}
           productId="00000000-0000-4000-8000-000000000000"
           onBack={() => retried.push('back')}
+          onAddPackage={() => undefined}
+          onEditPackage={() => undefined}
         />,
       );
       expect(screen.getByText('Product unavailable')).toBeTruthy();
@@ -255,14 +272,22 @@ describe('ProductDetailScreen', () => {
         deterministicIds(8100),
       );
       const graph = client.createTemporaryProduct({ name: 'Milo 400g' });
-      render(<ProductDetailScreen client={client} productId={graph.storeProduct.id} onBack={() => undefined} />);
+      render(
+        <ProductDetailScreen
+          client={client}
+          productId={graph.storeProduct.id}
+          onBack={() => undefined}
+          onAddPackage={() => undefined}
+          onEditPackage={() => undefined}
+        />,
+      );
       fireEvent.press(screen.getByText('Edit name or SKU'));
       fireEvent.changeText(screen.getByTestId('detail-name'), 'Milo 800g');
       fireEvent.changeText(screen.getByTestId('detail-sku'), 'ML-800');
       fireEvent.press(screen.getByText('Save changes'));
       expect(screen.getByText('Milo 800g')).toBeTruthy();
       expect(screen.getByText('Local SKU: ML-800')).toBeTruthy();
-      expect(screen.getByText('Base unit: piece')).toBeTruthy();
+      expect(screen.getByText('piece (Base unit)')).toBeTruthy();
       expect(countRows(fixture.adapter, 'outbox_operations')).toBe(2);
     } finally {
       fixture.closeAndDelete();
@@ -279,7 +304,15 @@ describe('ProductDetailScreen', () => {
         deterministicIds(8200),
       );
       const graph = client.createTemporaryProduct({ name: 'Milo 400g' });
-      render(<ProductDetailScreen client={client} productId={graph.storeProduct.id} onBack={() => undefined} />);
+      render(
+        <ProductDetailScreen
+          client={client}
+          productId={graph.storeProduct.id}
+          onBack={() => undefined}
+          onAddPackage={() => undefined}
+          onEditPackage={() => undefined}
+        />,
+      );
       expect(screen.getByText('No barcode or store code yet.')).toBeTruthy();
       fireEvent.changeText(screen.getByTestId('detail-identifier'), '6001234567890');
       fireEvent.press(screen.getByText('Add code'));
@@ -290,6 +323,220 @@ describe('ProductDetailScreen', () => {
       expect(
         screen.getByText('That barcode is already attached to another product; merge or correct it instead of duplicating.'),
       ).toBeTruthy();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('shows package conversions, prices, and preferred markers', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const client = createCatalogueClient(
+        fixture.adapter,
+        fixture.context.store,
+        fixture.context.device,
+        deterministicIds(8300),
+      );
+      const graph = client.createTemporaryProduct({ name: 'Indomie 70g' });
+      client.createPackage({
+        storeProductId: graph.storeProduct.id,
+        name: 'carton',
+        conversionText: '40',
+        setting: { defaultSellingPrice: '1450.50', isPreferredForSale: true },
+      });
+      const added: string[] = [];
+      const edited: string[] = [];
+      render(
+        <ProductDetailScreen
+          client={client}
+          productId={graph.storeProduct.id}
+          onBack={() => undefined}
+          onAddPackage={() => added.push('add')}
+          onEditPackage={(id) => edited.push(id)}
+        />,
+      );
+      expect(screen.getByText('piece (Base unit)')).toBeTruthy();
+      expect(screen.getByText('1 carton = 40 base units')).toBeTruthy();
+      expect(screen.getByText('Selling price: ₦1,450.50')).toBeTruthy();
+      fireEvent.press(screen.getByText('Add package'));
+      expect(added).toEqual(['add']);
+      fireEvent.press(screen.getByLabelText('Edit carton package'));
+      expect(edited).toHaveLength(1);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+});
+
+describe('PackageFormScreen', () => {
+  function openPackageFixture() {
+    const fixture = openCatalogueFixture();
+    const client = createCatalogueClient(
+      fixture.adapter,
+      fixture.context.store,
+      fixture.context.device,
+      deterministicIds(14000),
+    );
+    const graph = client.createTemporaryProduct({ name: 'Indomie 70g' });
+    return { fixture, client, graph };
+  }
+
+  it('previews the conversion sentence live and saves a package with its setting', () => {
+    const { fixture, client, graph } = openPackageFixture();
+    try {
+      const saved: string[] = [];
+      render(
+        <PackageFormScreen
+          client={client}
+          storeProductId={graph.storeProduct.id}
+          baseUnitName="piece"
+          onSaved={() => saved.push('saved')}
+          onCancel={() => undefined}
+        />,
+      );
+      fireEvent.changeText(screen.getByTestId('package-name'), 'carton');
+      fireEvent.changeText(screen.getByTestId('package-conversion'), '40');
+      expect(screen.getByText('1 carton = 40 piece')).toBeTruthy();
+      fireEvent.changeText(screen.getByTestId('package-price'), '1450.50');
+      fireEvent.press(screen.getByText('Save package'));
+      expect(saved).toEqual(['saved']);
+      expect(countRows(fixture.adapter, 'package_units')).toBe(2);
+      expect(countRows(fixture.adapter, 'store_package_settings')).toBe(1);
+      expect(countRows(fixture.adapter, 'outbox_operations')).toBe(2);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('rejects empty names and inexact conversions with field errors', () => {
+    const { fixture, client, graph } = openPackageFixture();
+    try {
+      render(
+        <PackageFormScreen
+          client={client}
+          storeProductId={graph.storeProduct.id}
+          baseUnitName="piece"
+          onSaved={() => undefined}
+          onCancel={() => undefined}
+        />,
+      );
+      fireEvent.press(screen.getByText('Save package'));
+      expect(screen.getByText('Enter a package name, for example carton or pack.')).toBeTruthy();
+      fireEvent.changeText(screen.getByTestId('package-name'), 'pack');
+      fireEvent.changeText(screen.getByTestId('package-conversion'), '1.0000001');
+      fireEvent.press(screen.getByText('Save package'));
+      expect(
+        screen.getByText(
+          'Enter how many base units this holds, with up to 6 decimals. Extra precision is rejected, not rounded.',
+        ),
+      ).toBeTruthy();
+      fireEvent.changeText(screen.getByTestId('package-conversion'), '0');
+      fireEvent.press(screen.getByText('Save package'));
+      expect(
+        screen.getByText('A package must contain a positive amount of the base unit.'),
+      ).toBeTruthy();
+      expect(countRows(fixture.adapter, 'package_units')).toBe(1);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('edits presentation and prices while the conversion stays fixed', () => {
+    const { fixture, client, graph } = openPackageFixture();
+    try {
+      const created = client.createPackage({
+        storeProductId: graph.storeProduct.id,
+        name: 'pack',
+        conversionText: '10',
+      });
+      const detail = client.getProductDetail(graph.storeProduct.id);
+      const setting = detail?.settings.find((entry) => entry.packageUnitId === created.packageUnit.id) ?? null;
+      const saved: string[] = [];
+      render(
+        <PackageFormScreen
+          client={client}
+          storeProductId={graph.storeProduct.id}
+          baseUnitName="piece"
+          packageUnit={created.packageUnit}
+          setting={setting}
+          onSaved={() => saved.push('saved')}
+          onCancel={() => undefined}
+        />,
+      );
+      expect(screen.getByText(/Conversion is fixed after creation/)).toBeTruthy();
+      expect(screen.queryByTestId('package-conversion')).toBeNull();
+      fireEvent.changeText(screen.getByTestId('package-name'), 'retail pack');
+      fireEvent.changeText(screen.getByTestId('package-price'), '1500');
+      fireEvent.press(screen.getByText('Save changes'));
+      expect(saved).toEqual(['saved']);
+      expect(countRows(fixture.adapter, 'store_package_settings')).toBe(1);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('deactivates only after confirmation and keeps the row', () => {
+    const { fixture, client, graph } = openPackageFixture();
+    try {
+      const created = client.createPackage({
+        storeProductId: graph.storeProduct.id,
+        name: 'carton',
+        conversionText: '40',
+      });
+      const deactivated: string[] = [];
+      render(
+        <PackageFormScreen
+          client={client}
+          storeProductId={graph.storeProduct.id}
+          baseUnitName="piece"
+          packageUnit={created.packageUnit}
+          onSaved={() => undefined}
+          onDeactivated={() => deactivated.push('deactivated')}
+          onCancel={() => undefined}
+        />,
+      );
+      fireEvent.press(screen.getByText('Deactivate package'));
+      expect(deactivated).toHaveLength(0);
+      fireEvent.press(screen.getByText('Confirm deactivate'));
+      expect(deactivated).toEqual(['deactivated']);
+      expect(countRows(fixture.adapter, 'package_units')).toBe(2);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('asks for confirmation before hardware back discards dirty input', () => {
+    const { fixture, client, graph } = openPackageFixture();
+    try {
+      const addSpy = jest.spyOn(BackHandler, 'addEventListener');
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+      try {
+        render(
+          <PackageFormScreen
+            client={client}
+            storeProductId={graph.storeProduct.id}
+            baseUnitName="piece"
+            onSaved={() => undefined}
+            onCancel={() => undefined}
+          />,
+        );
+        const handlers = addSpy.mock.calls as unknown as [string, () => boolean][];
+        const pristineHandler = handlers[handlers.length - 1]?.[1];
+        expect(pristineHandler?.()).toBe(false);
+        expect(alertSpy).not.toHaveBeenCalled();
+        fireEvent.changeText(screen.getByTestId('package-name'), 'carton');
+        const updatedHandlers = addSpy.mock.calls as unknown as [string, () => boolean][];
+        const dirtyHandler = updatedHandlers[updatedHandlers.length - 1]?.[1];
+        expect(dirtyHandler?.()).toBe(true);
+        expect(alertSpy).toHaveBeenCalledWith(
+          'Discard package changes?',
+          expect.any(String),
+          expect.any(Array),
+        );
+      } finally {
+        addSpy.mockRestore();
+        alertSpy.mockRestore();
+      }
     } finally {
       fixture.closeAndDelete();
     }

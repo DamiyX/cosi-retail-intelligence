@@ -3,9 +3,11 @@ import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 import RootLayout from '../app/_layout';
 import MoreScreen from '../app/(tabs)/more';
 import ProductsLayout from '../app/(tabs)/products/_layout';
-import ProductDetailRoute from '../app/(tabs)/products/[id]';
+import ProductDetailRoute from '../app/(tabs)/products/[id]/index';
 import ProductsIndexRoute from '../app/(tabs)/products/index';
 import QuickAddRoute from '../app/(tabs)/products/new';
+import NewPackageRoute from '../app/(tabs)/products/[id]/packages/new';
+import EditPackageRoute from '../app/(tabs)/products/[id]/packages/[packageId]';
 import SellScreen from '../app/(tabs)/sell';
 import TabsLayout from '../app/(tabs)/_layout';
 import TodayScreen from '../app/(tabs)/today';
@@ -35,7 +37,9 @@ const ROUTES = {
   '(tabs)/products/_layout': ProductsLayout,
   '(tabs)/products/index': ProductsIndexRoute,
   '(tabs)/products/new': QuickAddRoute,
-  '(tabs)/products/[id]': ProductDetailRoute,
+  '(tabs)/products/[id]/index': ProductDetailRoute,
+  '(tabs)/products/[id]/packages/new': NewPackageRoute,
+  '(tabs)/products/[id]/packages/[packageId]': EditPackageRoute,
 } as never;
 
 function openStoreDatabase(): IsolatedDatabase {
@@ -93,6 +97,23 @@ describe('M2 product shell', () => {
     expect(screen.getByText('Milo 400g')).toBeTruthy();
     expect(screen.getByText(/Temporary — an incomplete record/)).toBeTruthy();
     expect(router.getPathname()).toMatch(/^\/products\//);
+  });
+
+  it('adds a package from product detail and shows its exact conversion on return', async () => {
+    const router = renderRouter(ROUTES, { initialUrl: '/products/new' });
+    fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Indomie 70g');
+    fireEvent.press(screen.getByText('Save product'));
+    expect(await screen.findByText('Saved on this device. It has not been sent anywhere.')).toBeTruthy();
+    const detailPath = router.getPathname();
+    expect(detailPath).toMatch(/^\/products\//);
+    fireEvent.press(screen.getByText('Add package'));
+    expect(await screen.findByText('Add package')).toBeTruthy();
+    fireEvent.changeText(screen.getByTestId('package-name'), 'carton');
+    fireEvent.changeText(screen.getByTestId('package-conversion'), '40');
+    expect(await screen.findByText('1 carton = 40 piece')).toBeTruthy();
+    fireEvent.press(screen.getByText('Save package'));
+    expect(await screen.findByText('1 carton = 40 base units')).toBeTruthy();
+    expect(router.getPathname()).toBe(detailPath);
   });
 
   it('keeps later-milestone areas as clearly labelled placeholders', async () => {
