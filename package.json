@@ -13,9 +13,9 @@
   "packageManager": "npm@11.19.0",
   "scripts": {
     "check:environment": "node tools/scripts/check-environment.mjs",
-    "typecheck": "npm run typecheck --workspace @retail/mobile",
-    "lint": "npm run lint --workspace @retail/mobile",
-    "test": "npm run test --workspace @retail/mobile --",
+    "typecheck": "npm run typecheck --workspace @retail/domain && npm run typecheck --workspace @retail/mobile",
+    "lint": "npm run lint --workspace @retail/domain && npm run lint --workspace @retail/mobile",
+    "test": "npm run test --workspace @retail/domain -- --runInBand && npm run test --workspace @retail/mobile -- --runInBand",
     "validate": "npm run check:environment && npm run typecheck && npm run lint && npm test -- --runInBand",
     "mobile:start": "npm run start --workspace @retail/mobile",
     "mobile:export": "npm run export:android --workspace @retail/mobile",
