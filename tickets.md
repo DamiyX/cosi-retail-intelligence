@@ -36,7 +36,7 @@ decisions to the engineering planner on 2026-09-14.
 
 ## Ticket M1-01: Produce exact, portable commerce values
 
-**Status:** Ready  
+**Status:** Done (commit `a7b5c18`; typecheck, lint, and 92 workspace tests green)  
 **What to build:** Add a pure TypeScript domain package whose public API creates
 globally unique client IDs, performs authoritative money operations without
 binary floating-point arithmetic, and converts package counts to base inventory
@@ -47,16 +47,16 @@ React Native or database dependencies.
 **Out of scope:** Product/package persistence, costing policy, currency
 conversion, formatting-heavy UI, and ProductVariant or PackageUnit entities.
 
-- [ ] Automated tests prove UUID validity/uniqueness, integer-minor-unit money
+- [x] Automated tests prove UUID validity/uniqueness, integer-minor-unit money
       operations, and explicit rejection of invalid or unsafe values.
-- [ ] Automated tests prove exact package-to-base conversion for representative
+- [x] Automated tests prove exact package-to-base conversion for representative
       units and reject non-positive conversion factors or invalid quantities.
-- [ ] The mobile workspace imports the package through its public entry point,
+- [x] The mobile workspace imports the package through its public entry point,
       and workspace typecheck, lint, and tests remain green.
 
 ## Ticket M1-02: Open and safely upgrade a durable local database
 
-**Status:** Ready  
+**Status:** Done (commit `2d303e9`; expo-sqlite 57.0.3 matches the Expo 57 pin; `expo install --check` passes)  
 **What to build:** Integrate the Expo-compatible SQLite dependency, create one
 explicit database boundary, enable and verify foreign keys and WAL where the
 deployed runtime supports them, and run ordered transactional migrations with a
@@ -67,76 +67,79 @@ persisted schema version. Include reusable isolated-database test utilities.
 Supabase access, production encryption keys, ORM adoption, and deleting/resetting
 a database to recover from a migration error.
 
-- [ ] A fresh database reaches the expected schema version and reports the
+- [x] A fresh database reaches the expected schema version and reports the
       required foreign-key setting plus the verified journal mode.
-- [ ] Reopening an up-to-date database is idempotent: no migration reruns, schema
+- [x] Reopening an up-to-date database is idempotent: no migration reruns, schema
       drift, or data loss occurs.
-- [ ] An intentionally failing migration rolls back completely, preserves the
+- [x] An intentionally failing migration rolls back completely, preserves the
       prior version/data, and returns a diagnosable error without resetting the
       database.
 
 ## Ticket M1-03: Persist a valid local store operating context
 
-**Status:** Blocked  
+**Status:** Done (commit `adac3b4`; migration 001; all repository tests green)
+**Blocked by:** M1-01 and M1-02 (both complete)  
 **What to build:** Introduce only the near-term Store, User, StoreMember, and
 Device domain records, their first real migration, and typed parameterized
 repositories. Demonstrate creation and retrieval of a minimal valid store
-membership/device graph using client-generated IDs.  
-**Blocked by:** M1-01 and M1-02
-
+membership/device graph using client-generated IDs.
 **Out of scope:** Supabase Auth, invitations, multiple-store switching UI,
 staff-role expansion beyond the documented minimum, cloud RLS, catalogue
 entities, and speculative fields for later milestones.
 
-- [ ] A repository-level integration test creates a valid Store/User/StoreMember/
+- [x] A repository-level integration test creates a valid Store/User/StoreMember/
       Device graph and reads the same typed values through public repository
       interfaces.
-- [ ] Foreign-key and uniqueness violations reject invalid membership/device
+- [x] Foreign-key and uniqueness violations reject invalid membership/device
       data without leaving partial rows.
-- [ ] Values containing quotes or SQL-like text round-trip as data through
+- [x] Values containing quotes or SQL-like text round-trip as data through
       parameterized statements, and the graph remains available after closing
       and reopening the database.
 
 ## Ticket M1-04: Commit or roll back a complete local work unit
 
-**Status:** Blocked  
+**Status:** Done (commit `e0d4464`; provision operation tested for commit, injected-failure rollback, and typed errors)
+**Blocked by:** M1-02 and M1-03 (both complete)  
 **What to build:** Add the reusable application/database transaction helper and
 use it in a small store-context operation that performs multiple repository
-writes. The caller must receive success only after the SQLite commit completes.  
-**Blocked by:** M1-02 and M1-03
+writes. The caller must receive success only after the SQLite commit completes.
 
 **Out of scope:** A feature-specific outbox protocol, sync transport, retries,
 conflict resolution, sales, purchases, inventory events, or nested-transaction
 abstractions without a demonstrated M1 need.
 
-- [ ] The success-path integration test commits every expected row as one unit
+- [x] The success-path integration test commits every expected row as one unit
       and the result remains after database reopen.
-- [ ] A deterministic failure injected after an intermediate write leaves none
+- [x] A deterministic failure injected after an intermediate write leaves none
       of the operation's rows committed and preserves unrelated prior data.
-- [ ] The transaction helper propagates a useful typed/domain error and no
+- [x] The transaction helper propagates a useful typed/domain error and no
       repository or UI caller can report completion before commit succeeds.
 
 ## Ticket M1-05: Prove M1 during application startup and Android restart
 
-**Status:** Blocked  
+**Status:** Automated evidence complete (commit `ebd0b86`); device check deferred to 2026-09-15 morning (phone unavailable 2026-09-14)
+**Blocked by:** M1-01, M1-02, M1-03, and M1-04 (all complete)  
 **What to build:** Initialize the versioned local database through the mobile
 application startup boundary, surface initialization failure to the existing
 technical shell without inventing final product UI, and gather the complete M1
-acceptance evidence on the reference Android device.  
-**Blocked by:** M1-01, M1-02, M1-03, and M1-04
+acceptance evidence on the reference Android device.
 
 **Out of scope:** Final onboarding, navigation redesign, production data,
 Supabase sign-in, background sync, catalogue screens, and design-system choices.
 
-- [ ] Fresh-install and existing-database automated paths both reach application
+- [x] Fresh-install and existing-database automated paths both reach application
       readiness, while a migration failure prevents a false ready/completed
       state and exposes a diagnosable recovery state.
-- [ ] Clean-install validation, typecheck, lint, all automated tests, Expo
+- [x] Clean-install validation, typecheck, lint, all automated tests, Expo
       Doctor, and Android export pass with no committed secret or generated
       database/build artifact.
 - [ ] On the Galaxy A15 5G development build, a force-stop/relaunch opens the
       migrated database successfully; the milestone report records exact manual
       evidence, limitations, ticket results, and updated project/workflow state.
+      DEFERRED 2026-09-14: `adb devices` showed no attached phone, and the M0
+      APKs on the phone predate the expo-sqlite native module, so a new
+      development build plus the force-stop/relaunch check must run on
+      2026-09-15 morning once the phone is plugged in with USB debugging.
 
 ## Dependency Frontier
 

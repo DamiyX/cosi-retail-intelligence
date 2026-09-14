@@ -3,13 +3,18 @@
   "task_id": "m1-domain-local-database",
   "workflow_id": "build-feature",
   "mode": "implement",
-  "status": "pending",
-  "current_state": "ready-for-implementation",
+  "status": "in_progress",
+  "current_state": "awaiting-independent-audit",
   "completed_states": [
-    "plan-and-verify-ticket-breakdown"
+    "plan-and-verify-ticket-breakdown",
+    "m1-01-exact-commerce-values",
+    "m1-02-durable-database",
+    "m1-03-store-context",
+    "m1-04-atomic-work-unit",
+    "m1-05-automated-startup-evidence"
   ],
   "owner": {
-    "agent": "next-compatible-engineering-agent",
+    "agent": "independent-auditor",
     "thread": "unassigned",
     "worktree": null
   },
@@ -24,7 +29,32 @@
     {
       "kind": "project-state",
       "path": "docs/engineering/PROJECT_STATE.md",
-      "claim": "M1 planning and approval is the next engineering action."
+      "claim": "M1 implementation is complete except the deferred on-device check; audit is the next action."
+    },
+    {
+      "kind": "git-commit",
+      "value": "a7b5c18",
+      "claim": "M1-01 done: pure @retail/domain with UUID, integer-minor-unit money, and exact package conversion; 92 workspace tests green."
+    },
+    {
+      "kind": "git-commit",
+      "value": "2d303e9",
+      "claim": "M1-02 done: expo-sqlite 57.0.3 (Expo 57 pin), adapter port, transactional migrations, FK/WAL verification, isolated test DBs."
+    },
+    {
+      "kind": "git-commit",
+      "value": "adac3b4",
+      "claim": "M1-03 done: migration 001 (stores, users, store members, devices) with typed parameterized repositories."
+    },
+    {
+      "kind": "git-commit",
+      "value": "e0d4464",
+      "claim": "M1-04 done: atomic store-context provisioning; injected-failure rollback and typed errors tested."
+    },
+    {
+      "kind": "git-commit",
+      "value": "ebd0b86",
+      "claim": "M1-05 automated evidence done: startup init boundary with ready/failed shell states; clean-install validate, Expo Doctor 21/21, expo install --check, and Android export all pass; 110 tests green."
     }
   ],
   "acceptance_gates": [
@@ -106,6 +136,31 @@
       ],
       "blocker": null,
       "waiver": null
+    },
+    {
+      "id": "m1-device-verification",
+      "claim": "On the Galaxy A15 5G development build, a force-stop/relaunch opens the migrated database successfully.",
+      "owner": "founder-and-implementation-agent",
+      "required": true,
+      "status": "blocked",
+      "depends_on": [],
+      "verification": {
+        "kind": "inspection",
+        "procedure": "Install a development build containing the M1 branch on the Galaxy A15 5G, force-stop, relaunch, and confirm the migrated database opens with prior data intact.",
+        "success_condition": "Manual force-stop/relaunch evidence is recorded in the milestone report with build IDs, device state, and outcome."
+      },
+      "evidence": [
+        {
+          "result": "Automated fresh/existing/failure startup paths pass in Jest and the M1 code exports for Android, but no on-device run exists yet.",
+          "source": "npm run validate; npm run mobile:export",
+          "observed_at": "2026-09-14T01:42:18Z"
+        }
+      ],
+      "limitations": [
+        "The M0 APKs on the phone predate the expo-sqlite native module, so the device check needs a new development build, not the installed APKs."
+      ],
+      "blocker": "Galaxy A15 5G unavailable on 2026-09-14 (adb devices empty). Retry on 2026-09-15 morning once the phone is plugged in with USB debugging.",
+      "waiver": null
     }
   ],
   "artifacts": [
@@ -122,11 +177,17 @@
     {
       "date": "2026-09-13",
       "scope": "Create the missing durable project context and workflow-state files."
+    },
+    {
+      "date": "2026-09-14",
+      "scope": "Defer the M1-05 on-device force-stop/relaunch check to 2026-09-15 morning (phone unavailable); proceed to independent audit on automated evidence."
     }
   ],
-  "blockers": [],
-  "next_action": "Commit and push the continuity and ticket documents with the user's chosen utility model, accept the M0 pull request, create feat/m1-domain-local-database from the accepted baseline, then have the external implementation agent execute M1-01 through M1-05. Stop for independent audit before M2.",
+  "blockers": [
+    "Galaxy A15 5G unavailable on 2026-09-14: adb devices shows no attached phone, so the M1-05 force-stop/relaunch check and its required new development build are deferred to 2026-09-15 morning."
+  ],
+  "next_action": "REMINDER DUE 2026-09-15 MORNING: ask the user to plug in the Galaxy A15 5G with USB debugging authorized. Then build and install a development APK from feat/m1-domain-local-database, run the force-stop/relaunch database check, and record the evidence. Meanwhile the independent auditor reviews M1-01 through M1-05 on that branch. Do not start M2 until the audit passes.",
   "created_at": "2026-09-13T21:15:00.1326658Z",
-  "updated_at": "2026-09-14T00:34:32.2713760Z",
+  "updated_at": "2026-09-14T01:42:18Z",
   "archived": false
 }

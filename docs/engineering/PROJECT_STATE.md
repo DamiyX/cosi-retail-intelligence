@@ -1,86 +1,63 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-14
-Current milestone: M1 Domain + Local Database — ready for implementation.
-Completed engineering milestones: M0 Project Foundation.
+Current milestone: M1 Domain + Local Database — implemented on `feat/m1-domain-local-database`, pending independent audit.
+Completed engineering milestones: M0 Project Foundation; M1-01 through M1-04; M1-05 automated evidence.
+
+## Morning reminder due 2026-09-15
+
+Ask the user to plug in the Galaxy A15 5G with USB debugging authorized, then
+run the deferred M1 device check: build/install a development APK from
+`feat/m1-domain-local-database`, force-stop/relaunch, confirm the migrated
+database opens. A new build is required because the installed M0 APKs predate
+the expo-sqlite native module.
 
 ## Active checkout
 
 - Canonical remote: https://github.com/DamiyX/cosi-retail-intelligence
-- Task branch: `chore/m0-foundation`
+- Task branch: `feat/m1-domain-local-database` (local; created from M0 baseline `a50cce9`; NOT pushed)
 - Local checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m0`
-- Baseline commit: `a393498979f4dc08cfe63f77fa313d9d62ec4ab3`
-- Scaffold commit: `588b215e1bcefc276cdf779678f7dfab852d73b9`, pushed to origin.
-  Draft PR: https://github.com/DamiyX/cosi-retail-intelligence/pull/1
-  Git author identity uses the
-  existing repository author, configured for this checkout only with user approval.
+- M1 commits: `a7b5c18` (M1-01 domain), `2d303e9` (M1-02 database),
+  `adac3b4` (M1-03 store context), `e0d4464` (M1-04 atomic unit),
+  `ebd0b86` (M1-05 startup boundary). No push, merge, or deploy performed.
+- The M0 pull request (#1) is still open; `main` remains at `a393498`.
+  Rebase the M1 branch onto `main` after that PR is accepted.
 - The original sibling `COSI` documentation folder remains untouched.
 
 ## Current implementation
 
-The approved M0 scope is an Android Expo Development Build workspace with Router,
-strict TypeScript, lint/tests, environment configuration, EAS development/preview
-profiles, CI and Supabase configuration only. Full source-of-truth docs are copied
-into this checkout. No business features, schemas, sync or recognition are implemented.
+M1 adds a pure `@retail/domain` package (UUIDs, integer-minor-unit money,
+exact package conversion), an expo-sqlite boundary with transactional
+migrations (schema version 1: stores, users, store members, devices), typed
+parameterized repositories, an atomic store-context provisioning operation,
+and a startup initializer with ready/failed shell states. No catalogue,
+sales, inventory, sync, auth, recognition, or product design is implemented.
 
-Local typecheck, lint, all 10 tests and Expo Doctor (21/21) passed. Development and
-preview Android JavaScript exports succeeded. npm ci passed with unchanged lockfile
-SHA256. Typecheck, lint and all 10 tests also passed against that clean install.
-Do not interpret export success as native-build or physical-device acceptance.
-
-The project now has a repository continuity layer under `.agents/`: whole-project,
-stack, and application-flow contexts; versioned workflow-state schemas; and an M1
-task record. The approved M1 implementation tickets are published in `tickets.md`.
-The milestone must stop for independent audit before M2. The design gate is documented
-in `docs/design/README.md`; `DESIGN.md` and `DESIGN.json` remain intentionally absent
-until the design gate runs.
+Local evidence on 2026-09-14: clean `npm ci` with unchanged lockfile, full
+validate (typecheck, zero-warning lint, 80 domain + 30 mobile tests) green,
+Expo Doctor 21/21, `expo install --check` clean, Android export succeeds,
+no committed secret or generated database/build artifact.
 
 ## Verification and open acceptance blockers
 
-- CI passed on Windows and Ubuntu for scaffold commit 588b215:
-  https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34761033840
-- EAS CLI sign-in verified as `damiy_x`, Owner of `damiyxs-team`.
-  User-created project `@damiyxs-team/cosi` is linked in app config; project:info
-  verified ID `737ed99c-2c20-4612-ac80-a8a868b827cb`. Terra/medium handled sign-in only.
-- Development and preview EAS builds succeeded; both expose APK artifacts without build errors.
-  Both APKs installed and launched on the physical phone; see evidence limits below.
-  Builds submitted from `beb7a81`: development `cc7fcfe2-a642-454b-81a8-d5d28992ea4b`,
-  preview `12b2a32d-4c97-4cb5-9d3c-2d28e656015c`. Check existing requests before retrying.
-- Galaxy A15 5G (SM-A156E), Android 16: USB debugging authorized and adb connected.
-  Development Home/About/Android back passed with Metro. Preview cold launch and
-  About navigation passed with Metro stopped and airplane mode enabled, including
-  another force-stop/relaunch. A follow-up confirmed Wi-Fi and mobile data settings
-  were off, and observed Android back return to Welcome before any restart.
-  Airplane mode, Wi-Fi, and mobile data were restored to their original enabled state.
-  These checks used COSI APKs, not Expo Go.
-- CI also passed for linked-project commit `beb7a81`:
-  https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34761941894
-- Final device-evidence commit `eddae3b` passed on both Windows and Ubuntu:
-  https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34778987136
-  https://github.com/DamiyX/cosi-retail-intelligence/actions/runs/34778985181
-- Second-laptop reproduction is explicitly deferred by the user on 2026-09-13.
-  CI has exercised clean installs on Windows and Ubuntu, but it is not a substitute
-  for that future physical-laptop check. Java and Docker are not available on PATH;
-  Java/Docker are optional for the selected cloud-build/hosted-backend workflow.
-- User made the repository public. Repository description now uses COSI.
-- npm audit retains 21 moderate and 1 low upstream dependency findings after compatible
-  fixes; investigate before external distribution. ESLint 9 remains required by Expo's
-  current lint plugin. See M0_FOUNDATION.md for limitations.
+- Galaxy A15 5G was unavailable on 2026-09-14 (`adb devices` empty), so the
+  M1-05 force-stop/relaunch check is explicitly deferred, not passed. See the
+  morning reminder above and the blocked `m1-device-verification` gate in
+  `.agents/workflows/m1-domain-local-database.json`.
+- Second-laptop reproduction remains deferred (M0 carryover, required before
+  external beta, not before audit).
+- npm audit still reports the M0-baseline 21 moderate + 1 low upstream
+  findings; expo-sqlite 57.0.3 added no new findings.
+- Hand-rolled repository validation is used in M1; Zod remains the locked
+  boundary-validation choice and should be adopted in M2 when sync
+  DTO/catalogue schemas arrive.
 
 ## Next action
 
-M0 is complete for the approved scope. The second-laptop reproduction check is deferred
-and must be completed before external beta readiness. Commit and push the reviewed
-continuity/ticket changes with the user's chosen utility model, then give the external
-implementation agent the prompt in
-`docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md`. First accept the M0 pull request
-and create `feat/m1-domain-local-database` from that accepted baseline. That agent
-should execute M1-01 through M1-05 from `tickets.md` and stop for independent audit
-before M2. Notify the user before commit/push or other utility/external actions.
-
-See `DEVELOPMENT.md` for reproducible setup and `M0_FOUNDATION.md` for reviewed scope,
-retained documentation gaps and evidence. Established architecture decisions remain
-unchanged. Recognition model/runtime selection is deferred to benchmarks.
+Independent audit of M1-01 through M1-05 per
+`docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md`, then the deferred
+morning device check. Do not start M2 until the audit passes. Notify the
+user before commit/push or other utility/external actions.
 
 ## Continuity
 
