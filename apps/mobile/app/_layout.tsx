@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
+import { DatabaseProvider } from '../src/db/DatabaseContext';
 import { initializeAppDatabase, type DatabaseInitStatus } from '../src/db/initialize';
 
 export default function RootLayout() {
@@ -23,10 +24,11 @@ export default function RootLayout() {
           </Text>
         </View>
       ) : (
-        <Stack screenOptions={{ headerTintColor: '#174F46', contentStyle: { backgroundColor: '#F7F8F5' } }}>
-          <Stack.Screen name="index" options={{ title: 'Welcome' }} />
-          <Stack.Screen name="about" options={{ title: 'About' }} />
-        </Stack>
+        <DatabaseProvider adapter={databaseStatus.adapter}>
+          <Stack screenOptions={{ headerTintColor: '#174F46', contentStyle: { backgroundColor: '#F7F8F5' } }}>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+        </DatabaseProvider>
       )}
     </>
   );

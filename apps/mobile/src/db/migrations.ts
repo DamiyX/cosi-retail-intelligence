@@ -72,6 +72,113 @@ export const MIGRATIONS: Migration[] = [
       'CREATE INDEX idx_devices_store ON devices(store_id);',
     ],
   },
+  {
+    version: 2,
+    name: 'catalogue',
+    statements: [
+      `CREATE TABLE product_variants (
+        id TEXT PRIMARY KEY,
+        canonical_product_id TEXT,
+        identity_scope TEXT NOT NULL CHECK (identity_scope IN ('STORE_LOCAL', 'PLATFORM')),
+        owner_store_id TEXT REFERENCES stores(id) ON DELETE RESTRICT,
+        name TEXT NOT NULL CHECK (length(name) > 0 AND length(name) <= 500),
+        status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE')),
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        CHECK (
+          (identity_scope = 'STORE_LOCAL' AND owner_store_id IS NOT NULL)
+          OR (identity_scope = 'PLATFORM' AND owner_store_id IS NULL)
+        )
+      );`,
+      'CREATE INDEX idx_product_variants_owner ON product_variants(owner_store_id);',
+      'CREATE INDEX idx_product_variants_name ON product_variants(name);',
+      `CREATE TABLE package_units (
+        id TEXT PRIMARY KEY,
+        product_variant_id TEXT NOT NULL REFERENCES product_variants(id) ON DELETE RESTRICT,
+        name TEXT NOT NULL CHECK (length(name) > 0 AND length(name) <= 100),
+        symbol TEXT CHECK (symbol IS NULL OR (length(symbol) > 0 AND length(symbol) <= 24)),
+        conversion_to_base_micros INTEGER NOT NULL CHECK (conversion_to_base_micros > 0),
+        is_base_unit INTEGER NOT NULL DEFAULT 0 CHECK (is_base_unit IN (0, 1)),
+        is_sellable INTEGER NOT NULL DEFAULT 1 CHECK (is_sellable IN (0, 1)),
+        is_purchasable INTEGER NOT NULL DEFAULT 1 CHECK (is_purchasable IN (0, 1)),
+        status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE')),
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );`,
+      `CREATE UNIQUE INDEX uq_package_units_active_base
+        ON package_units(product_variant_id)
+        WHERE is_base_unit = 1 AND status = 'ACTIVE';`,
+      'CREATE INDEX idx_package_units_variant ON package_units(product_variant_id);',
+      `CREATE TABLE store_products (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        product_variant_id TEXT NOT NULL REFERENCES product_variants(id) ON DELETE RESTRICT,
+        local_sku TEXT CHECK (local_sku IS NULL OR (length(local_sku) > 0 AND length(local_sku) <= 64)),
+        preferred_package_unit_id TEXT REFERENCES package_units(id) ON DELETE RESTRICT,
+        default_selling_price_minor INTEGER CHECK (default_selling_price_minor >= 0),
+        minimum_selling_price_minor INTEGER CHECK (minimum_selling_price_minor >= 0),
+        reorder_level_base_micros INTEGER CHECK (reorder_level_base_micros >= 0),
+        is_temporary INTEGER NOT NULL DEFAULT 1 CHECK (is_temporary IN (0, 1)),
+        status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE')),
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        UNIQUE (store_id, product_variant_id)
+      );`,
+      `CREATE UNIQUE INDEX uq_store_products_sku
+        ON store_products(store_id, local_sku)
+        WHERE local_sku IS NOT NULL;`,
+      'CREATE INDEX idx_store_products_store ON store_products(store_id, status);',
+      `CREATE TABLE store_package_settings (
+        id TEXT PRIMARY KEY,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        package_unit_id TEXT NOT NULL REFERENCES package_units(id) ON DELETE RESTRICT,
+        default_selling_price_minor INTEGER CHECK (default_selling_price_minor >= 0),
+        minimum_selling_price_minor INTEGER CHECK (minimum_selling_price_minor >= 0),
+        is_preferred_for_sale INTEGER NOT NULL DEFAULT 0 CHECK (is_preferred_for_sale IN (0, 1)),
+        is_preferred_for_purchase INTEGER NOT NULL DEFAULT 0 CHECK (is_preferred_for_purchase IN (0, 1)),
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        UNIQUE (store_product_id, package_unit_id)
+      );`,
+      'CREATE INDEX idx_store_package_settings_product ON store_package_settings(store_product_id);',
+      `CREATE TABLE product_identifiers (
+        id TEXT PRIMARY KEY,
+        product_variant_id TEXT NOT NULL REFERENCES product_variants(id) ON DELETE RESTRICT,
+        package_unit_id TEXT REFERENCES package_units(id) ON DELETE RESTRICT,
+        type TEXT NOT NULL CHECK (type IN ('EAN', 'UPC', 'QR', 'INTERNAL_CODE', 'MANUFACTURER_CODE')),
+        value TEXT NOT NULL CHECK (length(value) > 0 AND length(value) <= 128),
+        normalized_value TEXT NOT NULL CHECK (length(normalized_value) > 0 AND length(normalized_value) <= 128),
+        country_market TEXT,
+        status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE')),
+        created_at TEXT NOT NULL
+      );`,
+      `CREATE UNIQUE INDEX uq_identifiers_exact
+        ON product_identifiers(type, normalized_value)
+        WHERE type IN ('EAN', 'UPC', 'QR') AND status = 'ACTIVE';`,
+      `CREATE UNIQUE INDEX uq_identifiers_internal
+        ON product_identifiers(product_variant_id, type, normalized_value)
+        WHERE type IN ('INTERNAL_CODE', 'MANUFACTURER_CODE') AND status = 'ACTIVE';`,
+      'CREATE INDEX idx_identifiers_variant ON product_identifiers(product_variant_id);',
+      'CREATE INDEX idx_identifiers_lookup ON product_identifiers(normalized_value);',
+      `CREATE TABLE outbox_operations (
+        operation_id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        entity_type TEXT NOT NULL CHECK (length(entity_type) > 0),
+        entity_id TEXT NOT NULL CHECK (length(entity_id) > 0),
+        operation_type TEXT NOT NULL CHECK (length(operation_type) > 0),
+        base_server_version INTEGER,
+        payload TEXT NOT NULL CHECK (length(payload) > 0),
+        created_at TEXT NOT NULL,
+        attempt_count INTEGER NOT NULL DEFAULT 0 CHECK (attempt_count >= 0),
+        next_attempt_at TEXT,
+        last_error_code TEXT,
+        status TEXT NOT NULL DEFAULT 'PENDING'
+          CHECK (status IN ('PENDING', 'SYNCING', 'SYNCED', 'CONFLICT', 'ERROR_RETRYABLE', 'ERROR_PERMANENT'))
+      );`,
+      'CREATE INDEX idx_outbox_store_status ON outbox_operations(store_id, status, created_at);',
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

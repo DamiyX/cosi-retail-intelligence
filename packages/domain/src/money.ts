@@ -118,3 +118,22 @@ export function compareMoney(left: Money, right: Money): -1 | 0 | 1 {
 export function equalMoney(left: Money, right: Money): boolean {
   return left.currencyCode === right.currencyCode && left.amountMinorUnits === right.amountMinorUnits;
 }
+
+function groupThousands(digits: string): string {
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/**
+ * Format money as canonical display text such as "NGN 1,450.50". Grouping
+ * and fraction digits are fixed so output never depends on device locale;
+ * the retailer-facing symbol choice stays in the presentation layer.
+ */
+export function formatMoney(value: Money): string {
+  assertCurrencyCode(value.currencyCode);
+  assertSafeIntegerAmount(value.amountMinorUnits);
+  const sign = value.amountMinorUnits < 0 ? '-' : '';
+  const magnitude = Math.abs(value.amountMinorUnits);
+  const whole = Math.trunc(magnitude / 100);
+  const fraction = String(magnitude % 100).padStart(2, '0');
+  return `${value.currencyCode} ${sign}${groupThousands(String(whole))}.${fraction}`;
+}

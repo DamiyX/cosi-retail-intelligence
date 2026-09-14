@@ -3,13 +3,14 @@
   "task_id": "m2-catalogue-package-units",
   "workflow_id": "build-feature",
   "mode": "implement",
-  "status": "ready",
-  "current_state": "m2-01-offline-temporary-product",
+  "status": "in-progress",
+  "current_state": "m2-02-search-and-enrich",
   "completed_states": [
     "m1-independent-audit",
     "m2-architecture-gates",
     "m2-design-gate",
-    "m2-ticket-review"
+    "m2-ticket-review",
+    "m2-01-offline-temporary-product"
   ],
   "owner": {
     "agent": "external-implementation-agent",
@@ -38,6 +39,11 @@
       "kind": "tickets",
       "path": "tickets.md",
       "claim": "M2-01 through M2-05 are vertical, dependency-ordered, and have binary acceptance evidence."
+    },
+    {
+      "kind": "tests",
+      "path": "tickets.md",
+      "claim": "M2-01 complete: D-034 quantity module, migration 2 catalogue schema, atomic provisional-product operation with single outbox envelope, Products shell/list/Quick Add/detail UI. Full validate green (126 domain + 78 mobile tests, typecheck, zero-warning lint)."
     }
   ],
   "acceptance_gates": [
@@ -166,8 +172,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Create feat/m2-catalogue-package-units from the accepted M1 baseline and implement M2-01 only; keep checks green and update evidence before M2-02.",
+  "next_action": "Implement M2-02 (search + enrich): identifier/detail/edit UI on the M2-01 base, atomic identity operations with outbox envelopes, ownership-boundary tests, then M2-03 packages. Keep checks green and update evidence per ticket.",
   "created_at": "2026-09-14T03:00:00Z",
-  "updated_at": "2026-09-14T03:00:00Z",
+  "updated_at": "2026-09-14T08:28:46Z",
   "archived": false
 }

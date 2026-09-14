@@ -6,9 +6,16 @@ export {
   addMoney,
   compareMoney,
   equalMoney,
+  formatMoney,
   money,
   moneyFromMajorUnits,
   multiplyMoney,
   subtractMoney,
 } from './money';
-export { toBaseUnits } from './packages';
+export {
+  convertPackagesToBase,
+  formatQuantityMicros,
+  MAX_MICROS_MAGNITUDE,
+  MICROS_PER_UNIT,
+  parseQuantityDecimal,
+} from './packages';

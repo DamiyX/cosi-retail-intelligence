@@ -83,3 +83,18 @@ export function countStores(adapter: DatabaseAdapter): number {
   const row = adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM stores;');
   return row?.total ?? 0;
 }
+
+/**
+ * Every local store, oldest first. M2 assumes the single-store retailer:
+ * the catalogue resolves the first store as current until onboarding
+ * defines store switching.
+ */
+export function listStores(adapter: DatabaseAdapter): StoreRow[] {
+  return adapter
+    .getAllRows<Record<string, string | null>>(
+      `SELECT id, name, currency_code, country_code, timezone, status,
+              created_by_user_id, created_at, updated_at
+       FROM stores ORDER BY created_at ASC;`,
+    )
+    .map(mapRow);
+}

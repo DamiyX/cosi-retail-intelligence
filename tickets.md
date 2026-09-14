@@ -33,7 +33,7 @@ design judgement to the engineering planner on 2026-09-14.
 
 ## Ticket M2-01: Create a usable temporary product offline
 
-**Status:** Ready  
+**Status:** Complete (commit pending with M2-02 unless the founder asks for a per-ticket commit)  
 **Outcome:** A retailer can enter a product name, save it without a network, and
 immediately reopen a valid product with a base package.  
 **Blocked by:** Accepted M1 baseline; D-034; D-035; M2 design gate (all met)
@@ -53,24 +53,38 @@ network sync, price/cost history, sales, inventory.
 
 **Acceptance:**
 
-- [ ] Decimal parsing and conversion tests prove exact six-place behavior,
+- [x] Decimal parsing and conversion tests prove exact six-place behavior,
       reject excess precision/unsafe ranges, and use no authoritative float math.
-- [ ] A Quick Add with only name and base-unit label succeeds offline and returns
+- [x] A Quick Add with only name and base-unit label succeeds offline and returns
       a temporary product whose required graph survives database close/reopen.
-- [ ] Exactly one PENDING outbox envelope with a unique operation ID, store ID,
+- [x] Exactly one PENDING outbox envelope with a unique operation ID, store ID,
       device ID, entity identity, operation type, canonical payload, timestamp,
       attempt count, and status is committed with the product graph.
-- [ ] Injected failures at each write boundary leave neither business rows nor an
+- [x] Injected failures at each write boundary leave neither business rows nor an
       outbox row; duplicate submit is prevented while saving.
-- [ ] Empty, validation, saving, locally-saved, and local-database-failure states
+- [x] Empty, validation, saving, locally-saved, and local-database-failure states
       are component-tested; the screen remains usable with no network.
+
+**Evidence (2026-09-14):** `packages/domain/src/packages.ts` implements D-034
+micro-units (`parseQuantityDecimal`, `formatQuantityMicros`,
+`convertPackagesToBase`, BigInt intermediates, exact-or-reject) and replaces
+the provisional `toBaseUnits`; `formatMoney` added for display. Migration 2
+`catalogue` adds product_variants, package_units (partial unique index: one
+active base), store_products, store_package_settings, product_identifiers
+(type-scoped uniqueness), and outbox_operations. `createTemporaryProduct`
+commits variant + base package + temporary store product + optional EAN
+identifier + one PRODUCT_CREATED envelope atomically, with operation-ID
+replay. Products tab shell (Today/Sell/More placeholders), list, Quick Add,
+and detail screens follow DESIGN.md; the border token moved to `#7F8E88`
+after measured contrast verification (recorded in DESIGN.md). Full validate
+green: 126 domain + 78 mobile tests, typecheck, zero-warning lint.
 
 ## Ticket M2-02: Find and enrich a store product
 
-**Status:** Blocked  
+**Status:** Ready  
 **Outcome:** A retailer can find a product and add useful identity details later
 without losing the temporary product or changing store commercial facts.  
-**Blocked by:** M2-01
+**Blocked by:** M2-01 (complete)
 
 **Vertical scope:**
 
@@ -100,10 +114,10 @@ selling-price history, bulk import.
 
 ## Ticket M2-03: Configure packages with exact conversions
 
-**Status:** Blocked  
+**Status:** Ready  
 **Outcome:** A retailer can add a carton, pack, weight, or other package and see
 an exact conversion to the product's base unit.  
-**Blocked by:** M2-01
+**Blocked by:** M2-01 (complete)
 
 **Vertical scope:**
 

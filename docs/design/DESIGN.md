@@ -138,13 +138,20 @@ Use the system font and a compact, readable hierarchy. The palette is semantic:
 | `text.primary` | `#17251F` | Primary text |
 | `text.secondary` | `#41534C` | Supporting text |
 | `action.primary` | `#174F46` | Primary actions and selected state |
-| `border.default` | `#C8D1CC` | Field and section boundaries |
+| `border.default` | `#7F8E88` | Field and section boundaries |
 | `status.warning` | `#8A5700` | Temporary/pending warnings with text |
 | `status.danger` | `#A22B2B` | Destructive action or failure with text |
 
 Use a four-point spacing base, 12-pixel field/card corner radius, and restrained
 elevation. These values are the M2 baseline; implementation must verify rendered
 contrast and text scaling rather than treating the table as evidence by itself.
+
+**M2 verification note (2026-09-14):** measured contrast of the approved text
+pairs passes WCAG AA (primary 15.9, secondary 8.2, warning 6.1, danger 7.2 on
+raised; button text 9.4 on the primary action). The first-draft border
+(`#C8D1CC`, ~1.5:1) failed the 3:1 boundary bar, so the baseline now uses
+`#7F8E88` (3.43:1 on raised, 3.22:1 on canvas). Automated tests assert these
+ratios; real-device text scaling still needs the deferred device check.
 
 ## Product Copy
 

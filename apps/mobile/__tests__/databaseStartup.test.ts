@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { MIGRATIONS, openDatabase } from '../src/db';
+import { CURRENT_SCHEMA_VERSION, MIGRATIONS, openDatabase } from '../src/db';
 import type { DatabaseAdapter, SqlParams, StatementResult, SyncWork } from '../src/db/adapter';
 import { initializeAppDatabase } from '../src/db/initialize';
 import { NodeTestAdapter } from '../src/db/nodeTestAdapter';
@@ -30,7 +30,7 @@ describe('application database startup', () => {
       const status = initializeAppDatabase(files.open);
       expect(status.state).toBe('ready');
       if (status.state === 'ready') {
-        expect(status.schemaVersion).toBe(1);
+        expect(status.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
         expect(status.path).toBe('retail.db');
         status.adapter.close();
       }
@@ -49,7 +49,7 @@ describe('application database startup', () => {
       const status = initializeAppDatabase(files.open);
       expect(status.state).toBe('ready');
       if (status.state === 'ready') {
-        expect(status.schemaVersion).toBe(1);
+        expect(status.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
         status.adapter.close();
       }
     } finally {

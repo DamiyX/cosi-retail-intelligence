@@ -1,10 +1,12 @@
 import {
+  convertPackagesToBase,
+  formatMoney,
   generateId,
   isValidId,
   money,
   moneyFromMajorUnits,
   multiplyMoney,
-  toBaseUnits,
+  parseQuantityDecimal,
 } from '@retail/domain';
 
 describe('shared domain package consumption', () => {
@@ -12,8 +14,11 @@ describe('shared domain package consumption', () => {
     expect(isValidId(generateId())).toBe(true);
   });
 
-  it('computes exact money and package conversion through the workspace entry point', () => {
+  it('computes exact money and micro-unit conversion through the workspace entry point', () => {
     expect(multiplyMoney(moneyFromMajorUnits('19.99', 'NGN'), 3)).toEqual(money(5997, 'NGN'));
-    expect(toBaseUnits(5, 40)).toBe(200);
+    expect(convertPackagesToBase(parseQuantityDecimal('5'), parseQuantityDecimal('40'))).toBe(
+      parseQuantityDecimal('200'),
+    );
+    expect(formatMoney(money(145050, 'NGN'))).toBe('NGN 1,450.50');
   });
 });

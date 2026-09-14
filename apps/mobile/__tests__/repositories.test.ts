@@ -1,6 +1,6 @@
 import { generateId } from '@retail/domain';
 
-import { MIGRATIONS, openDatabase } from '../src/db';
+import { CURRENT_SCHEMA_VERSION, MIGRATIONS, openDatabase } from '../src/db';
 import { NodeTestAdapter } from '../src/db/nodeTestAdapter';
 import {
   countStoreMembers,
@@ -20,7 +20,7 @@ describe('store operating context repositories', () => {
   it('creates and reads a valid store membership and device graph', () => {
     const isolated = openIsolatedDatabase(MIGRATIONS);
     try {
-      expect(isolated.report.schemaVersion).toBe(1);
+      expect(isolated.report.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
 
       const user = createUser(isolated.adapter, { id: generateId(), displayName: 'Adaeze O.' });
       const store = createStore(isolated.adapter, {
@@ -168,7 +168,7 @@ describe('store operating context repositories', () => {
       const reopened = new NodeTestAdapter(isolated.path);
       try {
         const report = openDatabase(reopened, MIGRATIONS);
-        expect(report.schemaVersion).toBe(1);
+        expect(report.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
         expect(getUserById(reopened, userId)?.displayName).toBe('Efe O.');
         expect(getStoreById(reopened, storeId)?.name).toBe('Efe Mart');
         expect(getStoreMemberById(reopened, memberId)?.role).toBe('OWNER');

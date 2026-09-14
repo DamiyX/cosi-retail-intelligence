@@ -79,3 +79,19 @@ export function getDeviceById(adapter: DatabaseAdapter, id: string): DeviceRow |
   );
   return row ? mapRow(row) : null;
 }
+
+/**
+ * Devices authorized for one store, newest first. M2 has no device
+ * switching: the catalogue uses the newest device as the acting writer for
+ * outbox attribution until onboarding defines session identity.
+ */
+export function listDevicesByStore(adapter: DatabaseAdapter, storeId: string): DeviceRow[] {
+  return adapter
+    .getAllRows<Record<string, string | null>>(
+      `SELECT id, store_id, user_id, platform, device_label, app_version,
+              last_seen_at, status, created_at
+       FROM devices WHERE store_id = ? ORDER BY created_at DESC;`,
+      [requireId(storeId)],
+    )
+    .map(mapRow);
+}
