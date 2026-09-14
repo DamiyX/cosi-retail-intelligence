@@ -155,3 +155,35 @@ Supabase sign-in, background sync, catalogue screens, and design-system choices.
 M1-01 and M1-02 are the initial frontier. They may be implemented in either
 order by one writer. Separate concurrent writers require separate worktrees and
 must not modify shared workspace configuration independently.
+
+## Audit correction record (2026-09-14, commit `6650f82`)
+
+The independent audit rejected M1 with four P1 and one P2 finding. All five
+are corrected on this branch; the Galaxy device gate remains the only open
+acceptance item:
+
+1. Migration runner now validates the full applied history (versions and
+   names) as an exact contiguous registry prefix and rejects fabricated,
+   gapped, or over-new histories with typed errors. Regression tests:
+   fabricated name, unexpected later version, missing first migration.
+2. The synchronous transaction contract rejects async callbacks at compile
+   time (`SyncWork`) and rolls back with `INVALID_TRANSACTION_USE` at
+   runtime via a shared runner used by both adapters. Contract tests cover
+   the runner, the node driver, and the type-level rejection.
+3. ID generation is injectable: domain exposes pure `formatUuidV4` plus
+   `createIdGenerator`; `provisionStoreContext` accepts a generator; the
+   Android provider uses `expo-crypto@57.0.3` (Expo 57 pin, `expo install
+   --check` clean, no new audit findings). Real Android entropy plus the
+   native rebuild still require the deferred device session.
+4. `initializeAppDatabase` now fails with `FOREIGN_KEYS_NOT_ENFORCED` when
+   foreign keys cannot be enabled; WAL stays informational. Regression test
+   proves a false ready state is impossible.
+5. Integer-only package semantics are documented as provisional/discrete-only
+   and gated by new deferred decision DF-010, which blocks M2 PackageUnit
+   persistence until fractional representation is reviewed.
+
+Evidence after corrections: typecheck clean, zero-warning lint, 87 domain +
+42 mobile tests green, Expo Doctor 21/21, `expo install --check` clean,
+Android export passes, `npm audit` unchanged (1 low, 21 moderate,
+pre-existing). Returned for independent re-audit; M1 stays in progress
+until the device check passes.

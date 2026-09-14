@@ -1,16 +1,17 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-14
-Current milestone: M1 Domain + Local Database — implemented on `feat/m1-domain-local-database`, pending independent audit.
-Completed engineering milestones: M0 Project Foundation; M1-01 through M1-04; M1-05 automated evidence.
+Current milestone: M1 Domain + Local Database — audit corrections applied on `feat/m1-domain-local-database`, pending independent re-audit.
+Completed engineering milestones: M0 Project Foundation; M1-01 through M1-05 automated evidence; all five M1 audit corrections.
 
 ## Morning reminder due 2026-09-15
 
 Ask the user to plug in the Galaxy A15 5G with USB debugging authorized, then
 run the deferred M1 device check: build/install a development APK from
-`feat/m1-domain-local-database`, force-stop/relaunch, confirm the migrated
-database opens. A new build is required because the installed M0 APKs predate
-the expo-sqlite native module.
+`feat/m1-domain-local-database`, exercise real ID generation and store-context
+persistence, force-stop/relaunch, confirm the migrated database opens. A new
+build is required because the installed M0 APKs predate both the expo-sqlite
+and expo-crypto native modules.
 
 ## Active checkout
 
@@ -19,7 +20,8 @@ the expo-sqlite native module.
 - Local checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m0`
 - M1 commits: `a7b5c18` (M1-01 domain), `2d303e9` (M1-02 database),
   `adac3b4` (M1-03 store context), `e0d4464` (M1-04 atomic unit),
-  `ebd0b86` (M1-05 startup boundary). No push, merge, or deploy performed.
+  `ebd0b86` (M1-05 startup boundary), `6650f82` (audit corrections).
+  No push, merge, or deploy performed.
 - The M0 pull request (#1) is still open; `main` remains at `a393498`.
   Rebase the M1 branch onto `main` after that PR is accepted.
 - The original sibling `COSI` documentation folder remains untouched.
@@ -33,10 +35,13 @@ parameterized repositories, an atomic store-context provisioning operation,
 and a startup initializer with ready/failed shell states. No catalogue,
 sales, inventory, sync, auth, recognition, or product design is implemented.
 
-Local evidence on 2026-09-14: clean `npm ci` with unchanged lockfile, full
-validate (typecheck, zero-warning lint, 80 domain + 30 mobile tests) green,
-Expo Doctor 21/21, `expo install --check` clean, Android export succeeds,
-no committed secret or generated database/build artifact.
+Local evidence on 2026-09-14 after corrections: full validate (typecheck,
+zero-warning lint, 87 domain + 42 mobile tests) green, Expo Doctor 21/21,
+`expo install --check` clean, Android export succeeds, `npm audit`
+unchanged (1 low, 21 moderate, pre-existing), no committed secret or
+generated database/build artifact. New dependency: expo-crypto 57.0.3
+(Expo 57 pin) for the Android ID provider; DF-010 defers fractional
+quantities to an M2 architecture gate.
 
 ## Verification and open acceptance blockers
 
@@ -54,7 +59,7 @@ no committed secret or generated database/build artifact.
 
 ## Next action
 
-Independent audit of M1-01 through M1-05 per
+Independent re-audit of M1-01 through M1-05 plus the five corrections per
 `docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md`, then the deferred
 morning device check. Do not start M2 until the audit passes. Notify the
 user before commit/push or other utility/external actions.

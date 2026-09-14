@@ -11,7 +11,8 @@
     "m1-02-durable-database",
     "m1-03-store-context",
     "m1-04-atomic-work-unit",
-    "m1-05-automated-startup-evidence"
+    "m1-05-automated-startup-evidence",
+    "m1-audit-corrections"
   ],
   "owner": {
     "agent": "independent-auditor",
@@ -55,6 +56,11 @@
       "kind": "git-commit",
       "value": "ebd0b86",
       "claim": "M1-05 automated evidence done: startup init boundary with ready/failed shell states; clean-install validate, Expo Doctor 21/21, expo install --check, and Android export all pass; 110 tests green."
+    },
+    {
+      "kind": "git-commit",
+      "value": "6650f82",
+      "claim": "All five audit findings corrected with regression tests; 129 tests green with doctor, expo-check, and export passing. Only the Galaxy device check remains."
     }
   ],
   "acceptance_gates": [
@@ -184,10 +190,10 @@
     }
   ],
   "blockers": [
-    "Galaxy A15 5G unavailable on 2026-09-14: adb devices shows no attached phone, so the M1-05 force-stop/relaunch check and its required new development build are deferred to 2026-09-15 morning."
+    "Galaxy A15 5G unavailable on 2026-09-14: adb devices shows no attached phone, so the M1-05 force-stop/relaunch check and its required new development build (now also containing expo-crypto) are deferred to 2026-09-15 morning."
   ],
-  "next_action": "REMINDER DUE 2026-09-15 MORNING: ask the user to plug in the Galaxy A15 5G with USB debugging authorized. Then build and install a development APK from feat/m1-domain-local-database, run the force-stop/relaunch database check, and record the evidence. Meanwhile the independent auditor reviews M1-01 through M1-05 on that branch. Do not start M2 until the audit passes.",
+  "next_action": "REMINDER DUE 2026-09-15 MORNING: ask the user to plug in the Galaxy A15 5G with USB debugging authorized. Then build and install a development APK from feat/m1-domain-local-database (includes expo-sqlite and expo-crypto native modules), exercise real ID generation, store-context persistence, and force-stop/relaunch, and record the evidence. Meanwhile the independent auditor re-reviews M1-01 through M1-05 plus the five corrections on that branch. Do not start M2 until the audit passes.",
   "created_at": "2026-09-13T21:15:00.1326658Z",
-  "updated_at": "2026-09-14T01:42:18Z",
+  "updated_at": "2026-09-14T02:08:17Z",
   "archived": false
 }
