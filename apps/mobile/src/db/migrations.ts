@@ -17,11 +17,62 @@ export interface OpenDatabaseReport {
 }
 
 /**
- * Ordered migration registry. M1-02 ships the runner with metadata only;
- * M1-03 appends the first versioned business migration. Append-only: never
- * reorder, rewrite, or delete an entry once devices may hold it.
+ * Ordered migration registry. Append-only: never reorder, rewrite, or delete
+ * an entry once devices may hold it.
  */
-export const MIGRATIONS: Migration[] = [];
+export const MIGRATIONS: Migration[] = [
+  {
+    version: 1,
+    name: 'store_context',
+    statements: [
+      `CREATE TABLE stores (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        currency_code TEXT NOT NULL,
+        country_code TEXT NOT NULL,
+        timezone TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'ACTIVE',
+        created_by_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );`,
+      `CREATE TABLE users (
+        id TEXT PRIMARY KEY,
+        display_name TEXT NOT NULL,
+        email TEXT,
+        phone TEXT,
+        status TEXT NOT NULL DEFAULT 'ACTIVE',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );`,
+      `CREATE TABLE store_members (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        role TEXT NOT NULL CHECK (role IN ('OWNER', 'ADMIN', 'STAFF')),
+        status TEXT NOT NULL DEFAULT 'ACTIVE',
+        joined_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        UNIQUE (store_id, user_id)
+      );`,
+      'CREATE INDEX idx_store_members_store ON store_members(store_id);',
+      'CREATE INDEX idx_store_members_user ON store_members(user_id);',
+      `CREATE TABLE devices (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+        platform TEXT NOT NULL CHECK (platform IN ('ANDROID', 'IOS', 'OTHER')),
+        device_label TEXT,
+        app_version TEXT NOT NULL,
+        last_seen_at TEXT,
+        status TEXT NOT NULL DEFAULT 'ACTIVE',
+        created_at TEXT NOT NULL
+      );`,
+      'CREATE INDEX idx_devices_store ON devices(store_id);',
+    ],
+  },
+];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;
 

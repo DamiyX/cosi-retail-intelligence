@@ -3,6 +3,7 @@ export type DomainErrorCode =
   | 'INVALID_MONEY'
   | 'INVALID_QUANTITY'
   | 'INVALID_CONVERSION'
+  | 'INVALID_VALUE'
   | 'CURRENCY_MISMATCH';
 
 /**
