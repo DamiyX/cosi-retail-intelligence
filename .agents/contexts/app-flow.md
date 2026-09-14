@@ -1,10 +1,10 @@
 # COSI Application Flow
 
-**Status:** Active, capability-level flow; screen design is provisional  
+**Status:** Active; MVP capability flow and M2 catalogue navigation approved  
 **Scope:** MVP user journeys  
 **Updated:** 2026-09-14  
 **Confidence:** High for required jobs and transaction behavior; medium or low
-where exact navigation, copy, permissions, and recovery UI remain undecided.
+where later-milestone navigation, permissions, and recovery UI remain undecided.
 
 ## How to Use This Context
 
@@ -35,6 +35,13 @@ workflow, without full inventory onboarding. Exact registration, sign-in,
 offline-expired-session, store creation, invitation, recovery, and multi-store
 screens are not yet approved and must be resolved before Auth and membership UI
 is built.
+
+## Approved Navigation Baseline
+
+The MVP begins with four primary destinations: Today, Sell, Products, and More.
+Scanner entry is contextual from Sell and Products. M2 implements Products;
+later milestone design gates expand the other destinations before their
+substantial UI is built. See `docs/design/DESIGN.md`.
 
 ## Primary Daily Flow
 
@@ -93,7 +100,9 @@ The user must not manually perform package conversion during normal work.
       -> enrich name, package, image, barcode, supplier, or category later
       -> preserve transaction snapshots and stock history during enrichment
 
-The exact temporary-product/package-unit boundary is an M1/M2 design question.
+Temporary creation now produces a store-scoped provisional ProductVariant, one
+base PackageUnit, and StoreProduct atomically under D-035. The user may enrich
+or explicitly match it later without losing store-owned or historical facts.
 
 ## Inventory and Reconciliation
 
@@ -161,7 +170,7 @@ transaction completed if its local atomic commit failed.
 | Account/store onboarding | Minimal path to useful work | Flow details open |
 | Today/Home | Daily task entry and honest summary | Layout open |
 | Sale/cart/payment/completion | Required offline workflow | Capability flow approved |
-| Catalogue/search/product edit | Progressive digitization | Screen split open |
+| Catalogue/search/product edit | Progressive digitization | M2 flow approved in `docs/design/DESIGN.md` |
 | Restock/purchase | Required offline workflow | Capability flow approved |
 | Inventory/reconciliation | Event-based control | Screen split open |
 | Expense/withdrawal | Required offline record | Screen split open |
@@ -176,12 +185,13 @@ the approved final information architecture.
 
 ## Design Questions That Must Be Resolved
 
-- Primary navigation and the default landing task.
+- Validate the approved Today / Sell / Products / More baseline with retailer
+  use before beta and adjust only through an explicit design update.
 - Owner/admin versus cashier information density and shortcuts.
 - Onboarding, membership, invitation, recovery, and multiple-store behavior.
 - Cart editing, payment, credit, receipt, cancellation, correction, reversal,
   and return behavior.
-- Temporary-product creation and later enrichment.
+- Detailed shared-catalogue consolidation after temporary-product enrichment.
 - Offline session expiry, local-write failure, sync conflict, and recovery UI.
 - Accessibility, text scale, touch targets, low-end device performance, camera
   permissions, and outdoor/low-light use.

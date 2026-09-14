@@ -279,6 +279,8 @@ Examples:
 
 - `id`
 - `canonicalProductId?`
+- `identityScope` (`STORE_LOCAL` or `PLATFORM`)
+- `ownerStoreId?` (required only for `STORE_LOCAL`)
 - `name`
 - `brandId?`
 - `categoryId?`
@@ -294,6 +296,12 @@ Examples:
 ### Invariant
 
 Different physical sizes or commercially distinct formulations must use different `ProductVariant` records.
+
+A temporary catalogue entry uses a `STORE_LOCAL` provisional variant owned by
+the store. Platform variants are shared identities and must not carry an owning
+store. Promoting or matching a provisional variant is an explicit operation;
+it must not overwrite store-owned commercial data or rewrite transaction
+snapshots. See D-035.
 
 Example:
 
@@ -359,7 +367,7 @@ Examples:
 - `productVariantId`
 - `name`
 - `symbol?`
-- `conversionToBase`
+- `conversionToBaseMicros`
 - `isBaseUnit`
 - `isSellable`
 - `isPurchasable`
@@ -382,9 +390,13 @@ For Indomie Chicken 70g:
 For each `ProductVariant`:
 
 1. Exactly one active base inventory unit should exist.
-2. Base unit has `conversionToBase = 1`.
+2. Base unit has `conversionToBaseMicros = 1,000,000` (one base unit).
 3. Conversion factor must be positive.
 4. Package conversions must not change historical completed transactions.
+
+Authoritative quantities and conversion factors use the fixed six-decimal
+micro-unit representation in D-034. Decimal input is parsed exactly; operations
+that require hidden rounding or exceed the safe persisted range are rejected.
 
 If a manufacturer changes carton composition in the future, create/version the relevant package definition rather than retroactively altering old transaction meaning.
 
@@ -398,8 +410,7 @@ Represents a product variant carried by one store.
 
 - `id`
 - `storeId`
-- `productVariantId?`
-- `temporaryName?`
+- `productVariantId`
 - `localSku?`
 - `preferredPackageUnitId?`
 - `defaultSellingPrice?`
@@ -412,9 +423,10 @@ Represents a product variant carried by one store.
 
 ### Important notes
 
-A `StoreProduct` may initially be temporary and may not yet link to a shared `ProductVariant`.
-
-This supports progressive product creation.
+A temporary `StoreProduct` links to a store-scoped provisional ProductVariant,
+not directly to a platform identity. Its `isTemporary` flag records that the
+identity needs enrichment or explicit matching. This preserves progressive
+creation while ensuring every product has a base PackageUnit. See D-035.
 
 ### Store-owned data
 

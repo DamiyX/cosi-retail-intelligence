@@ -64,10 +64,14 @@ testable completion condition.
 These artifacts have different jobs. Keep each concise and correct instead of
 copying full histories between them.
 
-## Current M1 Gate
+## Current M2 Gate
 
-The founder delegated M1 granularity and dependency decisions to the engineering
-planner on 2026-09-14. The reviewed M1 ticket set is published in the repository
-root at tickets.md and is ready for implementation. The external implementation
-agent must complete M1 and stop for the independent audit described in
-docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md before M2 tickets are created.
+M1 passed independent source and automated re-audit on 2026-09-14. Its Galaxy
+A15 5G native restart check is explicitly waived as an M2 entry blocker and
+carried forward as mandatory before external beta/native release readiness.
+
+The founder delegated M2 granularity, dependency, and design judgement to the
+engineering planner. The reviewed M2 ticket set is published at repository root
+in `tickets.md`. The implementation agent must complete M2 and stop for the
+independent audit in `docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md` before
+M3 tickets are created.

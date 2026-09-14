@@ -1,6 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
 
-import type { DatabaseAdapter, SqlParams, StatementResult } from './adapter';
+import type { DatabaseAdapter, SqlParams, StatementResult, SyncWork } from './adapter';
 import { DatabaseError } from './errors';
 import { runSyncTransaction } from './transaction';
 
@@ -13,6 +13,7 @@ import { runSyncTransaction } from './transaction';
 export class NodeTestAdapter implements DatabaseAdapter {
   private readonly database: DatabaseSync;
   private closed = false;
+  private invalidAsyncTransactionDetected = false;
 
   constructor(path: string) {
     try {
@@ -23,30 +24,49 @@ export class NodeTestAdapter implements DatabaseAdapter {
   }
 
   exec(script: string): void {
+    this.assertOperationsAllowed();
     this.database.exec(script);
   }
 
   run(sql: string, params: SqlParams = []): StatementResult {
+    this.assertOperationsAllowed();
     const result = this.database.prepare(sql).run(...params);
     return { changes: Number(result.changes), lastInsertRowid: Number(result.lastInsertRowid) };
   }
 
   getFirstRow<T>(sql: string, params: SqlParams = []): T | null {
+    this.assertOperationsAllowed();
     const row = this.database.prepare(sql).get(...params) as T | undefined;
     return row ?? null;
   }
 
   getAllRows<T>(sql: string, params: SqlParams = []): T[] {
+    this.assertOperationsAllowed();
     return this.database.prepare(sql).all(...params) as T[];
   }
 
-  transaction<T>(work: () => T): T {
+  transaction<T>(work: () => SyncWork<T>): T {
+    this.assertOperationsAllowed();
     return runSyncTransaction(
       () => this.database.exec('BEGIN IMMEDIATE'),
       () => this.database.exec('COMMIT'),
       () => this.database.exec('ROLLBACK'),
       work,
+      () => this.invalidateAfterAsyncTransaction(),
     );
+  }
+
+  private assertOperationsAllowed(): void {
+    if (this.invalidAsyncTransactionDetected) {
+      throw new DatabaseError(
+        'INVALID_TRANSACTION_USE',
+        'This database connection is blocked after an invalid async transaction callback; reopen it before further work.',
+      );
+    }
+  }
+
+  private invalidateAfterAsyncTransaction(): void {
+    this.invalidAsyncTransactionDetected = true;
   }
 
   close(): void {

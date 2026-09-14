@@ -1,74 +1,88 @@
 # PROJECT_STATE — COSI
 
-Last updated: 2026-09-14
-Current milestone: M1 Domain + Local Database — audit corrections applied on `feat/m1-domain-local-database`, pending independent re-audit.
-Completed engineering milestones: M0 Project Foundation; M1-01 through M1-05 automated evidence; all five M1 audit corrections.
-
-## Morning reminder due 2026-09-15
-
-Ask the user to plug in the Galaxy A15 5G with USB debugging authorized, then
-run the deferred M1 device check: build/install a development APK from
-`feat/m1-domain-local-database`, exercise real ID generation and store-context
-persistence, force-stop/relaunch, confirm the migrated database opens. A new
-build is required because the installed M0 APKs predate both the expo-sqlite
-and expo-crypto native modules.
+Last updated: 2026-09-14  
+Current milestone: M2 Catalogue + Package Units — design, architecture, workflow,
+and tickets ready; implementation has not started.  
+Completed engineering milestones: M0 Project Foundation; M1 Domain + Local
+Database accepted after independent re-audit with an explicit device waiver.
 
 ## Active checkout
 
 - Canonical remote: https://github.com/DamiyX/cosi-retail-intelligence
-- Task branch: `feat/m1-domain-local-database` (local; created from M0 baseline `a50cce9`; NOT pushed)
+- Current local branch while the accepted M1 audit changes are committed:
+  `feat/m1-domain-local-database`, created from M0 baseline `a50cce9`.
+- Next task branch: `feat/m2-catalogue-package-units`, created from the final
+  accepted M1 commit before M2 code begins.
 - Local checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m0`
-- M1 commits: `a7b5c18` (M1-01 domain), `2d303e9` (M1-02 database),
-  `adac3b4` (M1-03 store context), `e0d4464` (M1-04 atomic unit),
-  `ebd0b86` (M1-05 startup boundary), `6650f82` (audit corrections).
-  No push, merge, or deploy performed.
-- The M0 pull request (#1) is still open; `main` remains at `a393498`.
-  Rebase the M1 branch onto `main` after that PR is accepted.
-- The original sibling `COSI` documentation folder remains untouched.
+- M0 pull request #1 remains open and `main` remains at `a393498`; the milestone
+  branches are currently stacked. Rebase or retarget only after the earlier pull
+  request is accepted.
+- No push, merge, deployment, or production service change was performed during
+  this audit/planning pass.
 
-## Current implementation
+## M1 audit outcome
 
-M1 adds a pure `@retail/domain` package (UUIDs, integer-minor-unit money,
-exact package conversion), an expo-sqlite boundary with transactional
-migrations (schema version 1: stores, users, store members, devices), typed
-parameterized repositories, an atomic store-context provisioning operation,
-and a startup initializer with ready/failed shell states. No catalogue,
-sales, inventory, sync, auth, recognition, or product design is implemented.
+M1 supplies the pure `@retail/domain` package, versioned expo-sqlite boundary,
+transactional migrations, typed parameterized repositories, Store/User/
+StoreMember/Device context, atomic store-context provisioning, Expo-backed
+mobile UUID creation, and startup ready/failure states.
 
-Local evidence on 2026-09-14 after corrections: full validate (typecheck,
-zero-warning lint, 87 domain + 42 mobile tests) green, Expo Doctor 21/21,
-`expo install --check` clean, Android export succeeds, `npm audit`
-unchanged (1 low, 21 moderate, pre-existing), no committed secret or
-generated database/build artifact. New dependency: expo-crypto 57.0.3
-(Expo 57 pin) for the Android ID provider; DF-010 defers fractional
-quantities to an M2 architecture gate.
+The initial audit corrections fixed migration-history validation, async callback
+rejection, mobile UUID support, foreign-key readiness, and the unresolved
+fractional-quantity gate. The independent re-audit found and fixed two remaining
+edges:
 
-## Verification and open acceptance blockers
+- normal mobile store provisioning now defaults to the Expo crypto ID provider;
+- after an invalid async transaction callback is rolled back, both adapters
+  permanently invalidate that connection so scheduled work cannot escape into
+  autocommitted database writes.
 
-- Galaxy A15 5G was unavailable on 2026-09-14 (`adb devices` empty), so the
-  M1-05 force-stop/relaunch check is explicitly deferred, not passed. See the
-  morning reminder above and the blocked `m1-device-verification` gate in
-  `.agents/workflows/m1-domain-local-database.json`.
-- Second-laptop reproduction remains deferred (M0 carryover, required before
-  external beta, not before audit).
-- npm audit still reports the M0-baseline 21 moderate + 1 low upstream
-  findings; expo-sqlite 57.0.3 added no new findings.
-- Hand-rolled repository validation is used in M1; Zod remains the locked
-  boundary-validation choice and should be adopted in M2 when sync
-  DTO/catalogue schemas arrive.
+Evidence after the final patch: domain and mobile typecheck pass; both
+zero-warning lint runs pass; 87 domain plus 43 mobile tests pass (130 total);
+`expo install --check` is clean; Android export succeeds. The current shell
+could run only 17 of 21 Expo Doctor checks because it has Node but no `npm`
+executable for Expo Doctor's dependency-tree subprocesses. The prior correction
+commit recorded Expo Doctor 21/21, and this final patch changed no dependency.
+
+## Approved M2 baseline
+
+- D-034: quantities and package conversions use fixed-scale micro-units with
+  exact integer arithmetic and canonical decimal-string boundaries.
+- D-035: a temporary product has a store-scoped provisional ProductVariant,
+  active base PackageUnit, and StoreProduct; later matching preserves store data
+  and history.
+- `docs/design/DESIGN.md`: whole-MVP experience direction plus implementable M2
+  Products navigation, flows, states, accessibility, copy, and visual baseline.
+- `tickets.md`: M2-01 through M2-05, with vertical outcomes, dependencies,
+  non-goals, acceptance evidence, and the stop-before-M3 audit boundary.
+- `.agents/workflows/m2-catalogue-package-units.json`: active resumable state.
+
+## Deferred evidence and risks
+
+- The Galaxy A15 5G is unavailable. The founder explicitly waived its M1 native
+  force-stop/relaunch check as an M2 entry blocker. This is not a passed check;
+  it must be completed before external beta/native release readiness with a
+  build containing expo-sqlite and expo-crypto.
+- Second-laptop clean reproduction remains deferred and is also required before
+  external beta.
+- `npm audit` remains at the previously recorded M0 baseline of 21 moderate and
+  1 low upstream finding; M1 introduced no known increase.
+- D-034 must be implemented before M2 persists PackageUnit conversions. M1's
+  integer-only package helper remains provisional until M2-01 replaces or
+  extends it.
 
 ## Next action
 
-Independent re-audit of M1-01 through M1-05 plus the five corrections per
-`docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md`, then the deferred
-morning device check. Do not start M2 until the audit passes. Notify the
-user before commit/push or other utility/external actions.
+Commit the reviewed M1 audit and M2 planning artifacts, create
+`feat/m2-catalogue-package-units` from that commit, then give the implementation
+agent the short handoff prompt. That agent starts with M2-01, follows `tickets.md`,
+and stops after M2-05 for independent audit. Do not start M3 or push, merge, or
+deploy without the applicable approval.
 
 ## Continuity
 
 Read `AGENTS.md`, `.agents/contexts/project-context.md`,
-`.agents/workflows/index.json`, the active task record, and
-`MULTI_AGENT_WORKFLOW.md`. Read `tickets.md` and
-`docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md` before implementation. Inspect Git
-status/history/diff and continue this task branch. The repository documents and Git
-history are the project memory.
+`.agents/workflows/index.json`, the active M2 workflow, `tickets.md`,
+`docs/design/DESIGN.md`, the M2 section of `BUILD_PLAN.md`, D-034/D-035, and
+`MULTI_AGENT_WORKFLOW.md`. Inspect Git status, history, and diff before edits.
+Repository documents and Git history are the project memory.

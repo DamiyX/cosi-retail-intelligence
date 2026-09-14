@@ -1,189 +1,208 @@
-# Tickets: M1 Domain + Local Database Foundation
+# Tickets: M2 Catalogue + Package Units
 
-These tickets establish the smallest durable local foundation needed by M2 and
-later business features. The founder delegated ticket granularity and dependency
-decisions to the engineering planner on 2026-09-14.
+These tickets deliver the smallest offline catalogue that later sales and
+restocking can safely use. The founder delegated ticket size, dependency, and
+design judgement to the engineering planner on 2026-09-14.
 
 ## Execution Contract
 
-- Execute one ticket at a time in numeric order unless its declared dependencies
-  allow a safe independent start.
-- Keep typecheck, lint, and existing tests green after every ticket.
-- Mark a checkbox complete only when the named evidence exists.
-- Update this file and the active workflow record as work progresses.
-- Stop after M1-05 and return the milestone for independent audit. Do not start
-  M2 until that audit passes and M2 tickets are published.
-- Begin feature implementation only on `feat/m1-domain-local-database` created
-  from the accepted M0/context baseline. Do not add M1 code to
-  `chore/m0-foundation`.
+- Work on `feat/m2-catalogue-package-units`, created from the accepted M1
+  baseline. Do not add M2 implementation to the M1 branch.
+- Execute tickets in dependency order and keep typecheck, zero-warning lint,
+  tests, Expo compatibility, and Android export green.
+- A mutable catalogue action is incomplete unless its business data and durable
+  outbox operation commit atomically.
+- Update this file and `.agents/workflows/m2-catalogue-package-units.json` with
+  evidence after each ticket.
+- Stop after M2-05 for an independent milestone audit. Do not start M3.
+- Do not push, merge, deploy, link production services, or change an established
+  architecture decision without the required approval.
 
-## M1 Boundary Decisions
+## M2 Boundaries
 
-- Use the approved explicit SQL migration and typed-repository approach. Do not
-  add Drizzle or another ORM without an approved architecture decision.
-- M1 implements a domain-neutral package-conversion utility. ProductVariant,
-  PackageUnit, StoreProduct, temporary products, and catalogue behavior remain
-  M2 scope.
-- M1 establishes the reusable SQLite transaction boundary but has no completed
-  synchronizable business aggregate. M2 must add the durable outbox schema and
-  atomic enqueue behavior before its first mutable catalogue operation is
-  considered complete.
-- Auth screens, Supabase linkage, remote schema, synchronization workers,
-  catalogue, sales, inventory, recognition, and final visual design are outside
-  M1.
-- Local database encryption remains required before real external beta data, as
-  specified by the technical architecture; it is not introduced by M1.
+- Follow D-034 for fixed-scale micro-unit quantities and D-035 for temporary
+  store-scoped provisional variants.
+- Follow `docs/design/DESIGN.md` for the Products flow, states, accessibility,
+  and visual baseline. Do not invent final sale/restock UI in M2.
+- The outbox stores complete local operation envelopes. Network push/pull,
+  retries, conflict resolution, and Supabase application remain M7.
+- StoreProduct and StorePackageSetting own store price/cost/preferences. Shared
+  or platform-style identity edits may not overwrite those fields.
+- Sales, purchases, inventory events, recognition inference, auth UX, cloud
+  catalogue, and market-price sharing are outside M2.
 
-## Ticket M1-01: Produce exact, portable commerce values
+## Ticket M2-01: Create a usable temporary product offline
 
-**Status:** Done (commit `a7b5c18`; typecheck, lint, and 92 workspace tests green)  
-**What to build:** Add a pure TypeScript domain package whose public API creates
-globally unique client IDs, performs authoritative money operations without
-binary floating-point arithmetic, and converts package counts to base inventory
-units exactly. The mobile workspace must be able to consume the package without
-React Native or database dependencies.  
-**Blocked by:** None
+**Status:** Ready  
+**Outcome:** A retailer can enter a product name, save it without a network, and
+immediately reopen a valid product with a base package.  
+**Blocked by:** Accepted M1 baseline; D-034; D-035; M2 design gate (all met)
 
-**Out of scope:** Product/package persistence, costing policy, currency
-conversion, formatting-heavy UI, and ProductVariant or PackageUnit entities.
+**Vertical scope:**
 
-- [x] Automated tests prove UUID validity/uniqueness, integer-minor-unit money
-      operations, and explicit rejection of invalid or unsafe values.
-- [x] Automated tests prove exact package-to-base conversion for representative
-      units and reject non-positive conversion factors or invalid quantities.
-- [x] The mobile workspace imports the package through its public entry point,
-      and workspace typecheck, lint, and tests remain green.
+- Replace or extend the provisional integer-only quantity utility with the D-034
+  micro-unit value, exact decimal parser/formatter, and conversion operation.
+- Add the minimal migrations and typed repositories for store-scoped
+  ProductVariant, PackageUnit, StoreProduct, and durable OutboxOperation.
+- Add one application operation that atomically creates the provisional variant,
+  active base package, store product, and one complete outbox envelope.
+- Add the Products empty/list state and Quick Add flow from `DESIGN.md`.
 
-## Ticket M1-02: Open and safely upgrade a durable local database
+**Non-goals:** Additional package units, barcode search, platform matching,
+network sync, price/cost history, sales, inventory.
 
-**Status:** Done (commit `2d303e9`; expo-sqlite 57.0.3 matches the Expo 57 pin; `expo install --check` passes)  
-**What to build:** Integrate the Expo-compatible SQLite dependency, create one
-explicit database boundary, enable and verify foreign keys and WAL where the
-deployed runtime supports them, and run ordered transactional migrations with a
-persisted schema version. Include reusable isolated-database test utilities.  
-**Blocked by:** None
+**Acceptance:**
 
-**Out of scope:** Business tables beyond migration metadata, remote migrations,
-Supabase access, production encryption keys, ORM adoption, and deleting/resetting
-a database to recover from a migration error.
+- [ ] Decimal parsing and conversion tests prove exact six-place behavior,
+      reject excess precision/unsafe ranges, and use no authoritative float math.
+- [ ] A Quick Add with only name and base-unit label succeeds offline and returns
+      a temporary product whose required graph survives database close/reopen.
+- [ ] Exactly one PENDING outbox envelope with a unique operation ID, store ID,
+      device ID, entity identity, operation type, canonical payload, timestamp,
+      attempt count, and status is committed with the product graph.
+- [ ] Injected failures at each write boundary leave neither business rows nor an
+      outbox row; duplicate submit is prevented while saving.
+- [ ] Empty, validation, saving, locally-saved, and local-database-failure states
+      are component-tested; the screen remains usable with no network.
 
-- [x] A fresh database reaches the expected schema version and reports the
-      required foreign-key setting plus the verified journal mode.
-- [x] Reopening an up-to-date database is idempotent: no migration reruns, schema
-      drift, or data loss occurs.
-- [x] An intentionally failing migration rolls back completely, preserves the
-      prior version/data, and returns a diagnosable error without resetting the
-      database.
+## Ticket M2-02: Find and enrich a store product
 
-## Ticket M1-03: Persist a valid local store operating context
+**Status:** Blocked  
+**Outcome:** A retailer can find a product and add useful identity details later
+without losing the temporary product or changing store commercial facts.  
+**Blocked by:** M2-01
 
-**Status:** Done (commit `adac3b4`; migration 001; all repository tests green)
-**Blocked by:** M1-01 and M1-02 (both complete)  
-**What to build:** Introduce only the near-term Store, User, StoreMember, and
-Device domain records, their first real migration, and typed parameterized
-repositories. Demonstrate creation and retrieval of a minimal valid store
-membership/device graph using client-generated IDs.
-**Out of scope:** Supabase Auth, invitations, multiple-store switching UI,
-staff-role expansion beyond the documented minimum, cloud RLS, catalogue
-entities, and speculative fields for later milestones.
+**Vertical scope:**
 
-- [x] A repository-level integration test creates a valid Store/User/StoreMember/
-      Device graph and reads the same typed values through public repository
-      interfaces.
-- [x] Foreign-key and uniqueness violations reject invalid membership/device
-      data without leaving partial rows.
-- [x] Values containing quotes or SQL-like text round-trip as data through
-      parameterized statements, and the graph remains available after closing
-      and reopening the database.
+- Add ProductIdentifier records for barcode/internal-code values with normalized
+  uniqueness rules appropriate to their type.
+- Support exact/localized name, local SKU, and identifier search through indexed,
+  parameterized repository queries.
+- Add Product detail/edit UI for name, temporary status, identifier, local SKU,
+  and active state.
+- Atomically persist each supported mutable operation with its outbox envelope.
 
-## Ticket M1-04: Commit or roll back a complete local work unit
+**Non-goals:** Camera scanning, fuzzy/cloud search, canonical catalogue merge,
+selling-price history, bulk import.
 
-**Status:** Done (commit `e0d4464`; provision operation tested for commit, injected-failure rollback, and typed errors)
-**Blocked by:** M1-02 and M1-03 (both complete)  
-**What to build:** Add the reusable application/database transaction helper and
-use it in a small store-context operation that performs multiple repository
-writes. The caller must receive success only after the SQLite commit completes.
+**Acceptance:**
 
-**Out of scope:** A feature-specific outbox protocol, sync transport, retries,
-conflict resolution, sales, purchases, inventory events, or nested-transaction
-abstractions without a demonstrated M1 need.
+- [ ] Offline search finds expected products by name, local SKU, and exact
+      barcode; quotes/SQL-like text remains data and cannot alter queries.
+- [ ] Editing identity or store SKU survives restart and creates one matching
+      outbox operation; injected failure rolls back both sides.
+- [ ] Identity edits cannot overwrite local SKU, store selling-price fields, or
+      package settings, proven by repository integration tests; the boundary
+      leaves later cost, stock, and supplier ownership outside identity updates.
+- [ ] No-match search offers Quick Add with the query as a proposed editable
+      name; loading, empty, validation, inactive, and local-save states match
+      `DESIGN.md`.
 
-- [x] The success-path integration test commits every expected row as one unit
-      and the result remains after database reopen.
-- [x] A deterministic failure injected after an intermediate write leaves none
-      of the operation's rows committed and preserves unrelated prior data.
-- [x] The transaction helper propagates a useful typed/domain error and no
-      repository or UI caller can report completion before commit succeeds.
+## Ticket M2-03: Configure packages with exact conversions
 
-## Ticket M1-05: Prove M1 during application startup and Android restart
+**Status:** Blocked  
+**Outcome:** A retailer can add a carton, pack, weight, or other package and see
+an exact conversion to the product's base unit.  
+**Blocked by:** M2-01
 
-**Status:** Automated evidence complete (commit `ebd0b86`); device check deferred to 2026-09-15 morning (phone unavailable 2026-09-14)
-**Blocked by:** M1-01, M1-02, M1-03, and M1-04 (all complete)  
-**What to build:** Initialize the versioned local database through the mobile
-application startup boundary, surface initialization failure to the existing
-technical shell without inventing final product UI, and gather the complete M1
-acceptance evidence on the reference Android device.
+**Vertical scope:**
 
-**Out of scope:** Final onboarding, navigation redesign, production data,
-Supabase sign-in, background sync, catalogue screens, and design-system choices.
+- Add StorePackageSetting persistence for store-owned price and preferred
+  sale/purchase behavior.
+- Add package create/edit/deactivate application operations and Package UI.
+- Enforce one active base unit, positive exact conversion, and store/variant
+  ownership integrity in domain, application, and database boundaries.
+- Version or deactivate package definitions that have acquired historical use;
+  never silently rewrite completed transaction meaning.
 
-- [x] Fresh-install and existing-database automated paths both reach application
-      readiness, while a migration failure prevents a false ready/completed
-      state and exposes a diagnosable recovery state.
-- [x] Clean-install validation, typecheck, lint, all automated tests, Expo
-      Doctor, and Android export pass with no committed secret or generated
-      database/build artifact.
-- [ ] On the Galaxy A15 5G development build, a force-stop/relaunch opens the
-      migrated database successfully; the milestone report records exact manual
-      evidence, limitations, ticket results, and updated project/workflow state.
-      DEFERRED 2026-09-14: `adb devices` showed no attached phone, and the M0
-      APKs on the phone predate the expo-sqlite native module, so a new
-      development build plus the force-stop/relaunch check must run on
-      2026-09-15 morning once the phone is plugged in with USB debugging.
+**Non-goals:** Costing calculations, purchase/sale lines, inventory balances,
+server reconciliation.
+
+**Acceptance:**
+
+- [ ] Representative whole and fractional conversions round-trip through SQLite
+      and display as canonical decimal text without binary-float drift.
+- [ ] The UI previews a sentence such as `1 carton = 40 pieces` before save and
+      gives field-specific errors for zero, negative, excess-precision, or
+      unsafe values.
+- [ ] Package plus store setting plus one outbox envelope commit atomically;
+      deterministic failures leave no partial rows or orphaned envelopes.
+- [ ] Database constraints reject a second active base unit and cross-store or
+      cross-variant package references.
+- [ ] Package component tests cover add, edit, deactivate, text scaling, labels,
+      and Android Back handling for dirty forms.
+
+## Ticket M2-04: Manage catalogue lifecycle without losing ownership
+
+**Status:** Blocked  
+**Outcome:** A retailer can distinguish temporary, enriched, active, and
+inactive products without losing store-owned data or history.  
+**Blocked by:** M2-02 and M2-03
+
+**Vertical scope:**
+
+- Implement active/inactive catalogue filtering and a clear Temporary marker.
+- Allow a temporary product to be marked enriched while retaining its private
+  provisional identity; leave later platform matching as an explicit future
+  consolidation operation under D-035.
+- Preserve StoreProduct and StorePackageSetting; make repeated operation IDs
+  idempotent at the local application boundary.
+- Complete Product list/detail states needed for M2 lifecycle behavior.
+
+**Non-goals:** Platform-identity linking/consolidation, remote shared catalogue,
+automated matching, recognition model, cross-store exposure, conflict resolution.
+
+**Acceptance:**
+
+- [ ] Temporary and inactive states are visible in text, searchable through
+      explicit filters, and never rely on color alone.
+- [ ] Enriching identity keeps local SKU, store selling-price fields, and package
+      settings unchanged, and does not change the variant's owning store.
+- [ ] Reapplying the same operation ID cannot duplicate the logical mutation or
+      outbox work; a different valid operation remains independent.
+- [ ] Deactivation requires confirmation, remains after restart, and retains the
+      record for history; failure rolls back business and outbox changes.
+
+## Ticket M2-05: Prove the offline catalogue milestone
+
+**Status:** Blocked  
+**Outcome:** M2 has reproducible evidence and a clean handoff for independent
+audit before sales implementation starts.  
+**Blocked by:** M2-01 through M2-04
+
+**Vertical scope:**
+
+- Run clean install, typecheck, zero-warning lint, all automated tests, Expo
+  Doctor, Expo dependency check, and Android export.
+- Manually exercise offline create, restart, search, edit, package conversion,
+  inactive filtering, and failure/recovery on the reference Android device when
+  it is available.
+- Review migration upgrade paths from a populated M1 database and ensure no
+  secrets, generated databases, exports, or build artifacts are committed.
+- Update tickets, workflow state, PROJECT_STATE, and milestone evidence; return
+  the branch for independent audit.
+
+**Acceptance:**
+
+- [ ] Automated checks are green from a clean checkout and exact counts/results
+      are recorded rather than inferred.
+- [ ] Migration tests upgrade both fresh and populated M1 databases without
+      reset, loss, duplicate rows, or false schema history.
+- [ ] Device evidence records actual build/device identifiers and clearly marks
+      any unavailable check as blocked or explicitly waived rather than passed.
+- [ ] The final diff contains M2 scope only, documentation matches code, and M3
+      has not started.
 
 ## Dependency Frontier
 
-    M1-01 Exact commerce values ─────────────┐
-                                             ├──> M1-03 Store context
-    M1-02 Durable database ──────────────────┘          |
-           |                                            v
-           └────────────────────────────────────> M1-04 Atomic work unit
-                                                        |
-                                                        v
-                                               M1-05 Android acceptance
+    M2-01 Offline temporary product
+       |\
+       | +--> M2-03 Exact packages --------+
+       +----> M2-02 Search and enrich ------+--> M2-04 Lifecycle/linking
+                                                     |
+                                                     v
+                                             M2-05 Acceptance/audit handoff
 
-M1-01 and M1-02 are the initial frontier. They may be implemented in either
-order by one writer. Separate concurrent writers require separate worktrees and
-must not modify shared workspace configuration independently.
-
-## Audit correction record (2026-09-14, commit `6650f82`)
-
-The independent audit rejected M1 with four P1 and one P2 finding. All five
-are corrected on this branch; the Galaxy device gate remains the only open
-acceptance item:
-
-1. Migration runner now validates the full applied history (versions and
-   names) as an exact contiguous registry prefix and rejects fabricated,
-   gapped, or over-new histories with typed errors. Regression tests:
-   fabricated name, unexpected later version, missing first migration.
-2. The synchronous transaction contract rejects async callbacks at compile
-   time (`SyncWork`) and rolls back with `INVALID_TRANSACTION_USE` at
-   runtime via a shared runner used by both adapters. Contract tests cover
-   the runner, the node driver, and the type-level rejection.
-3. ID generation is injectable: domain exposes pure `formatUuidV4` plus
-   `createIdGenerator`; `provisionStoreContext` accepts a generator; the
-   Android provider uses `expo-crypto@57.0.3` (Expo 57 pin, `expo install
-   --check` clean, no new audit findings). Real Android entropy plus the
-   native rebuild still require the deferred device session.
-4. `initializeAppDatabase` now fails with `FOREIGN_KEYS_NOT_ENFORCED` when
-   foreign keys cannot be enabled; WAL stays informational. Regression test
-   proves a false ready state is impossible.
-5. Integer-only package semantics are documented as provisional/discrete-only
-   and gated by new deferred decision DF-010, which blocks M2 PackageUnit
-   persistence until fractional representation is reviewed.
-
-Evidence after corrections: typecheck clean, zero-warning lint, 87 domain +
-42 mobile tests green, Expo Doctor 21/21, `expo install --check` clean,
-Android export passes, `npm audit` unchanged (1 low, 21 moderate,
-pre-existing). Returned for independent re-audit; M1 stays in progress
-until the device check passes.
+The deferred M1 Galaxy A15 5G check is a non-blocking carried gate for M2
+implementation. It remains mandatory before external beta/native release
+readiness and should be completed as soon as the phone is available.

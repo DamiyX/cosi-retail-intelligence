@@ -104,6 +104,8 @@ When a major decision changes, update the affected source-of-truth document too.
 | D-031 | AI coding agents are interchangeable; task branch is the continuity boundary | ACTIVE |
 | D-032 | GitHub remote is the normal cross-laptop synchronization mechanism | ACTIVE |
 | D-033 | COSI is the temporary internal project codename | ACTIVE |
+| D-034 | Authoritative quantities use fixed-scale micro-units | ACTIVE |
+| D-035 | Temporary products use store-scoped provisional variants | ACTIVE |
 
 ---
 
@@ -997,6 +999,81 @@ COSI is **not** approved as the final public brand. A quick online search shows 
 
 ---
 
+## D-034 — Authoritative Quantities Use Fixed-Scale Micro-Units
+
+**Status:** ACTIVE  
+**Date:** 2026-09-14
+
+### Decision
+
+Represent authoritative inventory quantities and package conversions as signed
+SQLite integers at a fixed scale of **1,000,000 micro-units per base unit**.
+Parse user and sync inputs from canonical decimal strings. Domain arithmetic
+uses integer/BigInt intermediates and must either produce an exactly
+representable micro-unit result or reject the operation; it must never silently
+round or use binary floating point as the source of truth.
+
+Persisted values and values crossing React Native/native boundaries must remain
+within JavaScript's safe-integer range. A later server contract will transmit
+canonical decimal strings and store the corresponding values in PostgreSQL
+`NUMERIC` columns.
+
+### Rationale
+
+Six decimal places support discrete FMCG units and foreseeable fractional
+weight/volume categories while keeping local comparisons, sums, indexes, and
+constraints simple. The safe-integer ceiling still permits roughly nine billion
+base units per persisted value. Exact rejection exposes unsupported precision
+instead of corrupting stock through hidden rounding.
+
+### Smallest viable alternative considered
+
+Canonical decimal strings plus an arbitrary-precision decimal dependency would
+support variable precision, but would complicate SQLite ordering and aggregation
+before evidence shows that more than six decimal places are needed.
+
+### Revisit if
+
+Pilot data requires more than six decimal places or a legitimate operation
+cannot fit the safe persisted range.
+
+---
+
+## D-035 — Temporary Products Use Store-Scoped Provisional Variants
+
+**Status:** ACTIVE  
+**Date:** 2026-09-14
+
+### Decision
+
+Creating a temporary product in M2 creates one store-scoped provisional
+`ProductVariant`, its active base `PackageUnit`, and the store's `StoreProduct`
+record in one local transaction. A store-scoped variant has an owning store and
+is private to that store. A platform variant has no owning store. New M2
+`StoreProduct` records always reference a variant; `isTemporary` means the
+identity still needs enrichment or matching, rather than meaning the product
+has no package identity.
+
+Later matching must be an explicit link/consolidation operation. It must retain
+store-owned price, cost, stock, SKU, package settings, and historical transaction
+snapshots. M2 may record the relationship but does not build the shared catalogue
+or network reconciliation service.
+
+### Rationale
+
+Every sellable or restockable product needs a base unit and valid package
+conversion. Giving temporary products a private provisional variant keeps the
+existing `PackageUnit -> ProductVariant` ownership model intact and avoids a
+second package table or nullable dual-owner foreign key.
+
+### Smallest viable alternative considered
+
+Allowing `StoreProduct.productVariantId` to remain null would require package
+definitions to be owned by two different entity types or would prevent a
+temporary product from participating safely in quantity calculations.
+
+---
+
 # 6. Explicitly Deferred Decisions
 
 These are intentionally unresolved and should not be reopened as though they were forgotten.
@@ -1083,16 +1160,13 @@ Requires actual observation data.
 
 ## DF-010 — Fractional quantity and conversion representation
 
-**Status:** DEFERRED
+**Status:** RESOLVED BY D-034
 
-M1's package-conversion utility is explicitly provisional and discrete-only
-(non-negative integer quantities, positive integer factors). Before M2
-persists PackageUnit definitions, an architecture review must decide the
-final representation for fractional base quantities and non-integer
-conversion factors (decimal strategy, storage type, rounding/precision
-rules, and migration impact on snapshots). M2 catalogue/package tickets must
-not be published until this gate is resolved. This entry was added from the
-M1 independent audit on 2026-09-14.
+M1's package-conversion utility was explicitly provisional and discrete-only.
+D-034 resolves the M2 gate with fixed-scale micro-units, exact integer
+arithmetic, canonical decimal-string boundaries, and explicit precision/range
+rejection. M2 must replace or extend the provisional utility before persisting
+fractional PackageUnit definitions.
 
 ---
 

@@ -8,4 +8,3 @@ export {
   openDatabase,
 } from './migrations';
 export type { Migration, OpenDatabaseReport } from './migrations';
-export { runSyncTransaction } from './transaction';

@@ -3,8 +3,8 @@
   "task_id": "m1-domain-local-database",
   "workflow_id": "build-feature",
   "mode": "implement",
-  "status": "in_progress",
-  "current_state": "awaiting-independent-audit",
+  "status": "complete",
+  "current_state": "accepted-with-device-waiver",
   "completed_states": [
     "plan-and-verify-ticket-breakdown",
     "m1-01-exact-commerce-values",
@@ -12,10 +12,11 @@
     "m1-03-store-context",
     "m1-04-atomic-work-unit",
     "m1-05-automated-startup-evidence",
-    "m1-audit-corrections"
+    "m1-audit-corrections",
+    "m1-independent-reaudit"
   ],
   "owner": {
-    "agent": "independent-auditor",
+    "agent": "founder-and-engineering-agent",
     "thread": "unassigned",
     "worktree": null
   },
@@ -30,7 +31,7 @@
     {
       "kind": "project-state",
       "path": "docs/engineering/PROJECT_STATE.md",
-      "claim": "M1 implementation is complete except the deferred on-device check; audit is the next action."
+      "claim": "M1 passed independent re-audit and is accepted with a founder-approved device waiver carried before external beta/native release readiness."
     },
     {
       "kind": "git-commit",
@@ -61,6 +62,11 @@
       "kind": "git-commit",
       "value": "6650f82",
       "claim": "All five audit findings corrected with regression tests; 129 tests green with doctor, expo-check, and export passing. Only the Galaxy device check remains."
+    },
+    {
+      "kind": "audit",
+      "path": "docs/engineering/PROJECT_STATE.md",
+      "claim": "Independent re-audit fixed the mobile UUID default and blocked escaped async transaction continuations; 130 tests, typecheck, lint, dependency check, and Android export pass."
     }
   ],
   "acceptance_gates": [
@@ -148,7 +154,7 @@
       "claim": "On the Galaxy A15 5G development build, a force-stop/relaunch opens the migrated database successfully.",
       "owner": "founder-and-implementation-agent",
       "required": true,
-      "status": "blocked",
+      "status": "waived",
       "depends_on": [],
       "verification": {
         "kind": "inspection",
@@ -165,8 +171,11 @@
       "limitations": [
         "The M0 APKs on the phone predate the expo-sqlite native module, so the device check needs a new development build, not the installed APKs."
       ],
-      "blocker": "Galaxy A15 5G unavailable on 2026-09-14 (adb devices empty). Retry on 2026-09-15 morning once the phone is plugged in with USB debugging.",
-      "waiver": null
+      "blocker": null,
+      "waiver": {
+        "reason": "The Galaxy A15 5G is unavailable. The founder explicitly approved M2 entry on source, automated, and Android-export evidence while carrying this native check forward as mandatory before external beta/native release readiness.",
+        "approved_by": "founder"
+      }
     }
   ],
   "artifacts": [
@@ -187,13 +196,15 @@
     {
       "date": "2026-09-14",
       "scope": "Defer the M1-05 on-device force-stop/relaunch check to 2026-09-15 morning (phone unavailable); proceed to independent audit on automated evidence."
+    },
+    {
+      "date": "2026-09-14",
+      "scope": "Waive the unavailable Galaxy A15 5G check as an M2 entry blocker and carry it forward before external beta/native release readiness."
     }
   ],
-  "blockers": [
-    "Galaxy A15 5G unavailable on 2026-09-14: adb devices shows no attached phone, so the M1-05 force-stop/relaunch check and its required new development build (now also containing expo-crypto) are deferred to 2026-09-15 morning."
-  ],
-  "next_action": "REMINDER DUE 2026-09-15 MORNING: ask the user to plug in the Galaxy A15 5G with USB debugging authorized. Then build and install a development APK from feat/m1-domain-local-database (includes expo-sqlite and expo-crypto native modules), exercise real ID generation, store-context persistence, and force-stop/relaunch, and record the evidence. Meanwhile the independent auditor re-reviews M1-01 through M1-05 plus the five corrections on that branch. Do not start M2 until the audit passes.",
+  "blockers": [],
+  "next_action": "Use .agents/workflows/m2-catalogue-package-units.json and tickets.md. The carried Galaxy A15 5G check remains mandatory before external beta/native release readiness.",
   "created_at": "2026-09-13T21:15:00.1326658Z",
-  "updated_at": "2026-09-14T02:08:17Z",
-  "archived": false
+  "updated_at": "2026-09-14T03:00:00Z",
+  "archived": true
 }

@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "task_id": "m2-catalogue-package-units",
+  "workflow_id": "build-feature",
+  "mode": "implement",
+  "status": "ready",
+  "current_state": "m2-01-offline-temporary-product",
+  "completed_states": [
+    "m1-independent-audit",
+    "m2-architecture-gates",
+    "m2-design-gate",
+    "m2-ticket-review"
+  ],
+  "owner": {
+    "agent": "external-implementation-agent",
+    "thread": "unassigned",
+    "worktree": null
+  },
+  "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m0",
+  "lease": null,
+  "evidence": [
+    {
+      "kind": "audit",
+      "path": "docs/engineering/PROJECT_STATE.md",
+      "claim": "M1 source and automated re-audit passed; its device gate is explicitly deferred without a false pass claim."
+    },
+    {
+      "kind": "decision",
+      "path": "docs/decisions/DECISION_LOG.md",
+      "claim": "D-034 and D-035 resolve quantity and temporary-product/package ownership before M2."
+    },
+    {
+      "kind": "design",
+      "path": "docs/design/DESIGN.md",
+      "claim": "The whole-MVP direction and M2 Products flow, states, accessibility, and visual baseline are approved for implementation."
+    },
+    {
+      "kind": "tickets",
+      "path": "tickets.md",
+      "claim": "M2-01 through M2-05 are vertical, dependency-ordered, and have binary acceptance evidence."
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "m2-architecture-decisions",
+      "claim": "Quantity precision and temporary-product/package ownership are decided before schema implementation.",
+      "owner": "systems-architecture-review",
+      "required": true,
+      "status": "met",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Review D-034 and D-035 against the domain, technical architecture, and offline-sync contract.",
+        "success_condition": "The M2 schema can represent exact quantities and usable temporary products without split ownership or float arithmetic."
+      },
+      "evidence": [
+        {
+          "result": "D-034 selects fixed-scale micro-units and D-035 selects store-scoped provisional variants.",
+          "source": "docs/decisions/DECISION_LOG.md",
+          "observed_at": "2026-09-14T03:00:00Z"
+        }
+      ],
+      "limitations": ["Server NUMERIC DTO implementation remains M7."],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m2-design-baseline",
+      "claim": "The Products experience is defined before substantial M2 UI work.",
+      "owner": "founder-and-design-capable-agent",
+      "required": true,
+      "status": "met",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Review MVP navigation and M2 flow, states, accessibility, copy, and visual baseline.",
+        "success_condition": "DESIGN.md contains an implementable M2 baseline and later flows remain explicitly gated."
+      },
+      "evidence": [
+        {
+          "result": "Founder delegated design judgement and instructed the planner to create necessary project context and proceed.",
+          "source": "User instruction in the current task; docs/design/DESIGN.md",
+          "observed_at": "2026-09-14T03:00:00Z"
+        }
+      ],
+      "limitations": ["Later milestone screen details must be added before their substantial UI."],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m2-tickets-verified",
+      "claim": "M2 tickets are vertical, dependency-ordered, and independently auditable.",
+      "owner": "founder-and-engineering-planner",
+      "required": true,
+      "status": "met",
+      "depends_on": ["m2-architecture-decisions", "m2-design-baseline"],
+      "verification": {
+        "kind": "review",
+        "procedure": "Review each ticket's outcome, non-goals, dependencies, acceptance checks, and stop boundary.",
+        "success_condition": "An interchangeable implementation agent can execute M2 without chat history or speculative M3 work."
+      },
+      "evidence": [
+        {
+          "result": "Founder explicitly delegated granularity/dependency judgement; M2-01 through M2-05 were published with binary evidence requirements.",
+          "source": "tickets.md; user instruction in the current task",
+          "observed_at": "2026-09-14T03:00:00Z"
+        }
+      ],
+      "limitations": ["M3 tickets do not exist until M2 passes audit."],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "carried-m1-device-verification",
+      "claim": "The M1 database and mobile ID path are proven on the Galaxy A15 5G after force-stop/relaunch.",
+      "owner": "founder-and-implementation-agent",
+      "required": false,
+      "status": "blocked",
+      "depends_on": [],
+      "verification": {
+        "kind": "inspection",
+        "procedure": "Install a build containing expo-sqlite and expo-crypto, create store context, force-stop, relaunch, and confirm the migrated database and data reopen.",
+        "success_condition": "Actual device/build evidence is recorded before external beta/native release readiness."
+      },
+      "evidence": [],
+      "limitations": ["This gate does not block M2 implementation."],
+      "blocker": "Galaxy A15 5G is currently unavailable.",
+      "waiver": {
+        "reason": "Founder explicitly approved proceeding to M2 while carrying the unavailable phone check forward; automated M1 evidence and Android export passed.",
+        "approved_by": "founder"
+      }
+    },
+    {
+      "id": "m2-implementation-and-audit",
+      "claim": "M2-01 through M2-05 pass implementation evidence and independent audit before M3.",
+      "owner": "implementation-agent-and-independent-auditor",
+      "required": true,
+      "status": "pending",
+      "depends_on": ["m2-tickets-verified"],
+      "verification": {
+        "kind": "tests-and-review",
+        "procedure": "Execute tickets.md, record automated/manual evidence, then audit the final M2 branch against source-of-truth documents.",
+        "success_condition": "All required M2 acceptance checks pass, documentation matches code, and M3 has not started."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    }
+  ],
+  "artifacts": [
+    "tickets.md",
+    "docs/design/DESIGN.md",
+    "docs/decisions/DECISION_LOG.md",
+    "docs/architecture/DOMAIN_DATA_MODEL.md",
+    ".agents/contexts/app-flow.md"
+  ],
+  "approvals": [
+    {
+      "date": "2026-09-14",
+      "scope": "Proceed to M2 without waiting for the unavailable Galaxy A15 5G check; carry it forward without claiming it passed."
+    },
+    {
+      "date": "2026-09-14",
+      "scope": "Engineering planner owns M2 ticket granularity, dependency, and design judgement."
+    }
+  ],
+  "blockers": [],
+  "next_action": "Create feat/m2-catalogue-package-units from the accepted M1 baseline and implement M2-01 only; keep checks green and update evidence before M2-02.",
+  "created_at": "2026-09-14T03:00:00Z",
+  "updated_at": "2026-09-14T03:00:00Z",
+  "archived": false
+}

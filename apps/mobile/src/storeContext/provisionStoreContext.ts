@@ -1,5 +1,4 @@
-import { generateId as defaultGenerateId } from '@retail/domain';
-
+import { generateMobileId } from '../crypto/mobileIds';
 import type { DatabaseAdapter } from '../db/adapter';
 import {
   type CreateDeviceInput,
@@ -28,8 +27,8 @@ export interface ProvisionStoreContextInput {
 
 export interface ProvisionStoreContextOptions {
   /**
-   * Client ID provider. Defaults to the domain generator; Android callers
-   * pass the Expo-backed provider so no WebCrypto global is assumed.
+   * Client ID provider. Tests may inject a deterministic provider; normal
+   * mobile calls use the Expo-backed implementation by default.
    */
   generateId?: () => string;
 }
@@ -53,7 +52,7 @@ export function provisionStoreContext(
   input: ProvisionStoreContextInput,
   options: ProvisionStoreContextOptions = {},
 ): ProvisionStoreContextResult {
-  const generateId = options.generateId ?? defaultGenerateId;
+  const generateId = options.generateId ?? generateMobileId;
   return adapter.transaction(() => {
     const userInput: CreateUserInput = {
       id: generateId(),

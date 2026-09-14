@@ -1,15 +1,14 @@
 # Product Design Gate
 
 **Status:** Required before substantial product UI implementation  
-**Current design:** Not yet approved
+**Current design:** `DESIGN.md` approved as the whole-MVP direction and M2 implementation baseline on 2026-09-14
 
 ## Why This Exists
 
 The M0 Welcome and About screens prove that routing, builds, and device behavior
 work. They are not the final application flow or visual design. The repository
-now records the MVP capability flow in .agents/contexts/app-flow.md, while
-leaving screen structure and visual choices open for an explicit founder/design
-conversation.
+records the MVP capability flow in `.agents/contexts/app-flow.md` and the
+approved experience direction plus current milestone details in `DESIGN.md`.
 
 ## Trigger
 
@@ -38,7 +37,7 @@ The founder and design-capable agent should review:
 
 ## Required Outputs
 
-After approval, create:
+After approval, create or update:
 
 - docs/design/DESIGN.md as the human-readable source for approved experience,
   design principles, navigation, screen/state inventory, accessibility, tokens,
@@ -53,7 +52,7 @@ DESIGN.md; it must not become a second independently edited source of truth.
 
 ## Completion Evidence
 
-The gate is complete when the founder approves the flow and design direction,
-DESIGN.md covers the screens and states needed by the upcoming milestone, and
-the relevant milestone plan/tickets link to those artifacts. The specification
-may grow as later milestones introduce genuinely new flows.
+The gate is complete for M2. The founder delegated the design and ticket
+judgement on 2026-09-14; `DESIGN.md` covers the catalogue screens and states,
+and the M2 tickets link to it. The specification must grow as later milestones
+introduce genuinely new flows.

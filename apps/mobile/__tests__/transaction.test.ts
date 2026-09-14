@@ -1,4 +1,5 @@
 import { DatabaseError } from '../src/db';
+import { NodeTestAdapter } from '../src/db/nodeTestAdapter';
 import { openIsolatedDatabase } from '../src/db/testing';
 import { runSyncTransaction } from '../src/db/transaction';
 
@@ -13,6 +14,7 @@ describe('runSyncTransaction', () => {
         calls.push('work');
         return 42;
       },
+      () => undefined,
     );
     expect(result).toBe(42);
     expect(calls).toEqual(['begin', 'work', 'commit']);
@@ -30,6 +32,7 @@ describe('runSyncTransaction', () => {
         () => {
           throw original;
         },
+        () => undefined,
       );
     } catch (error) {
       failure = error;
@@ -47,6 +50,7 @@ describe('runSyncTransaction', () => {
         () => calls.push('commit'),
         () => calls.push('rollback'),
         () => Promise.resolve(1) as unknown as number,
+        () => undefined,
       );
     } catch (error) {
       failure = error;
@@ -69,6 +73,7 @@ describe('runSyncTransaction', () => {
         () => {
           throw original;
         },
+        () => undefined,
       );
     } catch (error) {
       failure = error;
@@ -78,23 +83,65 @@ describe('runSyncTransaction', () => {
 });
 
 describe('adapter transaction contract', () => {
-  it('rolls back an async callback on the node driver with a typed error', () => {
+  it('rolls back an async callback on the node driver with a typed error', async () => {
     const isolated = openIsolatedDatabase([]);
+    let pendingWork!: Promise<string>;
     try {
       isolated.adapter.exec('CREATE TABLE probe (id TEXT);');
       let failure: unknown;
       try {
         isolated.adapter.transaction(() => {
           isolated.adapter.run("INSERT INTO probe (id) VALUES ('early');");
-          return Promise.resolve('late') as unknown as string;
+          pendingWork = Promise.resolve('late');
+          return pendingWork as unknown as string;
         });
       } catch (error) {
         failure = error;
       }
       expect(failure).toBeInstanceOf(DatabaseError);
       expect((failure as DatabaseError).code).toBe('INVALID_TRANSACTION_USE');
-      const rows = isolated.adapter.getAllRows<{ id: string }>('SELECT id FROM probe;');
-      expect(rows).toEqual([]);
+      await pendingWork;
+      expect(() => isolated.adapter.getAllRows('SELECT id FROM probe;')).toThrow(
+        'reopen it before further work',
+      );
+      isolated.adapter.close();
+      const reopened = new NodeTestAdapter(isolated.path);
+      try {
+        expect(reopened.getAllRows<{ id: string }>('SELECT id FROM probe;')).toEqual([]);
+      } finally {
+        reopened.close();
+      }
+    } finally {
+      isolated.closeAndDelete();
+    }
+  });
+
+  it('blocks writes from a rejected async continuation after rollback', async () => {
+    const isolated = openIsolatedDatabase([]);
+    let lateAttempt!: Promise<void>;
+    try {
+      isolated.adapter.exec('CREATE TABLE continuation_probe (id TEXT);');
+
+      expect(() =>
+        isolated.adapter.transaction(() => {
+          lateAttempt = (async () => {
+            await Promise.resolve();
+            isolated.adapter.run("INSERT INTO continuation_probe (id) VALUES ('escaped');");
+          })();
+          return lateAttempt as unknown as string;
+        }),
+      ).toThrow(DatabaseError);
+
+      await expect(lateAttempt).rejects.toMatchObject({ code: 'INVALID_TRANSACTION_USE' });
+      isolated.adapter.close();
+      const reopened = new NodeTestAdapter(isolated.path);
+      try {
+        expect(
+          reopened.getAllRows<{ id: string }>('SELECT id FROM continuation_probe;'),
+        ).toEqual([]);
+      } finally {
+        reopened.close();
+      }
     } finally {
       isolated.closeAndDelete();
     }

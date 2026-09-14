@@ -1,6 +1,6 @@
 import { DatabaseError } from './errors';
 
-function isThenable(value: unknown): boolean {
+function isThenable(value: unknown): value is PromiseLike<unknown> {
   if (value === null || (typeof value !== 'object' && typeof value !== 'function')) {
     return false;
   }
@@ -21,11 +21,16 @@ export function runSyncTransaction<T>(
   commit: () => void,
   rollback: () => void,
   work: () => T,
+  invalidateAfterAsyncCallback: (work: PromiseLike<unknown>) => void,
 ): T {
   begin();
   try {
     const result = work();
     if (isThenable(result)) {
+      // The callback has already started and may have scheduled work beyond
+      // its returned Promise. Adapters permanently invalidate this connection
+      // so no continuation can escape the rollback as an autocommitted write.
+      invalidateAfterAsyncCallback(result);
       throw new DatabaseError(
         'INVALID_TRANSACTION_USE',
         'Transaction callbacks must be synchronous; an async callback cannot be committed atomically.',
