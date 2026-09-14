@@ -18,6 +18,13 @@ interface ListState {
   failure: string | null;
 }
 
+const FILTERS: readonly { value: ProductLifecycleFilter; label: string }[] = [
+  { value: 'ALL', label: 'All' },
+  { value: 'TEMPORARY', label: 'Temporary' },
+  { value: 'ACTIVE', label: 'Active' },
+  { value: 'INACTIVE', label: 'Inactive' },
+];
+
 function statusLabel(hit: ProductSearchHit): string | null {
   const parts: string[] = [];
   if (hit.isTemporary) {
@@ -36,12 +43,17 @@ export default function ProductsListScreen({
   onOpenProduct,
 }: ProductsListScreenProps) {
   const [query, setQuery] = useState(initialQuery);
-  const [filter] = useState<ProductLifecycleFilter>('ALL');
-  const [state, setState] = useState<ListState>(() => load(client, initialQuery, filter));
+  const [filter, setFilter] = useState<ProductLifecycleFilter>('ALL');
+  const [state, setState] = useState<ListState>(() => load(client, initialQuery, 'ALL'));
 
   const changeQuery = (text: string): void => {
     setQuery(text);
     setState(load(client, text, filter));
+  };
+
+  const changeFilter = (next: ProductLifecycleFilter): void => {
+    setFilter(next);
+    setState(load(client, query, next));
   };
 
   return (
@@ -61,6 +73,23 @@ export default function ProductsListScreen({
         onChangeText={changeQuery}
         style={styles.search}
       />
+      <View accessibilityRole="radiogroup" style={styles.filters}>
+        {FILTERS.map((option) => {
+          const selected = filter === option.value;
+          return (
+            <Pressable
+              key={option.value}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: selected }}
+              accessibilityLabel={`Show ${option.label.toLowerCase()} products`}
+              onPress={() => changeFilter(option.value)}
+              style={[styles.chip, selected && styles.chipSelected]}
+            >
+              <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{option.label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
       {state.failure !== null ? (
         <ErrorPanel
           title="Product list unavailable"
@@ -149,5 +178,18 @@ const styles = StyleSheet.create({
   rowName: { color: theme.color.textPrimary, fontSize: theme.fontSize.body, fontWeight: '600' },
   rowStatus: { color: theme.color.statusWarning, fontSize: theme.fontSize.small, fontWeight: '600' },
   rowMeta: { color: theme.color.textSecondary, fontSize: theme.fontSize.small },
+  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing(2) },
+  chip: {
+    borderColor: theme.color.border,
+    borderWidth: 1,
+    borderRadius: theme.radius.field,
+    minHeight: theme.minTouchTarget,
+    paddingHorizontal: theme.spacing(4),
+    justifyContent: 'center',
+    backgroundColor: theme.color.raised,
+  },
+  chipSelected: { backgroundColor: theme.color.actionPrimary, borderColor: theme.color.actionPrimary },
+  chipText: { color: theme.color.textPrimary, fontSize: theme.fontSize.small, fontWeight: '600' },
+  chipTextSelected: { color: theme.color.raised },
   addRow: { paddingBottom: theme.spacing(2) },
 });

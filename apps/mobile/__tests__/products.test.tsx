@@ -8,6 +8,7 @@ import {
   type PackageResult,
   type ProductDetail,
   type ProductIdentityResult,
+  type ProductLifecycleResult,
   type QuickAddInput,
   type TemporaryProductGraph,
 } from '../src/catalogue/client';
@@ -43,6 +44,12 @@ function stubClient(overrides: Partial<CatalogueClient> = {}): CatalogueClient {
     deactivatePackage: (): PackageResult => {
       throw new Error('Stub catalogue cannot save.');
     },
+    markProductEnriched: (): ProductLifecycleResult => {
+      throw new Error('Stub catalogue cannot save.');
+    },
+    setProductActive: (): ProductLifecycleResult => {
+      throw new Error('Stub catalogue cannot save.');
+    },
     ...overrides,
   };
 }
@@ -73,7 +80,7 @@ describe('ProductsListScreen', () => {
           onOpenProduct={(id) => opened.push(id)}
         />,
       );
-      expect(screen.getAllByText('Temporary')).toHaveLength(3);
+      expect(screen.getAllByLabelText(/, Temporary$/)).toHaveLength(3);
       expect(screen.getAllByText('Sold per piece')).toHaveLength(3);
       fireEvent.press(screen.getByLabelText('Milo 400g, Temporary'));
       expect(opened).toHaveLength(1);
@@ -101,6 +108,38 @@ describe('ProductsListScreen', () => {
       expect(screen.queryByLabelText('Milo 400g, Temporary')).toBeNull();
       expect(screen.getByText('No matching product')).toBeTruthy();
       unmount();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('filters temporary and inactive products through explicit text filters', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const client = createCatalogueClient(
+        fixture.adapter,
+        fixture.context.store,
+        fixture.context.device,
+        deterministicIds(5100),
+      );
+      const first = client.createTemporaryProduct({ name: 'Milo 400g' });
+      client.createTemporaryProduct({ name: 'Omo' });
+      client.markProductEnriched({ storeProductId: first.storeProduct.id });
+      client.setProductActive({ storeProductId: first.storeProduct.id }, false);
+      render(
+        <ProductsListScreen client={client} onAddProduct={() => undefined} onOpenProduct={() => undefined} />,
+      );
+      expect(screen.getByLabelText('Milo 400g, Inactive')).toBeTruthy();
+      expect(screen.getByLabelText('Omo, Temporary')).toBeTruthy();
+      fireEvent.press(screen.getByLabelText('Show inactive products'));
+      expect(screen.getByLabelText('Milo 400g, Inactive')).toBeTruthy();
+      expect(screen.queryByLabelText('Omo, Temporary')).toBeNull();
+      fireEvent.press(screen.getByLabelText('Show active products'));
+      expect(screen.getByLabelText('Omo, Temporary')).toBeTruthy();
+      expect(screen.queryByLabelText('Milo 400g, Inactive')).toBeNull();
+      fireEvent.press(screen.getByLabelText('Show temporary products'));
+      expect(screen.getByLabelText('Omo, Temporary')).toBeTruthy();
+      expect(screen.queryByLabelText('Milo 400g, Inactive')).toBeNull();
     } finally {
       fixture.closeAndDelete();
     }
@@ -362,6 +401,40 @@ describe('ProductDetailScreen', () => {
       expect(added).toEqual(['add']);
       fireEvent.press(screen.getByLabelText('Edit carton package'));
       expect(edited).toHaveLength(1);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('marks a product enriched and deactivates only after confirmation', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const client = createCatalogueClient(
+        fixture.adapter,
+        fixture.context.store,
+        fixture.context.device,
+        deterministicIds(8400),
+      );
+      const graph = client.createTemporaryProduct({ name: 'Milo 400g' });
+      render(
+        <ProductDetailScreen
+          client={client}
+          productId={graph.storeProduct.id}
+          onBack={() => undefined}
+          onAddPackage={() => undefined}
+          onEditPackage={() => undefined}
+        />,
+      );
+      fireEvent.press(screen.getByText('Mark as enriched'));
+      expect(screen.queryByText(/Temporary — an incomplete record/)).toBeNull();
+      expect(screen.queryByText('Mark as enriched')).toBeNull();
+      fireEvent.press(screen.getByText('Deactivate product'));
+      expect(screen.getByText('Status: Active')).toBeTruthy();
+      fireEvent.press(screen.getByText('Confirm deactivate'));
+      expect(screen.getByText('Status: Inactive')).toBeTruthy();
+      expect(screen.getByText('Reactivate product')).toBeTruthy();
+      fireEvent.press(screen.getByText('Reactivate product'));
+      expect(screen.getByText('Status: Active')).toBeTruthy();
     } finally {
       fixture.closeAndDelete();
     }

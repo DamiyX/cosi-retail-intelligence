@@ -168,10 +168,10 @@ confirmation, and dirty-form Back/cancel confirmation. Full validate green.
 
 ## Ticket M2-04: Manage catalogue lifecycle without losing ownership
 
-**Status:** Blocked  
+**Status:** Complete (committed)  
 **Outcome:** A retailer can distinguish temporary, enriched, active, and
 inactive products without losing store-owned data or history.  
-**Blocked by:** M2-02 and M2-03
+**Blocked by:** M2-02 and M2-03 (complete)
 
 **Vertical scope:**
 
@@ -188,14 +188,22 @@ automated matching, recognition model, cross-store exposure, conflict resolution
 
 **Acceptance:**
 
-- [ ] Temporary and inactive states are visible in text, searchable through
+- [x] Temporary and inactive states are visible in text, searchable through
       explicit filters, and never rely on color alone.
-- [ ] Enriching identity keeps local SKU, store selling-price fields, and package
+- [x] Enriching identity keeps local SKU, store selling-price fields, and package
       settings unchanged, and does not change the variant's owning store.
-- [ ] Reapplying the same operation ID cannot duplicate the logical mutation or
+- [x] Reapplying the same operation ID cannot duplicate the logical mutation or
       outbox work; a different valid operation remains independent.
-- [ ] Deactivation requires confirmation, remains after restart, and retains the
+- [x] Deactivation requires confirmation, remains after restart, and retains the
       record for history; failure rolls back business and outbox changes.
+
+**Evidence (2026-09-14):** `markProductEnriched` and `setProductActive`
+commit lifecycle-only changes with one PRODUCT_LIFECYCLE_CHANGED envelope
+each, with operation-ID replay (repeat returns the original; fresh IDs stay
+independent) and store-ownership checks; enrichment preserves SKU, prices,
+settings, and variant ownership by construction. List gains All/Temporary/
+Active/Inactive text filter chips; detail gains the enrich action and
+two-step deactivate/reactivate. Full validate green.
 
 ## Ticket M2-05: Prove the offline catalogue milestone
 

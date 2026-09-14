@@ -61,6 +61,7 @@ export default function ProductDetailScreen({
   const [identifierError, setIdentifierError] = useState<string | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [confirmingDeactivate, setConfirmingDeactivate] = useState(false);
 
   const detail = state.detail;
 
@@ -102,6 +103,43 @@ export default function ProductDetailScreen({
       } else {
         setFailure('These changes could not be saved on the device. Nothing was changed.');
       }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const markEnriched = (): void => {
+    if (saving || !detail) {
+      return;
+    }
+    setSaving(true);
+    setFailure(null);
+    try {
+      client.markProductEnriched({ storeProductId: detail.product.id });
+      setState(load(client, productId));
+    } catch {
+      setFailure('This product could not be marked enriched. Nothing was changed.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const changeActive = (active: boolean): void => {
+    if (saving || !detail) {
+      return;
+    }
+    if (!active && !confirmingDeactivate) {
+      setConfirmingDeactivate(true);
+      return;
+    }
+    setSaving(true);
+    setFailure(null);
+    try {
+      client.setProductActive({ storeProductId: detail.product.id }, active);
+      setConfirmingDeactivate(false);
+      setState(load(client, productId));
+    } catch {
+      setFailure('This product status could not be changed. Nothing was changed.');
     } finally {
       setSaving(false);
     }
@@ -296,6 +334,30 @@ export default function ProductDetailScreen({
               );
             })}
             <SecondaryButton title="Add package" onPress={onAddPackage} />
+          </View>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Product status</Text>
+            {detail.product.isTemporary ? (
+              <Text style={styles.line}>
+                Temporary records can be used right away. Mark this enriched when its identity
+                is complete; prices, packages, and history stay untouched.
+              </Text>
+            ) : null}
+            {detail.product.isTemporary ? (
+              <PrimaryButton
+                title={saving ? 'Saving…' : 'Mark as enriched'}
+                onPress={markEnriched}
+                disabled={saving}
+              />
+            ) : null}
+            {detail.product.status === 'ACTIVE' ? (
+              <SecondaryButton
+                title={confirmingDeactivate ? 'Confirm deactivate' : 'Deactivate product'}
+                onPress={() => changeActive(false)}
+              />
+            ) : (
+              <SecondaryButton title="Reactivate product" onPress={() => changeActive(true)} />
+            )}
           </View>
           <SecondaryButton title="Back to products" onPress={onBack} />
         </View>

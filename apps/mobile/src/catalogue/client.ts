@@ -23,6 +23,12 @@ import {
   type UpdatePackageInput,
 } from './managePackages';
 import {
+  markProductEnriched,
+  setProductActive,
+  type ProductLifecycleInput,
+  type ProductLifecycleResult,
+} from './manageLifecycle';
+import {
   getProductVariantById,
   getStoreProductById,
   listDevicesByStore,
@@ -70,6 +76,7 @@ export interface ProductDetail {
 export type { TemporaryProductGraph };
 export type { AddProductIdentifierResult, ProductIdentityResult };
 export type { PackageResult };
+export type { ProductLifecycleResult };
 
 export interface CatalogueClient {
   readonly storeId: string;
@@ -91,6 +98,13 @@ export interface CatalogueClient {
     input: Omit<UpdatePackageInput, 'storeId' | 'deviceId'> & { packageUnitId: string },
   ): PackageResult;
   deactivatePackage(input: Omit<DeactivatePackageInput, 'storeId' | 'deviceId'>): PackageResult;
+  markProductEnriched(
+    input: Omit<ProductLifecycleInput, 'storeId' | 'deviceId'>,
+  ): ProductLifecycleResult;
+  setProductActive(
+    input: Omit<ProductLifecycleInput, 'storeId' | 'deviceId'>,
+    active: boolean,
+  ): ProductLifecycleResult;
 }
 
 export function createCatalogueClient(
@@ -167,6 +181,26 @@ export function createCatalogueClient(
       return deactivatePackage(
         adapter,
         { ...input, storeId: store.id, deviceId: device.id },
+        { generateId },
+      );
+    },
+    markProductEnriched(
+      input: Omit<ProductLifecycleInput, 'storeId' | 'deviceId'>,
+    ): ProductLifecycleResult {
+      return markProductEnriched(
+        adapter,
+        { ...input, storeId: store.id, deviceId: device.id },
+        { generateId },
+      );
+    },
+    setProductActive(
+      input: Omit<ProductLifecycleInput, 'storeId' | 'deviceId'>,
+      active: boolean,
+    ): ProductLifecycleResult {
+      return setProductActive(
+        adapter,
+        { ...input, storeId: store.id, deviceId: device.id },
+        active,
         { generateId },
       );
     },

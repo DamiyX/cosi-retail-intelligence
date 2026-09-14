@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in-progress",
-  "current_state": "m2-04-lifecycle",
+  "current_state": "m2-05-acceptance-evidence",
   "completed_states": [
     "m1-independent-audit",
     "m2-architecture-gates",
@@ -12,7 +12,8 @@
     "m2-ticket-review",
     "m2-01-offline-temporary-product",
     "m2-02-search-and-enrich",
-    "m2-03-exact-packages"
+    "m2-03-exact-packages",
+    "m2-04-lifecycle"
   ],
   "owner": {
     "agent": "external-implementation-agent",
@@ -56,6 +57,11 @@
       "kind": "tests",
       "path": "tickets.md",
       "claim": "M2-03 complete: atomic package create/edit/deactivate with settings and single envelopes, immutable conversions, base protection with preference fallback, package form UI with preview and dirty-back handling, router package flow. Full validate green (126 domain + 123 mobile tests)."
+    },
+    {
+      "kind": "tests",
+      "path": "tickets.md",
+      "claim": "M2-04 complete: enrich/deactivate/reactivate operations with single envelopes, replay and ownership checks, explicit lifecycle filters, two-step deactivation, restart retention. Full validate green (126 domain + 131 mobile tests)."
     }
   ],
   "acceptance_gates": [
@@ -184,7 +190,7 @@
     }
   ],
   "blockers": [],
-  "next_action": "Implement M2-04 (lifecycle): active/inactive/temporary filters, mark-enriched, deactivation with confirmation, local operation-ID idempotency across ops, then M2-05 evidence and audit handoff. Keep checks green and update evidence per ticket.",
+  "next_action": "Execute M2-05: clean-install validate, Expo Doctor, dependency check, Android export, migration-path review, secret/artifact audit, final record updates, commit, and stop for independent audit. Do not start M3.",
   "created_at": "2026-09-14T03:00:00Z",
   "updated_at": "2026-09-14T08:28:46Z",
   "archived": false
