@@ -207,10 +207,10 @@ two-step deactivate/reactivate. Full validate green.
 
 ## Ticket M2-05: Prove the offline catalogue milestone
 
-**Status:** Blocked  
+**Status:** Complete — branch returned for independent audit  
 **Outcome:** M2 has reproducible evidence and a clean handoff for independent
 audit before sales implementation starts.  
-**Blocked by:** M2-01 through M2-04
+**Blocked by:** M2-01 through M2-04 (complete)
 
 **Vertical scope:**
 
@@ -226,14 +226,27 @@ audit before sales implementation starts.
 
 **Acceptance:**
 
-- [ ] Automated checks are green from a clean checkout and exact counts/results
+- [x] Automated checks are green from a clean checkout and exact counts/results
       are recorded rather than inferred.
-- [ ] Migration tests upgrade both fresh and populated M1 databases without
+- [x] Migration tests upgrade both fresh and populated M1 databases without
       reset, loss, duplicate rows, or false schema history.
-- [ ] Device evidence records actual build/device identifiers and clearly marks
+- [x] Device evidence records actual build/device identifiers and clearly marks
       any unavailable check as blocked or explicitly waived rather than passed.
-- [ ] The final diff contains M2 scope only, documentation matches code, and M3
+- [x] The final diff contains M2 scope only, documentation matches code, and M3
       has not started.
+
+**Evidence (2026-09-14, after `npm ci`):** environment check passes,
+typecheck passes, zero-warning lint passes, 126 domain + 131 mobile tests
+pass (257 total, 22 suites), Expo Doctor 21/21, `expo install --check`
+clean, Android export succeeds (2.9 MB bundle), `npm audit` unchanged at 1
+low + 21 moderate pre-existing findings. Migration 2 is additive only (six
+new tables plus indexes; no data rewrite) and the populated-M1 upgrade path
+is tested. Device checks: the Galaxy A15 5G remains unavailable and no adb
+tooling exists on this machine, so no device evidence is claimed; the
+carried M1 device gate and rendered text-scaling verification stay deferred
+and required before external beta/native release readiness. M2 diff is 61
+files with no database, build, export, or secret artifacts; no sales,
+purchase, inventory, sync-transport, or recognition code was added.
 
 ## Dependency Frontier
 

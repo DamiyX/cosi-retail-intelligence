@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in-progress",
-  "current_state": "m2-05-acceptance-evidence",
+  "current_state": "m2-audit-handoff",
   "completed_states": [
     "m1-independent-audit",
     "m2-architecture-gates",
@@ -13,7 +13,8 @@
     "m2-01-offline-temporary-product",
     "m2-02-search-and-enrich",
     "m2-03-exact-packages",
-    "m2-04-lifecycle"
+    "m2-04-lifecycle",
+    "m2-05-acceptance-evidence"
   ],
   "owner": {
     "agent": "external-implementation-agent",
@@ -62,6 +63,11 @@
       "kind": "tests",
       "path": "tickets.md",
       "claim": "M2-04 complete: enrich/deactivate/reactivate operations with single envelopes, replay and ownership checks, explicit lifecycle filters, two-step deactivation, restart retention. Full validate green (126 domain + 131 mobile tests)."
+    },
+    {
+      "kind": "tests",
+      "path": "tickets.md",
+      "claim": "M2-05 complete after npm ci: env check, typecheck, zero-warning lint, 126 domain + 131 mobile tests, Doctor 21/21, expo-check clean, Android export passes, audit unchanged, no artifacts/secrets, M3 not started. Device checks deferred without pass claims."
     }
   ],
   "acceptance_gates": [
@@ -190,7 +196,7 @@
     }
   ],
   "blockers": [],
-  "next_action": "Execute M2-05: clean-install validate, Expo Doctor, dependency check, Android export, migration-path review, secret/artifact audit, final record updates, commit, and stop for independent audit. Do not start M3.",
+  "next_action": "Independent audit of M2-01 through M2-05 on feat/m2-catalogue-package-units per docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md. Do not start M3 until the audit passes. The carried device gate (Galaxy A15 5G build + force-stop/relaunch + text scaling) stays deferred and required before external beta/native release readiness.",
   "created_at": "2026-09-14T03:00:00Z",
   "updated_at": "2026-09-14T08:28:46Z",
   "archived": false
