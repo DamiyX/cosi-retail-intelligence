@@ -2,7 +2,10 @@ export type DatabaseErrorCode =
   | 'OPEN_FAILED'
   | 'INVALID_MIGRATION_REGISTRY'
   | 'UNEXPECTED_SCHEMA_VERSION'
-  | 'MIGRATION_FAILED';
+  | 'MIGRATION_HISTORY_MISMATCH'
+  | 'MIGRATION_FAILED'
+  | 'INVALID_TRANSACTION_USE'
+  | 'FOREIGN_KEYS_NOT_ENFORCED';
 
 /**
  * Infrastructure failure from the local database boundary (open, pragma,

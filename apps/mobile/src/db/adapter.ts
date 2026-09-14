@@ -15,6 +15,13 @@ export interface StatementResult {
   lastInsertRowid: number;
 }
 
+/**
+ * A synchronous transaction body. The conditional return type collapses to
+ * never for async functions, so passing an async callback is a compile-time
+ * error; a runtime thenable guard in each adapter covers the rest.
+ */
+export type SyncWork<T> = T extends PromiseLike<unknown> ? never : T;
+
 export interface DatabaseAdapter {
   /** Run a multi-statement script (migrations, pragmas). No parameters. */
   exec(script: string): void;
@@ -28,7 +35,7 @@ export interface DatabaseAdapter {
    * Run work atomically. A throw rolls everything back and propagates the
    * original error; a clean return commits before this returns.
    */
-  transaction<T>(work: () => T): T;
+  transaction<T>(work: () => SyncWork<T>): T;
   /** Release the underlying connection. */
   close(): void;
 }

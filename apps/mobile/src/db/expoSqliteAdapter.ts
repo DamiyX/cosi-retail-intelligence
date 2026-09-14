@@ -2,6 +2,7 @@ import { openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
 
 import type { DatabaseAdapter, SqlParams, StatementResult } from './adapter';
 import { DatabaseError } from './errors';
+import { runSyncTransaction } from './transaction';
 
 class ExpoSqliteAdapter implements DatabaseAdapter {
   private readonly database: SQLiteDatabase;
@@ -30,18 +31,16 @@ class ExpoSqliteAdapter implements DatabaseAdapter {
 
   transaction<T>(work: () => T): T {
     // withTransactionSync cannot return a value, so the adapter controls the
-    // transaction explicitly. Same BEGIN IMMEDIATE/COMMIT/ROLLBACK semantics
-    // as the node test driver: a throw rolls back and rethrows the original
+    // transaction explicitly through the shared synchronous runner: same
+    // BEGIN IMMEDIATE/COMMIT/ROLLBACK semantics as the node test driver, plus
+    // the async-callback guard. A throw rolls back and rethrows the original
     // error, a clean return commits before this returns.
-    this.database.execSync('BEGIN IMMEDIATE;');
-    try {
-      const result = work();
-      this.database.execSync('COMMIT;');
-      return result;
-    } catch (error) {
-      this.database.execSync('ROLLBACK;');
-      throw error;
-    }
+    return runSyncTransaction(
+      () => this.database.execSync('BEGIN IMMEDIATE;'),
+      () => this.database.execSync('COMMIT;'),
+      () => this.database.execSync('ROLLBACK;'),
+      work,
+    );
   }
 
   close(): void {

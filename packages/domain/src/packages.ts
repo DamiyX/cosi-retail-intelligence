@@ -1,15 +1,17 @@
 import { DomainError } from './errors';
 
 /**
- * Convert a package count into base inventory units exactly.
+ * PROVISIONAL discrete-only conversion from a package count into base
+ * inventory units.
  *
- * M1 constraint (documented, revisited only by an explicit decision): both
- * the package quantity and the conversion factor must be integers, the factor
- * must be positive, and the quantity must be non-negative. Integer products
- * inside the safe-integer range are exact, which is what near-term FMCG
- * package levels (sachet = 1, pack = 10, carton = 40) require. Fractional
- * base units remain a deferred M2+ modeling decision per the technical
- * architecture, not silent floating-point math.
+ * M1 scope is deliberately limited to non-negative integer quantities and
+ * positive integer conversion factors, whose products inside the safe-
+ * integer range are exact — this covers near-term FMCG package levels
+ * (sachet = 1, pack = 10, carton = 40). This is NOT the final package
+ * model: the approved architecture leaves fractional base quantities open,
+ * so persisting PackageUnit definitions (M2) is blocked on an explicit
+ * fractional-quantity architecture decision (see DF-010). Do not extend
+ * this utility to fractional semantics without that review.
  */
 export function toBaseUnits(quantityPackages: number, conversionToBase: number): number {
   if (

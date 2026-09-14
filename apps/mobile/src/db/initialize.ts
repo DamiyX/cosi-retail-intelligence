@@ -15,6 +15,10 @@ export type DatabaseInitStatus =
  * diagnosable error without ever reporting a false ready state. The opener
  * is injectable so automated tests cover fresh, existing, and failing
  * databases without a native runtime.
+ *
+ * Foreign-key enforcement is required for readiness: without it the
+ * relational-integrity boundary is gone. WAL mode stays informational
+ * because it is conditional on platform support.
  */
 export function initializeAppDatabase(
   openAdapter: () => DatabaseAdapter = () => openExpoSqliteAdapter(APP_DATABASE_FILE_NAME),
@@ -23,6 +27,12 @@ export function initializeAppDatabase(
   try {
     adapter = openAdapter();
     const report = openDatabase(adapter, MIGRATIONS);
+    if (!report.foreignKeysEnforced) {
+      throw new DatabaseError(
+        'FOREIGN_KEYS_NOT_ENFORCED',
+        'SQLite foreign-key enforcement could not be enabled; refusing to report a ready database.',
+      );
+    }
     return { state: 'ready', adapter, schemaVersion: report.schemaVersion, path: APP_DATABASE_FILE_NAME };
   } catch (error) {
     if (adapter) {

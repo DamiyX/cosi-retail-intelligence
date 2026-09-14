@@ -1,6 +1,6 @@
 import { DomainError } from '@retail/domain';
 
-import type { DatabaseAdapter, SqlParams, StatementResult } from '../src/db/adapter';
+import type { DatabaseAdapter, SqlParams, StatementResult, SyncWork } from '../src/db/adapter';
 import { MIGRATIONS, openDatabase } from '../src/db';
 import { NodeTestAdapter } from '../src/db/nodeTestAdapter';
 import { createStore } from '../src/db/repositories';
@@ -40,7 +40,7 @@ class FailOnWriteAdapter implements DatabaseAdapter {
     return this.inner.getAllRows<T>(sql, params);
   }
 
-  transaction<T>(work: () => T): T {
+  transaction<T>(work: () => SyncWork<T>): T {
     return this.inner.transaction(work);
   }
 
@@ -130,6 +130,23 @@ describe('atomic store-context provisioning', () => {
     }
   });
 
+  it('uses the injected ID generator for every created record', () => {
+    const isolated = openIsolatedDatabase(MIGRATIONS);
+    try {
+      let counter = 1;
+      const deterministic = (): string =>
+        `00000000-0000-4000-8000-${String(counter++).padStart(12, '0')}`;
+      const result = provisionStoreContext(isolated.adapter, VALID_INPUT, {
+        generateId: deterministic,
+      });
+      expect(result.owner.id).toBe('00000000-0000-4000-8000-000000000001');
+      expect(result.store.id).toBe('00000000-0000-4000-8000-000000000002');
+      expect(result.membership.id).toBe('00000000-0000-4000-8000-000000000003');
+      expect(result.device.id).toBe('00000000-0000-4000-8000-000000000004');
+    } finally {
+      isolated.closeAndDelete();
+    }
+  });
   it('propagates typed validation errors with nothing committed', () => {
     const isolated = openIsolatedDatabase(MIGRATIONS);
     try {

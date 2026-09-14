@@ -1,5 +1,5 @@
 import { DomainError } from '../src/errors';
-import { assertValidId, generateId, isValidId } from '../src/ids';
+import { assertValidId, createIdGenerator, formatUuidV4, generateId, isValidId } from '../src/ids';
 
 describe('generateId', () => {
   it('produces canonical UUID strings', () => {
@@ -18,6 +18,46 @@ describe('generateId', () => {
       seen.add(generateId());
     }
     expect(seen.size).toBe(5000);
+  });
+});
+
+describe('formatUuidV4', () => {
+  it('formats fixed entropy deterministically with version and variant bits', () => {
+    expect(formatUuidV4(new Uint8Array(16))).toBe('00000000-0000-4000-8000-000000000000');
+    expect(formatUuidV4(new Uint8Array(16).fill(0xff))).toBe(
+      'ffffffff-ffff-4fff-bfff-ffffffffffff',
+    );
+  });
+
+  it('does not mutate the caller bytes', () => {
+    const bytes = new Uint8Array(16).fill(0xab);
+    formatUuidV4(bytes);
+    expect(Array.from(bytes).every((byte) => byte === 0xab)).toBe(true);
+  });
+
+  it.each([[new Uint8Array(15)], [new Uint8Array(17)], ['not-bytes'], [null]])(
+    'rejects invalid entropy %p',
+    (value) => {
+      try {
+        formatUuidV4(value as Uint8Array);
+        throw new Error('formatUuidV4 did not throw');
+      } catch (error) {
+        expect(error).toBeInstanceOf(DomainError);
+        expect((error as DomainError).code).toBe('INVALID_ID');
+      }
+    },
+  );
+});
+
+describe('createIdGenerator', () => {
+  it('builds valid version-4 IDs from an injected entropy source', () => {
+    let counter = 0;
+    const generate = createIdGenerator(() => new Uint8Array(16).fill(counter++ % 256));
+    const first = generate();
+    const second = generate();
+    expect(isValidId(first)).toBe(true);
+    expect(first[14]).toBe('4');
+    expect(first).not.toBe(second);
   });
 });
 

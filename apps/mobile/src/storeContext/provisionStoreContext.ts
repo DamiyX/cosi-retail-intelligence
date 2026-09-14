@@ -1,4 +1,4 @@
-import { generateId } from '@retail/domain';
+import { generateId as defaultGenerateId } from '@retail/domain';
 
 import type { DatabaseAdapter } from '../db/adapter';
 import {
@@ -26,6 +26,14 @@ export interface ProvisionStoreContextInput {
   appVersion: string;
 }
 
+export interface ProvisionStoreContextOptions {
+  /**
+   * Client ID provider. Defaults to the domain generator; Android callers
+   * pass the Expo-backed provider so no WebCrypto global is assumed.
+   */
+  generateId?: () => string;
+}
+
 export interface ProvisionStoreContextResult {
   owner: UserRow;
   store: StoreRow;
@@ -43,7 +51,9 @@ export interface ProvisionStoreContextResult {
 export function provisionStoreContext(
   adapter: DatabaseAdapter,
   input: ProvisionStoreContextInput,
+  options: ProvisionStoreContextOptions = {},
 ): ProvisionStoreContextResult {
+  const generateId = options.generateId ?? defaultGenerateId;
   return adapter.transaction(() => {
     const userInput: CreateUserInput = {
       id: generateId(),

@@ -1081,6 +1081,21 @@ Requires actual observation data.
 
 ---
 
+## DF-010 — Fractional quantity and conversion representation
+
+**Status:** DEFERRED
+
+M1's package-conversion utility is explicitly provisional and discrete-only
+(non-negative integer quantities, positive integer factors). Before M2
+persists PackageUnit definitions, an architecture review must decide the
+final representation for fractional base quantities and non-integer
+conversion factors (decimal strategy, storage type, rounding/precision
+rules, and migration impact on snapshots). M2 catalogue/package tickets must
+not be published until this gate is resolved. This entry was added from the
+M1 independent audit on 2026-09-14.
+
+---
+
 # 7. Explicitly Rejected Directions
 
 ## R-001 — PWA-first MVP

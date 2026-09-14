@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { MIGRATIONS, openDatabase } from '../src/db';
+import type { DatabaseAdapter, SqlParams, StatementResult, SyncWork } from '../src/db/adapter';
 import { initializeAppDatabase } from '../src/db/initialize';
 import { NodeTestAdapter } from '../src/db/nodeTestAdapter';
 import { openIsolatedDatabase } from '../src/db/testing';
@@ -65,7 +66,7 @@ describe('application database startup', () => {
       const status = initializeAppDatabase(() => isolated.adapter);
       expect(status.state).toBe('failed');
       if (status.state === 'failed') {
-        expect(status.code).toBe('UNEXPECTED_SCHEMA_VERSION');
+        expect(status.code).toBe('MIGRATION_HISTORY_MISMATCH');
         expect(status.message).toContain('99');
       }
     } finally {
@@ -83,4 +84,50 @@ describe('application database startup', () => {
       message: 'No native database module in this runtime.',
     });
   });
+
+  it('refuses readiness when foreign keys cannot be enforced', () => {
+    const isolated = openIsolatedDatabase([]);
+    try {
+      isolated.adapter.exec('PRAGMA foreign_keys = OFF;');
+      const withoutForeignKeys = new NoForeignKeysAdapter(isolated.adapter);
+      const status = initializeAppDatabase(() => withoutForeignKeys);
+      expect(status.state).toBe('failed');
+      if (status.state === 'failed') {
+        expect(status.code).toBe('FOREIGN_KEYS_NOT_ENFORCED');
+      }
+    } finally {
+      isolated.closeAndDelete();
+    }
+  });
 });
+
+/** Simulates a platform where PRAGMA foreign_keys cannot be enabled. */
+class NoForeignKeysAdapter implements DatabaseAdapter {
+  constructor(private readonly inner: DatabaseAdapter) {}
+
+  exec(script: string): void {
+    if (!script.includes('foreign_keys')) {
+      this.inner.exec(script);
+    }
+  }
+
+  run(sql: string, params?: SqlParams): StatementResult {
+    return this.inner.run(sql, params);
+  }
+
+  getFirstRow<T>(sql: string, params?: SqlParams): T | null {
+    return this.inner.getFirstRow<T>(sql, params);
+  }
+
+  getAllRows<T>(sql: string, params?: SqlParams): T[] {
+    return this.inner.getAllRows<T>(sql, params);
+  }
+
+  transaction<T>(work: () => SyncWork<T>): T {
+    return this.inner.transaction(work);
+  }
+
+  close(): void {
+    this.inner.close();
+  }
+}

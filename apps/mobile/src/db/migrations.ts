@@ -126,17 +126,33 @@ export function openDatabase(
     );`,
   );
 
-  const appliedRow = adapter.getFirstRow<{ max_version: number | null }>(
-    'SELECT MAX(version) AS max_version FROM schema_migrations;',
+  const applied = adapter.getAllRows<{ version: number; name: string }>(
+    'SELECT version, name FROM schema_migrations ORDER BY version ASC;',
   );
-  const appliedVersion = appliedRow?.max_version ?? 0;
 
-  if (appliedVersion > migrations.length) {
+  if (applied.length > migrations.length) {
     throw new DatabaseError(
       'UNEXPECTED_SCHEMA_VERSION',
-      `Database schema version ${appliedVersion} is newer than the supported version ${migrations.length}. Update the app instead of resetting data.`,
+      `Database holds ${applied.length} applied migrations but only ${migrations.length} are registered. Update the app instead of resetting data.`,
     );
   }
+
+  // The applied history must be an exact contiguous prefix of the registry:
+  // same versions in order with matching names. Anything else (a fabricated
+  // version record, a gap, or a renamed entry) means this database was not
+  // produced by these migrations, so applying more on top would corrupt it.
+  applied.forEach((row, index) => {
+    const expected = migrations[index];
+    if (row.version !== expected.version || row.name !== expected.name) {
+      throw new DatabaseError(
+        'MIGRATION_HISTORY_MISMATCH',
+        `Local migration history is not a prefix of the registered migrations at position ${index}: ` +
+          `found version ${row.version} (${row.name}), expected version ${expected.version} (${expected.name}). ` +
+          `Update the app instead of resetting data.`,
+      );
+    }
+  });
+  const appliedVersion = applied.length;
 
   for (const migration of migrations.slice(appliedVersion)) {
     try {

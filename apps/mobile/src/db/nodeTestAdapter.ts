@@ -2,6 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 
 import type { DatabaseAdapter, SqlParams, StatementResult } from './adapter';
 import { DatabaseError } from './errors';
+import { runSyncTransaction } from './transaction';
 
 /**
  * TEST-ONLY driver. Production code must never import this module: it binds
@@ -40,15 +41,12 @@ export class NodeTestAdapter implements DatabaseAdapter {
   }
 
   transaction<T>(work: () => T): T {
-    this.database.exec('BEGIN IMMEDIATE');
-    try {
-      const result = work();
-      this.database.exec('COMMIT');
-      return result;
-    } catch (error) {
-      this.database.exec('ROLLBACK');
-      throw error;
-    }
+    return runSyncTransaction(
+      () => this.database.exec('BEGIN IMMEDIATE'),
+      () => this.database.exec('COMMIT'),
+      () => this.database.exec('ROLLBACK'),
+      work,
+    );
   }
 
   close(): void {
