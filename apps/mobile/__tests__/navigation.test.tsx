@@ -8,6 +8,10 @@ jest.mock('expo-constants', () => ({
   default: { expoConfig: { extra: { appEnvironment: 'development' } } },
 }));
 
+jest.mock('../src/db/initialize', () => ({
+  initializeAppDatabase: () => ({ state: 'ready', schemaVersion: 1, path: 'retail.db' }),
+}));
+
 it('opens the about route from the welcome screen', async () => {
   const result = renderRouter({ _layout: RootLayout, index: HomeScreen, about: AboutScreen });
   expect(result.getPathname()).toBe('/');
