@@ -6,6 +6,8 @@ import ProductsLayout from '../app/(tabs)/products/_layout';
 import ProductDetailRoute from '../app/(tabs)/products/[id]/index';
 import ProductsIndexRoute from '../app/(tabs)/products/index';
 import QuickAddRoute from '../app/(tabs)/products/new';
+import NewPackageRoute from '../app/(tabs)/products/[id]/packages/new';
+import EditPackageRoute from '../app/(tabs)/products/[id]/packages/[packageId]';
 import SellScreen from '../app/(tabs)/sell';
 import TabsLayout from '../app/(tabs)/_layout';
 import TodayScreen from '../app/(tabs)/today';
@@ -36,6 +38,8 @@ const ROUTES = {
   '(tabs)/products/index': ProductsIndexRoute,
   '(tabs)/products/new': QuickAddRoute,
   '(tabs)/products/[id]/index': ProductDetailRoute,
+  '(tabs)/products/[id]/packages/new': NewPackageRoute,
+  '(tabs)/products/[id]/packages/[packageId]': EditPackageRoute,
 } as never;
 
 describe('M2 tab navigation', () => {

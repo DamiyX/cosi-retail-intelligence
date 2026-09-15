@@ -1,263 +1,228 @@
-# Tickets: M2 Catalogue + Package Units
+# Tickets: M3 Offline Sales
 
-These tickets deliver the smallest offline catalogue that later sales and
-restocking can safely use. The founder delegated ticket size, dependency, and
-design judgement to the engineering planner on 2026-09-14.
+These tickets deliver one reliable, exact, offline sale from local catalogue
+selection through inventory effect, payment/credit truth, and durable history.
 
 ## Execution Contract
 
-- Work on `feat/m2-catalogue-package-units`, created from the accepted M1
-  baseline. Do not add M2 implementation to the M1 branch.
-- Execute tickets in dependency order and keep typecheck, zero-warning lint,
-  tests, Expo compatibility, and Android export green.
-- A mutable catalogue action is incomplete unless its business data and durable
-  outbox operation commit atomically.
-- Update this file and `.agents/workflows/m2-catalogue-package-units.json` with
-  evidence after each ticket.
-- Stop after M2-05 for an independent milestone audit. Do not start M3.
-- Do not push, merge, deploy, link production services, or change an established
-  architecture decision without the required approval.
+- First commit the accepted M2 audit corrections, then create `feat/m3-sales`
+  from that commit. Do not implement M3 on the M2 branch.
+- Execute M3-01 through M3-05 in dependency order. Keep strict typecheck,
+  zero-warning lint, tests, Expo compatibility, and Android export green.
+- Follow active D-036 and D-037 and the M3 section of `docs/design/DESIGN.md`.
+- Sale completion is one atomic local transaction: Sale, SaleItems, Payment,
+  optional credit records, InventoryEvents, and one aggregate outbox envelope.
+- Update this file, `.agents/workflows/m3-sales.json`, and PROJECT_STATE with
+  evidence. Stop after M3-05 for independent audit; do not start M4.
+- Do not push, merge, deploy, link production services, or change approved
+  transaction semantics without the applicable authorization and review.
 
-## M2 Boundaries
+## M3 Boundaries
 
-- Follow D-034 for fixed-scale micro-unit quantities and D-035 for temporary
-  store-scoped provisional variants.
-- Follow `docs/design/DESIGN.md` for the Products flow, states, accessibility,
-  and visual baseline. Do not invent final sale/restock UI in M2.
-- The outbox stores complete local operation envelopes. Network push/pull,
-  retries, conflict resolution, and Supabase application remain M7.
-- StoreProduct and StorePackageSetting own store price/cost/preferences. Shared
-  or platform-style identity edits may not overwrite those fields.
-- Sales, purchases, inventory events, recognition inference, auth UX, cloud
-  catalogue, and market-price sharing are outside M2.
+- Use D-034 micro-unit quantities and D-036 exact sale arithmetic. Never use
+  binary floating point as the authoritative source of quantity or money.
+- Use D-037: in-memory draft cart, one tender allocation, explicit credit
+  receivable, nullable pre-M4 cost snapshots, and immutable completed sales.
+- Preserve D-013: a genuine offline sale remains valid even if derived stock
+  becomes negative; surface the discrepancy for later reconciliation.
+- Use the existing local StoreMember and Device for attribution and the existing
+  outbox/replay boundary. M7 owns network synchronization.
+- Scanner, recognition, restocking/costing, inventory reconciliation, split
+  tender, partial credit settlement, printing, returns, void/reversal, tax,
+  percentage/order discounts, and M4+ summaries are outside M3.
 
-## Ticket M2-01: Create a usable temporary product offline
+## Ticket M3-01: Complete one cash sale offline
 
-**Status:** Complete (commit pending with M2-02 unless the founder asks for a per-ticket commit)  
-**Outcome:** A retailer can enter a product name, save it without a network, and
-immediately reopen a valid product with a base package.  
-**Blocked by:** Accepted M1 baseline; D-034; D-035; M2 design gate (all met)
-
-**Vertical scope:**
-
-- Replace or extend the provisional integer-only quantity utility with the D-034
-  micro-unit value, exact decimal parser/formatter, and conversion operation.
-- Add the minimal migrations and typed repositories for store-scoped
-  ProductVariant, PackageUnit, StoreProduct, and durable OutboxOperation.
-- Add one application operation that atomically creates the provisional variant,
-  active base package, store product, and one complete outbox envelope.
-- Add the Products empty/list state and Quick Add flow from `DESIGN.md`.
-
-**Non-goals:** Additional package units, barcode search, platform matching,
-network sync, price/cost history, sales, inventory.
-
-**Acceptance:**
-
-- [x] Decimal parsing and conversion tests prove exact six-place behavior,
-      reject excess precision/unsafe ranges, and use no authoritative float math.
-- [x] A Quick Add with only name and base-unit label succeeds offline and returns
-      a temporary product whose required graph survives database close/reopen.
-- [x] Exactly one PENDING outbox envelope with a unique operation ID, store ID,
-      device ID, entity identity, operation type, canonical payload, timestamp,
-      attempt count, and status is committed with the product graph.
-- [x] Injected failures at each write boundary leave neither business rows nor an
-      outbox row; duplicate submit is prevented while saving.
-- [x] Empty, validation, saving, locally-saved, and local-database-failure states
-      are component-tested; the screen remains usable with no network.
-
-**Evidence (2026-09-14):** `packages/domain/src/packages.ts` implements D-034
-micro-units (`parseQuantityDecimal`, `formatQuantityMicros`,
-`convertPackagesToBase`, BigInt intermediates, exact-or-reject) and replaces
-the provisional `toBaseUnits`; `formatMoney` added for display. Migration 2
-`catalogue` adds product_variants, package_units (partial unique index: one
-active base), store_products, store_package_settings, product_identifiers
-(type-scoped uniqueness), and outbox_operations. `createTemporaryProduct`
-commits variant + base package + temporary store product + optional EAN
-identifier + one PRODUCT_CREATED envelope atomically, with operation-ID
-replay. Products tab shell (Today/Sell/More placeholders), list, Quick Add,
-and detail screens follow DESIGN.md; the border token moved to `#7F8E88`
-after measured contrast verification (recorded in DESIGN.md). Full validate
-green: 126 domain + 78 mobile tests, typecheck, zero-warning lint.
-
-## Ticket M2-02: Find and enrich a store product
-
-**Status:** Complete (committed with M2-01 follow-up)  
-**Outcome:** A retailer can find a product and add useful identity details later
-without losing the temporary product or changing store commercial facts.  
-**Blocked by:** M2-01 (complete)
+**Status:** Not started  
+**Outcome:** A retailer can find one existing product, sell one configured
+package for cash, and receive a durable local completion record with exactly one
+inventory effect and one outbox operation.  
+**Blocked by:** accepted and committed M2 baseline; `feat/m3-sales` branch
 
 **Vertical scope:**
 
-- Add ProductIdentifier records for barcode/internal-code values with normalized
-  uniqueness rules appropriate to their type.
-- Support exact/localized name, local SKU, and identifier search through indexed,
-  parameterized repository queries.
-- Add Product detail/edit UI for name, temporary status, identifier, local SKU,
-  and active state.
-- Atomically persist each supported mutable operation with its outbox envelope.
-
-**Non-goals:** Camera scanning, fuzzy/cloud search, canonical catalogue merge,
-selling-price history, bulk import.
+- Add exact sale-line calculation helpers for positive D-034 package quantity,
+  conversion snapshots, integer-minor-unit price/discount, and D-036 totals.
+- Add migration 3 and typed repositories for the minimum Sale, SaleItem,
+  Payment, and InventoryEvent fields required by a completed transaction.
+- Add one `completeSale` application operation that validates store, actor,
+  device, product, package, status, sellability, currency, and snapshots before
+  committing the aggregate and one `COMPLETED_SALE_CREATED` envelope.
+- Replace the Sell placeholder with local product search, one-line
+  configuration, cash review, completion, and a snapshot-based confirmation.
 
 **Acceptance:**
 
-- [x] Offline search finds expected products by name, local SKU, and exact
-      barcode; quotes/SQL-like text remains data and cannot alter queries.
-- [x] Editing identity or store SKU survives restart and creates one matching
-      outbox operation; injected failure rolls back both sides.
-- [x] Identity edits cannot overwrite local SKU, store selling-price fields, or
-      package settings, proven by repository integration tests; the boundary
-      leaves later cost, stock, and supplier ownership outside identity updates.
-- [x] No-match search offers Quick Add with the query as a proposed editable
-      name; loading, empty, validation, inactive, and local-save states match
-      `DESIGN.md`.
+- [ ] Exact domain tests cover representative whole/fractional quantities,
+      package-to-base conversion, price, discount, totals, overflow, zero,
+      negative, excess precision, and fractional-minor/base rejection.
+- [ ] In airplane-mode-compatible tests, one active sellable package completes
+      a cash sale; persisted sale/item/payment snapshots match the review; one
+      negative SALE InventoryEvent and one PENDING aggregate envelope exist.
+- [ ] Store/variant/package/actor/device/currency mismatches and inactive or
+      non-sellable choices fail before commit at application and database
+      boundaries where enforceable.
+- [ ] Injected failure at every write boundary leaves no Sale, child, inventory,
+      or outbox rows.
+- [ ] Repeating the same operation ID returns the original sale without
+      duplicating any child, inventory event, or envelope; another store/device/
+      operation cannot reuse it.
+- [ ] The UI prevents empty/duplicate completion, retains values on validation
+      or local-storage failure, and shows success only after local commit.
 
-**Evidence (2026-09-14):** `updateProductIdentity` (rename/SKU + one
-PRODUCT_IDENTITY_UPDATED envelope) and `addProductIdentifier` (+ one
-PRODUCT_IDENTIFIER_ADDED envelope) commit atomically with operation-ID
-replay and store-ownership checks; identity writes are column-restricted so
-prices, settings, and variant ownership are unreachable. Exact-type barcode
-uniqueness is cross-symbology by normalized digits (OFFLINE_SYNC section
-29); the unreleased migration-2 index was corrected in place to
-`(normalized_value)` before any device holds it. Detail screen supports
-edit, identifier add with type choice, and field-mapped errors; no-match
-search prefills Quick Add. Full validate green.
+## Ticket M3-02: Build and edit an exact multi-line cart
 
-## Ticket M2-03: Configure packages with exact conversions
-
-**Status:** Complete (committed)  
-**Outcome:** A retailer can add a carton, pack, weight, or other package and see
-an exact conversion to the product's base unit.  
-**Blocked by:** M2-01 (complete)
+**Status:** Not started  
+**Outcome:** A retailer can assemble and review a realistic multi-product cart
+with package choice, flexible selling price, exact quantity, and line discount.  
+**Blocked by:** M3-01
 
 **Vertical scope:**
 
-- Add StorePackageSetting persistence for store-owned price and preferred
-  sale/purchase behavior.
-- Add package create/edit/deactivate application operations and Package UI.
-- Enforce one active base unit, positive exact conversion, and store/variant
-  ownership integrity in domain, application, and database boundaries.
-- Version or deactivate package definitions that have acquired historical use;
-  never silently rewrite completed transaction meaning.
-
-**Non-goals:** Costing calculations, purchase/sale lines, inventory balances,
-server reconciliation.
+- Support multiple cart lines, active sellable package selection, preferred
+  package defaults, exact quantity, package-specific/default/manual price, and
+  absolute line discount.
+- Let a retailer edit or remove a line and show deterministic subtotal,
+  discount total, and total before payment.
+- Offer the existing Quick Add path on no match and return the new temporary
+  product to line configuration without requiring cloud/scanner data.
+- Guard Android Back, Cancel, and tab exit when the in-memory cart is dirty.
 
 **Acceptance:**
 
-- [x] Representative whole and fractional conversions round-trip through SQLite
-      and display as canonical decimal text without binary-float drift.
-- [x] The UI previews a sentence such as `1 carton = 40 pieces` before save and
-      gives field-specific errors for zero, negative, excess-precision, or
-      unsafe values.
-- [x] Package plus store setting plus one outbox envelope commit atomically;
-      deterministic failures leave no partial rows or orphaned envelopes.
-- [x] Database constraints reject a second active base unit and cross-store or
-      cross-variant package references.
-- [x] Package component tests cover add, edit, deactivate, text scaling, labels,
-      and Android Back handling for dirty forms.
+- [ ] Cart calculation tests prove sum invariants, safe ranges, deterministic
+      line replacement/removal, no authoritative floats, and no mutation of
+      catalogue price/package records.
+- [ ] A multi-line completion snapshots each selected product/package,
+      conversion, quantity, price, and discount and creates exactly one SALE
+      InventoryEvent per line inside the same aggregate transaction.
+- [ ] Inactive products/packages, non-sellable packages, packages from another
+      variant/store, zero/negative quantity, excessive discount, and values
+      requiring hidden rounding cannot be completed.
+- [ ] Search/no-match Quick Add returns to Sell with the created product
+      selectable; network, scanner, or recognition absence never blocks sale.
+- [ ] Component/navigation tests cover add, edit, remove, empty cart, totals,
+      retained field errors, dirty-exit confirmation, large content scrolling,
+      semantic labels, and 48dp actions.
 
-**Evidence (2026-09-14):** `createPackage`/`updatePackage`/`deactivatePackage`
-commit package + store price/preference setting + one envelope atomically
-with operation-ID replay; conversion text parses to D-034 micro-units
-(excess precision rejected); conversion is immutable after creation
-(deactivate-plus-create); the active base cannot be deactivated and
-preference falls back to it; prices use the store's currency; package form
-shows the live conversion sentence, field errors, two-step deactivate
-confirmation, and dirty-form Back/cancel confirmation. Full validate green.
+## Ticket M3-03: Record all approved payment methods and credit truthfully
 
-## Ticket M2-04: Manage catalogue lifecycle without losing ownership
-
-**Status:** Complete (committed)  
-**Outcome:** A retailer can distinguish temporary, enriched, active, and
-inactive products without losing store-owned data or history.  
-**Blocked by:** M2-02 and M2-03 (complete)
+**Status:** Not started  
+**Outcome:** A retailer can complete a sale by cash, transfer, POS/card, or
+credit without reporting credit as cash received.  
+**Blocked by:** M3-02
 
 **Vertical scope:**
 
-- Implement active/inactive catalogue filtering and a clear Temporary marker.
-- Allow a temporary product to be marked enriched while retaining its private
-  provisional identity; leave later platform matching as an explicit future
-  consolidation operation under D-035.
-- Preserve StoreProduct and StorePackageSetting; make repeated operation IDs
-  idempotent at the local application boundary.
-- Complete Product list/detail states needed for M2 lifecycle behavior.
-
-**Non-goals:** Platform-identity linking/consolidation, remote shared catalogue,
-automated matching, recognition model, cross-store exposure, conflict resolution.
+- Add BANK_TRANSFER and POS_CARD selection using one tender allocation equal to
+  the completed sale total.
+- Add the D-037 credit path with required customer name, lightweight
+  CustomerAccount selection/creation without name-only auto-merge, and one OPEN
+  Receivable for the credit amount.
+- Include the tender and optional credit snapshots in the same sale outbox
+  envelope and expose truthful completion/history labels.
 
 **Acceptance:**
 
-- [x] Temporary and inactive states are visible in text, searchable through
-      explicit filters, and never rely on color alone.
-- [x] Enriching identity keeps local SKU, store selling-price fields, and package
-      settings unchanged, and does not change the variant's owning store.
-- [x] Reapplying the same operation ID cannot duplicate the logical mutation or
-      outbox work; a different valid operation remains independent.
-- [x] Deactivation requires confirmation, remains after restart, and retains the
-      record for history; failure rolls back business and outbox changes.
+- [ ] Cash, transfer, and POS/card each persist one Payment allocation equal to
+      the sale total; invalid method/amount combinations fail atomically.
+- [ ] Credit requires a non-empty bounded customer name and atomically persists
+      Payment, CustomerAccount, and OPEN Receivable whose original and
+      outstanding amounts equal the sale total.
+- [ ] Cash-received queries exclude CREDIT while sale-total queries include it;
+      tests prevent double counting and unsupported split/partial settlement.
+- [ ] Failure and operation replay cannot leave or duplicate customer,
+      receivable, payment, inventory, sale, or outbox rows.
+- [ ] Payment controls have text labels and checked state; Credit explains the
+      amount owed, retains customer input on failure, and never claims cash was
+      received.
 
-**Evidence (2026-09-14):** `markProductEnriched` and `setProductActive`
-commit lifecycle-only changes with one PRODUCT_LIFECYCLE_CHANGED envelope
-each, with operation-ID replay (repeat returns the original; fresh IDs stay
-independent) and store-ownership checks; enrichment preserves SKU, prices,
-settings, and variant ownership by construction. List gains All/Temporary/
-Active/Inactive text filter chips; detail gains the enrich action and
-two-step deactivate/reactivate. Full validate green.
+## Ticket M3-04: Recover and review completed sales
 
-## Ticket M2-05: Prove the offline catalogue milestone
-
-**Status:** Complete — branch returned for independent audit  
-**Outcome:** M2 has reproducible evidence and a clean handoff for independent
-audit before sales implementation starts.  
-**Blocked by:** M2-01 through M2-04 (complete)
+**Status:** Not started  
+**Outcome:** Completed sales remain reviewable from local history after restart,
+while incomplete carts and immutable-history limits are communicated clearly.  
+**Blocked by:** M3-01 and M3-03
 
 **Vertical scope:**
 
-- Run clean install, typecheck, zero-warning lint, all automated tests, Expo
-  Doctor, Expo dependency check, and Android export.
-- Manually exercise offline create, restart, search, edit, package conversion,
-  inactive filtering, and failure/recovery on the reference Android device when
-  it is available.
-- Review migration upgrade paths from a populated M1 database and ensure no
-  secrets, generated databases, exports, or build artifacts are committed.
-- Update tickets, workflow state, PROJECT_STATE, and milestone evidence; return
-  the branch for independent audit.
+- Add recent sale history and sale detail using persisted snapshots, occurred
+  time, tender method, total, item count, and honest local/pending status.
+- Ensure catalogue renames, price changes, package changes, and later cost-state
+  availability cannot rewrite an existing sale's display or totals.
+- Complete loading, empty, restart, local-read-failure, negative-stock, large
+  text, accessibility, and performance states for Sell/history/detail.
+- Expose no edit/delete/void/return action for a completed sale in M3.
 
 **Acceptance:**
 
-- [x] Automated checks are green from a clean checkout and exact counts/results
-      are recorded rather than inferred.
-- [x] Migration tests upgrade both fresh and populated M1 databases without
-      reset, loss, duplicate rows, or false schema history.
-- [x] Device evidence records actual build/device identifiers and clearly marks
-      any unavailable check as blocked or explicitly waived rather than passed.
-- [x] The final diff contains M2 scope only, documentation matches code, and M3
-      has not started.
+- [ ] Completed cash and credit sales survive database close/reopen and render
+      from sale snapshots after linked catalogue identity/price changes.
+- [ ] History is scoped to the current store, ordered deterministically without
+      treating device time as global sync order, and cannot expose another
+      store's sale through an ID or replay path.
+- [ ] Derived inventory is reconstructable by summing InventoryEvents; a
+      negative value is retained and labelled rather than deleting a sale.
+- [ ] Read failures do not claim missing/deleted history; retry recovers without
+      writing or duplicating records.
+- [ ] Component tests cover scrollable large-text layouts, accessible line and
+      payment summaries, local-save language, empty/loading/failure states, and
+      the absence of destructive completed-sale actions.
 
-**Evidence (2026-09-14, after `npm ci`):** environment check passes,
-typecheck passes, zero-warning lint passes, 126 domain + 131 mobile tests
-pass (257 total, 22 suites), Expo Doctor 21/21, `expo install --check`
-clean, Android export succeeds (2.9 MB bundle), `npm audit` unchanged at 1
-low + 21 moderate pre-existing findings. Migration 2 is additive only (six
-new tables plus indexes; no data rewrite) and the populated-M1 upgrade path
-is tested. Device checks: the Galaxy A15 5G remains unavailable and no adb
-tooling exists on this machine, so no device evidence is claimed; the
-carried M1 device gate and rendered text-scaling verification stay deferred
-and required before external beta/native release readiness. M2 diff is 61
-files with no database, build, export, or secret artifacts; no sales,
-purchase, inventory, sync-transport, or recognition code was added.
+## Ticket M3-05: Prove the offline sales milestone
+
+**Status:** Not started  
+**Outcome:** M3 has reproducible evidence and a clean handoff for independent
+audit before restocking/costing starts.  
+**Blocked by:** M3-01 through M3-04
+
+**Vertical scope:**
+
+- Run clean install, validation, Expo checks, Android export, migration upgrade,
+  aggregate rollback/replay/ownership tests, and repository artifact review.
+- On the Galaxy A15 5G, install the current build and exercise local store setup,
+  catalogue creation, force-stop/relaunch, airplane-mode sale, inventory effect,
+  history, credit truth, dirty cart, and rendered text scaling when adb tooling
+  is available.
+- Update tickets, workflow state, PROJECT_STATE, and durable decisions only when
+  evidence warrants it; return the branch for independent audit.
+
+**Acceptance:**
+
+- [ ] `npm ci`, environment check, strict typecheck, zero-warning lint, all
+      tests, Expo Doctor, Expo dependency check, and Android export pass with
+      exact results recorded.
+- [ ] Migration tests upgrade fresh and populated M2 databases without reset,
+      loss, false history, or duplicate effects.
+- [ ] Automated evidence proves atomic sale aggregate/outbox capture, exact
+      arithmetic, idempotent replay, store isolation, immutable snapshots,
+      payment/credit truth, and reconstructable inventory.
+- [ ] Device evidence records actual build/device identifiers and observed
+      offline/restart/text-scaling behavior; unavailable tooling is marked
+      blocked rather than passed.
+- [ ] The final diff contains M3 scope only, no secrets/databases/exports/build
+      artifacts, documentation matches code, and M4 has not started.
 
 ## Dependency Frontier
 
-    M2-01 Offline temporary product
-       |\
-       | +--> M2-03 Exact packages --------+
-       +----> M2-02 Search and enrich ------+--> M2-04 Lifecycle/linking
-                                                     |
-                                                     v
-                                             M2-05 Acceptance/audit handoff
+    Accepted M2 baseline + D-036/D-037 + M3 design
+                         |
+                         v
+              M3-01 One cash sale
+                         |
+                         v
+              M3-02 Exact cart
+                         |
+                         v
+              M3-03 Payment + credit
+                         |
+                         +----------+
+                                    v
+                         M3-04 History/recovery
+                                    |
+                                    v
+                         M3-05 Evidence/audit handoff
 
-The deferred M1 Galaxy A15 5G check is a non-blocking carried gate for M2
-implementation. It remains mandatory before external beta/native release
-readiness and should be completed as soon as the phone is available.
+The Galaxy device gate does not block M3 source implementation, but it remains
+required before external beta/native release readiness and should be completed
+when the lower-cost device/tooling session is scheduled.

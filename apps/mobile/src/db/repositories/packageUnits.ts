@@ -34,6 +34,8 @@ export interface CreatePackageUnitInput {
   symbol?: string | null;
   conversionToBaseMicros: number;
   isBaseUnit: boolean;
+  isSellable?: boolean;
+  isPurchasable?: boolean;
 }
 
 type PackageRecord = Record<string, string | number | null>;
@@ -87,8 +89,19 @@ export function createPackageUnit(
     `INSERT INTO package_units
       (id, product_variant_id, name, symbol, conversion_to_base_micros,
        is_base_unit, is_sellable, is_purchasable, status, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, 1, 1, 'ACTIVE', ?, ?);`,
-    [id, productVariantId, name, symbol, conversion, fromBoolean(input.isBaseUnit), timestamp, timestamp],
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?, ?);`,
+    [
+      id,
+      productVariantId,
+      name,
+      symbol,
+      conversion,
+      fromBoolean(input.isBaseUnit),
+      fromBoolean(input.isSellable ?? true),
+      fromBoolean(input.isPurchasable ?? true),
+      timestamp,
+      timestamp,
+    ],
   );
   const created = getPackageUnitById(adapter, id);
   if (!created) {

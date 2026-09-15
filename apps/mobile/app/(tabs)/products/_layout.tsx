@@ -1,24 +1,45 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 import { Stack } from 'expo-router';
 
-import { CatalogueProvider, useCatalogueClient } from '../../../src/catalogue/CatalogueContext';
+import { CatalogueProvider, useCatalogue } from '../../../src/catalogue/CatalogueContext';
+import { ErrorPanel, Field, PrimaryButton } from '../../../src/ui/components';
+import { theme } from '../../../src/ui/theme';
 
 function MissingStore() {
+  const { setupLocalStore } = useCatalogue();
+  const [ownerName, setOwnerName] = useState('');
+  const [storeName, setStoreName] = useState('');
+  const [failure, setFailure] = useState<string | null>(null);
+  const setup = (): void => {
+    if (!ownerName.trim() || !storeName.trim()) {
+      setFailure('Enter your name and store name.');
+      return;
+    }
+    try {
+      setupLocalStore(ownerName.trim(), storeName.trim());
+    } catch {
+      setFailure('Store setup could not be saved on this device. Nothing was changed.');
+    }
+  };
   return (
-    <View style={styles.center}>
+    <ScrollView contentContainerStyle={styles.center} keyboardShouldPersistTaps="handled">
       <Text accessibilityRole="header" style={styles.title}>
-        No store yet
+        Set up this store
       </Text>
       <Text style={styles.body}>
-        Products belong to a store, and this device has none. Store setup arrives with
-        onboarding; nothing was lost.
+        This creates the local store record needed to save products offline. Account linking arrives later.
       </Text>
-    </View>
+      <Field label="Your name" value={ownerName} onChangeText={setOwnerName} testID="setup-owner-name" />
+      <Field label="Store name" value={storeName} onChangeText={setStoreName} testID="setup-store-name" />
+      {failure ? <ErrorPanel title="Store not created" message={failure} /> : null}
+      <PrimaryButton title="Create local store" onPress={setup} />
+    </ScrollView>
   );
 }
 
 function CatalogueGate({ children }: { children: React.ReactNode }) {
-  const client = useCatalogueClient();
+  const { client } = useCatalogue();
   if (!client) {
     return <MissingStore />;
   }
@@ -31,10 +52,10 @@ export default function ProductsLayout() {
       <CatalogueGate>
         <Stack screenOptions={{ headerTintColor: '#174F46', contentStyle: { backgroundColor: '#F7F8F5' } }}>
           <Stack.Screen name="index" options={{ title: 'Products' }} />
-          <Stack.Screen name="new" options={{ title: 'Add product' }} />
-          <Stack.Screen name="[id]/index" options={{ title: 'Product' }} />
-          <Stack.Screen name="[id]/packages/new" options={{ title: 'Add package' }} />
-          <Stack.Screen name="[id]/packages/[packageId]" options={{ title: 'Edit package' }} />
+          <Stack.Screen name="new" options={{ headerShown: false }} />
+          <Stack.Screen name="[id]/index" options={{ headerShown: false }} />
+          <Stack.Screen name="[id]/packages/new" options={{ headerShown: false }} />
+          <Stack.Screen name="[id]/packages/[packageId]" options={{ headerShown: false }} />
         </Stack>
       </CatalogueGate>
     </CatalogueProvider>
@@ -42,7 +63,7 @@ export default function ProductsLayout() {
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, padding: 24, gap: 12, backgroundColor: '#F7F8F5', justifyContent: 'center' },
-  title: { color: '#17251F', fontSize: 24, fontWeight: '600' },
-  body: { color: '#41534C', fontSize: 16, lineHeight: 24 },
+  center: { flexGrow: 1, padding: 24, gap: 12, backgroundColor: theme.color.canvas, justifyContent: 'center' },
+  title: { color: theme.color.textPrimary, fontSize: 24, fontWeight: '600' },
+  body: { color: theme.color.textSecondary, fontSize: 16, lineHeight: 24 },
 });

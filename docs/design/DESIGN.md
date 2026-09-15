@@ -1,8 +1,8 @@
-# COSI Product Experience and M2 Design Baseline
+# COSI Product Experience, M2 Catalogue, and M3 Sales Design Baseline
 
 **Status:** Approved implementation baseline  
 **Approved:** 2026-09-14 through founder delegation of design and ticket judgement  
-**Scope:** Whole-MVP experience direction, with implementation detail for M2  
+**Scope:** Whole-MVP experience direction, with implementation detail for M2–M3  
 **Reference device:** Galaxy A15 5G; low-end Android remains a required constraint
 
 ## Product Experience
@@ -97,6 +97,79 @@ shared. Deactivation uses a deliberate confirmation and retains history.
   is versioned or deactivated rather than rewritten in place.
 - Store-specific selling price and preferred-for-sale/purchase choices belong to
   StorePackageSetting, not the shared package identity.
+
+## M3 Sales Flow
+
+### Sell entry and product selection
+
+- The Sell tab opens directly into offline catalogue search and an empty cart.
+- Search and browse use the same local catalogue truth as Products. Only active,
+  sellable package choices may be added.
+- A no-match result offers **Add product** through the existing Quick Add flow,
+  then returns the saved product to Sell. Scanner entry remains visibly deferred
+  to M8 and cannot block manual search.
+- Each result shows product name, preferred package, and package selling price
+  when known. Selecting a product opens line configuration rather than silently
+  adding an assumed quantity or price.
+
+### Configure a sale line
+
+1. Choose an active sellable package; start with the preferred sale package.
+2. Enter a positive quantity using exact D-034 decimal handling.
+3. Show the configured package price when one exists and allow a retailer to
+   replace it with the agreed selling price.
+4. Offer an optional absolute discount for this line.
+5. Show quantity, package, price, discount, and calculated line total before
+   **Add to cart** or **Update line**.
+
+Invalid values stay in the form with field-level guidance. A value combination
+that would require hidden quantity or currency rounding is rejected plainly.
+
+### Review cart
+
+- Show all lines with product/package snapshots, quantity, unit price, discount,
+  and line total.
+- Show subtotal, discount total, and sale total in the store currency.
+- Let the retailer edit or remove a line before completion. An empty cart cannot
+  continue to payment.
+- The cart is an in-memory draft under D-037. Android Back or tab exit from a
+  dirty cart requires confirmation that the uncompleted sale will be discarded.
+
+### Payment and credit
+
+- Present one large, text-labelled choice: **Cash**, **Transfer**, **POS/card**,
+  or **Credit**.
+- Cash, transfer, and POS/card allocate the full sale total. M3 does not ask for
+  split-tender amounts.
+- Credit shows the amount owed and requires a customer name before completion.
+  Existing matches are selectable, but name alone never auto-merges accounts;
+  the retailer can create a separate customer. Credit must never be presented
+  as cash received.
+- The final button states the amount, for example **Complete sale · ₦4,250**,
+  and is disabled while the local transaction commits.
+
+### Completion and history
+
+- Success appears only after the complete local aggregate and outbox commit.
+- Confirmation shows total, payment method, item count, **Saved on this device**,
+  and actions for **New sale** and **View sale**.
+- Recent sales show occurred time, total, payment method, and local status.
+  Detail renders stored transaction snapshots so later catalogue edits do not
+  rewrite history.
+- Completed sales expose no edit, delete, void, return, or reversal action in
+  M3. Those require a later correction-flow decision.
+
+### Sale failure and recovery
+
+- Validation or arithmetic failure retains the cart and points to the field.
+- Local database failure says **Sale not recorded** and retains the cart for a
+  deliberate retry. It must not navigate to confirmation.
+- Duplicate completion presses and operation replay cannot duplicate a sale,
+  payment, receivable, inventory effect, or outbox operation.
+- Negative derived stock may be shown as a reconciliation signal but never
+  causes a real offline sale to be discarded.
+- Sale, history, and completion content must scroll at large text sizes; payment
+  choices and cart actions retain 48dp targets and text labels.
 
 ## State Requirements
 

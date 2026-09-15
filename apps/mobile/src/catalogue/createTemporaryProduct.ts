@@ -8,7 +8,7 @@ import {
   createProductVariant,
   createStoreProduct,
   enqueueOutboxOperation,
-  findOutboxOperation,
+  findExpectedOutboxReplay,
   getActiveBasePackageUnit,
   getProductIdentifierById,
   getProductVariantById,
@@ -81,7 +81,13 @@ export function createTemporaryProduct(
   const deviceId = requireId(input.deviceId);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
-  const replayed = findOutboxOperation(adapter, operationId);
+  const replayed = findExpectedOutboxReplay(adapter, {
+    operationId,
+    storeId,
+    deviceId,
+    operationType: 'PRODUCT_CREATED',
+    entityType: 'STORE_PRODUCT',
+  });
   if (replayed) {
     return rehydrateTemporaryProduct(adapter, replayed);
   }

@@ -1,6 +1,6 @@
 import { DomainError, formatQuantityMicros, parseQuantityDecimal } from '@retail/domain';
 import { useEffect, useState } from 'react';
-import { Alert, BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { CatalogueClient } from '../../catalogue/client';
 import type { PackageUnitRow, StorePackageSettingRow } from '../../db/repositories';
@@ -59,16 +59,22 @@ function initialFrom(
     defaultPriceText:
       setting?.defaultSellingPriceMinor === undefined || setting?.defaultSellingPriceMinor === null
         ? ''
-        : (setting.defaultSellingPriceMinor / 100).toFixed(2),
+        : formatMinorForEdit(setting.defaultSellingPriceMinor),
     minimumPriceText:
       setting?.minimumSellingPriceMinor === undefined || setting?.minimumSellingPriceMinor === null
         ? ''
-        : (setting.minimumSellingPriceMinor / 100).toFixed(2),
+        : formatMinorForEdit(setting.minimumSellingPriceMinor),
     isPreferredForSale: setting?.isPreferredForSale ?? false,
     isPreferredForPurchase: setting?.isPreferredForPurchase ?? false,
     isSellable: packageUnit.isSellable,
     isPurchasable: packageUnit.isPurchasable,
   };
+}
+
+function formatMinorForEdit(amountMinor: number): string {
+  const sign = amountMinor < 0 ? '-' : '';
+  const absolute = Math.abs(amountMinor);
+  return `${sign}${Math.floor(absolute / 100)}.${String(absolute % 100).padStart(2, '0')}`;
 }
 
 function conversionPreview(name: string, baseUnitName: string, conversionText: string): string | null {
@@ -197,6 +203,8 @@ export default function PackageFormScreen({
           name: form.name.trim(),
           symbol: form.symbol.trim().length === 0 ? null : form.symbol.trim(),
           conversionText: form.conversionText.trim(),
+          isSellable: form.isSellable,
+          isPurchasable: form.isPurchasable,
           setting: {
             defaultSellingPrice: orNull(form.defaultPriceText),
             minimumSellingPrice: orNull(form.minimumPriceText),
@@ -237,7 +245,7 @@ export default function PackageFormScreen({
   const preview = conversionPreview(form.name, baseUnitName, editMode ? initialFrom(packageUnit, setting).conversionText : form.conversionText);
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <Text accessibilityRole="header" style={styles.title}>
         {editMode ? 'Edit package' : 'Add package'}
       </Text>
@@ -326,7 +334,7 @@ export default function PackageFormScreen({
           />
         ) : null}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -390,7 +398,7 @@ function Toggle({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: theme.spacing(4), gap: theme.spacing(3), backgroundColor: theme.color.canvas },
+  container: { flexGrow: 1, padding: theme.spacing(4), gap: theme.spacing(3), backgroundColor: theme.color.canvas },
   title: { color: theme.color.textPrimary, fontSize: theme.fontSize.header, fontWeight: '600' },
   note: { color: theme.color.textSecondary, fontSize: theme.fontSize.body, lineHeight: 24 },
   preview: { color: theme.color.actionPrimary, fontSize: theme.fontSize.body, fontWeight: '600' },

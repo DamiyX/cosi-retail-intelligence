@@ -4,7 +4,7 @@ import { generateMobileId } from '../crypto/mobileIds';
 import type { DatabaseAdapter } from '../db/adapter';
 import {
   enqueueOutboxOperation,
-  findOutboxOperation,
+  findExpectedOutboxReplay,
   getProductVariantById,
   getStoreProductById,
   updateStoreProductLifecycle,
@@ -67,7 +67,14 @@ function changeLifecycle(
   const deviceId = requireId(input.deviceId);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
-  const replayed = findOutboxOperation(adapter, operationId);
+  const replayed = findExpectedOutboxReplay(adapter, {
+    operationId,
+    storeId,
+    deviceId,
+    operationType: 'PRODUCT_LIFECYCLE_CHANGED',
+    entityType: 'STORE_PRODUCT',
+    entityId: input.storeProductId,
+  });
   if (replayed) {
     const storeProduct = getStoreProductById(adapter, replayed.entityId);
     if (!storeProduct) {

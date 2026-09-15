@@ -249,6 +249,7 @@ export interface ProductSearchHit {
   variantName: string;
   variantStatus: CatalogueStatus;
   preferredPackageName: string | null;
+  preferredSellingPriceMinor: number | null;
   isTemporary: boolean;
 }
 
@@ -299,13 +300,17 @@ export function searchStoreProducts(
       variant_name: string;
       variant_status: CatalogueStatus;
       preferred_package_name: string | null;
+      preferred_selling_price_minor: number | null;
     }
   >(
     `SELECT sp.${COLUMNS.split(', ').join(', sp.')}, pv.name AS variant_name, pv.status AS variant_status,
-            ppu.name AS preferred_package_name
+            ppu.name AS preferred_package_name,
+            sps.default_selling_price_minor AS preferred_selling_price_minor
      FROM store_products sp
      JOIN product_variants pv ON pv.id = sp.product_variant_id
      LEFT JOIN package_units ppu ON ppu.id = sp.preferred_package_unit_id
+     LEFT JOIN store_package_settings sps
+       ON sps.store_product_id = sp.id AND sps.package_unit_id = sp.preferred_package_unit_id
      WHERE ${conditions.join(' AND ')}
      ORDER BY ${orderBy};`,
     params,
@@ -315,6 +320,7 @@ export function searchStoreProducts(
     variantName: row.variant_name,
     variantStatus: row.variant_status,
     preferredPackageName: row.preferred_package_name,
+    preferredSellingPriceMinor: row.preferred_selling_price_minor,
     isTemporary: toBoolean(row.is_temporary as number),
   }));
 }

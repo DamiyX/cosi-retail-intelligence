@@ -3,8 +3,8 @@
   "task_id": "m2-catalogue-package-units",
   "workflow_id": "build-feature",
   "mode": "implement",
-  "status": "in-progress",
-  "current_state": "m2-audit-handoff",
+  "status": "complete",
+  "current_state": "m2-audit-accepted",
   "completed_states": [
     "m1-independent-audit",
     "m2-architecture-gates",
@@ -14,10 +14,11 @@
     "m2-02-search-and-enrich",
     "m2-03-exact-packages",
     "m2-04-lifecycle",
-    "m2-05-acceptance-evidence"
+    "m2-05-acceptance-evidence",
+    "m2-independent-audit"
   ],
   "owner": {
-    "agent": "external-implementation-agent",
+    "agent": "independent-auditor",
     "thread": "unassigned",
     "worktree": null
   },
@@ -145,35 +146,44 @@
       "claim": "The M1 database and mobile ID path are proven on the Galaxy A15 5G after force-stop/relaunch.",
       "owner": "founder-and-implementation-agent",
       "required": false,
-      "status": "blocked",
+      "status": "met",
       "depends_on": [],
       "verification": {
         "kind": "inspection",
         "procedure": "Install a build containing expo-sqlite and expo-crypto, create store context, force-stop, relaunch, and confirm the migrated database and data reopen.",
         "success_condition": "Actual device/build evidence is recorded before external beta/native release readiness."
       },
-      "evidence": [],
-      "limitations": ["This gate does not block M2 implementation."],
-      "blocker": "Galaxy A15 5G is currently unavailable.",
-      "waiver": {
-        "reason": "Founder explicitly approved proceeding to M2 while carrying the unavailable phone check forward; automated M1 evidence and Android export passed.",
-        "approved_by": "founder"
-      }
+      "evidence": [
+        {
+          "result": "On Galaxy A15 5G SM-A156E (Android 16), preview build 90c3fd47-e9be-49cb-bdbc-f9ab649f3c34 provisioned a local store and temporary product. Both survived force-stop/relaunch and an airplane-mode force-stop/relaunch; the records also rendered at 1.3 text scale. Airplane mode and the original 1.0 scale were restored.",
+          "source": "docs/engineering/PROJECT_STATE.md",
+          "observed_at": "2026-09-15T00:00:00Z"
+        }
+      ],
+      "limitations": ["The matching development-client APK completed in EAS but was not installed after a corrupted interrupted transfer; its Metro-specific check remains pre-beta evidence."],
+      "blocker": null,
+      "waiver": null
     },
     {
       "id": "m2-implementation-and-audit",
       "claim": "M2-01 through M2-05 pass implementation evidence and independent audit before M3.",
       "owner": "implementation-agent-and-independent-auditor",
       "required": true,
-      "status": "pending",
+      "status": "met",
       "depends_on": ["m2-tickets-verified"],
       "verification": {
         "kind": "tests-and-review",
         "procedure": "Execute tickets.md, record automated/manual evidence, then audit the final M2 branch against source-of-truth documents.",
         "success_condition": "All required M2 acceptance checks pass, documentation matches code, and M3 has not started."
       },
-      "evidence": [],
-      "limitations": [],
+      "evidence": [
+        {
+          "result": "Independent source and automated audit passed after integrity, replay, preference, fresh-install, and navigation corrections. npm run validate: 126 domain + 137 mobile tests; Doctor 21/21; Expo dependency check clean; Android export succeeds.",
+          "source": "tickets.md; docs/engineering/PROJECT_STATE.md",
+          "observed_at": "2026-09-14T12:00:00Z"
+        }
+      ],
+      "limitations": ["Physical Galaxy verification remains a carried pre-beta gate."],
       "blocker": null,
       "waiver": null
     }
@@ -196,8 +206,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Independent audit of M2-01 through M2-05 on feat/m2-catalogue-package-units per docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md. Do not start M3 until the audit passes. The carried device gate (Galaxy A15 5G build + force-stop/relaunch + text scaling) stays deferred and required before external beta/native release readiness.",
+  "next_action": "Commit the accepted M2 audit corrections and approved M3 planning artifacts, create feat/m3-sales, and follow .agents/workflows/m3-sales.json. The standalone Galaxy verification is complete; only the development-client/Metro-specific pre-beta check remains.",
   "created_at": "2026-09-14T03:00:00Z",
-  "updated_at": "2026-09-14T08:28:46Z",
+  "updated_at": "2026-09-15T00:00:00Z",
   "archived": false
 }

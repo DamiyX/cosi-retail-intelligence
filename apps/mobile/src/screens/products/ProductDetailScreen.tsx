@@ -1,6 +1,6 @@
 import { DomainError, formatQuantityMicros } from '@retail/domain';
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { CatalogueClient, ProductDetail } from '../../catalogue/client';
 import type { IdentifierType } from '../../db/repositories';
@@ -64,6 +64,43 @@ export default function ProductDetailScreen({
   const [confirmingDeactivate, setConfirmingDeactivate] = useState(false);
 
   const detail = state.detail;
+  const identityDirty = Boolean(
+    editing && detail && (name !== detail.variant.name || localSku !== (detail.product.localSku ?? '')),
+  );
+  const dirty = identityDirty || identifierValue.trim().length > 0;
+
+  const requestBack = useCallback((): void => {
+    if (!dirty) {
+      onBack();
+      return;
+    }
+    Alert.alert('Discard unsaved entries?', 'Your unsaved product entries will be lost.', [
+      { text: 'Keep editing', style: 'cancel' },
+      { text: 'Discard', style: 'destructive', onPress: onBack },
+    ]);
+  }, [dirty, onBack]);
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!dirty) {
+        return false;
+      }
+      requestBack();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [dirty, requestBack]);
+
+  const cancelIdentityEdit = (): void => {
+    if (!identityDirty) {
+      setEditing(false);
+      return;
+    }
+    Alert.alert('Discard product changes?', 'Your name or SKU changes will be lost.', [
+      { text: 'Keep editing', style: 'cancel' },
+      { text: 'Discard', style: 'destructive', onPress: () => setEditing(false) },
+    ]);
+  };
 
   const beginEdit = (): void => {
     if (!detail) {
@@ -176,13 +213,13 @@ export default function ProductDetailScreen({
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       {state.failure !== null || detail === null ? (
         <ErrorPanel
           title="Product unavailable"
           message="This product could not be read from the device."
           onRetry={() => setState(load(client, productId))}
-          onDismiss={onBack}
+          onDismiss={requestBack}
         />
       ) : (
         <View style={styles.body}>
@@ -218,7 +255,7 @@ export default function ProductDetailScreen({
                   onPress={saveIdentity}
                   disabled={saving}
                 />
-                <SecondaryButton title="Cancel" onPress={() => setEditing(false)} />
+                <SecondaryButton title="Cancel" onPress={cancelIdentityEdit} />
               </View>
             </View>
           ) : (
@@ -359,15 +396,15 @@ export default function ProductDetailScreen({
               <SecondaryButton title="Reactivate product" onPress={() => changeActive(true)} />
             )}
           </View>
-          <SecondaryButton title="Back to products" onPress={onBack} />
+          <SecondaryButton title="Back to products" onPress={requestBack} />
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: theme.spacing(4), backgroundColor: theme.color.canvas },
+  container: { flexGrow: 1, padding: theme.spacing(4), backgroundColor: theme.color.canvas },
   body: { gap: theme.spacing(3) },
   title: { color: theme.color.textPrimary, fontSize: theme.fontSize.header, fontWeight: '600' },
   temporary: { color: theme.color.statusWarning, fontSize: theme.fontSize.body, fontWeight: '600' },

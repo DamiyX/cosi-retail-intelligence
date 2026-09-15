@@ -72,8 +72,18 @@ describe('ProductsListScreen', () => {
     try {
       seedProducts(fixture);
       const client = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device);
+      const milo = client.listProducts('Milo')[0];
+      if (!milo) {
+        throw new Error('Milo fixture missing.');
+      }
+      client.createPackage({
+        storeProductId: milo.product.id,
+        name: 'carton',
+        conversionText: '20',
+        setting: { defaultSellingPrice: '1450.50', isPreferredForSale: true },
+      });
       const opened: string[] = [];
-      render(
+      const { unmount } = render(
         <ProductsListScreen
           client={client}
           onAddProduct={() => undefined}
@@ -81,9 +91,12 @@ describe('ProductsListScreen', () => {
         />,
       );
       expect(screen.getAllByLabelText(/, Temporary$/)).toHaveLength(3);
-      expect(screen.getAllByText('Sold per piece')).toHaveLength(3);
+      expect(screen.getAllByText('Sold per piece')).toHaveLength(2);
+      expect(screen.getByText('Sold per carton')).toBeTruthy();
+      expect(screen.getByText('Selling price: ₦1,450.50')).toBeTruthy();
       fireEvent.press(screen.getByLabelText('Milo 400g, Temporary'));
       expect(opened).toHaveLength(1);
+      unmount();
     } finally {
       fixture.closeAndDelete();
     }
@@ -245,6 +258,18 @@ describe('QuickAddProductScreen', () => {
     fireEvent.press(screen.getByText('Go back'));
     expect(cancelled).toEqual(['cancelled']);
   });
+
+  it('asks before Cancel discards entered product data', () => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    try {
+      render(<QuickAddProductScreen client={stubClient()} onSaved={() => undefined} onCancel={() => undefined} />);
+      fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Unsaved item');
+      fireEvent.press(screen.getByText('Cancel'));
+      expect(alertSpy).toHaveBeenCalledWith('Discard product?', expect.any(String), expect.any(Array));
+    } finally {
+      alertSpy.mockRestore();
+    }
+  });
 });
 
 describe('ProductDetailScreen', () => {
@@ -329,6 +354,32 @@ describe('ProductDetailScreen', () => {
       expect(screen.getByText('piece (Base unit)')).toBeTruthy();
       expect(countRows(fixture.adapter, 'outbox_operations')).toBe(2);
     } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('asks before Cancel discards an identity edit', () => {
+    const fixture = openCatalogueFixture();
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    try {
+      const client = createCatalogueClient(
+        fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(8150),
+      );
+      const graph = client.createTemporaryProduct({ name: 'Milo 400g' });
+      render(
+        <ProductDetailScreen
+          client={client} productId={graph.storeProduct.id} onBack={() => undefined}
+          onAddPackage={() => undefined} onEditPackage={() => undefined}
+        />,
+      );
+      fireEvent.press(screen.getByText('Edit name or SKU'));
+      fireEvent.changeText(screen.getByTestId('detail-name'), 'Unsaved name');
+      fireEvent.press(screen.getByText('Cancel'));
+      expect(alertSpy).toHaveBeenCalledWith(
+        'Discard product changes?', expect.any(String), expect.any(Array),
+      );
+    } finally {
+      alertSpy.mockRestore();
       fixture.closeAndDelete();
     }
   });

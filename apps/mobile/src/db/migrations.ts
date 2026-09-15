@@ -128,6 +128,40 @@ export const MIGRATIONS: Migration[] = [
         ON store_products(store_id, local_sku)
         WHERE local_sku IS NOT NULL;`,
       'CREATE INDEX idx_store_products_store ON store_products(store_id, status);',
+      `CREATE TRIGGER trg_store_products_variant_owner_insert
+        BEFORE INSERT ON store_products
+        WHEN NOT EXISTS (
+          SELECT 1 FROM product_variants pv
+          WHERE pv.id = NEW.product_variant_id
+            AND (pv.identity_scope = 'PLATFORM' OR pv.owner_store_id = NEW.store_id)
+        )
+        BEGIN SELECT RAISE(ABORT, 'store product variant ownership mismatch'); END;`,
+      `CREATE TRIGGER trg_store_products_variant_owner_update
+        BEFORE UPDATE OF store_id, product_variant_id ON store_products
+        WHEN NOT EXISTS (
+          SELECT 1 FROM product_variants pv
+          WHERE pv.id = NEW.product_variant_id
+            AND (pv.identity_scope = 'PLATFORM' OR pv.owner_store_id = NEW.store_id)
+        )
+        BEGIN SELECT RAISE(ABORT, 'store product variant ownership mismatch'); END;`,
+      `CREATE TRIGGER trg_store_products_preferred_package_insert
+        BEFORE INSERT ON store_products
+        WHEN NEW.preferred_package_unit_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM package_units pu
+          WHERE pu.id = NEW.preferred_package_unit_id
+            AND pu.product_variant_id = NEW.product_variant_id
+            AND pu.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'preferred package does not belong to product variant'); END;`,
+      `CREATE TRIGGER trg_store_products_preferred_package_update
+        BEFORE UPDATE OF preferred_package_unit_id, product_variant_id ON store_products
+        WHEN NEW.preferred_package_unit_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM package_units pu
+          WHERE pu.id = NEW.preferred_package_unit_id
+            AND pu.product_variant_id = NEW.product_variant_id
+            AND pu.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'preferred package does not belong to product variant'); END;`,
       `CREATE TABLE store_package_settings (
         id TEXT PRIMARY KEY,
         store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
@@ -141,6 +175,47 @@ export const MIGRATIONS: Migration[] = [
         UNIQUE (store_product_id, package_unit_id)
       );`,
       'CREATE INDEX idx_store_package_settings_product ON store_package_settings(store_product_id);',
+      `CREATE UNIQUE INDEX uq_store_package_settings_preferred_sale
+        ON store_package_settings(store_product_id)
+        WHERE is_preferred_for_sale = 1;`,
+      `CREATE UNIQUE INDEX uq_store_package_settings_preferred_purchase
+        ON store_package_settings(store_product_id)
+        WHERE is_preferred_for_purchase = 1;`,
+      `CREATE TRIGGER trg_store_package_settings_variant_insert
+        BEFORE INSERT ON store_package_settings
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          JOIN package_units pu ON pu.id = NEW.package_unit_id
+          WHERE sp.id = NEW.store_product_id
+            AND sp.product_variant_id = pu.product_variant_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'package setting variant mismatch'); END;`,
+      `CREATE TRIGGER trg_store_package_settings_variant_update
+        BEFORE UPDATE OF store_product_id, package_unit_id ON store_package_settings
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          JOIN package_units pu ON pu.id = NEW.package_unit_id
+          WHERE sp.id = NEW.store_product_id
+            AND sp.product_variant_id = pu.product_variant_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'package setting variant mismatch'); END;`,
+      `CREATE TRIGGER trg_store_package_settings_active_preference_insert
+        BEFORE INSERT ON store_package_settings
+        WHEN (NEW.is_preferred_for_sale = 1 OR NEW.is_preferred_for_purchase = 1)
+          AND NOT EXISTS (
+            SELECT 1 FROM package_units pu
+            WHERE pu.id = NEW.package_unit_id AND pu.status = 'ACTIVE'
+          )
+        BEGIN SELECT RAISE(ABORT, 'inactive package cannot be preferred'); END;`,
+      `CREATE TRIGGER trg_store_package_settings_active_preference_update
+        BEFORE UPDATE OF package_unit_id, is_preferred_for_sale, is_preferred_for_purchase
+        ON store_package_settings
+        WHEN (NEW.is_preferred_for_sale = 1 OR NEW.is_preferred_for_purchase = 1)
+          AND NOT EXISTS (
+            SELECT 1 FROM package_units pu
+            WHERE pu.id = NEW.package_unit_id AND pu.status = 'ACTIVE'
+          )
+        BEGIN SELECT RAISE(ABORT, 'inactive package cannot be preferred'); END;`,
       `CREATE TABLE product_identifiers (
         id TEXT PRIMARY KEY,
         product_variant_id TEXT NOT NULL REFERENCES product_variants(id) ON DELETE RESTRICT,
@@ -160,6 +235,22 @@ export const MIGRATIONS: Migration[] = [
         WHERE type IN ('INTERNAL_CODE', 'MANUFACTURER_CODE') AND status = 'ACTIVE';`,
       'CREATE INDEX idx_identifiers_variant ON product_identifiers(product_variant_id);',
       'CREATE INDEX idx_identifiers_lookup ON product_identifiers(normalized_value);',
+      `CREATE TRIGGER trg_product_identifiers_package_insert
+        BEFORE INSERT ON product_identifiers
+        WHEN NEW.package_unit_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM package_units pu
+          WHERE pu.id = NEW.package_unit_id
+            AND pu.product_variant_id = NEW.product_variant_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'identifier package variant mismatch'); END;`,
+      `CREATE TRIGGER trg_product_identifiers_package_update
+        BEFORE UPDATE OF product_variant_id, package_unit_id ON product_identifiers
+        WHEN NEW.package_unit_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM package_units pu
+          WHERE pu.id = NEW.package_unit_id
+            AND pu.product_variant_id = NEW.product_variant_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'identifier package variant mismatch'); END;`,
       `CREATE TABLE outbox_operations (
         operation_id TEXT PRIMARY KEY,
         store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
@@ -177,6 +268,20 @@ export const MIGRATIONS: Migration[] = [
           CHECK (status IN ('PENDING', 'SYNCING', 'SYNCED', 'CONFLICT', 'ERROR_RETRYABLE', 'ERROR_PERMANENT'))
       );`,
       'CREATE INDEX idx_outbox_store_status ON outbox_operations(store_id, status, created_at);',
+      `CREATE TRIGGER trg_outbox_device_store_insert
+        BEFORE INSERT ON outbox_operations
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id AND d.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'outbox device does not belong to store'); END;`,
+      `CREATE TRIGGER trg_outbox_device_store_update
+        BEFORE UPDATE OF store_id, device_id ON outbox_operations
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id AND d.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'outbox device does not belong to store'); END;`,
     ],
   },
 ];

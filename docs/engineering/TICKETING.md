@@ -64,14 +64,18 @@ testable completion condition.
 These artifacts have different jobs. Keep each concise and correct instead of
 copying full histories between them.
 
-## Current M2 Gate
+## Current Milestone Gate
 
-M1 passed independent source and automated re-audit on 2026-09-14. Its Galaxy
-A15 5G native restart check is explicitly waived as an M2 entry blocker and
-carried forward as mandatory before external beta/native release readiness.
+M1 passed independent source and automated re-audit on 2026-09-14. On
+2026-09-15, the Galaxy A15 5G preview build proved local-store and temporary
+catalogue creation, force-stop/relaunch retention, airplane-mode retention,
+and 1.3 text-scale rendering. The development-client/Metro-specific check is
+still open because its downloaded APK was corrupted before installation; it
+remains required before an external beta/native release claim.
 
-The founder delegated M2 granularity, dependency, and design judgement to the
-engineering planner. The reviewed M2 ticket set is published at repository root
-in `tickets.md`. The implementation agent must complete M2 and stop for the
-independent audit in `docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md` before
-M3 tickets are created.
+M2 passed independent source and automated audit on 2026-09-14 after correction
+of integrity, replay, preference, fresh-install, and navigation defects. The
+founder then approved D-036/D-037 and the M3 Sell-flow baseline. M3-01 through
+M3-05 are now published in `tickets.md` and registered in
+`.agents/workflows/m3-sales.json`. The implementation agent must stop after
+M3-05 for independent audit before any M4 tickets or feature code.

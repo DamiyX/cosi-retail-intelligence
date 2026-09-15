@@ -571,7 +571,9 @@ Inventory decreases by 20 base units.
 
 ## 7.3 Payment
 
-Represents payment received against a sale.
+Represents the amount allocated to one sale tender method. For cash, bank
+transfer, and POS/card this is payment received. For credit it is the amount
+owed and must not be counted as cash received.
 
 ### Core fields
 
@@ -596,6 +598,12 @@ Even if the MVP UI initially asks for one payment method, using a separate Payme
 - split payments;
 - later partial credit settlement;
 - corrections.
+
+### M3 clarification
+
+M3 records one tender allocation equal to the completed sale total. A credit
+tender requires a lightweight customer identity and matching OPEN Receivable.
+Split tender and partial credit settlement remain deferred under D-037.
 
 ---
 

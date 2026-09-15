@@ -121,11 +121,14 @@ describe('M2 product shell', () => {
     expect(await screen.findByText(/arrive in milestone M3/)).toBeTruthy();
   });
 
-  it('shows the honest pending state when the device holds no store', async () => {
+  it('provisions a local store from a fresh database and reaches Products', async () => {
     mockDatabase?.closeAndDelete();
     mockDatabase = openIsolatedDatabase(MIGRATIONS);
     renderRouter(ROUTES, { initialUrl: '/products' });
-    expect(await screen.findByText('No store yet')).toBeTruthy();
-    expect(screen.queryByText('No products yet')).toBeNull();
+    expect(await screen.findByText('Set up this store')).toBeTruthy();
+    fireEvent.changeText(screen.getByTestId('setup-owner-name'), 'Ada');
+    fireEvent.changeText(screen.getByTestId('setup-store-name'), 'Ada Provisions');
+    fireEvent.press(screen.getByText('Create local store'));
+    expect(await screen.findByText('No products yet')).toBeTruthy();
   });
 });

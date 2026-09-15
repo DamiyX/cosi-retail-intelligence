@@ -106,6 +106,8 @@ When a major decision changes, update the affected source-of-truth document too.
 | D-033 | COSI is the temporary internal project codename | ACTIVE |
 | D-034 | Authoritative quantities use fixed-scale micro-units | ACTIVE |
 | D-035 | Temporary products use store-scoped provisional variants | ACTIVE |
+| D-036 | Local sale arithmetic is exact-or-reject | ACTIVE |
+| D-037 | M3 uses one tender allocation with explicit credit truth | ACTIVE |
 
 ---
 
@@ -1074,6 +1076,74 @@ temporary product from participating safely in quantity calculations.
 
 ---
 
+## D-036 — Exact Local Sale Arithmetic
+
+**Status:** ACTIVE  
+**Date:** 2026-09-14
+
+### Decision
+
+- Persist sale package quantity and inventory quantity as D-034 micro-unit
+  integers.
+- Compute `quantityBase = quantityPackages × conversionSnapshot / 1,000,000`
+  and reject a result that is not exactly representable.
+- Persist unit selling price and absolute line discount in integer minor units.
+- Compute gross line money as
+  `unitPriceMinor × quantityPackages / 1,000,000`; reject a fractional minor
+  unit instead of silently rounding.
+- Define `lineTotal = grossLine - discountAmount`, `subtotal = sum(grossLine)`,
+  `discountTotal = sum(discountAmount)`, and `total = sum(lineTotal)`.
+
+### Rationale
+
+This extends the approved exact-or-reject quantity and money rules into M3,
+keeps completed-sale totals reproducible, and avoids JavaScript floating-point
+authority or hidden rounding.
+
+### Consequences
+
+The sale form must explain the rare quantity/price combination that would
+produce less than one currency minor unit. Discounts are line-level absolute
+amounts in M3; percentage and order-level discounts are deferred.
+
+---
+
+## D-037 — M3 Tender, Credit, Draft, and Correction Boundary
+
+**Status:** ACTIVE  
+**Date:** 2026-09-14
+
+### Decision
+
+- The M3 cart is an in-memory draft. No Sale or outbox row exists until the
+  retailer confirms completion; leaving a dirty cart requires confirmation.
+- One tender allocation covers the completed sale total in M3: cash, bank
+  transfer, POS/card, or credit. Split tender is deferred.
+- `Payment.amount` represents the amount allocated to its tender method. Credit
+  is not counted as cash received.
+- A credit sale requires a customer name and atomically creates or selects a
+  lightweight CustomerAccount plus an OPEN Receivable for the credit amount.
+  Name alone never auto-merges two accounts: the retailer explicitly selects
+  an existing match or creates a new account.
+  Partial settlement and debt-collection workflow are deferred.
+- Cost/COGS snapshots are nullable until M4 supplies a validated cost state.
+  M4 must not retroactively invent cost for already-completed sales.
+- Completed sales are immutable in M3. Void/reversal/return UI waits for its
+  explicit correction design; no delete or edit path is exposed.
+
+### Rationale
+
+This is the smallest coherent implementation of every PRD payment method while
+keeping cash reporting honest and preserving completed transaction history.
+
+### Consequences
+
+Unexpected app termination can lose an uncompleted cart, but never a completed
+sale. Completion must atomically commit the sale, items, tender, optional credit
+records, inventory events, and one aggregate outbox envelope.
+
+---
+
 # 6. Explicitly Deferred Decisions
 
 These are intentionally unresolved and should not be reopened as though they were forgotten.
@@ -1277,10 +1347,11 @@ Superseded by:
 
 # 9. Current Decision Review
 
-As of 2026-09-13:
+As of 2026-09-14:
 
 - no active decision is known to conflict with the current Product Inception, PRD, Domain Model, Technical Architecture, Offline Sync or Scanning Architecture;
-- no code exists yet that requires migration from an older implementation;
+- M0–M2 are implemented; M2 passed independent source and automated audit, and
+  M3 transaction/design contracts are approved but feature code has not begun;
 - provisional decisions requiring the strongest later validation are:
   - custom sync vs managed sync;
   - moving weighted-average costing;

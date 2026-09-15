@@ -6,7 +6,7 @@ import {
   createPackageUnit,
   deactivatePackageUnit,
   enqueueOutboxOperation,
-  findOutboxOperation,
+  findExpectedOutboxReplay,
   getActiveBasePackageUnit,
   getPackageUnitById,
   getProductVariantById,
@@ -14,6 +14,7 @@ import {
   getStoreProductById,
   getStoreProductByStoreAndVariant,
   getStorePackageSetting,
+  listStorePackageSettings,
   saveStorePackageSetting,
   updatePackageUnit,
   updateStoreProductPreferredPackage,
@@ -69,7 +70,9 @@ export function createPackage(
   const deviceId = requireId(input.deviceId);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
-  const replayed = findOutboxOperation(adapter, operationId);
+  const replayed = findExpectedOutboxReplay(adapter, {
+    operationId, storeId, deviceId, operationType: 'PACKAGE_CREATED', entityType: 'PACKAGE_UNIT',
+  });
   if (replayed) {
     return rehydratePackageResult(adapter, replayed);
   }
@@ -89,8 +92,11 @@ export function createPackage(
       symbol: input.symbol,
       conversionToBaseMicros: conversionMicros,
       isBaseUnit: false,
+      isSellable: input.isSellable,
+      isPurchasable: input.isPurchasable,
     });
     const setting = savePackageSetting(adapter, generateId, storeProduct.id, packageUnit.id, currency, input.setting);
+    const updatedProduct = synchronizeSalePreference(adapter, storeProduct, packageUnit, setting);
     const outbox = enqueueOutboxOperation(adapter, {
       operationType: 'PACKAGE_CREATED',
       operationId,
@@ -99,9 +105,14 @@ export function createPackage(
       entityType: 'PACKAGE_UNIT',
       entityId: packageUnit.id,
       occurredAt,
-      entities: { storeProduct, packageUnit, setting },
+      entities: {
+        storeProduct: updatedProduct,
+        packageUnit,
+        setting,
+        storePackageSettings: listStorePackageSettings(adapter, updatedProduct.id),
+      },
     });
-    return { storeProduct, packageUnit, setting, outbox };
+    return { storeProduct: updatedProduct, packageUnit, setting, outbox };
   });
 }
 
@@ -132,7 +143,10 @@ export function updatePackage(
   const deviceId = requireId(input.deviceId);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
-  const replayed = findOutboxOperation(adapter, operationId);
+  const replayed = findExpectedOutboxReplay(adapter, {
+    operationId, storeId, deviceId, operationType: 'PACKAGE_UPDATED', entityType: 'PACKAGE_UNIT',
+    entityId: input.packageUnitId,
+  });
   if (replayed) {
     return rehydratePackageResult(adapter, replayed);
   }
@@ -144,6 +158,12 @@ export function updatePackage(
       throw new DomainError('INVALID_VALUE', 'Package unit does not exist.');
     }
     const storeProduct = requireOwnedPackage(adapter, storeId, existing);
+    if (
+      existing.status === 'INACTIVE' &&
+      (input.setting?.isPreferredForSale === true || input.setting?.isPreferredForPurchase === true)
+    ) {
+      throw new DomainError('INVALID_VALUE', 'An inactive package cannot be preferred.');
+    }
     const currency = requireStoreCurrency(adapter, storeId);
     const packageUnit = updatePackageUnit(adapter, existing.id, {
       name: input.name,
@@ -155,6 +175,7 @@ export function updatePackage(
       input.setting === undefined
         ? getStorePackageSetting(adapter, storeProduct.id, packageUnit.id)
         : savePackageSetting(adapter, generateId, storeProduct.id, packageUnit.id, currency, input.setting);
+    const updatedProduct = synchronizeSalePreference(adapter, storeProduct, packageUnit, setting);
     const outbox = enqueueOutboxOperation(adapter, {
       operationType: 'PACKAGE_UPDATED',
       operationId,
@@ -163,9 +184,14 @@ export function updatePackage(
       entityType: 'PACKAGE_UNIT',
       entityId: packageUnit.id,
       occurredAt,
-      entities: { storeProduct, packageUnit, setting },
+      entities: {
+        storeProduct: updatedProduct,
+        packageUnit,
+        setting,
+        storePackageSettings: listStorePackageSettings(adapter, updatedProduct.id),
+      },
     });
-    return { storeProduct, packageUnit, setting, outbox };
+    return { storeProduct: updatedProduct, packageUnit, setting, outbox };
   });
 }
 
@@ -192,7 +218,10 @@ export function deactivatePackage(
   const deviceId = requireId(input.deviceId);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
-  const replayed = findOutboxOperation(adapter, operationId);
+  const replayed = findExpectedOutboxReplay(adapter, {
+    operationId, storeId, deviceId, operationType: 'PACKAGE_DEACTIVATED', entityType: 'PACKAGE_UNIT',
+    entityId: input.packageUnitId,
+  });
   if (replayed) {
     return rehydratePackageResult(adapter, replayed);
   }
@@ -218,6 +247,18 @@ export function deactivatePackage(
         updatedProduct = updateStoreProductPreferredPackage(adapter, storeProduct.id, base.id);
       }
     }
+    const existingSetting = getStorePackageSetting(adapter, updatedProduct.id, packageUnit.id);
+    const setting = existingSetting
+      ? saveStorePackageSetting(adapter, {
+          id: existingSetting.id,
+          storeProductId: existingSetting.storeProductId,
+          packageUnitId: existingSetting.packageUnitId,
+          defaultSellingPriceMinor: existingSetting.defaultSellingPriceMinor,
+          minimumSellingPriceMinor: existingSetting.minimumSellingPriceMinor,
+          isPreferredForSale: false,
+          isPreferredForPurchase: false,
+        })
+      : null;
     const outbox = enqueueOutboxOperation(adapter, {
       operationType: 'PACKAGE_DEACTIVATED',
       operationId,
@@ -226,9 +267,13 @@ export function deactivatePackage(
       entityType: 'PACKAGE_UNIT',
       entityId: packageUnit.id,
       occurredAt,
-      entities: { storeProduct: updatedProduct, packageUnit },
+      entities: {
+        storeProduct: updatedProduct,
+        packageUnit,
+        setting,
+        storePackageSettings: listStorePackageSettings(adapter, updatedProduct.id),
+      },
     });
-    const setting = getStorePackageSetting(adapter, updatedProduct.id, packageUnit.id);
     return { storeProduct: updatedProduct, packageUnit, setting, outbox };
   });
 }
@@ -277,6 +322,24 @@ function requireStoreCurrency(adapter: DatabaseAdapter, storeId: string): string
   return store.currencyCode;
 }
 
+function synchronizeSalePreference(
+  adapter: DatabaseAdapter,
+  storeProduct: StoreProductRow,
+  packageUnit: PackageUnitRow,
+  setting: StorePackageSettingRow | null,
+): StoreProductRow {
+  if (setting?.isPreferredForSale) {
+    return updateStoreProductPreferredPackage(adapter, storeProduct.id, packageUnit.id);
+  }
+  if (storeProduct.preferredPackageUnitId !== packageUnit.id || packageUnit.isBaseUnit) {
+    return storeProduct;
+  }
+  const base = getActiveBasePackageUnit(adapter, storeProduct.productVariantId);
+  return base
+    ? updateStoreProductPreferredPackage(adapter, storeProduct.id, base.id)
+    : storeProduct;
+}
+
 function requireOwnedProduct(
   adapter: DatabaseAdapter,
   storeId: string,
@@ -323,5 +386,6 @@ function rehydratePackageResult(
   if (!storeProduct) {
     throw new Error('Outbox replay references a product that no longer exists.');
   }
-  return { storeProduct, packageUnit, setting: null, outbox };
+  const setting = getStorePackageSetting(adapter, storeProduct.id, packageUnit.id);
+  return { storeProduct, packageUnit, setting, outbox };
 }

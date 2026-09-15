@@ -20,18 +20,19 @@
 | Cloud native builds | EAS | Project linked |
 | CI | GitHub Actions | Windows and Ubuntu validation |
 
-The mobile package is apps/mobile. It currently contains only the M0 Welcome
-and About navigation shell. There is no approved design system, component
-library, global state library, server-state library, or business feature code.
+The mobile package is apps/mobile. It contains the M1 SQLite/domain foundation
+and the audited M2 Products catalogue, package, lifecycle, and local provisioning
+flows. The app uses a small project-owned component/theme layer; no global or
+server-state library has been selected.
 
 ## Approved but Not Implemented
 
-- Expo SQLite for durable local business data.
+- Supabase synchronization and remote business schema.
 - Supabase PostgreSQL, Auth, Storage, and Edge Functions.
 - A hosted Supabase development project and migration-driven schema.
 - Domain packages only when M1 responsibilities justify them.
-- A durable outbox schema and atomic enqueue beginning with M2 mutable catalogue
-  operations; network synchronization workers remain M7 scope.
+- Network synchronization workers over the implemented durable local outbox;
+  they remain M7 scope.
 
 These items are architecture commitments, not evidence that a package, schema,
 remote project, or runtime behavior already exists.

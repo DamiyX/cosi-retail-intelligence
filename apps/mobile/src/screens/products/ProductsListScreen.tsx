@@ -4,6 +4,7 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 import type { CatalogueClient } from '../../catalogue/client';
 import type { ProductLifecycleFilter, ProductSearchHit } from '../../db/repositories';
 import { EmptyState, ErrorPanel, PrimaryButton, StatusNote } from '../../ui/components';
+import { displayMoney } from '../../ui/money';
 import { theme } from '../../ui/theme';
 
 interface ProductsListScreenProps {
@@ -114,6 +115,7 @@ export default function ProductsListScreen({
           contentContainerStyle={styles.list}
           renderItem={({ item }) => {
             const label = statusLabel(item);
+            const price = displayMoney(item.preferredSellingPriceMinor, client.storeCurrencyCode);
             return (
               <Pressable
                 accessibilityRole="button"
@@ -126,6 +128,7 @@ export default function ProductsListScreen({
                 {item.preferredPackageName ? (
                   <Text style={styles.rowMeta}>Sold per {item.preferredPackageName}</Text>
                 ) : null}
+                {price ? <Text style={styles.rowMeta}>Selling price: {price}</Text> : null}
               </Pressable>
             );
           }}

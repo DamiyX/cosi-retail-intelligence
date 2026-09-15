@@ -5,7 +5,8 @@ import type { DatabaseAdapter } from '../db/adapter';
 import {
   createProductIdentifier,
   enqueueOutboxOperation,
-  findOutboxOperation,
+  findExpectedOutboxReplay,
+  getPackageUnitById,
   getProductIdentifierById,
   getProductVariantById,
   getStoreProductById,
@@ -52,7 +53,14 @@ export function updateProductIdentity(
   const deviceId = requireId(input.deviceId);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
-  const replayed = findOutboxOperation(adapter, operationId);
+  const replayed = findExpectedOutboxReplay(adapter, {
+    operationId,
+    storeId,
+    deviceId,
+    operationType: 'PRODUCT_IDENTITY_UPDATED',
+    entityType: 'STORE_PRODUCT',
+    entityId: input.storeProductId,
+  });
   if (replayed) {
     return rehydrateIdentityResult(adapter, replayed);
   }
@@ -111,7 +119,13 @@ export function addProductIdentifier(
   const deviceId = requireId(input.deviceId);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
-  const replayed = findOutboxOperation(adapter, operationId);
+  const replayed = findExpectedOutboxReplay(adapter, {
+    operationId,
+    storeId,
+    deviceId,
+    operationType: 'PRODUCT_IDENTIFIER_ADDED',
+    entityType: 'PRODUCT_IDENTIFIER',
+  });
   if (replayed) {
     return rehydrateIdentifierResult(adapter, replayed);
   }
@@ -119,6 +133,12 @@ export function addProductIdentifier(
   const occurredAt = nowIso();
   return adapter.transaction(() => {
     const storeProduct = requireOwnedProduct(adapter, storeId, input.storeProductId);
+    if (input.packageUnitId) {
+      const packageUnit = getPackageUnitById(adapter, input.packageUnitId);
+      if (!packageUnit || packageUnit.productVariantId !== storeProduct.productVariantId) {
+        throw new DomainError('INVALID_VALUE', 'Package unit does not belong to this product.');
+      }
+    }
     const identifier = createProductIdentifier(adapter, {
       id: generateId(),
       productVariantId: storeProduct.productVariantId,

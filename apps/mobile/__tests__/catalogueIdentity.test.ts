@@ -246,6 +246,35 @@ describe('M2-02 product identifiers', () => {
     }
   });
 
+  it('rejects attaching an identifier to another product package', () => {
+    const { fixture, graph } = openProductFixture();
+    try {
+      const other = createTemporaryProduct(
+        fixture.adapter,
+        { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, name: 'Omo' },
+        { generateId: deterministicIds(10750) },
+      );
+      expectDomainError(
+        () => addProductIdentifier(
+          fixture.adapter,
+          {
+            storeId: fixture.context.store.id,
+            deviceId: fixture.context.device.id,
+            storeProductId: graph.storeProduct.id,
+            packageUnitId: other.basePackage.id,
+            type: 'EAN',
+            value: '6001234567890',
+          },
+          { generateId: deterministicIds(10760) },
+        ),
+        'INVALID_VALUE',
+      );
+      expect(listProductIdentifiers(fixture.adapter, graph.variant.id)).toHaveLength(0);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
   it('rejects a duplicate exact barcode on another product without writing', () => {
     const { fixture, graph } = openProductFixture();
     try {

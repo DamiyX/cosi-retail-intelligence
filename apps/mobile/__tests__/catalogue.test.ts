@@ -145,6 +145,65 @@ describe('M2-01 catalogue migration', () => {
       fixture.closeAndDelete();
     }
   });
+
+  it('rejects cross-owner catalogue and outbox references at the database boundary', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const first = createTemporaryProduct(
+        fixture.adapter,
+        { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, name: 'First' },
+        { generateId: deterministicIds(700) },
+      );
+      const second = createTemporaryProduct(
+        fixture.adapter,
+        { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, name: 'Second' },
+        { generateId: deterministicIds(800) },
+      );
+      const otherContext = provisionStoreContext(
+        fixture.adapter,
+        {
+          ownerDisplayName: 'Other owner', storeName: 'Other store', currencyCode: 'NGN',
+          countryCode: 'NG', timezone: 'Africa/Lagos', appVersion: '0.0.1',
+        },
+        { generateId: deterministicIds(900) },
+      );
+      const timestamp = new Date().toISOString();
+
+      expect(() => fixture.adapter.run(
+        `INSERT INTO store_products
+          (id, store_id, product_variant_id, is_temporary, status, created_at, updated_at)
+         VALUES (?, ?, ?, 1, 'ACTIVE', ?, ?);`,
+        [testId(950), otherContext.store.id, first.variant.id, timestamp, timestamp],
+      )).toThrow();
+      expect(() => fixture.adapter.run(
+        'UPDATE store_products SET preferred_package_unit_id = ? WHERE id = ?;',
+        [second.basePackage.id, first.storeProduct.id],
+      )).toThrow();
+      expect(() => fixture.adapter.run(
+        `INSERT INTO store_package_settings
+          (id, store_product_id, package_unit_id, is_preferred_for_sale,
+           is_preferred_for_purchase, created_at, updated_at)
+         VALUES (?, ?, ?, 0, 0, ?, ?);`,
+        [testId(951), first.storeProduct.id, second.basePackage.id, timestamp, timestamp],
+      )).toThrow();
+      expect(() => fixture.adapter.run(
+        `INSERT INTO product_identifiers
+          (id, product_variant_id, package_unit_id, type, value, normalized_value,
+           status, created_at, updated_at)
+         VALUES (?, ?, ?, 'EAN', '123', '123', 'ACTIVE', ?, ?);`,
+        [testId(952), first.variant.id, second.basePackage.id, timestamp, timestamp],
+      )).toThrow();
+      expect(() => fixture.adapter.run(
+        `INSERT INTO outbox_operations
+          (operation_id, store_id, device_id, entity_type, entity_id, operation_type,
+           payload, created_at, status)
+         VALUES (?, ?, ?, 'STORE_PRODUCT', ?, 'PRODUCT_CREATED', '{}', ?, 'PENDING');`,
+        [testId(953), fixture.context.store.id, otherContext.device.id, first.storeProduct.id, timestamp],
+      )).toThrow();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
 });
 
 describe('createTemporaryProduct application operation', () => {
@@ -238,6 +297,37 @@ describe('createTemporaryProduct application operation', () => {
       } finally {
         reopened.close();
       }
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('rejects operation-ID replay from another store instead of exposing its graph', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const operationId = testId(350);
+      createTemporaryProduct(
+        fixture.adapter,
+        { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, name: 'Private item' },
+        { generateId: deterministicIds(351), operationId },
+      );
+      const other = provisionStoreContext(
+        fixture.adapter,
+        {
+          ownerDisplayName: 'Other owner', storeName: 'Other store', currencyCode: 'NGN',
+          countryCode: 'NG', timezone: 'Africa/Lagos', appVersion: '0.0.1',
+        },
+        { generateId: deterministicIds(360) },
+      );
+      expectDomainError(
+        () => createTemporaryProduct(
+          fixture.adapter,
+          { storeId: other.store.id, deviceId: other.device.id, name: 'Attempted replay' },
+          { generateId: deterministicIds(370), operationId },
+        ),
+        'INVALID_VALUE',
+      );
+      expect(listStoreProducts(fixture.adapter, other.store.id)).toHaveLength(0);
     } finally {
       fixture.closeAndDelete();
     }

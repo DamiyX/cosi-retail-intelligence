@@ -67,6 +67,22 @@ export function saveStorePackageSetting(
     );
   }
   const timestamp = nowIso();
+  if (input.isPreferredForSale === true) {
+    adapter.run(
+      `UPDATE store_package_settings
+       SET is_preferred_for_sale = 0, updated_at = ?
+       WHERE store_product_id = ? AND package_unit_id <> ? AND is_preferred_for_sale = 1;`,
+      [timestamp, storeProductId, packageUnitId],
+    );
+  }
+  if (input.isPreferredForPurchase === true) {
+    adapter.run(
+      `UPDATE store_package_settings
+       SET is_preferred_for_purchase = 0, updated_at = ?
+       WHERE store_product_id = ? AND package_unit_id <> ? AND is_preferred_for_purchase = 1;`,
+      [timestamp, storeProductId, packageUnitId],
+    );
+  }
   adapter.run(
     `INSERT INTO store_package_settings
       (id, store_product_id, package_unit_id, default_selling_price_minor,

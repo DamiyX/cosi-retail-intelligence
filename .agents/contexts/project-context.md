@@ -20,10 +20,10 @@ The current strategy is:
 > Lead with price. Deliver with control. Build the network through normal
 > business activity.
 
-M0 Project Foundation is complete. No business domain, SQLite schema, sync,
-market network, or recognition implementation exists yet. M1 Domain + Local
-Database is approved and ready for implementation through the published
-tickets.
+M0 Project Foundation, M1 Domain + Local Database, and M2 Catalogue + Package
+Units are implemented. M2 passed independent source and automated audit; its
+review corrections remain uncommitted. Network sync, sales, market network, and
+recognition inference are not implemented.
 
 ## Product Snapshot
 
@@ -74,11 +74,10 @@ partial measure, never full profit or P&L.
 
 ## Current Priorities
 
-1. Execute the approved M1 domain primitives, money/quantity rules, local
-   database, repositories, migrations, transactions, and test foundation.
-2. Keep product/package entities in M2. M2 must introduce durable outbox storage
-   and atomic enqueue before its first mutable catalogue operation is complete;
-   network synchronization remains M7.
+1. Review and commit the accepted M2 audit corrections and approved M3 planning
+   artifacts, then create `feat/m3-sales`.
+2. Execute M3-01 through M3-05 using active D-036/D-037, the approved Sell-flow
+   design, the M2 durable outbox, and the M1 transaction boundary.
 3. Continue through the milestone order in BUILD_PLAN.md, validating useful
    retailer workflows early instead of building all future infrastructure at
    once.
@@ -110,8 +109,8 @@ partial measure, never full profit or P&L.
 
 ## Open Questions and Gates
 
-- Define the detailed temporary-product/package-unit behavior during M2
-  planning; M1 contains only domain-neutral conversion utilities.
+- Validate D-036 exact-or-reject sale arithmetic against real retailer values;
+  split tender, partial credit settlement, and reversal remain later gates.
 - Confirm onboarding, session recovery, store creation/membership, multiple
   stores, and exact staff permissions before those flows are implemented.
 - Review the costing policy before M4 implementation.

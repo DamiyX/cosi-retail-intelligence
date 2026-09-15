@@ -5,6 +5,7 @@ export {
   countPendingOutboxOperations,
   enqueueOutboxOperation,
   findOutboxOperation,
+  findExpectedOutboxReplay,
   listPendingOutboxOperations,
   OUTBOX_PAYLOAD_VERSION,
 } from './outbox';

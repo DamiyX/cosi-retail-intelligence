@@ -1,8 +1,9 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-14T03:00:00Z",
+  "updated_at": "2026-09-14T12:30:00Z",
   "tasks": {
     "m1-domain-local-database": "m1-domain-local-database.json",
-    "m2-catalogue-package-units": "m2-catalogue-package-units.json"
+    "m2-catalogue-package-units": "m2-catalogue-package-units.json",
+    "m3-sales": "m3-sales.json"
   }
 }

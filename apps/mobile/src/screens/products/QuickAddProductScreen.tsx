@@ -1,6 +1,6 @@
 import { DomainError } from '@retail/domain';
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { CatalogueClient } from '../../catalogue/client';
 import { ErrorPanel, Field, PrimaryButton, SecondaryButton } from '../../ui/components';
@@ -47,6 +47,30 @@ export default function QuickAddProductScreen({
   const [errors, setErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
+  const dirty =
+    name !== initialName || baseUnitName !== 'piece' || localSku.length > 0 || barcode.length > 0;
+
+  const cancel = useCallback((): void => {
+    if (!dirty) {
+      onCancel();
+      return;
+    }
+    Alert.alert('Discard product?', 'Your entries will be lost.', [
+      { text: 'Keep editing', style: 'cancel' },
+      { text: 'Discard', style: 'destructive', onPress: onCancel },
+    ]);
+  }, [dirty, onCancel]);
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!dirty) {
+        return false;
+      }
+      cancel();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [cancel, dirty]);
 
   const save = (): void => {
     if (saving) {
@@ -88,7 +112,7 @@ export default function QuickAddProductScreen({
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <Text accessibilityRole="header" style={styles.title}>
         Add product
       </Text>
@@ -155,7 +179,7 @@ export default function QuickAddProductScreen({
           title="Not saved"
           message={failure}
           onRetry={save}
-          onDismiss={onCancel}
+          onDismiss={cancel}
         />
       ) : null}
       <View style={styles.actions}>
@@ -165,14 +189,14 @@ export default function QuickAddProductScreen({
           disabled={saving}
           accessibilityHint="Save this product on this device"
         />
-        <SecondaryButton title="Cancel" onPress={onCancel} />
+        <SecondaryButton title="Cancel" onPress={cancel} />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: theme.spacing(4), gap: theme.spacing(3), backgroundColor: theme.color.canvas },
+  container: { flexGrow: 1, padding: theme.spacing(4), gap: theme.spacing(3), backgroundColor: theme.color.canvas },
   title: { color: theme.color.textPrimary, fontSize: theme.fontSize.header, fontWeight: '600' },
   note: { color: theme.color.textSecondary, fontSize: theme.fontSize.body, lineHeight: 24 },
   moreToggle: {

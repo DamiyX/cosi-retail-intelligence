@@ -168,6 +168,43 @@ export function findOutboxOperation(
   return row ? mapRow(row) : null;
 }
 
+export interface ExpectedOutboxReplay {
+  operationId: string;
+  storeId: string;
+  deviceId: string;
+  operationType: CatalogueOperationType;
+  entityType: OutboxEntityType;
+  /** Known for mutations of an existing entity; omitted for create operations. */
+  entityId?: string;
+}
+
+/**
+ * Resolve an idempotent replay without allowing an operation ID from another
+ * store, device, mutation type, or entity to be mistaken for this request.
+ */
+export function findExpectedOutboxReplay(
+  adapter: DatabaseAdapter,
+  expected: ExpectedOutboxReplay,
+): OutboxOperationRow | null {
+  const existing = findOutboxOperation(adapter, expected.operationId);
+  if (!existing) {
+    return null;
+  }
+  const mismatched =
+    existing.storeId !== requireId(expected.storeId) ||
+    existing.deviceId !== requireId(expected.deviceId) ||
+    existing.operationType !== expected.operationType ||
+    existing.entityType !== expected.entityType ||
+    (expected.entityId !== undefined && existing.entityId !== requireId(expected.entityId));
+  if (mismatched) {
+    throw new DomainError(
+      'INVALID_VALUE',
+      'This operation ID already belongs to a different catalogue request.',
+    );
+  }
+  return existing;
+}
+
 /** Pending envelopes for one store, oldest first (future M7 push order). */
 export function listPendingOutboxOperations(
   adapter: DatabaseAdapter,

@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "task_id": "m3-sales",
+  "workflow_id": "build-feature",
+  "mode": "implement",
+  "status": "ready",
+  "current_state": "m3-ready-for-implementation",
+  "completed_states": [
+    "m2-independent-audit",
+    "m3-architecture-decisions",
+    "m3-design-gate",
+    "m3-ticket-review"
+  ],
+  "owner": {
+    "agent": "external-implementation-agent",
+    "thread": "unassigned",
+    "worktree": null
+  },
+  "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m0",
+  "lease": null,
+  "evidence": [
+    {
+      "kind": "audit",
+      "path": "docs/engineering/PROJECT_STATE.md",
+      "claim": "M2 passed independent source and automated audit after corrections; physical Galaxy evidence remains a carried pre-beta gate."
+    },
+    {
+      "kind": "decision",
+      "path": "docs/decisions/DECISION_LOG.md",
+      "claim": "Active D-036 and D-037 define exact sale arithmetic and the M3 tender, credit, draft, cost, and correction boundary."
+    },
+    {
+      "kind": "design",
+      "path": "docs/design/DESIGN.md",
+      "claim": "The M3 Sell, line configuration, cart, payment, completion, history, failure, Android, and accessibility behavior is approved."
+    },
+    {
+      "kind": "tickets",
+      "path": "tickets.md",
+      "claim": "M3-01 through M3-05 are vertical, dependency-ordered, testable, and stop before M4."
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "m2-accepted-baseline",
+      "claim": "M2 catalogue and package foundations pass independent audit before sales depend on them.",
+      "owner": "independent-auditor",
+      "required": true,
+      "status": "met",
+      "depends_on": [],
+      "verification": {
+        "kind": "review-and-tests",
+        "procedure": "Audit M2 source, migrations, tests, UI states, and recorded evidence.",
+        "success_condition": "Catalogue/package ownership, exact conversion, local persistence, and outbox capture are safe inputs to M3."
+      },
+      "evidence": [
+        {
+          "result": "M2 accepted after corrections; npm run validate passed with 126 domain and 137 mobile tests, Doctor 21/21, clean Expo dependency check, and successful Android export.",
+          "source": "tickets.md; docs/engineering/PROJECT_STATE.md",
+          "observed_at": "2026-09-14T12:00:00Z"
+        }
+      ],
+      "limitations": ["Physical Galaxy verification remains carried."],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m3-transaction-decisions",
+      "claim": "Exact arithmetic, tender, credit, draft, cost, and correction semantics are approved before M3 schema or code.",
+      "owner": "founder-and-systems-architecture-review",
+      "required": true,
+      "status": "met",
+      "depends_on": ["m2-accepted-baseline"],
+      "verification": {
+        "kind": "decision-review",
+        "procedure": "Review D-036/D-037 against the PRD, domain model, D-013, D-034, and offline-sync aggregate contract.",
+        "success_condition": "M3 can calculate and persist a coherent completed sale without hidden rounding, cash misstatement, or destructive history."
+      },
+      "evidence": [
+        {
+          "result": "Founder explicitly approved D-036 and D-037 as written.",
+          "source": "Current user instruction; docs/decisions/DECISION_LOG.md",
+          "observed_at": "2026-09-14T12:30:00Z"
+        }
+      ],
+      "limitations": ["Split tender, partial settlement, and reversal remain deferred."],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m3-design-baseline",
+      "claim": "The substantial Sell flow has an approved screen sequence, state, recovery, Android, and accessibility baseline.",
+      "owner": "founder-and-design-capable-agent",
+      "required": true,
+      "status": "met",
+      "depends_on": ["m3-transaction-decisions"],
+      "verification": {
+        "kind": "design-review",
+        "procedure": "Review the M3 section of DESIGN.md and M3_SALES_PLAN.md.",
+        "success_condition": "An implementation agent can build Sell without inventing product behavior or later scanner/reversal scope."
+      },
+      "evidence": [
+        {
+          "result": "Founder approved the proposed M3 contracts; DESIGN.md records the resulting Sell baseline.",
+          "source": "docs/design/DESIGN.md; docs/engineering/M3_SALES_PLAN.md",
+          "observed_at": "2026-09-14T12:30:00Z"
+        }
+      ],
+      "limitations": ["Real-device layout remains to be verified."],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m3-tickets-verified",
+      "claim": "M3 tickets are vertical, dependency-ordered, and independently auditable.",
+      "owner": "engineering-planner",
+      "required": true,
+      "status": "met",
+      "depends_on": ["m3-design-baseline"],
+      "verification": {
+        "kind": "ticket-review",
+        "procedure": "Review M3-01 through M3-05 outcomes, non-goals, dependencies, acceptance checks, and stop boundary.",
+        "success_condition": "Each ticket fits a clean implementation context and leaves validation green."
+      },
+      "evidence": [
+        {
+          "result": "Founder previously delegated ticket granularity and dependency judgement; the published M3 frontier follows the repository ticket contract.",
+          "source": "tickets.md; docs/engineering/TICKETING.md",
+          "observed_at": "2026-09-14T12:30:00Z"
+        }
+      ],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "carried-galaxy-verification",
+      "claim": "The current native build passes provisioning, force-stop/relaunch, offline catalogue and sale, history, and large-text checks on the Galaxy A15 5G.",
+      "owner": "founder-and-device-verification-agent",
+      "required": false,
+      "status": "blocked",
+      "depends_on": [],
+      "verification": {
+        "kind": "physical-device",
+        "procedure": "Install the current development/preview build, use airplane mode, complete the scripted M1-M3 flow, force-stop/relaunch, and record actual observations.",
+        "success_condition": "Device/build identifiers and observed persistence, offline, navigation, and text-scaling results are recorded before external beta."
+      },
+      "evidence": [],
+      "limitations": ["Does not block M3 source implementation."],
+      "blocker": "Galaxy A15 5G is available, but adb/Android SDK tooling is not installed on this laptop.",
+      "waiver": {
+        "reason": "Founder approved continuing source milestones while carrying physical evidence as a mandatory pre-beta gate.",
+        "approved_by": "founder"
+      }
+    },
+    {
+      "id": "m3-implementation-and-audit",
+      "claim": "M3-01 through M3-05 pass implementation evidence and independent audit before M4.",
+      "owner": "implementation-agent-and-independent-auditor",
+      "required": true,
+      "status": "pending",
+      "depends_on": ["m3-tickets-verified"],
+      "verification": {
+        "kind": "tests-device-and-review",
+        "procedure": "Execute tickets.md, record automated and available device evidence, then audit the final M3 branch.",
+        "success_condition": "A complete offline sale is exact, atomic, attributable, idempotent, durable, historically stable, and reviewable."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    }
+  ],
+  "artifacts": [
+    "tickets.md",
+    "docs/engineering/M3_SALES_PLAN.md",
+    "docs/design/DESIGN.md",
+    "docs/decisions/DECISION_LOG.md",
+    "docs/architecture/DOMAIN_DATA_MODEL.md",
+    "docs/architecture/OFFLINE_SYNC.md",
+    ".agents/contexts/app-flow.md"
+  ],
+  "approvals": [
+    {
+      "date": "2026-09-14",
+      "scope": "D-036 exact sale arithmetic and D-037 M3 tender, credit, draft, cost, and correction boundary approved as written."
+    },
+    {
+      "date": "2026-09-14",
+      "scope": "Engineering planner owns milestone ticket granularity and dependency judgement."
+    }
+  ],
+  "blockers": [],
+  "next_action": "Commit the accepted M2 audit corrections and approved M3 planning artifacts, create feat/m3-sales from that commit, then give the implementation agent the M3 handoff prompt. Implement M3-01 through M3-05 only and stop before M4 for independent audit.",
+  "created_at": "2026-09-14T12:30:00Z",
+  "updated_at": "2026-09-14T12:30:00Z",
+  "archived": false
+}

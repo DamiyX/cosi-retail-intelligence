@@ -73,8 +73,9 @@ upload must not block local transaction completion.
       -> synchronize later without duplicating the sale
 
 Scanner, recognition, network, or cloud-catalogue failure cannot block this
-journey. Exact cart layout, credit follow-up, receipt, void, return, correction,
-and reversal experiences require explicit design and domain review.
+journey. M3 uses an in-memory cart, one tender allocation, and the credit
+boundary in D-036/D-037. Receipt printing, split tender, partial credit
+settlement, void, return, correction, and reversal remain deferred.
 
 ## Restock or Purchase Journey
 
@@ -189,8 +190,8 @@ the approved final information architecture.
   use before beta and adjust only through an explicit design update.
 - Owner/admin versus cashier information density and shortcuts.
 - Onboarding, membership, invitation, recovery, and multiple-store behavior.
-- Cart editing, payment, credit, receipt, cancellation, correction, reversal,
-  and return behavior.
+- Receipt, split-tender, partial-credit, cancellation, correction, reversal,
+  and return behavior after the approved M3 boundary.
 - Detailed shared-catalogue consolidation after temporary-product enrichment.
 - Offline session expiry, local-write failure, sync conflict, and recovery UI.
 - Accessibility, text scale, touch targets, low-end device performance, camera

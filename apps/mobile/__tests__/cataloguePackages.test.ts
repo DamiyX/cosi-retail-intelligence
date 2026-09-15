@@ -12,7 +12,6 @@ import {
   getStorePackageSetting,
   getStoreProductById,
   listPackageUnitsByVariant,
-  updateStoreProductPreferredPackage,
 } from '../src/db/repositories';
 import {
   countRows,
@@ -58,10 +57,14 @@ describe('M2-03 package conversions', () => {
           storeProductId: graph.storeProduct.id,
           name: 'carton',
           conversionText: '40',
+          isSellable: false,
+          isPurchasable: true,
         },
         { generateId: deterministicIds(12100) },
       );
       expect(carton.packageUnit.conversionToBaseMicros).toBe(parseQuantityDecimal('40'));
+      expect(carton.packageUnit.isSellable).toBe(false);
+      expect(carton.packageUnit.isPurchasable).toBe(true);
       expect(formatQuantityMicros(carton.packageUnit.conversionToBaseMicros)).toBe('40');
       expect(carton.setting).toBeNull();
 
@@ -242,6 +245,38 @@ describe('M2-03 package conversions', () => {
     }
   });
 
+  it('keeps only one preferred sale package and synchronizes the product pointer', () => {
+    const { fixture, graph } = openProductFixture();
+    try {
+      const first = createPackage(
+        fixture.adapter,
+        {
+          storeId: fixture.context.store.id, deviceId: fixture.context.device.id,
+          storeProductId: graph.storeProduct.id, name: 'pack', conversionText: '10',
+          setting: { isPreferredForSale: true },
+        },
+        { generateId: deterministicIds(12950) },
+      );
+      const second = createPackage(
+        fixture.adapter,
+        {
+          storeId: fixture.context.store.id, deviceId: fixture.context.device.id,
+          storeProductId: graph.storeProduct.id, name: 'carton', conversionText: '40',
+          setting: { isPreferredForSale: true },
+        },
+        { generateId: deterministicIds(12960) },
+      );
+      expect(getStorePackageSetting(fixture.adapter, graph.storeProduct.id, first.packageUnit.id)
+        ?.isPreferredForSale).toBe(false);
+      expect(getStorePackageSetting(fixture.adapter, graph.storeProduct.id, second.packageUnit.id)
+        ?.isPreferredForSale).toBe(true);
+      expect(getStoreProductById(fixture.adapter, graph.storeProduct.id)?.preferredPackageUnitId)
+        .toBe(second.packageUnit.id);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
   it('rejects cross-store package writes', () => {
     const { fixture, graph } = openProductFixture();
     try {
@@ -310,8 +345,7 @@ describe('M2-03 package conversions', () => {
         { generateId: deterministicIds(13300) },
       );
       const before = getStoreProductById(fixture.adapter, graph.storeProduct.id);
-      expect(before?.preferredPackageUnitId).toBe(graph.basePackage.id);
-      updateStoreProductPreferredPackage(fixture.adapter, graph.storeProduct.id, created.packageUnit.id);
+      expect(before?.preferredPackageUnitId).toBe(created.packageUnit.id);
       expect(
         getStoreProductById(fixture.adapter, graph.storeProduct.id)?.preferredPackageUnitId,
       ).toBe(created.packageUnit.id);
@@ -328,6 +362,7 @@ describe('M2-03 package conversions', () => {
       expect(deactivated.packageUnit.status).toBe('INACTIVE');
       expect(deactivated.outbox.operationType).toBe('PACKAGE_DEACTIVATED');
       expect(deactivated.storeProduct.preferredPackageUnitId).toBe(graph.basePackage.id);
+      expect(deactivated.setting?.isPreferredForSale).toBe(false);
       expect(
         getStorePackageSetting(
           fixture.adapter,
@@ -338,6 +373,19 @@ describe('M2-03 package conversions', () => {
       const retained = getPackageUnitById(fixture.adapter, created.packageUnit.id);
       expect(retained?.status).toBe('INACTIVE');
       expect(retained?.conversionToBaseMicros).toBe(40_000_000);
+      expectDomainError(
+        () => updatePackage(
+          fixture.adapter,
+          {
+            storeId: fixture.context.store.id,
+            deviceId: fixture.context.device.id,
+            packageUnitId: created.packageUnit.id,
+            setting: { isPreferredForPurchase: true },
+          },
+          { generateId: deterministicIds(13550) },
+        ),
+        'INVALID_VALUE',
+      );
     } finally {
       fixture.closeAndDelete();
     }
@@ -377,6 +425,7 @@ describe('M2-03 package conversions', () => {
           storeProductId: graph.storeProduct.id,
           name: 'pack',
           conversionText: '10',
+          setting: { defaultSellingPrice: '250', isPreferredForSale: true },
         },
         { generateId: deterministicIds(13700), operationId },
       );
@@ -392,6 +441,8 @@ describe('M2-03 package conversions', () => {
         { generateId: deterministicIds(13800), operationId },
       );
       expect(second.packageUnit.id).toBe(first.packageUnit.id);
+      expect(second.setting?.defaultSellingPriceMinor).toBe(25000);
+      expect(second.setting?.isPreferredForSale).toBe(true);
       expect(second.packageUnit.name).toBe('pack');
       expect(countRows(fixture.adapter, 'package_units')).toBe(2);
       expect(countPendingOutboxOperations(fixture.adapter, fixture.context.store.id)).toBe(2);
