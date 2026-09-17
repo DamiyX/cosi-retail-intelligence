@@ -1,16 +1,18 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-18  
-Current milestone: M3 Sales — independent-audit corrections are implemented
-and independently re-audit is required before M4.  
+Current milestone: M3 Sales — source/automated scope accepted after independent
+re-audit under the carried physical-device waiver; M4 planning is next.  
 Completed engineering milestones: M0 Project Foundation; M1 Domain + Local
 Database (accepted with an explicit device waiver); M2 Catalogue + Package Units
-(accepted after independent audit); M3 implementation (re-audit pending).
+(accepted after independent audit); M3 source/automated scope (accepted after
+independent audit with physical/release gates carried).
 
 ## Active checkout
 
 - Canonical remote: https://github.com/DamiyX/cosi-retail-intelligence
-- Current local branch: `feat/m3-sales`, based on `9476297`.
+- Current local branch: `feat/m3-sales`, based on `9476297`; M3 implementation
+  commit `2ff7b4f` and corrective commit `0a5f8c8` are present locally.
 - Local checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m0`
 - M0 pull request #1 remains open and `main` remains at `a393498`; the milestone
   branches are currently stacked. Rebase or retarget only after the earlier pull
@@ -18,7 +20,14 @@ Database (accepted with an explicit device waiver); M2 Catalogue + Package Units
 - No push, merge, deployment, production-service change, device action, or cloud
   build was performed in this M3 implementation pass.
 
-## M3 implementation outcome
+## M3 source/automated outcome
+
+The coordinating independent auditor accepted the source/automated M3 scope at
+`0a5f8c8` on 2026-09-18 (task/thread
+`01a098ef-d830-7531-bca7-2d66b0a5b587`). This acceptance covers the code,
+automated evidence, workflow records, and repository review described below;
+it does not pass the carried physical-device, development-client/Metro, or
+second-laptop readiness gates.
 
 M3 delivers one complete offline sale on the M1/M2 foundation:
 
@@ -72,8 +81,12 @@ new migration.
   Android Back lifecycle. The focused correction suites passed 50 tests / 3
   suites before the full run.
 - M3 workflow JSON Schema (including date-time formats) and gate dependencies
-  passed local validation. `git diff --check` passed in the final pre-commit
-  review; generated `apps/mobile/dist` remains ignored.
+  passed local validation, and the independent auditor repeated that validation
+  with AJV draft 2020 plus `ajv-formats`. `git diff --check 9476297 HEAD` and
+  clean Git status passed at the acceptance checkpoint; generated
+  `apps/mobile/dist` remains ignored.
+- The independent auditor reviewed the existing Expo Doctor, dependency-check,
+  and Android-export evidence rather than claiming a redundant rerun.
 
 ## Deferred evidence and risks
 
@@ -101,10 +114,12 @@ new migration.
 
 ## Next action
 
-Hand `feat/m3-sales` and its audit-correction commit to an independent auditor
-for re-review of M3-01 through M3-05. Stop before M4 (Restocking + Costing); do
-not push, merge, deploy, or make the M3 device gate pass without the applicable
-authorization.
+Open the separate M4 Restocking + Costing planning gate only; do not implement
+M4 in this checkpoint or invent its detailed decisions. Complete the carried
+M3 physical-device/offline-sale, development-client/Metro, large-text, and
+second-laptop reproduction checks before any external beta or native-release
+readiness claim. Do not push, merge, deploy, or alter the carried device gate
+without applicable authorization.
 
 ## Continuity
 

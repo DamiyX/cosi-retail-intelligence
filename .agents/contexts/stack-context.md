@@ -2,7 +2,7 @@
 
 **Status:** Active  
 **Scope:** Whole project  
-**Updated:** 2026-09-14
+**Updated:** 2026-09-18
 
 ## Implemented Foundation
 
@@ -20,10 +20,12 @@
 | Cloud native builds | EAS | Project linked |
 | CI | GitHub Actions | Windows and Ubuntu validation |
 
-The mobile package is apps/mobile. It contains the M1 SQLite/domain foundation
-and the audited M2 Products catalogue, package, lifecycle, and local provisioning
-flows. The app uses a small project-owned component/theme layer; no global or
-server-state library has been selected.
+The mobile package is apps/mobile. It contains the M1 SQLite/domain foundation,
+the audited M2 Products catalogue/package/lifecycle/local-provisioning flows,
+and M3 Sell source/automated-accepted sales flows. M3 physical-device,
+development-client/Metro, and second-laptop readiness checks remain deferred
+before external beta/native release. The app uses a small project-owned
+component/theme layer; no global or server-state library has been selected.
 
 ## Approved but Not Implemented
 

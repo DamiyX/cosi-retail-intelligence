@@ -1,6 +1,8 @@
 # COSI Application Flow
 
-**Status:** Active; MVP capability flow plus M2 catalogue and M3 Sell navigation approved  
+**Status:** Active; MVP capability flow plus M2 catalogue and M3 Sell navigation
+approved, with M3 source/automated scope accepted and physical/release gates
+carried  
 **Scope:** MVP user journeys  
 **Updated:** 2026-09-18  
 **Confidence:** High for required jobs and transaction behavior; medium or low

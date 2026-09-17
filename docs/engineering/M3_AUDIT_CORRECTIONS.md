@@ -1,7 +1,8 @@
 # M3 Audit Corrections
 
-**Status:** Corrective implementation complete; independent re-audit required.
-M3 is not accepted and M4 must not start.  
+**Status:** Source/automated scope independently re-audited and accepted;
+physical-device, development-client, and second-laptop readiness gates remain
+carried. This is not native-release approval.  
 **Audit comparison:** accepted M2/planning baseline `9476297` to initial M3
 implementation commit `2ff7b4f` on `feat/m3-sales`.  
 **Recorded:** 2026-09-18
@@ -36,9 +37,9 @@ implementation commit `2ff7b4f` on `feat/m3-sales`.
   expose retry. A saved Quick Add product is never described as unsaved when a
   follow-up catalogue read fails. Existing-store/client construction failure
   presents retry rather than another-store setup.
-- **T5 — continuity state:** the M3 workflow now uses the schema-valid
-  `in_progress` state and the actual task identifier. Project summaries reflect
-  M3 implementation plus pending re-audit rather than a future M3 branch.
+- **T5 — continuity state:** the M3 workflow uses schema-valid status, owner,
+  timestamps, gate dependencies, and archival state. Project summaries reflect
+  the accepted source/automated scope and the carried readiness gates.
 
 ## Evidence recorded in this pass
 
@@ -52,16 +53,46 @@ implementation commit `2ff7b4f` on `feat/m3-sales`.
   to date (with `expo` intentionally excluded); Android export passed with
   1,341 modules and a 3 MB Hermes bundle.
 - Workflow JSON Schema/date-time and gate dependency validation passed. Final
-  `git diff --check` passed. The re-audit handoff must record the correction
-  commit and a clean Git status.
+  `git diff --check` passed. The correction commit is recorded in Git history
+  with a clean status for the acceptance checkpoint.
+
+## Independent re-audit acceptance checkpoint
+
+The coordinating independent auditor accepted the source/automated M3 scope at
+corrective commit `0a5f8c8` on local 2026-09-18 (UTC
+`2026-09-17T23:08:06Z`), task/thread
+`01a098ef-d830-7531-bca7-2d66b0a5b587`. The auditor independently inspected
+`0a5f8c8` against `2ff7b4f` and baseline `9476297`, including aggregate and
+arithmetic safety, store-scoped reads, durable history, recovery states, and
+Sell/Quick Add focus behavior.
+
+The independent evidence was:
+
+- `npm run validate`: 143 domain tests in 4 suites and 186 mobile tests in 21
+  suites (329 tests / 25 suites), strict typecheck, and zero-warning lint —
+  all passed.
+- Workflow records validated with AJV draft 2020 plus `ajv-formats`, including
+  date-time formats and gate dependency references — passed.
+- `git diff --check 9476297 HEAD` and clean Git status — passed.
+- Existing Expo Doctor, dependency-check, and Android-export evidence was
+  reviewed; it was not redundantly rerun by the auditor.
+
+This acceptance covers source and automated evidence only. No M3
+physical-device/offline-sale, large-text physical-rendering,
+development-client/Metro transfer, or second-laptop reproduction was claimed
+or performed. Those gates remain required before an external beta or native
+release readiness claim.
 
 ## Boundaries and residual limits
 
 - Migration 3 is already committed and was not edited. These corrections do
   not require a schema change or migration 4.
-- No M4 work, push, merge, deployment, cloud build, device action, production
-  data access, or destructive operation is included.
+- No M4 implementation, push, merge, deployment, cloud build, device action,
+  production data access, or destructive operation is included. The next
+  milestone action is only its separate planning gate.
 - The preserved Galaxy A15 evidence remains M1/M2-only. No M3 physical-device,
   large-text physical-rendering, or Metro development-client claim is made
   here; those gates remain deferred before an external beta/native-release
   claim.
+- Second-laptop clean reproduction remains unverified and is also required
+  before external beta/native-release readiness.

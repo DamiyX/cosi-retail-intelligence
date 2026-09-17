@@ -76,6 +76,8 @@ remains required before an external beta/native release claim.
 M2 passed independent source and automated audit on 2026-09-14 after correction
 of integrity, replay, preference, fresh-install, and navigation defects. The
 founder then approved D-036/D-037 and the M3 Sell-flow baseline. M3-01 through
-M3-05 are now published in `tickets.md` and registered in
-`.agents/workflows/m3-sales.json`. The implementation agent must stop after
-M3-05 for independent audit before any M4 tickets or feature code.
+M3-05 are published in `tickets.md` and registered in
+`.agents/workflows/m3-sales.json`; their source/automated scope was independently
+accepted on 2026-09-18, with physical/release gates carried. The next milestone
+may open only its separate planning gate; no M4 feature code is included in the
+M3 acceptance checkpoint.

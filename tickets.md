@@ -13,7 +13,9 @@ selection through inventory effect, payment/credit truth, and durable history.
 - Sale completion is one atomic local transaction: Sale, SaleItems, Payment,
   optional credit records, InventoryEvents, and one aggregate outbox envelope.
 - Update this file, `.agents/workflows/m3-sales.json`, and PROJECT_STATE with
-  evidence. Stop after M3-05 for independent audit; do not start M4.
+  evidence. Stop M3 implementation after M3-05 for independent audit; the next
+  milestone has a separate planning gate and is not implemented in this
+  checkpoint.
 - Do not push, merge, deploy, link production services, or change approved
   transaction semantics without the applicable authorization and review.
 
@@ -31,10 +33,11 @@ selection through inventory effect, payment/credit truth, and durable history.
   tender, partial credit settlement, printing, returns, void/reversal, tax,
   percentage/order discounts, and M4+ summaries are outside M3.
 
-## Verified implementation evidence — 2026-09-17
+## Verified implementation and audit evidence — 2026-09-18
 
-M3 source implementation is complete and awaits independent audit; it is not
-yet accepted for M4.
+M3 source/automated scope is accepted after independent audit at corrective
+commit `0a5f8c8`; physical-device, development-client/Metro, and second-laptop
+readiness gates remain carried and are not passed.
 
 - Exact D-034/D-036 calculations, atomic local Sale aggregate/outbox capture,
   single-tender and credit truth, immutable sale history, and durable stored
@@ -52,8 +55,15 @@ yet accepted for M4.
   presentation, exact cross-row aggregate guards, screen-facing store-read
   isolation, recoverable local-read states, full credit/multiline rollback and
   replay coverage, and schema-valid workflow continuity. See
-  `docs/engineering/M3_AUDIT_CORRECTIONS.md`; independent re-audit remains
-  required.
+  `docs/engineering/M3_AUDIT_CORRECTIONS.md`.
+- The coordinating independent auditor (task/thread
+  `01a098ef-d830-7531-bca7-2d66b0a5b587`) independently inspected the corrective
+  commit against the initial M3 and accepted the source/automated scope. The
+  auditor reran `npm run validate` (143 domain + 186 mobile = 329 tests / 25
+  suites, strict typecheck, zero-warning lint), workflow JSON Schema/date-time
+  and gate-dependency validation, and `git diff --check 9476297 HEAD` with
+  clean status. Existing Doctor/dependency/export evidence was reviewed, not
+  redundantly rerun.
 
 ## Ticket M3-01: Complete one cash sale offline
 
@@ -195,9 +205,11 @@ while incomplete carts and immutable-history limits are communicated clearly.
 
 ## Ticket M3-05: Prove the offline sales milestone
 
-**Status:** Implementation complete — independent audit pending  
-**Outcome:** M3 has reproducible evidence and a clean handoff for independent
-audit before restocking/costing starts.  
+**Status:** Accepted for source/automated scope — physical and release gates
+carried  
+**Outcome:** M3 has reproducible source/automated evidence accepted by the
+independent auditor at `0a5f8c8`; restocking/costing remains a separate planning
+gate.  
 **Blocked by:** M3-01 through M3-04
 
 **Vertical scope:**
@@ -222,10 +234,14 @@ audit before restocking/costing starts.
 - [x] Automated evidence proves atomic sale aggregate/outbox capture, exact
       arithmetic, idempotent replay, store isolation, immutable snapshots,
       payment/credit truth, and reconstructable inventory.
+- [x] Independent source/automated re-audit accepts the final M3 branch after
+      reviewing the corrective commit, rerunning validation and workflow-schema
+      checks, and confirming a clean diff/status.
 - [ ] M3 physical-device evidence is deliberately deferred/blocked, not passed.
       Carried Galaxy A15 provisioning, restart, airplane-mode, and text-scale
       observations remain M1/M2-only evidence and are required again for M3
-      before an external beta/native-release claim.
+      before an external beta/native-release claim; development-client/Metro
+      transfer and second-laptop reproduction are also still required.
 - [x] The final diff contains M3 scope only, no secrets/databases/exports/build
       artifacts, documentation matches code, and M4 has not started.
 
@@ -249,6 +265,9 @@ audit before restocking/costing starts.
                                     v
                          M3-05 Evidence/audit handoff
 
-The Galaxy device gate does not block M3 source implementation, but it remains
-required before external beta/native release readiness and should be completed
-when the lower-cost device/tooling session is scheduled.
+The source/automated M3 acceptance gate is met. The Galaxy device gate does not
+block source acceptance, but it remains required before external beta/native
+release readiness and should be completed with the development-client/Metro
+and second-laptop checks when the lower-cost sessions are scheduled. M4 may
+begin only through its separate planning gate; no M4 implementation is claimed
+here.

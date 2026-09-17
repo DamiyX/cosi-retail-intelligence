@@ -21,8 +21,9 @@ The current strategy is:
 > business activity.
 
 M0 Project Foundation, M1 Domain + Local Database, and M2 Catalogue + Package
-Units are accepted. M3 Sales is implemented on `feat/m3-sales` and has received
-one independent-audit correction pass; it remains unaccepted pending re-audit.
+Units are accepted. M3 Sales source/automated scope is accepted on
+`feat/m3-sales` after independent re-audit, under a carried physical-device
+waiver; native/release readiness is not yet approved.
 Network sync, market network, and recognition inference are not implemented.
 
 ## Product Snapshot
@@ -74,14 +75,14 @@ partial measure, never full profit or P&L.
 
 ## Current Priorities
 
-1. Independently re-audit the M3 corrective commit(s), including local exact
-   arithmetic, store-scoped client reads, durable history, and recovery states.
-2. Complete the explicitly deferred M3 physical-device verification before any
+1. Open the separate M4 Restocking + Costing planning gate; do not implement M4
+   from this routing summary or invent its detailed decisions.
+2. Complete the explicitly deferred M3 physical-device/offline-sale,
+   development-client/Metro, large-text, and second-laptop checks before any
    external beta/native-release claim; preserve the M1/M2 Galaxy evidence as
    historical evidence only.
-3. Only after M3 acceptance, continue through the milestone order in BUILD_PLAN.md, validating useful
-   retailer workflows early instead of building all future infrastructure at
-   once.
+3. Continue validating useful retailer workflows early instead of building all
+   future infrastructure at once.
 4. Keep recognition research isolated from core transaction reliability until
    its evidence and contracts are ready.
 
