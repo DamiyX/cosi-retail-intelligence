@@ -31,9 +31,27 @@ selection through inventory effect, payment/credit truth, and durable history.
   tender, partial credit settlement, printing, returns, void/reversal, tax,
   percentage/order discounts, and M4+ summaries are outside M3.
 
+## Verified implementation evidence — 2026-09-17
+
+M3 source implementation is complete and awaits independent audit; it is not
+yet accepted for M4.
+
+- Exact D-034/D-036 calculations, atomic local Sale aggregate/outbox capture,
+  single-tender and credit truth, immutable sale history, and durable stored
+  sync status have application, SQLite, and automated-test coverage.
+- Because migration 3 was uncommitted and unshipped, its pending definition was
+  corrected directly rather than appending migration 4. The populated-M2
+  upgrade test proves no reset, loss, false history, or duplicate sales effect.
+- `npm run validate` passed 143 domain and 169 mobile tests (312 tests in 25
+  suites), with strict typecheck and zero-warning lint; Doctor passed 21/21,
+  Expo dependencies are current, and Android export succeeded.
+- M3 physical-device verification was deliberately not run in this pass. The
+  preserved Galaxy A15 evidence is M1/M2-only and must not be used as M3 proof;
+  M3 device verification remains a pre-beta/native-release gate.
+
 ## Ticket M3-01: Complete one cash sale offline
 
-**Status:** Not started  
+**Status:** Complete  
 **Outcome:** A retailer can find one existing product, sell one configured
 package for cash, and receive a durable local completion record with exactly one
 inventory effect and one outbox operation.  
@@ -53,26 +71,26 @@ inventory effect and one outbox operation.
 
 **Acceptance:**
 
-- [ ] Exact domain tests cover representative whole/fractional quantities,
+- [x] Exact domain tests cover representative whole/fractional quantities,
       package-to-base conversion, price, discount, totals, overflow, zero,
       negative, excess precision, and fractional-minor/base rejection.
-- [ ] In airplane-mode-compatible tests, one active sellable package completes
+- [x] In airplane-mode-compatible tests, one active sellable package completes
       a cash sale; persisted sale/item/payment snapshots match the review; one
       negative SALE InventoryEvent and one PENDING aggregate envelope exist.
-- [ ] Store/variant/package/actor/device/currency mismatches and inactive or
+- [x] Store/variant/package/actor/device/currency mismatches and inactive or
       non-sellable choices fail before commit at application and database
       boundaries where enforceable.
-- [ ] Injected failure at every write boundary leaves no Sale, child, inventory,
+- [x] Injected failure at every write boundary leaves no Sale, child, inventory,
       or outbox rows.
-- [ ] Repeating the same operation ID returns the original sale without
+- [x] Repeating the same operation ID returns the original sale without
       duplicating any child, inventory event, or envelope; another store/device/
       operation cannot reuse it.
-- [ ] The UI prevents empty/duplicate completion, retains values on validation
+- [x] The UI prevents empty/duplicate completion, retains values on validation
       or local-storage failure, and shows success only after local commit.
 
 ## Ticket M3-02: Build and edit an exact multi-line cart
 
-**Status:** Not started  
+**Status:** Complete  
 **Outcome:** A retailer can assemble and review a realistic multi-product cart
 with package choice, flexible selling price, exact quantity, and line discount.  
 **Blocked by:** M3-01
@@ -90,24 +108,24 @@ with package choice, flexible selling price, exact quantity, and line discount.
 
 **Acceptance:**
 
-- [ ] Cart calculation tests prove sum invariants, safe ranges, deterministic
+- [x] Cart calculation tests prove sum invariants, safe ranges, deterministic
       line replacement/removal, no authoritative floats, and no mutation of
       catalogue price/package records.
-- [ ] A multi-line completion snapshots each selected product/package,
+- [x] A multi-line completion snapshots each selected product/package,
       conversion, quantity, price, and discount and creates exactly one SALE
       InventoryEvent per line inside the same aggregate transaction.
-- [ ] Inactive products/packages, non-sellable packages, packages from another
+- [x] Inactive products/packages, non-sellable packages, packages from another
       variant/store, zero/negative quantity, excessive discount, and values
       requiring hidden rounding cannot be completed.
-- [ ] Search/no-match Quick Add returns to Sell with the created product
+- [x] Search/no-match Quick Add returns to Sell with the created product
       selectable; network, scanner, or recognition absence never blocks sale.
-- [ ] Component/navigation tests cover add, edit, remove, empty cart, totals,
+- [x] Component/navigation tests cover add, edit, remove, empty cart, totals,
       retained field errors, dirty-exit confirmation, large content scrolling,
       semantic labels, and 48dp actions.
 
 ## Ticket M3-03: Record all approved payment methods and credit truthfully
 
-**Status:** Not started  
+**Status:** Complete  
 **Outcome:** A retailer can complete a sale by cash, transfer, POS/card, or
 credit without reporting credit as cash received.  
 **Blocked by:** M3-02
@@ -124,22 +142,22 @@ credit without reporting credit as cash received.
 
 **Acceptance:**
 
-- [ ] Cash, transfer, and POS/card each persist one Payment allocation equal to
+- [x] Cash, transfer, and POS/card each persist one Payment allocation equal to
       the sale total; invalid method/amount combinations fail atomically.
-- [ ] Credit requires a non-empty bounded customer name and atomically persists
+- [x] Credit requires a non-empty bounded customer name and atomically persists
       Payment, CustomerAccount, and OPEN Receivable whose original and
       outstanding amounts equal the sale total.
-- [ ] Cash-received queries exclude CREDIT while sale-total queries include it;
+- [x] Cash-received queries exclude CREDIT while sale-total queries include it;
       tests prevent double counting and unsupported split/partial settlement.
-- [ ] Failure and operation replay cannot leave or duplicate customer,
+- [x] Failure and operation replay cannot leave or duplicate customer,
       receivable, payment, inventory, sale, or outbox rows.
-- [ ] Payment controls have text labels and checked state; Credit explains the
+- [x] Payment controls have text labels and checked state; Credit explains the
       amount owed, retains customer input on failure, and never claims cash was
       received.
 
 ## Ticket M3-04: Recover and review completed sales
 
-**Status:** Not started  
+**Status:** Complete  
 **Outcome:** Completed sales remain reviewable from local history after restart,
 while incomplete carts and immutable-history limits are communicated clearly.  
 **Blocked by:** M3-01 and M3-03
@@ -156,22 +174,22 @@ while incomplete carts and immutable-history limits are communicated clearly.
 
 **Acceptance:**
 
-- [ ] Completed cash and credit sales survive database close/reopen and render
+- [x] Completed cash and credit sales survive database close/reopen and render
       from sale snapshots after linked catalogue identity/price changes.
-- [ ] History is scoped to the current store, ordered deterministically without
+- [x] History is scoped to the current store, ordered deterministically without
       treating device time as global sync order, and cannot expose another
       store's sale through an ID or replay path.
-- [ ] Derived inventory is reconstructable by summing InventoryEvents; a
+- [x] Derived inventory is reconstructable by summing InventoryEvents; a
       negative value is retained and labelled rather than deleting a sale.
-- [ ] Read failures do not claim missing/deleted history; retry recovers without
+- [x] Read failures do not claim missing/deleted history; retry recovers without
       writing or duplicating records.
-- [ ] Component tests cover scrollable large-text layouts, accessible line and
+- [x] Component tests cover scrollable large-text layouts, accessible line and
       payment summaries, local-save language, empty/loading/failure states, and
       the absence of destructive completed-sale actions.
 
 ## Ticket M3-05: Prove the offline sales milestone
 
-**Status:** Not started  
+**Status:** Implementation complete — independent audit pending  
 **Outcome:** M3 has reproducible evidence and a clean handoff for independent
 audit before restocking/costing starts.  
 **Blocked by:** M3-01 through M3-04
@@ -189,18 +207,20 @@ audit before restocking/costing starts.
 
 **Acceptance:**
 
-- [ ] `npm ci`, environment check, strict typecheck, zero-warning lint, all
-      tests, Expo Doctor, Expo dependency check, and Android export pass with
-      exact results recorded.
-- [ ] Migration tests upgrade fresh and populated M2 databases without reset,
+- [x] A clean `npm ci` installation (development dependencies included),
+      environment check, strict typecheck, zero-warning lint, `npm run validate`
+      (143 domain + 169 mobile = 312 tests / 25 suites), Expo Doctor (21/21),
+      Expo dependency check, and Android export pass with exact results recorded.
+- [x] Migration tests upgrade fresh and populated M2 databases without reset,
       loss, false history, or duplicate effects.
-- [ ] Automated evidence proves atomic sale aggregate/outbox capture, exact
+- [x] Automated evidence proves atomic sale aggregate/outbox capture, exact
       arithmetic, idempotent replay, store isolation, immutable snapshots,
       payment/credit truth, and reconstructable inventory.
-- [ ] Device evidence records actual build/device identifiers and observed
-      offline/restart/text-scaling behavior; unavailable tooling is marked
-      blocked rather than passed.
-- [ ] The final diff contains M3 scope only, no secrets/databases/exports/build
+- [ ] M3 physical-device evidence is deliberately deferred/blocked, not passed.
+      Carried Galaxy A15 provisioning, restart, airplane-mode, and text-scale
+      observations remain M1/M2-only evidence and are required again for M3
+      before an external beta/native-release claim.
+- [x] The final diff contains M3 scope only, no secrets/databases/exports/build
       artifacts, documentation matches code, and M4 has not started.
 
 ## Dependency Frontier

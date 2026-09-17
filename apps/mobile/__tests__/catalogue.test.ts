@@ -36,7 +36,7 @@ function expectDomainError(fn: () => unknown, code: DomainError['code']): void {
 
 describe('M2-01 catalogue migration', () => {
   it('migrates a fresh database to version 2 with empty catalogue tables', () => {
-    const isolated = openIsolatedDatabase(MIGRATIONS);
+    const isolated = openIsolatedDatabase(MIGRATIONS.slice(0, 2));
     try {
       expect(isolated.report.schemaVersion).toBe(2);
       for (const table of [
@@ -73,7 +73,7 @@ describe('M2-01 catalogue migration', () => {
 
       const reopened = reopenDatabase(isolated.path);
       try {
-        const report = openDatabase(reopened, MIGRATIONS);
+        const report = openDatabase(reopened, MIGRATIONS.slice(0, 2));
         expect(report.schemaVersion).toBe(2);
         expect(countRows(reopened, 'stores')).toBe(1);
         expect(countRows(reopened, 'users')).toBe(1);
@@ -286,7 +286,7 @@ describe('createTemporaryProduct application operation', () => {
       const reopened = reopenDatabase(fixture.path);
       try {
         const report = openDatabase(reopened, MIGRATIONS);
-        expect(report.schemaVersion).toBe(2);
+        expect(report.schemaVersion).toBe(3);
         const product = getStoreProductById(reopened, productId);
         if (!product) {
           throw new Error('Temporary product did not survive reopen.');

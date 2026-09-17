@@ -4,6 +4,7 @@ export {
   buildOutboxEnvelope,
   countPendingOutboxOperations,
   enqueueOutboxOperation,
+  findOutboxOperationForEntity,
   findOutboxOperation,
   findExpectedOutboxReplay,
   listPendingOutboxOperations,
@@ -12,6 +13,7 @@ export {
 export type {
   CatalogueOperationType,
   EnqueueOutboxOperationInput,
+  FindOutboxOperationForEntityInput,
   OutboxEntityType,
   OutboxEnvelopeInput,
   OutboxOperationRow,
@@ -83,3 +85,41 @@ export { countStores, createStore, getStoreById, listStores } from './stores';
 export type { CreateStoreInput, StoreRow } from './stores';
 export { createUser, getUserById } from './users';
 export type { CreateUserInput, UserRow } from './users';
+export { createSale, getSaleById, listSalesByStore } from './sales';
+export type { CreateSaleInput, SaleRow, SaleStatus, SaleSummaryRow } from './sales';
+export { createSaleItem, listSaleItemsBySaleId } from './saleItems';
+export type { CreateSaleItemInput, SaleItemRow } from './saleItems';
+export {
+  createPayment,
+  getCashReceivedTotalByStore,
+  getTotalSalesValueByStore,
+  listPaymentsBySaleId,
+} from './payments';
+export type { CreatePaymentInput, PaymentMethod, PaymentRow } from './payments';
+export {
+  createInventoryEvent,
+  getInventoryBalanceByStoreProduct,
+  listInventoryEventsBySource,
+  listInventoryEventsByStoreProduct,
+} from './inventoryEvents';
+export type {
+  CreateInventoryEventInput,
+  InventoryEventRow,
+  InventoryEventType,
+  InventorySourceType,
+} from './inventoryEvents';
+export {
+  createCustomerAccount,
+  getCustomerAccountById,
+  listCustomerAccounts,
+  searchCustomerAccounts,
+} from './customerAccounts';
+export type { CreateCustomerAccountInput, CustomerAccountRow } from './customerAccounts';
+export {
+  createReceivable,
+  getReceivableById,
+  getReceivableBySaleId,
+  listReceivablesByStore,
+} from './receivables';
+export type { CreateReceivableInput, ReceivableRow, ReceivableStatus } from './receivables';
+export type { OutboxOperationType } from './outbox';

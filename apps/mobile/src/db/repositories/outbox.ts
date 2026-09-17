@@ -25,9 +25,12 @@ export type OutboxEntityType =
   | 'PRODUCT_VARIANT'
   | 'PACKAGE_UNIT'
   | 'STORE_PACKAGE_SETTING'
-  | 'PRODUCT_IDENTIFIER';
+  | 'PRODUCT_IDENTIFIER'
+  | 'SALE'
+  | 'CUSTOMER_ACCOUNT'
+  | 'RECEIVABLE';
 
-export type CatalogueOperationType =
+export type OutboxOperationType =
   | 'PRODUCT_CREATED'
   | 'PRODUCT_IDENTITY_UPDATED'
   | 'PRODUCT_IDENTIFIER_ADDED'
@@ -35,7 +38,10 @@ export type CatalogueOperationType =
   | 'PACKAGE_UPDATED'
   | 'PACKAGE_DEACTIVATED'
   | 'STORE_PACKAGE_SETTING_SAVED'
-  | 'PRODUCT_LIFECYCLE_CHANGED';
+  | 'PRODUCT_LIFECYCLE_CHANGED'
+  | 'COMPLETED_SALE_CREATED';
+
+export type CatalogueOperationType = OutboxOperationType;
 
 /** Canonical envelope version; M7 push includes it for protocol checks. */
 export const OUTBOX_PAYLOAD_VERSION = 1;
@@ -46,7 +52,7 @@ export interface OutboxOperationRow {
   deviceId: string;
   entityType: OutboxEntityType;
   entityId: string;
-  operationType: CatalogueOperationType;
+  operationType: OutboxOperationType;
   baseServerVersion: number | null;
   /** Canonical JSON envelope (fixed key order) with full entity snapshots. */
   payload: string;
@@ -58,7 +64,7 @@ export interface OutboxOperationRow {
 }
 
 export interface OutboxEnvelopeInput {
-  operationType: CatalogueOperationType;
+  operationType: OutboxOperationType;
   operationId: string;
   storeId: string;
   deviceId: string;
@@ -79,7 +85,7 @@ function mapRow(row: OutboxRecord): OutboxOperationRow {
     deviceId: row.device_id as string,
     entityType: row.entity_type as OutboxEntityType,
     entityId: row.entity_id as string,
-    operationType: row.operation_type as CatalogueOperationType,
+    operationType: row.operation_type as OutboxOperationType,
     baseServerVersion: (row.base_server_version as number | null) ?? null,
     payload: row.payload as string,
     createdAt: row.created_at as string,
@@ -168,11 +174,43 @@ export function findOutboxOperation(
   return row ? mapRow(row) : null;
 }
 
+export interface FindOutboxOperationForEntityInput {
+  storeId: string;
+  entityType: OutboxEntityType;
+  entityId: string;
+  operationType?: OutboxOperationType;
+}
+
+/**
+ * Look up the durable sync record for one entity within its store boundary.
+ * Screens use this as a status read only; M7 retains ownership of mutation,
+ * acknowledgement, retry, and conflict handling.
+ */
+export function findOutboxOperationForEntity(
+  adapter: DatabaseAdapter,
+  input: FindOutboxOperationForEntityInput,
+): OutboxOperationRow | null {
+  const storeId = requireId(input.storeId);
+  const entityId = requireId(input.entityId);
+  const hasOperationType = input.operationType !== undefined;
+  const row = adapter.getFirstRow<OutboxRecord>(
+    `SELECT ${COLUMNS} FROM outbox_operations
+     WHERE store_id = ? AND entity_type = ? AND entity_id = ?
+     ${hasOperationType ? 'AND operation_type = ?' : ''}
+     ORDER BY created_at DESC, operation_id DESC
+     LIMIT 1;`,
+    hasOperationType
+      ? [storeId, input.entityType, entityId, input.operationType!]
+      : [storeId, input.entityType, entityId],
+  );
+  return row ? mapRow(row) : null;
+}
+
 export interface ExpectedOutboxReplay {
   operationId: string;
   storeId: string;
   deviceId: string;
-  operationType: CatalogueOperationType;
+  operationType: OutboxOperationType;
   entityType: OutboxEntityType;
   /** Known for mutations of an existing entity; omitted for create operations. */
   entityId?: string;
@@ -199,7 +237,7 @@ export function findExpectedOutboxReplay(
   if (mismatched) {
     throw new DomainError(
       'INVALID_VALUE',
-      'This operation ID already belongs to a different catalogue request.',
+      'This operation ID already belongs to a different request.',
     );
   }
   return existing;

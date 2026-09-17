@@ -24,7 +24,7 @@ jest.mock('../src/db/initialize', () => ({
     if (!mockDatabase) {
       throw new Error('Shell test database is not open.');
     }
-    return { state: 'ready', adapter: mockDatabase.adapter, schemaVersion: 2, path: mockDatabase.path };
+    return { state: 'ready', adapter: mockDatabase.adapter, schemaVersion: 3, path: mockDatabase.path };
   },
 }));
 
@@ -117,8 +117,8 @@ describe('M2 product shell', () => {
   });
 
   it('keeps later-milestone areas as clearly labelled placeholders', async () => {
-    renderRouter(ROUTES, { initialUrl: '/sell' });
-    expect(await screen.findByText(/arrive in milestone M3/)).toBeTruthy();
+    renderRouter(ROUTES, { initialUrl: '/today' });
+    expect(await screen.findByText(/arrives in a\s*later milestone/)).toBeTruthy();
   });
 
   it('provisions a local store from a fresh database and reaches Products', async () => {

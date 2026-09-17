@@ -5,6 +5,7 @@ import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } fro
 import type { CatalogueClient } from '../../catalogue/client';
 import type { PackageUnitRow, StorePackageSettingRow } from '../../db/repositories';
 import { ErrorPanel, Field, PrimaryButton, SecondaryButton } from '../../ui/components';
+import { formatMinorForEdit } from '../../ui/money';
 import { theme } from '../../ui/theme';
 
 export interface PackageFormInitial {
@@ -71,11 +72,6 @@ function initialFrom(
   };
 }
 
-function formatMinorForEdit(amountMinor: number): string {
-  const sign = amountMinor < 0 ? '-' : '';
-  const absolute = Math.abs(amountMinor);
-  return `${sign}${Math.floor(absolute / 100)}.${String(absolute % 100).padStart(2, '0')}`;
-}
 
 function conversionPreview(name: string, baseUnitName: string, conversionText: string): string | null {
   const trimmed = conversionText.trim();

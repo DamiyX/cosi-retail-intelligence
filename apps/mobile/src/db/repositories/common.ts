@@ -31,6 +31,13 @@ export function optionalText(value: unknown, field: string, maxLength = 500): st
   if (value === undefined || value === null) {
     return null;
   }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed.length === 0) {
+      return null;
+    }
+    return requireText(trimmed, field, maxLength);
+  }
   return requireText(value, field, maxLength);
 }
 

@@ -1,5 +1,5 @@
 import { DomainError } from '@retail/domain';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { CatalogueClient } from '../../catalogue/client';
@@ -11,6 +11,8 @@ interface QuickAddProductScreenProps {
   initialName?: string;
   onSaved: (productId: string) => void;
   onCancel: () => void;
+  /** Lets a host guard tab/navigation exit without persisting a draft. */
+  onDirtyDraftChange?: (discard: (() => void) | null) => void;
 }
 
 interface FieldErrors {
@@ -38,6 +40,7 @@ export default function QuickAddProductScreen({
   initialName = '',
   onSaved,
   onCancel,
+  onDirtyDraftChange,
 }: QuickAddProductScreenProps) {
   const [name, setName] = useState(initialName);
   const [baseUnitName, setBaseUnitName] = useState('piece');
@@ -60,6 +63,14 @@ export default function QuickAddProductScreen({
       { text: 'Discard', style: 'destructive', onPress: onCancel },
     ]);
   }, [dirty, onCancel]);
+
+  // The Sell tab guard reads this callback synchronously at tab press time.
+  // Publish a changed Quick Add draft before an interactive navigation control
+  // can be painted, so a rapid tab exit cannot skip the confirmation.
+  useLayoutEffect(() => {
+    onDirtyDraftChange?.(dirty ? onCancel : null);
+    return () => onDirtyDraftChange?.(null);
+  }, [dirty, onCancel, onDirtyDraftChange]);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {

@@ -1,4 +1,5 @@
-import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
+import { act, fireEvent, renderRouter, screen } from 'expo-router/testing-library';
+import { Alert } from 'react-native';
 
 import RootLayout from '../app/_layout';
 import MoreScreen from '../app/(tabs)/more';
@@ -12,6 +13,7 @@ import SellScreen from '../app/(tabs)/sell';
 import TabsLayout from '../app/(tabs)/_layout';
 import TodayScreen from '../app/(tabs)/today';
 import type { IsolatedDatabase } from '../src/db/testing';
+import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
 import { openIsolatedDatabase } from '../src/db/testing';
 import { MIGRATIONS } from '../src/db';
 import { provisionStoreContext } from '../src/storeContext/provisionStoreContext';
@@ -24,7 +26,7 @@ jest.mock('../src/db/initialize', () => ({
     if (!mockDatabase) {
       throw new Error('Shell test database is not open.');
     }
-    return { state: 'ready', adapter: mockDatabase.adapter, schemaVersion: 2, path: mockDatabase.path };
+    return { state: 'ready', adapter: mockDatabase.adapter, schemaVersion: 3, path: mockDatabase.path };
   },
 }));
 
@@ -69,7 +71,7 @@ describe('M2 tab navigation', () => {
     expect(await screen.findByText('No products yet')).toBeTruthy();
 
     fireEvent.press(screen.getByLabelText(/Sell, tab/));
-    expect(await screen.findByText(/arrive in milestone M3/)).toBeTruthy();
+    expect(await screen.findByPlaceholderText('Search name, local SKU, or barcode')).toBeTruthy();
     expect(router.getPathname()).toBe('/sell');
 
     fireEvent.press(screen.getByLabelText(/Today, tab/));
@@ -81,5 +83,77 @@ describe('M2 tab navigation', () => {
     fireEvent.press(screen.getByLabelText(/Products, tab/));
     expect(await screen.findByText('No products yet')).toBeTruthy();
     expect(router.getPathname()).toBe('/products');
+  });
+
+  it('requires confirmation before a dirty in-memory cart can leave through a tab', async () => {
+    if (!mockDatabase) {
+      throw new Error('Test database is not open.');
+    }
+    const store = mockDatabase.adapter.getFirstRow<{ id: string }>('SELECT id FROM stores LIMIT 1;');
+    const device = mockDatabase.adapter.getFirstRow<{ id: string }>('SELECT id FROM devices LIMIT 1;');
+    if (!store || !device) {
+      throw new Error('Test store context is missing.');
+    }
+    createTemporaryProduct(
+      mockDatabase.adapter,
+      { storeId: store.id, deviceId: device.id, name: 'Tab guard item' },
+      { generateId: deterministicIds(3500) },
+    );
+
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    const router = renderRouter(ROUTES, { initialUrl: '/sell' });
+    expect(await screen.findByText('Tab guard item')).toBeTruthy();
+    fireEvent.press(screen.getByText('Tab guard item'));
+    fireEvent.changeText(screen.getByTestId('line-price-input'), '100');
+    fireEvent.press(screen.getByText('Add to cart'));
+    expect(screen.getByText('Cart (1)')).toBeTruthy();
+
+    fireEvent.press(screen.getByLabelText(/Today, tab/));
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Discard sale?',
+      'Your uncompleted sale will be lost.',
+      expect.any(Array),
+    );
+    expect(router.getPathname()).toBe('/sell');
+
+    const actions = alertSpy.mock.calls[0]?.[2] as
+      | { text: string; onPress?: () => void }[]
+      | undefined;
+    act(() => {
+      actions?.find((action) => action.text === 'Discard')?.onPress?.();
+    });
+    expect(await screen.findByText(/arrives in a\s*later milestone/)).toBeTruthy();
+    expect(router.getPathname()).toBe('/today');
+
+    alertSpy.mockRestore();
+  });
+
+  it('requires confirmation before a dirty Quick Add form can leave through a tab', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    const router = renderRouter(ROUTES, { initialUrl: '/sell' });
+    expect(await screen.findByPlaceholderText('Search name, local SKU, or barcode')).toBeTruthy();
+
+    fireEvent.changeText(screen.getByPlaceholderText('Search name, local SKU, or barcode'), 'New tab product');
+    fireEvent.press(screen.getByText('Add product'));
+    fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Changed tab product');
+
+    fireEvent.press(screen.getByLabelText(/Today, tab/));
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Discard product and sale?',
+      'Your product entries and uncompleted sale will be lost.',
+      expect.any(Array),
+    );
+    expect(router.getPathname()).toBe('/sell');
+
+    const actions = alertSpy.mock.calls[0]?.[2] as
+      | { text: string; onPress?: () => void }[]
+      | undefined;
+    act(() => {
+      actions?.find((action) => action.text === 'Discard')?.onPress?.();
+    });
+    expect(await screen.findByText(/arrives in a\s*later milestone/)).toBeTruthy();
+    expect(router.getPathname()).toBe('/today');
+
+    alertSpy.mockRestore();
   });
 });

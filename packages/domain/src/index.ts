@@ -19,3 +19,5 @@ export {
   MICROS_PER_UNIT,
   parseQuantityDecimal,
 } from './packages';
+export type { CalculatedSaleLine, CalculatedSaleTotals, SaleLineCalculationInput } from './sales';
+export { calculateSaleLine, calculateSaleTotals } from './sales';

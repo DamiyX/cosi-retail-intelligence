@@ -284,6 +284,279 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'outbox device does not belong to store'); END;`,
     ],
   },
+  {
+    version: 3,
+    name: 'sales_and_inventory',
+    statements: [
+      `CREATE TABLE sales (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        created_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        occurred_at TEXT NOT NULL,
+        currency_code TEXT NOT NULL CHECK (length(currency_code) = 3),
+        subtotal_minor INTEGER NOT NULL CHECK (subtotal_minor >= 0),
+        discount_total_minor INTEGER NOT NULL DEFAULT 0 CHECK (discount_total_minor >= 0),
+        total_minor INTEGER NOT NULL CHECK (total_minor >= 0),
+        status TEXT NOT NULL DEFAULT 'COMPLETED' CHECK (status IN ('COMPLETED', 'VOIDED')),
+        note TEXT CHECK (note IS NULL OR length(note) <= 500),
+        created_at TEXT NOT NULL,
+        completed_at TEXT NOT NULL,
+        CHECK (total_minor = subtotal_minor - discount_total_minor)
+      );`,
+      'CREATE INDEX idx_sales_store_occurred ON sales(store_id, occurred_at DESC);',
+      'CREATE INDEX idx_sales_store_status ON sales(store_id, status);',
+      `CREATE TRIGGER trg_sales_device_store_insert
+        BEFORE INSERT ON sales
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id AND d.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'sales device does not belong to store'); END;`,
+      `CREATE TRIGGER trg_sales_user_store_insert
+        BEFORE INSERT ON sales
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.user_id = NEW.created_by_user_id AND sm.store_id = NEW.store_id AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'sales user is not an active store member'); END;`,
+      `CREATE TRIGGER trg_sales_currency_store_insert
+        BEFORE INSERT ON sales
+        WHEN NOT EXISTS (
+          SELECT 1 FROM stores s
+          WHERE s.id = NEW.store_id AND s.currency_code = NEW.currency_code
+        )
+        BEGIN SELECT RAISE(ABORT, 'sales currency mismatch with store'); END;`,
+      `CREATE TABLE sale_items (
+        id TEXT PRIMARY KEY,
+        sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        product_variant_id TEXT NOT NULL REFERENCES product_variants(id) ON DELETE RESTRICT,
+        package_unit_id TEXT NOT NULL REFERENCES package_units(id) ON DELETE RESTRICT,
+        quantity_packages_micros INTEGER NOT NULL CHECK (quantity_packages_micros > 0),
+        conversion_to_base_snapshot_micros INTEGER NOT NULL CHECK (conversion_to_base_snapshot_micros > 0),
+        quantity_base_micros INTEGER NOT NULL CHECK (quantity_base_micros > 0),
+        unit_price_minor INTEGER NOT NULL CHECK (unit_price_minor >= 0),
+        gross_total_minor INTEGER NOT NULL CHECK (gross_total_minor >= 0),
+        discount_amount_minor INTEGER NOT NULL DEFAULT 0 CHECK (discount_amount_minor >= 0),
+        net_total_minor INTEGER NOT NULL CHECK (net_total_minor >= 0),
+        unit_cost_base_snapshot_minor INTEGER CHECK (unit_cost_base_snapshot_minor IS NULL OR unit_cost_base_snapshot_minor >= 0),
+        cogs_amount_minor INTEGER CHECK (cogs_amount_minor IS NULL OR cogs_amount_minor >= 0),
+        product_name_snapshot TEXT NOT NULL CHECK (length(product_name_snapshot) > 0),
+        package_name_snapshot TEXT NOT NULL CHECK (length(package_name_snapshot) > 0),
+        created_at TEXT NOT NULL,
+        CHECK (net_total_minor = gross_total_minor - discount_amount_minor)
+      );`,
+      'CREATE INDEX idx_sale_items_sale ON sale_items(sale_id);',
+      'CREATE INDEX idx_sale_items_store_product ON sale_items(store_product_id);',
+      `CREATE TRIGGER trg_sale_items_store_product_insert
+        BEFORE INSERT ON sale_items
+        WHEN NOT EXISTS (
+          SELECT 1 FROM sales s
+          JOIN store_products sp ON sp.id = NEW.store_product_id
+          WHERE s.id = NEW.sale_id AND sp.store_id = s.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'sale item store product does not belong to sale store'); END;`,
+      `CREATE TRIGGER trg_sale_items_variant_insert
+        BEFORE INSERT ON sale_items
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          WHERE sp.id = NEW.store_product_id AND sp.product_variant_id = NEW.product_variant_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'sale item variant mismatch with store product'); END;`,
+      `CREATE TRIGGER trg_sale_items_package_insert
+        BEFORE INSERT ON sale_items
+        WHEN NOT EXISTS (
+          SELECT 1 FROM package_units pu
+          WHERE pu.id = NEW.package_unit_id AND pu.product_variant_id = NEW.product_variant_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'sale item package unit does not belong to product variant'); END;`,
+      `CREATE TABLE payments (
+        id TEXT PRIMARY KEY,
+        sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE RESTRICT,
+        method TEXT NOT NULL CHECK (method IN ('CASH', 'BANK_TRANSFER', 'POS_CARD', 'CREDIT')),
+        amount_minor INTEGER NOT NULL CHECK (amount_minor >= 0),
+        currency_code TEXT NOT NULL CHECK (length(currency_code) = 3),
+        recorded_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        payment_reference TEXT CHECK (payment_reference IS NULL OR length(payment_reference) <= 128),
+        created_at TEXT NOT NULL,
+        UNIQUE (sale_id)
+      );`,
+      'CREATE INDEX idx_payments_sale ON payments(sale_id);',
+      'CREATE INDEX idx_payments_method ON payments(method);',
+      `CREATE TRIGGER trg_payments_currency_insert
+        BEFORE INSERT ON payments
+        WHEN NOT EXISTS (
+          SELECT 1 FROM sales s
+          WHERE s.id = NEW.sale_id AND s.currency_code = NEW.currency_code
+        )
+        BEGIN SELECT RAISE(ABORT, 'payment currency mismatch with sale'); END;`,
+      `CREATE TRIGGER trg_payments_user_store_insert
+        BEFORE INSERT ON payments
+        WHEN NOT EXISTS (
+          SELECT 1 FROM sales s
+          JOIN store_members sm ON sm.store_id = s.store_id AND sm.user_id = NEW.recorded_by_user_id
+          WHERE s.id = NEW.sale_id AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'payment user is not an active store member'); END;`,
+      `CREATE TRIGGER trg_payments_amount_matches_sale_insert
+        BEFORE INSERT ON payments
+        WHEN NOT EXISTS (
+          SELECT 1 FROM sales s
+          WHERE s.id = NEW.sale_id AND s.total_minor = NEW.amount_minor
+        )
+        BEGIN SELECT RAISE(ABORT, 'payment amount must equal completed sale total'); END;`,
+      `CREATE TRIGGER trg_payments_credit_positive_insert
+        BEFORE INSERT ON payments
+        WHEN NEW.method = 'CREDIT' AND NEW.amount_minor <= 0
+        BEGIN SELECT RAISE(ABORT, 'credit payment amount must be positive'); END;`,
+      `CREATE TABLE inventory_events (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        event_type TEXT NOT NULL CHECK (event_type IN ('PURCHASE', 'SALE', 'CUSTOMER_RETURN', 'SUPPLIER_RETURN', 'DAMAGED', 'EXPIRED', 'MISSING', 'PERSONAL_USE', 'CORRECTION', 'OPENING_BALANCE')),
+        quantity_base_delta_micros INTEGER NOT NULL CHECK (quantity_base_delta_micros <> 0),
+        package_unit_id TEXT REFERENCES package_units(id) ON DELETE RESTRICT,
+        quantity_package_snapshot_micros INTEGER,
+        conversion_to_base_snapshot_micros INTEGER,
+        source_type TEXT NOT NULL CHECK (source_type IN ('SALE', 'PURCHASE', 'RECONCILIATION', 'MANUAL_ADJUSTMENT', 'OPENING_BALANCE')),
+        source_id TEXT,
+        reason_code TEXT,
+        note TEXT CHECK (note IS NULL OR length(note) <= 500),
+        occurred_at TEXT NOT NULL,
+        created_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        created_at TEXT NOT NULL
+      );`,
+      'CREATE INDEX idx_inventory_events_store_product ON inventory_events(store_id, store_product_id, occurred_at);',
+      'CREATE INDEX idx_inventory_events_source ON inventory_events(source_type, source_id);',
+      `CREATE TRIGGER trg_inventory_events_store_product_insert
+        BEFORE INSERT ON inventory_events
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          WHERE sp.id = NEW.store_product_id AND sp.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'inventory event store product does not belong to store'); END;`,
+      `CREATE TRIGGER trg_inventory_events_device_store_insert
+        BEFORE INSERT ON inventory_events
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id AND d.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'inventory event device does not belong to store'); END;`,
+      `CREATE TRIGGER trg_inventory_events_user_store_insert
+        BEFORE INSERT ON inventory_events
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.created_by_user_id
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'inventory event user is not an active store member'); END;`,
+      `CREATE TRIGGER trg_inventory_events_package_variant_insert
+        BEFORE INSERT ON inventory_events
+        WHEN NEW.package_unit_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          JOIN package_units pu ON pu.id = NEW.package_unit_id
+          WHERE sp.id = NEW.store_product_id
+            AND pu.product_variant_id = sp.product_variant_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'inventory event package does not belong to store product'); END;`,
+      `CREATE TRIGGER trg_inventory_events_sale_source_insert
+        BEFORE INSERT ON inventory_events
+        WHEN NEW.event_type = 'SALE' AND (
+          NEW.source_type <> 'SALE'
+          OR NEW.source_id IS NULL
+          OR NEW.quantity_base_delta_micros >= 0
+          OR NEW.package_unit_id IS NULL
+          OR NEW.quantity_package_snapshot_micros IS NULL
+          OR NEW.conversion_to_base_snapshot_micros IS NULL
+          OR NOT EXISTS (
+            SELECT 1 FROM sales s
+            WHERE s.id = NEW.source_id AND s.store_id = NEW.store_id
+          )
+        )
+        BEGIN SELECT RAISE(ABORT, 'sale inventory event must be a negative snapshot for its sale'); END;`,
+      `CREATE TABLE customer_accounts (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        name TEXT NOT NULL CHECK (length(name) > 0 AND length(name) <= 200),
+        phone TEXT CHECK (phone IS NULL OR (length(phone) > 0 AND length(phone) <= 32)),
+        notes TEXT CHECK (notes IS NULL OR length(notes) <= 500),
+        status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE')),
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );`,
+      'CREATE INDEX idx_customer_accounts_store_name ON customer_accounts(store_id, name);',
+      `CREATE TABLE receivables (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE RESTRICT,
+        customer_account_id TEXT NOT NULL REFERENCES customer_accounts(id) ON DELETE RESTRICT,
+        original_amount_minor INTEGER NOT NULL CHECK (original_amount_minor > 0),
+        outstanding_amount_minor INTEGER NOT NULL CHECK (outstanding_amount_minor >= 0 AND outstanding_amount_minor <= original_amount_minor),
+        status TEXT NOT NULL DEFAULT 'OPEN' CHECK (status IN ('OPEN', 'PARTIALLY_PAID', 'PAID', 'WRITTEN_OFF')),
+        due_date TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        UNIQUE (sale_id)
+      );`,
+      'CREATE INDEX idx_receivables_store_status ON receivables(store_id, status);',
+      'CREATE INDEX idx_receivables_customer ON receivables(customer_account_id);',
+      `CREATE TRIGGER trg_receivables_customer_store_insert
+        BEFORE INSERT ON receivables
+        WHEN NOT EXISTS (
+          SELECT 1 FROM customer_accounts ca
+          WHERE ca.id = NEW.customer_account_id AND ca.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'receivable customer account does not belong to store'); END;`,
+      `CREATE TRIGGER trg_receivables_sale_store_insert
+        BEFORE INSERT ON receivables
+        WHEN NOT EXISTS (
+          SELECT 1 FROM sales s
+          WHERE s.id = NEW.sale_id AND s.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'receivable sale does not belong to store'); END;`,
+      `CREATE TRIGGER trg_receivables_credit_payment_insert
+        BEFORE INSERT ON receivables
+        WHEN NEW.status <> 'OPEN'
+          OR NEW.outstanding_amount_minor <> NEW.original_amount_minor
+          OR NOT EXISTS (
+            SELECT 1 FROM payments p
+            WHERE p.sale_id = NEW.sale_id
+              AND p.method = 'CREDIT'
+              AND p.amount_minor = NEW.original_amount_minor
+          )
+        BEGIN SELECT RAISE(ABORT, 'receivable must open for the matching credit payment'); END;`,
+      `CREATE UNIQUE INDEX uq_outbox_completed_sale_entity
+        ON outbox_operations(entity_type, entity_id)
+        WHERE operation_type = 'COMPLETED_SALE_CREATED';`,
+      `CREATE TRIGGER trg_sales_immutable_update
+        BEFORE UPDATE ON sales
+        BEGIN SELECT RAISE(ABORT, 'completed sales are immutable'); END;`,
+      `CREATE TRIGGER trg_sales_immutable_delete
+        BEFORE DELETE ON sales
+        BEGIN SELECT RAISE(ABORT, 'completed sales are immutable'); END;`,
+      `CREATE TRIGGER trg_sale_items_immutable_update
+        BEFORE UPDATE ON sale_items
+        BEGIN SELECT RAISE(ABORT, 'completed sale items are immutable'); END;`,
+      `CREATE TRIGGER trg_sale_items_immutable_delete
+        BEFORE DELETE ON sale_items
+        BEGIN SELECT RAISE(ABORT, 'completed sale items are immutable'); END;`,
+      `CREATE TRIGGER trg_payments_immutable_update
+        BEFORE UPDATE ON payments
+        BEGIN SELECT RAISE(ABORT, 'completed sale payments are immutable'); END;`,
+      `CREATE TRIGGER trg_payments_immutable_delete
+        BEFORE DELETE ON payments
+        BEGIN SELECT RAISE(ABORT, 'completed sale payments are immutable'); END;`,
+      `CREATE TRIGGER trg_inventory_events_immutable_update
+        BEFORE UPDATE ON inventory_events
+        BEGIN SELECT RAISE(ABORT, 'inventory events are append-only'); END;`,
+      `CREATE TRIGGER trg_inventory_events_immutable_delete
+        BEFORE DELETE ON inventory_events
+        BEGIN SELECT RAISE(ABORT, 'inventory events are append-only'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;
