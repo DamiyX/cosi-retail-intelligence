@@ -94,6 +94,13 @@ settlement, void, return, correction, and reversal remain deferred.
 
 The user must not manually perform package conversion during normal work.
 
+The founder approved the M4 screen/state baseline on 2026-09-18. Restock and
+purchase history enter through More; product Quick Add retains the in-memory
+draft, dirty exits require confirmation, and total/unit input retains its exact
+basis. Cost is estimated or unavailable under D-038; personal observations remain
+private/non-contributing. See DESIGN and M4_RESTOCKING_COSTING_PLAN. M4 source
+implementation is assigned; its completion and physical evidence are not claimed.
+
 ## Catalogue and Progressive Setup
 
     Encounter product during sale or restock
@@ -174,7 +181,7 @@ transaction completed if its local atomic commit failed.
 | Today/Home | Daily task entry and honest summary | Layout open |
 | Sale/cart/payment/completion | Required offline workflow | Capability flow approved |
 | Catalogue/search/product edit | Progressive digitization | M2 flow approved in `docs/design/DESIGN.md` |
-| Restock/purchase | Required offline workflow | Capability flow approved |
+| Restock/purchase | Required offline workflow | M4 screen/state baseline approved; implementation pending |
 | Inventory/reconciliation | Event-based control | Screen split open |
 | Expense/withdrawal | Required offline record | Screen split open |
 | Transactions/history | Review and accountability | Filters/actions open |

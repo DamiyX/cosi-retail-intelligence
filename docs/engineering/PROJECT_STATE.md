@@ -1,8 +1,9 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-18  
-Current milestone: M3 Sales — source/automated scope accepted after independent
-re-audit under the carried physical-device waiver; M4 planning is next.  
+Current milestone: M4 Restocking + Costing — founder-approved cost/design
+contract and published tickets assigned to separate Luna max implementation;
+independent audit and physical/release evidence remain pending.  
 Completed engineering milestones: M0 Project Foundation; M1 Domain + Local
 Database (accepted with an explicit device waiver); M2 Catalogue + Package Units
 (accepted after independent audit); M3 source/automated scope (accepted after
@@ -11,8 +12,14 @@ independent audit with physical/release gates carried).
 ## Active checkout
 
 - Canonical remote: https://github.com/DamiyX/cosi-retail-intelligence
-- Current local branch: `feat/m3-sales`, based on `9476297`; M3 implementation
-  commit `2ff7b4f` and corrective commit `0a5f8c8` are present locally.
+- Current branch: `feat/m4-restocking-costing`, from accepted M3 checkpoint
+  `66cc64d`. No M4 production code has been added.
+- Coordinator-created M4 plan, published tickets, D-038, cost/design sources and
+  workflow registration are local documentation changes for the implementer to
+  verify and commit separately before feature tickets.
+- Separate implementation task `01a0b1a5-4512-79f0-ae55-58d39559944d` is assigned
+  M4 only as Luna max. Coordinator owns planning/tickets/workflow registration
+  and independent audit; implementer owns implementation and assigned fixes.
 - Local checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m0`
 - M0 pull request #1 remains open and `main` remains at `a393498`; the milestone
   branches are currently stacked. Rebase or retarget only after the earlier pull
@@ -114,8 +121,12 @@ new migration.
 
 ## Next action
 
-Open the separate M4 Restocking + Costing planning gate only; do not implement
-M4 in this checkpoint or invent its detailed decisions. Complete the carried
+The assigned Luna max task implements M4-01 through M4-05 in dependency order
+using the approved M4_RESTOCKING_COSTING_PLAN, D-038 and DESIGN. First verify and
+commit coordinator-created documentation as a separate planning checkpoint;
+then commit each ticket separately with actual evidence. Send completion to the
+coordinating task and stop for independent audit; do not self-accept or start M5. Accepted M3 tickets are archived in
+`docs/engineering/tickets/M3_SALES.md`. Complete the carried
 M3 physical-device/offline-sale, development-client/Metro, large-text, and
 second-laptop reproduction checks before any external beta or native-release
 readiness claim. Do not push, merge, deploy, or alter the carried device gate
@@ -124,8 +135,9 @@ without applicable authorization.
 ## Continuity
 
 Read `AGENTS.md`, `.agents/contexts/project-context.md`,
-`.agents/workflows/index.json`, `.agents/workflows/m3-sales.json`, `tickets.md`,
+`.agents/workflows/index.json`, `.agents/workflows/m4-restocking-costing.json`,
+`tickets.md`, `docs/engineering/M4_RESTOCKING_COSTING_PLAN.md`,
 `docs/engineering/M3_SALES_PLAN.md`, `docs/engineering/M3_AUDIT_CORRECTIONS.md`,
-`docs/design/DESIGN.md`, the M3 section of `BUILD_PLAN.md`, D-013/D-034/D-036/
-D-037, and `MULTI_AGENT_WORKFLOW.md`. Inspect Git status, history, and diff
+`docs/design/DESIGN.md`, the M4 section of `BUILD_PLAN.md`, D-013/D-027/D-028/
+D-034/D-036/D-037/D-038, and `MULTI_AGENT_WORKFLOW.md`. Inspect Git status, history, and diff
 before edits. Repository documents and Git history are the project memory.

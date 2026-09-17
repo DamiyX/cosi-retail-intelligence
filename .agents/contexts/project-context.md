@@ -75,8 +75,11 @@ partial measure, never full profit or P&L.
 
 ## Current Priorities
 
-1. Open the separate M4 Restocking + Costing planning gate; do not implement M4
-   from this routing summary or invent its detailed decisions.
+1. Implement published M4 tickets on feat/m4-restocking-costing from 66cc64d.
+   Founder approved M4 cost/design rules; D-038 records engineering precision,
+   rounding and coverage while D-027 stays provisional. Coordinator owns plans,
+   tickets, workflow and independent audit; separate Luna max task implements
+   approved tickets and assigned fixes. Stop at the independent audit boundary.
 2. Complete the explicitly deferred M3 physical-device/offline-sale,
    development-client/Metro, large-text, and second-laptop checks before any
    external beta/native-release claim; preserve the M1/M2 Galaxy evidence as
@@ -115,7 +118,7 @@ partial measure, never full profit or P&L.
   split tender, partial credit settlement, and reversal remain later gates.
 - Confirm onboarding, session recovery, store creation/membership, multiple
   stores, and exact staff permissions before those flows are implemented.
-- Review the costing policy before M4 implementation.
+- D-038 approves M4 engineering costing; professional accounting review, M5 adjustment costing and M7 concurrent-device costing remain gates.
 - Approve the application flow and design direction before substantial product
   UI implementation. See .agents/contexts/app-flow.md and
   docs/design/README.md.

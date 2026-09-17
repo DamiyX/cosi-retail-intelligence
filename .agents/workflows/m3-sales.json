@@ -38,7 +38,7 @@
     },
     {
       "kind": "tickets",
-      "path": "tickets.md",
+      "path": "docs/engineering/tickets/M3_SALES.md",
       "claim": "M3-01 through M3-05 are vertical, dependency-ordered, testable, and stop before M4."
     },
     {
@@ -68,7 +68,7 @@
       "evidence": [
         {
           "result": "M2 accepted after corrections; npm run validate passed with 126 domain and 137 mobile tests, Doctor 21/21, clean Expo dependency check, and successful Android export.",
-          "source": "tickets.md; docs/engineering/PROJECT_STATE.md",
+          "source": "docs/engineering/tickets/M3_SALES.md; docs/engineering/PROJECT_STATE.md",
           "observed_at": "2026-09-14T12:00:00Z"
         }
       ],
@@ -137,7 +137,7 @@
       "evidence": [
         {
           "result": "Founder previously delegated ticket granularity and dependency judgement; the published M3 frontier follows the repository ticket contract.",
-          "source": "tickets.md; docs/engineering/TICKETING.md",
+          "source": "docs/engineering/tickets/M3_SALES.md; docs/engineering/TICKETING.md",
           "observed_at": "2026-09-14T12:30:00Z"
         }
       ],
@@ -186,7 +186,7 @@
       "evidence": [
         {
           "result": "The coordinating independent auditor accepted source/automated M3 scope at 0a5f8c8 after independently inspecting the corrective commit against 2ff7b4f and 9476297; npm run validate passed 143 domain and 186 mobile tests (329 total / 25 suites), strict typecheck, zero-warning lint; AJV draft 2020 plus ajv-formats workflow schema/date-time and gate-dependency validation passed; git diff --check 9476297 HEAD and clean status passed. Existing Doctor 21/21, Expo dependency-check, and Android-export evidence was reviewed rather than redundantly rerun.",
-          "source": "docs/engineering/M3_AUDIT_CORRECTIONS.md; tickets.md; docs/engineering/PROJECT_STATE.md",
+          "source": "docs/engineering/M3_AUDIT_CORRECTIONS.md; docs/engineering/tickets/M3_SALES.md; docs/engineering/PROJECT_STATE.md",
           "observed_at": "2026-09-17T23:08:06Z"
         }
       ],
@@ -196,7 +196,7 @@
     }
   ],
   "artifacts": [
-    "tickets.md",
+    "docs/engineering/tickets/M3_SALES.md",
     "docs/engineering/M3_SALES_PLAN.md",
     "docs/engineering/M3_AUDIT_CORRECTIONS.md",
     "docs/design/DESIGN.md",

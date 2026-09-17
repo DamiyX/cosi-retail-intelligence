@@ -228,6 +228,13 @@ founder to verify their granularity and dependencies before publishing
 future milestone. The founder may explicitly delegate this technical judgment to
 the planning agent.
 
+The coordinating planning/audit agent owns milestone plans, tickets, dependency
+review, workflow registration, implementation prompts, independent audits, and
+acceptance. The implementer owns approved implementation and assigned fixes.
+Its tests and self-checks are evidence, not independent audit or permission to
+start another milestone. Follow the sequential-task responsibilities in
+`docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md`.
+
 An implementation agent may complete all published tickets inside one milestone.
 It must then stop for the independent audit defined in
 `docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md` before starting the next

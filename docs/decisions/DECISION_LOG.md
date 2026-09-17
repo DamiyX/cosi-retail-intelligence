@@ -108,6 +108,7 @@ When a major decision changes, update the affected source-of-truth document too.
 | D-035 | Temporary products use store-scoped provisional variants | ACTIVE |
 | D-036 | Local sale arithmetic is exact-or-reject | ACTIVE |
 | D-037 | M3 uses one tender allocation with explicit credit truth | ACTIVE |
+| D-038 | M4 exact cost basis, provisional COGS rounding and conservative coverage | ACTIVE |
 
 ---
 
@@ -1144,6 +1145,75 @@ records, inventory events, and one aggregate outbox envelope.
 
 ---
 
+## D-038 — M4 Exact Cost Basis and Provisional Coverage Rules
+
+**Status:** ACTIVE engineering contract; D-027 remains PROVISIONAL accounting policy  
+**Date:** 2026-09-18  
+**Approval:** Founder explicitly approved the M4 costing and screen proposal and
+instructed the coordinator to assign M4 implementation.
+
+### Decision
+
+- Purchase quantity/conversion uses D-034 safe integer micro-units. Merchant
+  input is total line cost or per-package unit cost in nonnegative integer minor
+  units. Preserve mode/value and immutable quantity/name/conversion/currency
+  snapshots. Unit-cost mode must yield an exact integer line total; total-cost
+  mode can yield a fractional normalized price. Explicit zero cost is distinct
+  from unavailable cost.
+- Normalized package/base prices and moving average costs use reduced,
+  nonnegative rational values, with BigInt internal calculations and canonical
+  decimal-string numerator/denominator at storage/JSON boundaries. Cost ratios
+  are minor units per whole base unit; denominators are positive.
+- For fully covered positive stock, average equals exact remaining value plus
+  receipt total divided by new quantity. Sales consume exact proportional value;
+  processing order of repeated-product lines is stable.
+- A fully covered NEW sale line snapshots its exact basis and method/version.
+  Estimated COGS rounds half up once per line to integer minor units. Rounded
+  COGS is not fed back into the exact stock valuation. D-036 sale amounts,
+  discounts and tenders continue to use exact-or-reject arithmetic.
+- Positive stock with unknown prior coverage has unavailable average/COGS;
+  purchases still save and their original prices remain visible. When a receipt
+  takes a prior zero/negative balance positive, initialize the positive remainder
+  at that receipt's exact unit cost. Never retroactively cost the old deficit.
+  Nonpositive stock has no usable average and zero costed quantity. A sale line
+  exceeding coverage has unavailable COGS for the whole line, consumes remaining
+  coverage, and remains a valid genuine sale under D-013.
+- Completed pre-M4 sales remain unchanged. New immutable companion snapshots
+  may preserve fractional cost basis; integer unit-cost fields must not pretend
+  fractional values are integral. Sale cost snapshots and cost movements/state
+  share the sale transaction. Cost state is store-private and reconstructable
+  from immutable purchase/sale movements with explicit local application order.
+- Purchase/items, positive inventory events, cost movements/state, personal
+  observations, optional newly created supplier and one completed-purchase
+  outbox envelope commit atomically. Replay preserves actor/store ownership and
+  original immutable attribution, including resolved membership and device.
+- Personal observations are private, reference purchase lines and default
+  contribution consent to false. Supplier selection/creation is explicit;
+  duplicate names never auto-merge. Restock draft is in memory with dirty-exit
+  guards; purchase completion does not imply payment/payable settlement.
+
+### Evidence and examples
+
+The approved M4_RESTOCKING_COSTING_PLAN supplies verification cases: 20 units at
+30000 kobo plus 40 at 35000 => 100000/3 kobo/unit; one-unit COGS 33333, three-unit
+line COGS 100000. Half-kobo rounds to one kobo. Unknown positive stock retains
+unavailable cost; balance -2 plus five purchased units costs only the positive
+remainder of three, with no historical backfill.
+
+### Tradeoffs and limits
+
+Rational basis adds persistence/validation work but avoids compounding rounded
+unit costs. Whole-kobo average storage was rejected because it loses basis;
+leaving all subsequent sale COGS unavailable would defer required integration.
+Per-line rounding can differ from rounding a combined quantity; retain exact
+basis and method version, label costs as estimates, and make no finalized
+accounting or full profit/P&L claim. Professional review remains required.
+M5 reviews adjustment costing, and M7 reviews concurrent-device costing/order;
+local application order is not global synchronization. Purchasing credit,
+returns, voids, taxes and landed-cost allocation remain outside M4.
+
+---
+
 # 6. Explicitly Deferred Decisions
 
 These are intentionally unresolved and should not be reopened as though they were forgotten.
@@ -1347,11 +1417,14 @@ Superseded by:
 
 # 9. Current Decision Review
 
-As of 2026-09-14:
+As of 2026-09-18:
 
 - no active decision is known to conflict with the current Product Inception, PRD, Domain Model, Technical Architecture, Offline Sync or Scanning Architecture;
-- M0–M2 are implemented; M2 passed independent source and automated audit, and
-  M3 transaction/design contracts are approved but feature code has not begun;
+- M0–M3 source/automated scope is accepted after independent audit, with physical
+  and release readiness carried; M4 cost/design contracts are approved and its
+  implementation is assigned to a separate Luna max task;
+- D-038 fixes engineering precision/coverage/rounding for M4; it does not finalize
+  D-027 as accounting policy;
 - provisional decisions requiring the strongest later validation are:
   - custom sync vs managed sync;
   - moving weighted-average costing;

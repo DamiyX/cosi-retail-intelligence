@@ -723,6 +723,18 @@ The original package-basis price must be retained even when normalized base-unit
 
 This is important for restock-price intelligence.
 
+### M4 representation and completion — D-038
+
+Quantities/conversion snapshots use D-034 micro-units. Preserve total-versus-unit
+input mode and merchant-entered minor-unit value; unit-cost mode must produce
+an exact integer total. Normalized package and base prices can be reduced
+rational values with canonical decimal-string numerator/denominator, not
+silently rounded input prices. Completed lines and names/conversions are immutable.
+Purchase attribution includes resolved active membership, acting user and device.
+Optional supplier creation, purchase/items, positive inventory events, cost
+movements/state, private line-linked observations and one aggregate outbox commit
+atomically; actor/store-scoped replay returns the original graph.
+
 ---
 
 # 10. Inventory Domain
@@ -869,6 +881,31 @@ Maintains the current costing state for a store product.
 ### Accounting note
 
 The exact accounting behavior must be validated before formal accounting claims are made.
+
+### M4 engineering contract — D-038
+
+Average cost is an exact reduced rational minor-unit amount per whole base unit,
+computed using BigInt and stored/transmitted as canonical decimal strings.
+Costed quantity is integer base micro-units. Remaining value is exact; rounded
+sale COGS is never fed back into average calculations. State is a store-private
+projection rebuildable from immutable purchase/sale cost movements and explicit
+local application order; timestamps alone do not define that order.
+
+Positive stock with unknown coverage has unavailable average/COGS. A receipt
+crossing a zero/negative balance into positive stock initializes only the
+positive remainder at the receipt's unit cost. A sale exceeding coverage keeps
+whole-line COGS unavailable, consumes remaining coverage and preserves genuine
+negative-stock sales. Nonpositive stock has no usable average and zero costed
+quantity. Later adjustment and multi-device rules require M5/M7 review.
+
+New fully covered sale lines preserve exact basis/method version in immutable
+snapshots, optionally through an additive companion record. Estimated COGS is
+rounded half up once per line to minor units. Integer unit-cost columns cannot
+misrepresent fractional bases. Pre-M4 costs stay null; completed snapshots never
+change. D-036 selling arithmetic remains exact-or-reject. Cost basis, movements
+and projection changes commit within the same sale transaction as its business
+aggregate, inventory and outbox. The UI labels estimates and unavailable costs;
+D-027 remains provisional pending professional accounting review.
 
 ---
 

@@ -1,9 +1,10 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-17T23:08:06Z",
+  "updated_at": "2026-09-17T23:30:57Z",
   "tasks": {
     "m1-domain-local-database": "m1-domain-local-database.json",
     "m2-catalogue-package-units": "m2-catalogue-package-units.json",
-    "m3-sales": "m3-sales.json"
+    "m3-sales": "m3-sales.json",
+    "m4-restocking-costing": "m4-restocking-costing.json"
   }
 }

@@ -891,6 +891,24 @@ Database transaction persists result
 
 Completed sale items snapshot the applicable cost basis.
 
+### M4 exact basis and atomic projection — D-038
+
+Purchase normalization and cost transitions use pure domain functions with
+BigInt internal rational arithmetic and canonical decimal strings at SQLite/JSON
+boundaries. Inputs remain safe integer minor money units and D-034 quantities.
+Averages and remaining value retain exact fractions. Estimated COGS rounds half
+up once per fully covered sale line, preserving basis and method version; D-036
+sale/tender arithmetic does not change. Missing coverage is unavailable, not zero.
+
+Apply the approved zero/negative/unknown coverage transitions from D-038.
+Append migrations and immutable new-sale companion snapshots without changing
+committed M1–M3 definitions or old cost fields. Persist purchase effects and
+cost movements/state/observations/outbox in one transaction, and new sale cost
+snapshots/depletion in the existing sale transaction. Projection reconstruction
+uses immutable local movement order, not timestamps alone; no separate stock
+truth or sync protocol is introduced. M5 adjustment and M7 concurrent-device
+costing remain review gates. Cost is provisional, not formal accounting profit.
+
 ---
 
 # 34. Remote Object / Image Storage

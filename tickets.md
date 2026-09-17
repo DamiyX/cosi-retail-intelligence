@@ -1,273 +1,154 @@
-# Tickets: M3 Offline Sales
+# Tickets: M4 Offline Restocking + Provisional Costing
 
-These tickets deliver one reliable, exact, offline sale from local catalogue
-selection through inventory effect, payment/credit truth, and durable history.
+**Status:** PUBLISHED for implementation. Founder approved the M4 costing and
+screen/state contract on 2026-09-18; D-038 and DESIGN record the approved rules.
+Coordinator verified ticket granularity/dependencies under delegated judgment.
+**Branch:** feat/m4-restocking-costing. **Accepted baseline:** 66cc64d.
+Accepted M3 tickets/evidence are archived in the engineering M3_SALES ledger.
 
-## Execution Contract
+## Execution contract
 
-- First commit the accepted M2 audit corrections, then create `feat/m3-sales`
-  from that commit. Do not implement M3 on the M2 branch.
-- Execute M3-01 through M3-05 in dependency order. Keep strict typecheck,
-  zero-warning lint, tests, Expo compatibility, and Android export green.
-- Follow active D-036 and D-037 and the M3 section of `docs/design/DESIGN.md`.
-- Sale completion is one atomic local transaction: Sale, SaleItems, Payment,
-  optional credit records, InventoryEvents, and one aggregate outbox envelope.
-- Update this file, `.agents/workflows/m3-sales.json`, and PROJECT_STATE with
-  evidence. Stop M3 implementation after M3-05 for independent audit; the next
-  milestone has a separate planning gate and is not implemented in this
-  checkpoint.
-- Do not push, merge, deploy, link production services, or change approved
-  transaction semantics without the applicable authorization and review.
+Coordinator owns planning, dependencies, decisions, workflow registration and
+independent audit. Luna max implements approved tickets and assigned fixes,
+returning completion for audit. Founder delegated sizing/dependency judgment.
 
-## M3 Boundaries
+Shared sources: BUILD_PLAN M4, PRD restocking/costing, DOMAIN_DATA_MODEL,
+TECHNICAL_ARCHITECTURE, OFFLINE_SYNC, DESIGN, M4_RESTOCKING_COSTING_PLAN and
+D-013/D-027/D-028/D-034/D-036/D-037/D-038. Cost/design approval is recorded;
+follow these contracts and report contradictions rather than changing them.
 
-- Use D-034 micro-unit quantities and D-036 exact sale arithmetic. Never use
-  binary floating point as the authoritative source of quantity or money.
-- Use D-037: in-memory draft cart, one tender allocation, explicit credit
-  receivable, nullable pre-M4 cost snapshots, and immutable completed sales.
-- Preserve D-013: a genuine offline sale remains valid even if derived stock
-  becomes negative; surface the discrepancy for later reconciliation.
-- Use the existing local StoreMember and Device for attribution and the existing
-  outbox/replay boundary. M7 owns network synchronization.
-- Scanner, recognition, restocking/costing, inventory reconciliation, split
-  tender, partial credit settlement, printing, returns, void/reversal, tax,
-  percentage/order discounts, and M4+ summaries are outside M3.
+Per ticket: relevant domain/repository/component tests, typecheck and
+zero-warning lint must pass. Commit separately with ticket ID; record commands,
+results, commits and deferred checks. No M5, remote schema/transport, purchase
+payments/payables, returns, shared contributions, recognition, push, merge or
+deployment. Never edit committed migrations 1-3 or fabricate old sale costs.
 
-## Verified implementation and audit evidence — 2026-09-18
+## M4-01 — Complete and reopen one offline restock
 
-M3 source/automated scope is accepted after independent audit at corrective
-commit `0a5f8c8`; physical-device, development-client/Metro, and second-laptop
-readiness gates remain carried and are not passed.
+**Status:** Ready. **Blocked by:** M3 acceptance (met); M4 approval gate (met).
+**Outcome:** Save one product/package with quantity and total cost, increase
+stock and reopen its immutable receipt.
+**Scope/modules:** Purchase domain, additive SQLite repositories/schema,
+record-purchase aggregate, minimal More/restock/receipt screens and tests.
+No supplier form, unit-cost mode, multiline cart, reconciliation or sale COGS yet.
 
-- Exact D-034/D-036 calculations, atomic local Sale aggregate/outbox capture,
-  single-tender and credit truth, immutable sale history, and durable stored
-  sync status have application, SQLite, and automated-test coverage.
-- Because migration 3 was uncommitted and unshipped, its pending definition was
-  corrected directly rather than appending migration 4. The populated-M2
-  upgrade test proves no reset, loss, false history, or duplicate sales effect.
-- `npm run validate` passed 143 domain and 186 mobile tests (329 tests in 25
-  suites), with strict typecheck and zero-warning lint; Doctor passed 21/21,
-  Expo dependencies are current, and Android export succeeded.
-- M3 physical-device verification was deliberately not run in this pass. The
-  preserved Galaxy A15 evidence is M1/M2-only and must not be used as M3 proof;
-  M3 device verification remains a pre-beta/native-release gate.
-- The 2026-09-17 independent-audit correction pass added negative-stock
-  presentation, exact cross-row aggregate guards, screen-facing store-read
-  isolation, recoverable local-read states, full credit/multiline rollback and
-  replay coverage, and schema-valid workflow continuity. See
-  `docs/engineering/M3_AUDIT_CORRECTIONS.md`.
-- The coordinating independent auditor (task/thread
-  `01a098ef-d830-7531-bca7-2d66b0a5b587`) independently inspected the corrective
-  commit against the initial M3 and accepted the source/automated scope. The
-  auditor reran `npm run validate` (143 domain + 186 mobile = 329 tests / 25
-  suites, strict typecheck, zero-warning lint), workflow JSON Schema/date-time
-  and gate-dependency validation, and `git diff --check 9476297 HEAD` with
-  clean status. Existing Doctor/dependency/export evidence was reviewed, not
-  redundantly rerun.
+- [ ] Exact package/base quantity and total/currency validation; immutable names,
+  conversion, input basis and normalized rational price. Purchase/item, positive
+  inventory event, provisional cost state/movement, private non-contributing
+  observation and one outbox aggregate commit atomically. Receipt reads stored
+  facts and distinguishes estimated/unavailable cost.
+- [ ] Populated-M3 upgrade retains all prior rows/history/null costs; rollback
+  injection at every aggregate write proves no partial effects. Actor-scoped
+  replay returns the original graph without duplicate stock/observation/outbox;
+  cross-store/device/member/product/package/currency misuse and conflicting
+  operation reuse are rejected without writes.
+- [ ] UI covers valid save/reopen, exact input errors, retained failed draft,
+  retry with same operation ID, duplicate-submit prevention and dirty exits.
+  Domain tests cover fractional normalization, zero/negative/unknown-stock
+  transitions and overflow. Ticket tests, typecheck and zero-warning lint pass.
 
-## Ticket M3-01: Complete one cash sale offline
+**Risks/manual checks:** Native restart/offline proof needs the device gate;
+Node/component tests do not provide physical evidence.
+**Completion evidence:** None.
 
-**Status:** Complete  
-**Outcome:** A retailer can find one existing product, sell one configured
-package for cash, and receive a durable local completion record with exactly one
-inventory effect and one outbox operation.  
-**Blocked by:** accepted and committed M2 baseline; `feat/m3-sales` branch
+## M4-02 — Restock multiple packages and optionally identify a supplier
 
-**Vertical scope:**
+**Status:** Pending. **Blocked by:** M4-01.
+**Outcome:** Review/save several lines using total or per-package unit cost,
+with optional explicitly selected/created supplier.
+**Scope/modules:** Restock cart/normalization, supplier repository, aggregate,
+client and tests. Append a migration for new persisted contracts if necessary.
+No tender/credit, supplier auto-merge, contacts import or landed costs.
 
-- Add exact sale-line calculation helpers for positive D-034 package quantity,
-  conversion snapshots, integer-minor-unit price/discount, and D-036 totals.
-- Add migration 3 and typed repositories for the minimum Sale, SaleItem,
-  Payment, and InventoryEvent fields required by a completed transaction.
-- Add one `completeSale` application operation that validates store, actor,
-  device, product, package, status, sellability, currency, and snapshots before
-  committing the aggregate and one `COMPLETED_SALE_CREATED` envelope.
-- Replace the Sell placeholder with local product search, one-line
-  configuration, cash review, completion, and a snapshot-based confirmation.
+- [ ] Add/edit/remove lines with exact running totals; unit-cost mode rejects
+  fractional minor-unit totals while total-cost mode retains fractional derived
+  prices. Mixed packages/repeated products process in stable line order using
+  transaction-time active-package ownership checks.
+- [ ] Supplier is store-private and explicit; duplicate names do not merge.
+  Receipt attribution survives later supplier/product/package changes. New
+  supplier and all purchase effects/envelope commit or roll back together;
+  tests inject failure at every multiline write, replay and isolate stores,
+  including repeated-product cost updates and safe arithmetic bounds.
+- [ ] Component tests cover no-match/Quick Add return with retained draft,
+  supplier modes, line edits, read retry, package deactivation, overflow and
+  dirty header/hardware/tab/Cancel exits. No unhandled initial/follow-up reads;
+  ticket tests, typecheck and zero-warning lint pass.
 
-**Acceptance:**
+**Risks/manual checks:** Keyboard, dirty exits and large text need device checks.
+**Completion evidence:** None.
 
-- [x] Exact domain tests cover representative whole/fractional quantities,
-      package-to-base conversion, price, discount, totals, overflow, zero,
-      negative, excess precision, and fractional-minor/base rejection.
-- [x] In airplane-mode-compatible tests, one active sellable package completes
-      a cash sale; persisted sale/item/payment snapshots match the review; one
-      negative SALE InventoryEvent and one PENDING aggregate envelope exist.
-- [x] Store/variant/package/actor/device/currency mismatches and inactive or
-      non-sellable choices fail before commit at application and database
-      boundaries where enforceable.
-- [x] Injected failure at every write boundary leaves no Sale, child, inventory,
-      or outbox rows.
-- [x] Repeating the same operation ID returns the original sale without
-      duplicating any child, inventory event, or envelope; another store/device/
-      operation cannot reuse it.
-- [x] The UI prevents empty/duplicate completion, retains values on validation
-      or local-storage failure, and shows success only after local commit.
+## M4-03 — Snapshot available provisional cost on subsequent sales
 
-## Ticket M3-02: Build and edit an exact multi-line cart
+**Status:** Pending. **Blocked by:** M4-01.
+**Outcome:** Preserve validated receipt-derived basis/estimated COGS on new sales
+without changing old sales or blocking unknown-cost checkout.
+**Scope/modules:** Cost domain/projection, complete-sale aggregate, additive
+immutable sale-basis persistence, receipt/detail display and tests.
+No backfill, full profit, alternative costing method or M5 adjustment. M4-02 is
+not a logical dependency; this shared-checkout assignment remains sequential.
 
-**Status:** Complete  
-**Outcome:** A retailer can assemble and review a realistic multi-product cart
-with package choice, flexible selling price, exact quantity, and line discount.  
-**Blocked by:** M3-01
+- [ ] Resolve cost inside the sale/items/inventory/outbox transaction; exact
+  rational basis/method version and approved per-line rounded COGS are immutable.
+  Do not misrepresent a fractional basis in an integer unit-cost field. New
+  restocks never change prior snapshots; D-036 arithmetic/tender/credit and
+  D-013 genuine overselling remain intact.
+- [ ] Tests cover remaining-value/average transitions, one-versus-three-unit
+  rational examples, half-kobo rounding, zero cost, unknown coverage, overselling
+  and replenishment through nonpositive stock. Pre-M4 costs remain null; failure
+  and replay cannot partially consume or duplicate stock/cost movements; enforce
+  store/device/member isolation and safe bounds.
+- [ ] Sale detail labels estimated/unavailable cost. Integration tests exercise
+  purchase -> sale -> changed-price purchase -> sale, then cold reopen and
+  projection rebuild from immutable local movement order with identical basis
+  and snapshots. Ticket tests, typecheck and zero-warning lint pass.
 
-**Vertical scope:**
+**Risks/manual checks:** Professional accounting review and M7 concurrent-device
+costing remain separate gates; the method stays provisional.
+**Completion evidence:** None.
 
-- Support multiple cart lines, active sellable package selection, preferred
-  package defaults, exact quantity, package-specific/default/manual price, and
-  absolute line discount.
-- Let a retailer edit or remove a line and show deterministic subtotal,
-  discount total, and total before payment.
-- Offer the existing Quick Add path on no match and return the new temporary
-  product to line configuration without requiring cloud/scanner data.
-- Guard Android Back, Cancel, and tab exit when the in-memory cart is dirty.
+## M4-04 — Inspect private purchase and original price history offline
 
-**Acceptance:**
+**Status:** Pending. **Blocked by:** M4-02, M4-03.
+**Outcome:** Reopen receipts/product purchase-price history with original
+package facts, supplier attribution and truthful local sync status.
+**Scope/modules:** Store-scoped queries, history/detail/product price UI,
+projection verification and tests. No trend charts, market signals or sharing.
 
-- [x] Cart calculation tests prove sum invariants, safe ranges, deterministic
-      line replacement/removal, no authoritative floats, and no mutation of
-      catalogue price/package records.
-- [x] A multi-line completion snapshots each selected product/package,
-      conversion, quantity, price, and discount and creates exactly one SALE
-      InventoryEvent per line inside the same aggregate transaction.
-- [x] Inactive products/packages, non-sellable packages, packages from another
-      variant/store, zero/negative quantity, excessive discount, and values
-      requiring hidden rounding cannot be completed.
-- [x] Search/no-match Quick Add returns to Sell with the created product
-      selectable; network, scanner, or recognition absence never blocks sale.
-- [x] Component/navigation tests cover add, edit, remove, empty cart, totals,
-      retained field errors, dirty-exit confirmation, large content scrolling,
-      semantic labels, and 48dp actions.
+- [ ] Reads show saved names, quantities, conversion, currency and entered
+  total/unit basis plus labelled normalization, supplier and cost availability.
+  Later catalogue/supplier changes do not rewrite history; consent stays false.
+- [ ] Cold-reopen/upgrade tests retain receipts, observations, movements and
+  operation IDs. History never substitutes current prices or leaks another
+  store's observations. Local ordered projection rebuild matches state without
+  treating device timestamps as sole ordering authority.
+- [ ] Empty/loading/error/retry and focus reload are tested; tabs/header/hardware
+  Back preserve draft guards and large-text components remain usable. No future
+  More action appears implemented. Ticket tests, typecheck and lint pass.
 
-## Ticket M3-03: Record all approved payment methods and credit truthfully
+**Risks/manual checks:** Physical offline/history/text-scaling gate remains open.
+**Completion evidence:** None.
 
-**Status:** Complete  
-**Outcome:** A retailer can complete a sale by cash, transfer, POS/card, or
-credit without reporting credit as cash received.  
-**Blocked by:** M3-02
+## M4-05 — Demonstrate the restock-to-sale workflow and return for audit
 
-**Vertical scope:**
+**Status:** Pending. **Blocked by:** M4-01, M4-02, M4-03, M4-04.
+**Outcome:** Prove the complete workflow and hand back a reproducible source
+milestone. This cross-flow verification slice does not substitute independent audit.
+**Scope/modules:** Regression/integration evidence, developer/device procedures
+and execution ledgers. No new feature scope or readiness waiver.
 
-- Add BANK_TRANSFER and POS_CARD selection using one tender allocation equal to
-  the completed sale total.
-- Add the D-037 credit path with required customer name, lightweight
-  CustomerAccount selection/creation without name-only auto-merge, and one OPEN
-  Receivable for the credit amount.
-- Include the tender and optional credit snapshots in the same sale outbox
-  envelope and expose truthful completion/history labels.
+- [ ] Full documented validation passes: domain/mobile tests, typecheck,
+  zero-warning lint, Doctor, dependency compatibility, Android export, workflow
+  schema/date-time/dependency checks and diff hygiene. Report exact commands,
+  results, commits, migrations and unavailable checks.
+- [ ] Cross-flow tests prove multiline restock -> sale -> changed-price restock
+  -> history/projection after reopen; failure/replay produces no partial or
+  duplicate effects. Document Galaxy airplane-mode/force-stop/large-text/dirty
+  exit procedure; record only physical checks actually performed and preserve
+  unpassed carried readiness gates.
+- [ ] Tickets, PROJECT_STATE and workflow contain actual evidence/deferred risks;
+  completed commits leave a clean checkout. Notify coordinating task, mark
+  independent audit pending and STOP. Do not self-accept M4 or start M5.
 
-**Acceptance:**
-
-- [x] Cash, transfer, and POS/card each persist one Payment allocation equal to
-      the sale total; invalid method/amount combinations fail atomically.
-- [x] Credit requires a non-empty bounded customer name and atomically persists
-      Payment, CustomerAccount, and OPEN Receivable whose original and
-      outstanding amounts equal the sale total.
-- [x] Cash-received queries exclude CREDIT while sale-total queries include it;
-      tests prevent double counting and unsupported split/partial settlement.
-- [x] Failure and operation replay cannot leave or duplicate customer,
-      receivable, payment, inventory, sale, or outbox rows.
-- [x] Payment controls have text labels and checked state; Credit explains the
-      amount owed, retains customer input on failure, and never claims cash was
-      received.
-
-## Ticket M3-04: Recover and review completed sales
-
-**Status:** Complete  
-**Outcome:** Completed sales remain reviewable from local history after restart,
-while incomplete carts and immutable-history limits are communicated clearly.  
-**Blocked by:** M3-01 and M3-03
-
-**Vertical scope:**
-
-- Add recent sale history and sale detail using persisted snapshots, occurred
-  time, tender method, total, item count, and honest local/pending status.
-- Ensure catalogue renames, price changes, package changes, and later cost-state
-  availability cannot rewrite an existing sale's display or totals.
-- Complete loading, empty, restart, local-read-failure, negative-stock, large
-  text, accessibility, and performance states for Sell/history/detail.
-- Expose no edit/delete/void/return action for a completed sale in M3.
-
-**Acceptance:**
-
-- [x] Completed cash and credit sales survive database close/reopen and render
-      from sale snapshots after linked catalogue identity/price changes.
-- [x] History is scoped to the current store, ordered deterministically without
-      treating device time as global sync order, and cannot expose another
-      store's sale through an ID or replay path.
-- [x] Derived inventory is reconstructable by summing InventoryEvents; a
-      negative value is retained and labelled rather than deleting a sale.
-- [x] Read failures do not claim missing/deleted history; retry recovers without
-      writing or duplicating records.
-- [x] Component tests cover scrollable large-text layouts, accessible line and
-      payment summaries, local-save language, empty/loading/failure states, and
-      the absence of destructive completed-sale actions.
-
-## Ticket M3-05: Prove the offline sales milestone
-
-**Status:** Accepted for source/automated scope — physical and release gates
-carried  
-**Outcome:** M3 has reproducible source/automated evidence accepted by the
-independent auditor at `0a5f8c8`; restocking/costing remains a separate planning
-gate.  
-**Blocked by:** M3-01 through M3-04
-
-**Vertical scope:**
-
-- Run clean install, validation, Expo checks, Android export, migration upgrade,
-  aggregate rollback/replay/ownership tests, and repository artifact review.
-- On the Galaxy A15 5G, install the current build and exercise local store setup,
-  catalogue creation, force-stop/relaunch, airplane-mode sale, inventory effect,
-  history, credit truth, dirty cart, and rendered text scaling when adb tooling
-  is available.
-- Update tickets, workflow state, PROJECT_STATE, and durable decisions only when
-  evidence warrants it; return the branch for independent audit.
-
-**Acceptance:**
-
-- [x] A clean `npm ci` installation (development dependencies included),
-      environment check, strict typecheck, zero-warning lint, `npm run validate`
-      (143 domain + 186 mobile = 329 tests / 25 suites), Expo Doctor (21/21),
-      Expo dependency check, and Android export pass with exact results recorded.
-- [x] Migration tests upgrade fresh and populated M2 databases without reset,
-      loss, false history, or duplicate effects.
-- [x] Automated evidence proves atomic sale aggregate/outbox capture, exact
-      arithmetic, idempotent replay, store isolation, immutable snapshots,
-      payment/credit truth, and reconstructable inventory.
-- [x] Independent source/automated re-audit accepts the final M3 branch after
-      reviewing the corrective commit, rerunning validation and workflow-schema
-      checks, and confirming a clean diff/status.
-- [ ] M3 physical-device evidence is deliberately deferred/blocked, not passed.
-      Carried Galaxy A15 provisioning, restart, airplane-mode, and text-scale
-      observations remain M1/M2-only evidence and are required again for M3
-      before an external beta/native-release claim; development-client/Metro
-      transfer and second-laptop reproduction are also still required.
-- [x] The final diff contains M3 scope only, no secrets/databases/exports/build
-      artifacts, documentation matches code, and M4 has not started.
-
-## Dependency Frontier
-
-    Accepted M2 baseline + D-036/D-037 + M3 design
-                         |
-                         v
-              M3-01 One cash sale
-                         |
-                         v
-              M3-02 Exact cart
-                         |
-                         v
-              M3-03 Payment + credit
-                         |
-                         +----------+
-                                    v
-                         M3-04 History/recovery
-                                    |
-                                    v
-                         M3-05 Evidence/audit handoff
-
-The source/automated M3 acceptance gate is met. The Galaxy device gate does not
-block source acceptance, but it remains required before external beta/native
-release readiness and should be completed with the development-client/Metro
-and second-laptop checks when the lower-cost sessions are scheduled. M4 may
-begin only through its separate planning gate; no M4 implementation is claimed
-here.
+**Risks/manual checks:** Source acceptance and external release readiness are
+separate. Only coordinator records independent acceptance.
+**Completion evidence:** None.

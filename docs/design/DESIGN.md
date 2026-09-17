@@ -1,8 +1,9 @@
-# COSI Product Experience, M2 Catalogue, and M3 Sales Design Baseline
+# COSI Product Experience and M2–M4 Design Baseline
 
 **Status:** Approved implementation baseline  
 **Approved:** 2026-09-14 through founder delegation of design and ticket judgement  
-**Scope:** Whole-MVP experience direction, with implementation detail for M2–M3  
+**Scope:** Whole-MVP experience direction, with implementation detail for M2–M4  
+**M4 approval:** Founder approved restock screens/states and D-038 on 2026-09-18  
 **Reference device:** Galaxy A15 5G; low-end Android remains a required constraint
 
 ## Product Experience
@@ -235,6 +236,51 @@ ratios; real-device text scaling still needs the deferred device check.
 - Avoid accounting claims such as profit when the tracked inputs are incomplete.
 - Avoid technical terms such as outbox, mutation, canonical identity, or schema
   in retailer-facing screens.
+
+## M4 Restocking, Purchase History and Cost Availability
+
+M4 adds a minimal **More** destination containing **Restock** and **Purchase
+history**; do not present other More capabilities as implemented. Use existing
+theme/components and store context. No scanner or accounting redesign.
+
+### Enter and review
+
+1. Find a local product or use the established Quick Add return path.
+2. Choose an active purchase package and enter package quantity.
+3. Choose **Total cost** or **Unit cost**; show exact converted base quantity,
+   entered cost basis, store currency and labelled derived price information.
+   Reject nonintegral unit-price totals with a field error; never silently round.
+4. Add/edit/remove lines, review exact totals and optionally explicitly choose
+   or create a supplier. Matching names do not automatically merge suppliers.
+5. Review then confirm; no supplier-payment/credit settlement is implied.
+
+Draft is in memory. Dirty header Back, hardware Back, tab changes and Cancel
+require discard confirmation; internal review and Quick Add transitions retain
+it. Focus-aware handlers do not intercept Back from other tabs. Preserve draft
+through read/refresh/save failures with visible retry. Do not allow an overflow
+or malformed input to crash rendering.
+
+### Complete and inspect
+
+Disable duplicate submission and retain the operation ID for retry. Only an
+atomic durable local commit shows success. Receipt and offline history display
+stored names, package/conversion/quantity/cost snapshots, optional supplier
+attribution and the established saved-on-device/sync status language. Retry after
+commit returns the original purchase. Later catalogue edits never replace facts.
+
+Product purchase-price history shows original total/unit input basis plus
+labelled normalized values; no market trend or shared-data feature is implied.
+Current average and applicable sale cost are **Estimated weighted-average cost**;
+unknown coverage is **Cost unavailable**, never zero or full profit. Preserve
+original sale snapshots even after another restock. D-027/D-038 limitations apply.
+
+### States and accessibility
+
+Provide empty/loading/error/retry states for product, package, supplier, history
+and detail reads, with focus reload and retained drafts. Reuse accessible labels,
+field errors, 48dp targets, keyboard-safe review, large-text wrapping and existing
+contrast tokens. Galaxy offline/restart/history/dirty-exit/large-text evidence is
+still required; approval of this baseline is not physical-device proof.
 
 ## Gates for Later Milestones
 

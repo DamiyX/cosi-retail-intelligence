@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "task_id": "m4-restocking-costing",
+  "workflow_id": "build-feature",
+  "mode": "implement",
+  "status": "in_progress",
+  "current_state": "approved-m4-assigned-for-implementation",
+  "completed_states": [
+    "m3-independent-source-automated-acceptance",
+    "m4-intake",
+    "m4-coordinator-ticket-decomposition",
+    "m4-founder-costing-design-approval",
+    "m4-source-document-alignment",
+    "m4-ticket-release"
+  ],
+  "owner": {
+    "agent": "implementation-engineer-luna-max",
+    "thread": "01a0b1a5-4512-79f0-ae55-58d39559944d",
+    "worktree": null
+  },
+  "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m0",
+  "lease": null,
+  "evidence": [
+    {
+      "kind": "inspection",
+      "claim": "Branch feat/m4-restocking-costing at accepted M3 checkpoint 66cc64d was clean before coordinator documentation edits; separate implementer stopped without file changes."
+    },
+    {
+      "kind": "planning",
+      "path": "docs/engineering/M4_RESTOCKING_COSTING_PLAN.md",
+      "claim": "Coordinator drafted precision/coverage rules, screen states, additive migration strategy and dependency-reviewed tickets; approval and feature completion are not claimed."
+    },
+    {
+      "kind": "validation",
+      "claim": "Coordinator validated M4 workflow JSON Schema/date-time formats, gate IDs/dependency cycles, artifact existence and index registration; archived M3 ledger is byte-identical to 66cc64d:tickets.md. git diff --check passed; no runtime files changed."
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "m3-source-accepted",
+      "claim": "Prior M3 source/automated scope passed independent audit.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Read archived M3 workflow and audit report.",
+        "success_condition": "Accepted at 0a5f8c8, checkpoint 66cc64d, with carried readiness gates."
+      },
+      "evidence": [
+        {
+          "result": "Independent M3 acceptance recorded; 329 tests, typecheck and zero-warning lint passed.",
+          "source": ".agents/workflows/m3-sales.json; docs/engineering/M3_AUDIT_CORRECTIONS.md"
+        }
+      ],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m4-costing-design-approved",
+      "claim": "Cost precision, coverage, provisional rounding and screen states reviewed before implementation.",
+      "owner": "founder-and-coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "m3-source-accepted"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Review M4_RESTOCKING_COSTING_PLAN, then record approved decisions and align domain/architecture/DESIGN/app-flow.",
+        "success_condition": "Approved cost contract and screen baseline are in source-of-truth documents."
+      },
+      "evidence": [
+        {
+          "result": "Founder approved the M4 proposal; coordinator aligned D-038, domain/technical architecture, DESIGN/app-flow and released five dependency-reviewed tickets. No implementation or independent acceptance is claimed.",
+          "source": "docs/engineering/M4_RESTOCKING_COSTING_PLAN.md; docs/decisions/DECISION_LOG.md; docs/design/DESIGN.md; tickets.md",
+          "observed_at": "2026-09-17T23:30:57Z"
+        }
+      ],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m4-tickets-released",
+      "claim": "Coordinator releases reviewed tickets for implementation.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "m4-costing-design-approved"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Recheck binary acceptance/dependencies against approved contract and publish runnable ledger.",
+        "success_condition": "No policy/design ambiguity; implementation-only assignment matches tickets."
+      },
+      "evidence": [
+        {
+          "result": "Founder approved the M4 proposal; coordinator aligned D-038, domain/technical architecture, DESIGN/app-flow and released five dependency-reviewed tickets. No implementation or independent acceptance is claimed.",
+          "source": "docs/engineering/M4_RESTOCKING_COSTING_PLAN.md; docs/decisions/DECISION_LOG.md; docs/design/DESIGN.md; tickets.md",
+          "observed_at": "2026-09-17T23:30:57Z"
+        }
+      ],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m4-implementation-evidence",
+      "claim": "M4 tickets have actual passing checks and recoverable commits.",
+      "owner": "implementation-task-01a0b1a5-4512-79f0-ae55-58d39559944d",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m4-tickets-released"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Luna max implements tickets; runs focused and full checks; returns report and stops.",
+        "success_condition": "Evidence and commits recorded without self-accepting independent audit."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m4-independent-audit",
+      "claim": "Coordinator independently accepts source/automated scope after correction and re-audit.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m4-implementation-evidence"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Inspect code/migrations/tests and each criterion; send fixes to same task and independently verify them.",
+        "success_condition": "No blocking findings; source acceptance distinguished from physical/release readiness."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "carried-device-release-readiness",
+      "claim": "Physical milestones, development-client/Metro and second-laptop checks precede external beta/native release.",
+      "owner": "founder-and-verification-task",
+      "required": false,
+      "status": "blocked",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Perform actual Galaxy M3/M4 offline/restart/history/dirty-exit/large-text flows and outstanding setup checks.",
+        "success_condition": "Actual build/device/reproduction observations recorded."
+      },
+      "evidence": [],
+      "limitations": [
+        "Existing Galaxy evidence proves M1/M2 only.",
+        "Does not block source continuation under the existing waiver; mandatory before release."
+      ],
+      "blocker": "M3/M4 physical evidence and remaining readiness checks not performed.",
+      "waiver": {
+        "reason": "Founder approved source continuation with readiness gates carried, not passed.",
+        "approved_by": "founder"
+      }
+    }
+  ],
+  "artifacts": [
+    "tickets.md",
+    "docs/engineering/M4_RESTOCKING_COSTING_PLAN.md",
+    "docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md",
+    "docs/engineering/tickets/M3_SALES.md",
+    "docs/engineering/PROJECT_STATE.md",
+    "docs/decisions/DECISION_LOG.md",
+    "docs/architecture/DOMAIN_DATA_MODEL.md",
+    "docs/architecture/TECHNICAL_ARCHITECTURE.md",
+    "docs/design/DESIGN.md",
+    ".agents/contexts/app-flow.md"
+  ],
+  "approvals": [
+    {
+      "date": "2026-09-18",
+      "scope": "Founder assigns planning/tickets/workflow/independent audit to coordinator, implementation/corrections only to separate Luna max tasks; ticket sizing remains delegated."
+    },
+    {
+      "date": "2026-09-18",
+      "scope": "Founder explicitly approved proposed M4 cost/design rules and instructed coordinator to send M4 implementation to the separate AI task; D-038 and DESIGN record the approved contract."
+    }
+  ],
+  "blockers": [],
+  "next_action": "Luna max implementation task verifies and separately commits coordinator documentation, implements M4-01 through M4-05 with per-ticket commits/evidence, then reports to coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 and stops for independent audit. Return corrections to this same M4 task; do not begin M5.",
+  "created_at": "2026-09-17T23:22:42Z",
+  "updated_at": "2026-09-17T23:30:57Z",
+  "archived": false
+}

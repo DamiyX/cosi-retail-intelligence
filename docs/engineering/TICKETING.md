@@ -24,7 +24,8 @@ For each milestone:
 3. draft the smallest vertical tickets that produce verifiable behavior;
 4. name acceptance criteria, test evidence, architecture risks, and blocking
    dependencies;
-5. ask the founder to verify ticket granularity and dependency edges;
+5. have the coordinating planner verify ticket granularity and dependency edges
+   when the founder has delegated that judgment; otherwise ask the founder;
 6. only then publish the milestone ticket set in tickets.md or the approved
    external tracker;
 7. execute tickets in dependency order and update their status with evidence;
@@ -32,6 +33,11 @@ For each milestone:
 
 It is acceptable to identify a future milestone dependency early. Keep it as a
 roadmap note or blocker rather than a detailed speculative ticket.
+
+The coordinating planning/audit agent owns this process. The implementer updates
+execution evidence but must not silently redesign tickets, approve decision
+gates, or accept its own milestone. Material decisions still require the review
+specified in AGENTS.md even when ticket sizing is delegated.
 
 ## Ticket Shape
 
@@ -76,8 +82,11 @@ remains required before an external beta/native release claim.
 M2 passed independent source and automated audit on 2026-09-14 after correction
 of integrity, replay, preference, fresh-install, and navigation defects. The
 founder then approved D-036/D-037 and the M3 Sell-flow baseline. M3-01 through
-M3-05 are published in `tickets.md` and registered in
+M3-05 are preserved in `docs/engineering/tickets/M3_SALES.md` and registered in
 `.agents/workflows/m3-sales.json`; their source/automated scope was independently
 accepted on 2026-09-18, with physical/release gates carried. The next milestone
-may open only its separate planning gate; no M4 feature code is included in the
-M3 acceptance checkpoint.
+has opened its coordinator-owned planning gate on `feat/m4-restocking-costing`.
+Founder approved M4 cost/design rules on 2026-09-18; D-038 and DESIGN record
+the contract. Coordinator-reviewed M4 tickets are published in `tickets.md`.
+The separate Luna max task implements them and assigned fixes, then stops for
+coordinator audit. It does not create plans or independent audit acceptance.

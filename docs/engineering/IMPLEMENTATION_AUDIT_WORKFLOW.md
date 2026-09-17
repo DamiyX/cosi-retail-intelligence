@@ -5,10 +5,20 @@
 
 ## Operating Decision
 
-The external implementation agent may own the long-term M1–M13 build, but it
-must execute one milestone at a time. It may complete every published ticket
-inside the current milestone without waiting between tickets. It must stop at
-the milestone boundary for independent review before starting dependent work.
+The coordinating planning/audit agent directs the build and creates each
+milestone's plan, tickets, workflow registration and implementation prompt.
+A separate implementation task executes only that milestone and stops for
+independent audit. Its self-checks do not replace the independent audit.
+
+Use one new, separate task per milestone, sequentially. Return corrections to
+that milestone's existing task and branch. Do not substitute a subagent when
+the founder requests a separate task. The coordinator does not edit or audit
+the shared checkout while the implementer is writing. The next milestone's
+task starts only after independent acceptance and its own planning gates.
+
+The founder's current implementer selection is Luna at max effort. This is an
+execution preference, not an architecture requirement; follow later founder
+instructions and record the actual task identity.
 
 For COSI, auditing only after M1–M3 or M1–M5 would allow a domain, package,
 transaction, costing, or inventory defect to spread into several dependent
@@ -16,14 +26,24 @@ milestones. The default audit unit is therefore one milestone.
 
 ## Responsibilities
 
+### Coordinating Planning/Audit Agent
+
+- owns milestone plans, ticket granularity, dependency and acceptance review,
+  workflow registration, and implementation/correction prompts;
+- identifies material decisions for founder review before implementation;
+- independently audits returned work and verifies corrections before acceptance;
+- does not delegate planning or independent acceptance to the implementer.
+
 ### External Implementation Agent
 
 - reads repository truth instead of relying on a pasted chat history;
 - works on the existing task branch and active published tickets;
-- implements only the current milestone;
+- implements approved current-milestone tickets and assigned corrections only;
+- does not create or approve milestone plans, tickets, durable decisions, or
+  independent acceptance; reports contradictions to the coordinator;
 - keeps the workspace green after each ticket;
 - updates ticket checkboxes and workflow evidence honestly;
-- stops at the milestone gate with a complete report;
+- sends a complete report to the coordinating task and stops at the audit gate;
 - does not push, merge, deploy, or start the next milestone without the user's
   authorization and the required audit.
 
