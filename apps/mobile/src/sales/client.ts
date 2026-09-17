@@ -8,6 +8,7 @@ import { generateMobileId } from '../crypto/mobileIds';
 import type { DatabaseAdapter } from '../db/adapter';
 import {
   getDeviceById,
+  getProductVariantById,
   getStoreById,
   getStoreProductById,
   listDevicesByStore,
@@ -96,12 +97,15 @@ export function createDatabaseSalesClient(
   if (!store) {
     throw new Error('Cannot create SalesClient: no store is provisioned.');
   }
+  if (store.status !== 'ACTIVE') {
+    throw new Error('Cannot create SalesClient: store is not active.');
+  }
 
   const device = options.deviceId
     ? getDeviceById(adapter, options.deviceId)
     : listDevicesByStore(adapter, store.id)[0];
-  if (!device || device.storeId !== store.id) {
-    throw new Error('Cannot create SalesClient: no valid device is provisioned for this store.');
+  if (!device || device.storeId !== store.id || device.status !== 'ACTIVE') {
+    throw new Error('Cannot create SalesClient: no active device is provisioned for this store.');
   }
 
   let userId = options.userId;
@@ -126,7 +130,15 @@ export function createDatabaseSalesClient(
 
   const getPackagesForProduct = (storeProductId: string): SellablePackageOption[] => {
     const sp = getStoreProductById(adapter, storeProductId);
-    if (!sp) return [];
+    if (!sp || sp.storeId !== store.id || sp.status !== 'ACTIVE') return [];
+    const variant = getProductVariantById(adapter, sp.productVariantId);
+    if (
+      !variant ||
+      variant.status !== 'ACTIVE' ||
+      (variant.identityScope === 'STORE_LOCAL' && variant.ownerStoreId !== store.id)
+    ) {
+      return [];
+    }
     const pkgs = listPackageUnitsByVariant(adapter, sp.productVariantId).filter(
       (p) => p.status === 'ACTIVE' && p.isSellable,
     );

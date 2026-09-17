@@ -3,7 +3,7 @@
 **Status:** Active  
 **Scope:** Whole project  
 **Project ID:** COSI  
-**Updated:** 2026-09-14  
+**Updated:** 2026-09-18  
 **Confidence:** High for approved product and architecture; explicit unknowns
 remain below.
 
@@ -21,9 +21,9 @@ The current strategy is:
 > business activity.
 
 M0 Project Foundation, M1 Domain + Local Database, and M2 Catalogue + Package
-Units are implemented. M2 passed independent source and automated audit; its
-review corrections remain uncommitted. Network sync, sales, market network, and
-recognition inference are not implemented.
+Units are accepted. M3 Sales is implemented on `feat/m3-sales` and has received
+one independent-audit correction pass; it remains unaccepted pending re-audit.
+Network sync, market network, and recognition inference are not implemented.
 
 ## Product Snapshot
 
@@ -74,11 +74,12 @@ partial measure, never full profit or P&L.
 
 ## Current Priorities
 
-1. Review and commit the accepted M2 audit corrections and approved M3 planning
-   artifacts, then create `feat/m3-sales`.
-2. Execute M3-01 through M3-05 using active D-036/D-037, the approved Sell-flow
-   design, the M2 durable outbox, and the M1 transaction boundary.
-3. Continue through the milestone order in BUILD_PLAN.md, validating useful
+1. Independently re-audit the M3 corrective commit(s), including local exact
+   arithmetic, store-scoped client reads, durable history, and recovery states.
+2. Complete the explicitly deferred M3 physical-device verification before any
+   external beta/native-release claim; preserve the M1/M2 Galaxy evidence as
+   historical evidence only.
+3. Only after M3 acceptance, continue through the milestone order in BUILD_PLAN.md, validating useful
    retailer workflows early instead of building all future infrastructure at
    once.
 4. Keep recognition research isolated from core transaction reliability until

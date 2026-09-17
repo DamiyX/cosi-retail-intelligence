@@ -1,9 +1,12 @@
 import { DomainError, MICROS_PER_UNIT } from '@retail/domain';
 
+import { createCatalogueClient } from '../src/catalogue/client';
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
 import { updateProductIdentity } from '../src/catalogue/updateProductIdentity';
 import { MIGRATIONS, openDatabase } from '../src/db';
+import type { DatabaseAdapter } from '../src/db/adapter';
 import {
+  createCustomerAccount,
   createPackageUnit,
   createStore,
   createStoreMember,
@@ -11,6 +14,7 @@ import {
   getCashReceivedTotalByStore,
   getTotalSalesValueByStore,
 } from '../src/db/repositories';
+import { createDatabaseSalesClient } from '../src/sales/client';
 import { openIsolatedDatabase } from '../src/db/testing';
 import { completeSale, getProductStock, getSaleDetail, listRecentSales } from '../src/sales';
 import { provisionStoreContext } from '../src/storeContext/provisionStoreContext';
@@ -31,6 +35,20 @@ function expectDomainError(fn: () => unknown, code: DomainError['code']): void {
     expect(error).toBeInstanceOf(DomainError);
     expect((error as DomainError).code).toBe(code);
   }
+}
+
+const SALE_GRAPH_TABLES = [
+  'sales',
+  'sale_items',
+  'payments',
+  'inventory_events',
+  'customer_accounts',
+  'receivables',
+  'outbox_operations',
+] as const;
+
+function saleGraphCounts(adapter: DatabaseAdapter): number[] {
+  return SALE_GRAPH_TABLES.map((table) => countRows(adapter, table));
 }
 
 describe('M3 Sales milestone', () => {
@@ -544,6 +562,251 @@ describe('M3 Sales milestone', () => {
         } finally {
           fixture.closeAndDelete();
         }
+      }
+    });
+
+    it('rolls back every credit write for a new customer and receivable', () => {
+      // New-credit writes: customer, sale, item, payment, receivable, inventory, outbox.
+      for (const failOnWrite of [1, 2, 3, 4, 5, 6, 7]) {
+        const fixture = openCatalogueFixture();
+        try {
+          const product = createTemporaryProduct(
+            fixture.adapter,
+            {
+              storeId: fixture.context.store.id,
+              deviceId: fixture.context.device.id,
+              name: 'Credit rollback item',
+            },
+            { generateId: deterministicIds(300) },
+          );
+          const before = saleGraphCounts(fixture.adapter);
+          const failingAdapter = new FailOnWriteAdapter(
+            fixture.adapter,
+            failOnWrite,
+            new Error(`Injected credit failure at write ${failOnWrite}`),
+          );
+
+          expect(() =>
+            completeSale(
+              failingAdapter,
+              {
+                storeId: fixture.context.store.id,
+                deviceId: fixture.context.device.id,
+                userId: fixture.context.owner.id,
+                lines: [
+                  {
+                    storeProductId: product.storeProduct.id,
+                    packageUnitId: product.basePackage.id,
+                    quantityPackagesMicros: MICROS_PER_UNIT,
+                    unitPriceMinor: 10_000,
+                  },
+                ],
+                payment: { method: 'CREDIT', customerName: 'New credit customer' },
+              },
+              { generateId: deterministicIds(400), operationId: testId(8_000 + failOnWrite) },
+            ),
+          ).toThrow(`Injected credit failure at write ${failOnWrite}`);
+
+          expect(saleGraphCounts(fixture.adapter)).toEqual(before);
+          expect(getProductStock(fixture.adapter, product.storeProduct.id)).toBe(0);
+        } finally {
+          fixture.closeAndDelete();
+        }
+      }
+    });
+
+    it('rolls back every selected-customer credit write without mutating that account', () => {
+      // Selected-credit writes: sale, item, payment, receivable, inventory, outbox.
+      for (const failOnWrite of [1, 2, 3, 4, 5, 6]) {
+        const fixture = openCatalogueFixture();
+        try {
+          const product = createTemporaryProduct(
+            fixture.adapter,
+            {
+              storeId: fixture.context.store.id,
+              deviceId: fixture.context.device.id,
+              name: 'Selected credit rollback item',
+            },
+            { generateId: deterministicIds(300) },
+          );
+          const account = createCustomerAccount(fixture.adapter, {
+            id: testId(8_100),
+            storeId: fixture.context.store.id,
+            name: 'Selected customer',
+          });
+          const before = saleGraphCounts(fixture.adapter);
+          const failingAdapter = new FailOnWriteAdapter(
+            fixture.adapter,
+            failOnWrite,
+            new Error(`Injected selected credit failure at write ${failOnWrite}`),
+          );
+
+          expect(() =>
+            completeSale(
+              failingAdapter,
+              {
+                storeId: fixture.context.store.id,
+                deviceId: fixture.context.device.id,
+                userId: fixture.context.owner.id,
+                lines: [
+                  {
+                    storeProductId: product.storeProduct.id,
+                    packageUnitId: product.basePackage.id,
+                    quantityPackagesMicros: MICROS_PER_UNIT,
+                    unitPriceMinor: 10_000,
+                  },
+                ],
+                payment: {
+                  method: 'CREDIT',
+                  customerName: account.name,
+                  customerAccountId: account.id,
+                },
+              },
+              { generateId: deterministicIds(400), operationId: testId(8_100 + failOnWrite) },
+            ),
+          ).toThrow(`Injected selected credit failure at write ${failOnWrite}`);
+
+          expect(saleGraphCounts(fixture.adapter)).toEqual(before);
+          expect(
+            fixture.adapter.getFirstRow<{ name: string }>('SELECT name FROM customer_accounts WHERE id = ?;', [
+              account.id,
+            ]),
+          ).toEqual({ name: 'Selected customer' });
+          expect(getProductStock(fixture.adapter, product.storeProduct.id)).toBe(0);
+        } finally {
+          fixture.closeAndDelete();
+        }
+      }
+    });
+
+    it('rolls back every multiline aggregate write without leaking a child or envelope', () => {
+      // Multiline cash writes: sale, two items, payment, two inventory events, outbox.
+      for (const failOnWrite of [1, 2, 3, 4, 5, 6, 7]) {
+        const fixture = openCatalogueFixture();
+        try {
+          const first = createTemporaryProduct(
+            fixture.adapter,
+            {
+              storeId: fixture.context.store.id,
+              deviceId: fixture.context.device.id,
+              name: 'Multiline first item',
+            },
+            { generateId: deterministicIds(300) },
+          );
+          const second = createTemporaryProduct(
+            fixture.adapter,
+            {
+              storeId: fixture.context.store.id,
+              deviceId: fixture.context.device.id,
+              name: 'Multiline second item',
+            },
+            { generateId: deterministicIds(350) },
+          );
+          const before = saleGraphCounts(fixture.adapter);
+          const failingAdapter = new FailOnWriteAdapter(
+            fixture.adapter,
+            failOnWrite,
+            new Error(`Injected multiline failure at write ${failOnWrite}`),
+          );
+
+          expect(() =>
+            completeSale(
+              failingAdapter,
+              {
+                storeId: fixture.context.store.id,
+                deviceId: fixture.context.device.id,
+                userId: fixture.context.owner.id,
+                lines: [
+                  {
+                    storeProductId: first.storeProduct.id,
+                    packageUnitId: first.basePackage.id,
+                    quantityPackagesMicros: MICROS_PER_UNIT,
+                    unitPriceMinor: 10_000,
+                  },
+                  {
+                    storeProductId: second.storeProduct.id,
+                    packageUnitId: second.basePackage.id,
+                    quantityPackagesMicros: MICROS_PER_UNIT,
+                    unitPriceMinor: 20_000,
+                  },
+                ],
+                payment: { method: 'CASH' },
+              },
+              { generateId: deterministicIds(400), operationId: testId(8_200 + failOnWrite) },
+            ),
+          ).toThrow(`Injected multiline failure at write ${failOnWrite}`);
+
+          expect(saleGraphCounts(fixture.adapter)).toEqual(before);
+          expect(getProductStock(fixture.adapter, first.storeProduct.id)).toBe(0);
+          expect(getProductStock(fixture.adapter, second.storeProduct.id)).toBe(0);
+        } finally {
+          fixture.closeAndDelete();
+        }
+      }
+    });
+
+    it('replays a credit operation without duplicating a customer, receivable, inventory, or outbox effect', () => {
+      const fixture = openCatalogueFixture();
+      try {
+        const first = createTemporaryProduct(
+          fixture.adapter,
+          {
+            storeId: fixture.context.store.id,
+            deviceId: fixture.context.device.id,
+            name: 'Credit replay first item',
+          },
+          { generateId: deterministicIds(300) },
+        );
+        const second = createTemporaryProduct(
+          fixture.adapter,
+          {
+            storeId: fixture.context.store.id,
+            deviceId: fixture.context.device.id,
+            name: 'Credit replay second item',
+          },
+          { generateId: deterministicIds(350) },
+        );
+        const operationId = testId(8_300);
+        const input = {
+          storeId: fixture.context.store.id,
+          deviceId: fixture.context.device.id,
+          userId: fixture.context.owner.id,
+          lines: [
+            {
+              storeProductId: first.storeProduct.id,
+              packageUnitId: first.basePackage.id,
+              quantityPackagesMicros: MICROS_PER_UNIT,
+              unitPriceMinor: 10_000,
+            },
+            {
+              storeProductId: second.storeProduct.id,
+              packageUnitId: second.basePackage.id,
+              quantityPackagesMicros: MICROS_PER_UNIT,
+              unitPriceMinor: 20_000,
+            },
+          ],
+          payment: { method: 'CREDIT' as const, customerName: 'Replay credit customer' },
+        };
+
+        const firstCompletion = completeSale(fixture.adapter, input, {
+          generateId: deterministicIds(400),
+          operationId,
+        });
+        const countsAfterFirst = saleGraphCounts(fixture.adapter);
+        const replay = completeSale(fixture.adapter, input, {
+          generateId: deterministicIds(500),
+          operationId,
+        });
+
+        expect(replay.sale.id).toBe(firstCompletion.sale.id);
+        expect(replay.customerAccount?.id).toBe(firstCompletion.customerAccount?.id);
+        expect(replay.receivable?.id).toBe(firstCompletion.receivable?.id);
+        expect(saleGraphCounts(fixture.adapter)).toEqual(countsAfterFirst);
+        expect(countRows(fixture.adapter, 'customer_accounts')).toBe(1);
+        expect(countRows(fixture.adapter, 'receivables')).toBe(1);
+        expect(countRows(fixture.adapter, 'inventory_events')).toBe(2);
+      } finally {
+        fixture.closeAndDelete();
       }
     });
 
@@ -1095,6 +1358,155 @@ describe('M3 Sales milestone', () => {
         expect(listRecentSales(fixture.adapter, fixture.context.store.id)).toHaveLength(1);
         // Store 2 has 0 sales
         expect(listRecentSales(fixture.adapter, store2.id)).toHaveLength(0);
+      } finally {
+        fixture.closeAndDelete();
+      }
+    });
+
+    it('keeps all screen-facing sales-client reads within the bound store', () => {
+      const fixture = openCatalogueFixture();
+      try {
+        const secondContext = provisionStoreContext(
+          fixture.adapter,
+          {
+            ownerDisplayName: 'Store B Owner',
+            storeName: 'Store B',
+            currencyCode: 'NGN',
+            countryCode: 'NG',
+            timezone: 'Africa/Lagos',
+            appVersion: '0.0.1',
+          },
+          { generateId: deterministicIds(900) },
+        );
+        const secondCatalogue = createCatalogueClient(
+          fixture.adapter,
+          secondContext.store,
+          secondContext.device,
+          deterministicIds(1_000),
+        );
+        const secondProduct = secondCatalogue.createTemporaryProduct({ name: 'Store B private price' });
+        const secondPackage = secondCatalogue.createPackage({
+          storeProductId: secondProduct.storeProduct.id,
+          name: 'Store B carton',
+          conversionText: '12',
+          setting: { defaultSellingPrice: '123.45', isPreferredForSale: true },
+        });
+        const secondCustomer = createCustomerAccount(fixture.adapter, {
+          id: testId(1_100),
+          storeId: secondContext.store.id,
+          name: 'Store B customer',
+        });
+        const secondSalesClient = createDatabaseSalesClient(fixture.adapter, {
+          storeId: secondContext.store.id,
+          deviceId: secondContext.device.id,
+          userId: secondContext.owner.id,
+          generateId: deterministicIds(1_200),
+        });
+        const secondSale = secondSalesClient.completeSale({
+          lines: [
+            {
+              storeProductId: secondProduct.storeProduct.id,
+              packageUnitId: secondPackage.packageUnit.id,
+              quantityPackagesMicros: MICROS_PER_UNIT,
+              unitPriceMinor: 12_345,
+            },
+          ],
+          payment: { method: 'CASH' },
+        });
+        const firstSalesClient = createDatabaseSalesClient(fixture.adapter, {
+          storeId: fixture.context.store.id,
+          deviceId: fixture.context.device.id,
+          userId: fixture.context.owner.id,
+        });
+
+        expect(secondSalesClient.getProductPackages(secondProduct.storeProduct.id)).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: secondPackage.packageUnit.id, sellingPriceMinor: 12_345 }),
+          ]),
+        );
+        expect(firstSalesClient.getProductPackages(secondProduct.storeProduct.id)).toEqual([]);
+        expect(firstSalesClient.searchProducts('Store B private price')).toEqual([]);
+        expect(firstSalesClient.searchCustomers('Store B customer')).toEqual([]);
+        expect(firstSalesClient.listSales()).toEqual([]);
+        expect(firstSalesClient.getSaleDetail(secondSale.sale.id)).toBeNull();
+        expect(secondCustomer.storeId).toBe(secondContext.store.id);
+      } finally {
+        fixture.closeAndDelete();
+      }
+    });
+
+    it('rejects client construction for an inactive bound store or device', () => {
+      const fixture = openCatalogueFixture();
+      try {
+        fixture.adapter.run(`UPDATE devices SET status = 'INACTIVE' WHERE id = ?;`, [fixture.context.device.id]);
+        expect(() =>
+          createDatabaseSalesClient(fixture.adapter, {
+            storeId: fixture.context.store.id,
+            deviceId: fixture.context.device.id,
+          }),
+        ).toThrow(/active device/);
+
+        fixture.adapter.run(`UPDATE devices SET status = 'ACTIVE' WHERE id = ?;`, [fixture.context.device.id]);
+        fixture.adapter.run(`UPDATE stores SET status = 'INACTIVE' WHERE id = ?;`, [fixture.context.store.id]);
+        expect(() =>
+          createDatabaseSalesClient(fixture.adapter, {
+            storeId: fixture.context.store.id,
+            deviceId: fixture.context.device.id,
+          }),
+        ).toThrow(/store is not active/);
+      } finally {
+        fixture.closeAndDelete();
+      }
+    });
+
+    it('rejects unsafe cross-row money and inventory aggregates instead of rounding them', () => {
+      const fixture = openCatalogueFixture();
+      try {
+        const product = createTemporaryProduct(
+          fixture.adapter,
+          {
+            storeId: fixture.context.store.id,
+            deviceId: fixture.context.device.id,
+            name: 'Aggregate boundary item',
+          },
+          { generateId: deterministicIds(300) },
+        );
+        const input = {
+          storeId: fixture.context.store.id,
+          deviceId: fixture.context.device.id,
+          userId: fixture.context.owner.id,
+          lines: [
+            {
+              storeProductId: product.storeProduct.id,
+              packageUnitId: product.basePackage.id,
+              quantityPackagesMicros: Number.MAX_SAFE_INTEGER,
+              unitPriceMinor: MICROS_PER_UNIT,
+            },
+          ],
+          payment: { method: 'CASH' as const },
+        };
+
+        completeSale(fixture.adapter, input, {
+          generateId: deterministicIds(400),
+          operationId: testId(1_300),
+        });
+        completeSale(fixture.adapter, input, {
+          generateId: deterministicIds(500),
+          operationId: testId(1_301),
+        });
+
+        expectDomainError(
+          () => getCashReceivedTotalByStore(fixture.adapter, fixture.context.store.id),
+          'INVALID_MONEY',
+        );
+        expectDomainError(
+          () => getTotalSalesValueByStore(fixture.adapter, fixture.context.store.id),
+          'INVALID_MONEY',
+        );
+        expectDomainError(
+          () => getProductStock(fixture.adapter, product.storeProduct.id),
+          'INVALID_QUANTITY',
+        );
       } finally {
         fixture.closeAndDelete();
       }

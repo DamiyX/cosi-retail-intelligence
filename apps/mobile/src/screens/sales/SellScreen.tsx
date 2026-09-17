@@ -56,6 +56,8 @@ interface SellScreenProps {
   catalogueClient?: CatalogueClient;
   /** Optional route-level hook used to guard tab and navigation exits. */
   onDirtyDraftChange?: (draft: SaleDraftExit | null) => void;
+  /** Provided by the route so global Back never belongs to a blurred Sell tab. */
+  isFocused?: boolean;
 }
 
 type ViewMode = 'cart' | 'quick_add' | 'history' | 'detail' | 'confirmation';
@@ -67,7 +69,33 @@ const PAYMENT_METHODS: readonly { method: PaymentMethod; label: string }[] = [
   { method: 'CREDIT', label: 'Credit' },
 ];
 
-export default function SellScreen({ client, catalogueClient, onDirtyDraftChange }: SellScreenProps) {
+interface ProductSearchState {
+  results: SellableProductHit[];
+  failure: string | null;
+}
+
+interface PackageReadFailure {
+  hit: SellableProductHit;
+  existingLine?: CartLine;
+}
+
+function readProducts(client: SalesClient, query: string): ProductSearchState {
+  try {
+    return { results: client.searchProducts(query), failure: null };
+  } catch {
+    return {
+      results: [],
+      failure: 'Products could not be read from this device. Your current cart is preserved.',
+    };
+  }
+}
+
+export default function SellScreen({
+  client,
+  catalogueClient,
+  onDirtyDraftChange,
+  isFocused = true,
+}: SellScreenProps) {
   // Navigation & Subscreen Mode
   const [viewMode, setViewMode] = useState<ViewMode>('cart');
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
@@ -75,9 +103,10 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
 
   // Catalogue Search
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<SellableProductHit[]>(() =>
-    client.searchProducts(''),
-  );
+  const [productSearch, setProductSearch] = useState<ProductSearchState>(() => readProducts(client, ''));
+  const [packageReadFailure, setPackageReadFailure] = useState<PackageReadFailure | null>(null);
+  const [quickAddSavedNotice, setQuickAddSavedNotice] = useState<string | null>(null);
+  const searchResults = productSearch.results;
 
   // Cart & Line Items
   const [lines, setLines] = useState<CartLine[]>([]);
@@ -103,6 +132,7 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
   const [customerName, setCustomerName] = useState('');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [customerMatches, setCustomerMatches] = useState<CustomerAccountRow[]>([]);
+  const [customerReadFailure, setCustomerReadFailure] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -156,10 +186,17 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
     return () => onDirtyDraftChange?.(null);
   }, [draftExit, onDirtyDraftChange]);
 
+  const loadProducts = useCallback((query: string): SellableProductHit[] | null => {
+    const next = readProducts(client, query);
+    setProductSearch(next);
+    return next.failure === null ? next.results : null;
+  }, [client]);
+
   // Search updater
   const handleSearchChange = (text: string) => {
     setSearchQuery(text);
-    setSearchResults(client.searchProducts(text));
+    setQuickAddSavedNotice(null);
+    loadProducts(text);
   };
 
   // Guard every locally-owned draft exit. Completed sales never use these
@@ -212,6 +249,9 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
   }, [closeQuickAdd, quickAddDiscard]);
 
   useEffect(() => {
+    if (!isFocused) {
+      return;
+    }
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       if (viewMode === 'detail') {
         setViewMode('history');
@@ -241,6 +281,7 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
     confirmDiscardCart,
     confirmDiscardLine,
     confirmDiscardQuickAdd,
+    isFocused,
     lines.length,
     viewMode,
   ]);
@@ -250,7 +291,14 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
     hit: SellableProductHit,
     existingLine?: CartLine,
   ) => {
-    const pkgs = client.getProductPackages(hit.storeProductId);
+    let pkgs: SellablePackageOption[];
+    try {
+      pkgs = client.getProductPackages(hit.storeProductId);
+    } catch {
+      setPackageReadFailure({ hit, existingLine });
+      return;
+    }
+    setPackageReadFailure(null);
     setAvailablePackages(pkgs);
 
     const initialPkg = existingLine
@@ -440,50 +488,84 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
       calculated: calc,
     };
 
-    setLines((prev) => {
-      if (editingLineId) {
-        return prev.map((l) => (l.id === editingLineId ? newLine : l));
-      }
-      return [...prev, newLine];
-    });
+    const candidateLines = editingLineId
+      ? lines.map((line) => (line.id === editingLineId ? newLine : line))
+      : [...lines, newLine];
+    try {
+      calculateSaleTotals(candidateLines.map((line) => line.calculated));
+    } catch (error) {
+      setLineErrors({
+        general: error instanceof Error ? error.message : 'This line would make the sale total unsafe.',
+      });
+      return;
+    }
+
+    setLines(candidateLines);
 
     setConfiguringProduct(null);
     setEditingLineId(null);
     setLineFormDirty(false);
     setSearchQuery('');
-    setSearchResults(client.searchProducts(''));
+    loadProducts('');
   };
 
   const removeLine = (lineId: string) => {
     setLines((prev) => prev.filter((l) => l.id !== lineId));
   };
 
-  // Cart totals calculation
-  const totals =
-    lines.length > 0
-      ? calculateSaleTotals(lines.map((l) => l.calculated))
-      : { subtotalMinor: 0, discountTotalMinor: 0, totalMinor: 0, lineCount: 0 };
+  // Cart totals calculation. Candidate mutations are checked before state
+  // changes; this defensive boundary also keeps a corrupt/incomplete draft
+  // from crashing render or being recorded.
+  const cartTotals = useMemo(() => {
+    if (lines.length === 0) {
+      return { subtotalMinor: 0, discountTotalMinor: 0, totalMinor: 0, lineCount: 0 };
+    }
+    try {
+      return calculateSaleTotals(lines.map((line) => line.calculated));
+    } catch {
+      return null;
+    }
+  }, [lines]);
+  const totals = cartTotals ?? { subtotalMinor: 0, discountTotalMinor: 0, totalMinor: 0, lineCount: 0 };
+
+  const loadCustomerMatches = useCallback((query: string): void => {
+    if (query.length === 0) {
+      setCustomerMatches([]);
+      setCustomerReadFailure(null);
+      return;
+    }
+    try {
+      setCustomerMatches(client.searchCustomers(query));
+      setCustomerReadFailure(null);
+    } catch {
+      setCustomerMatches([]);
+      setCustomerReadFailure(
+        'Existing customers could not be searched on this device. Retry before choosing to create a new customer account.',
+      );
+    }
+  }, [client]);
 
   // Customer search for credit
   const handleCustomerNameChange = (text: string) => {
     setCustomerName(text);
     setSelectedCustomerId(null);
-    if (text.trim().length > 0) {
-      setCustomerMatches(client.searchCustomers(text.trim()));
-    } else {
-      setCustomerMatches([]);
-    }
+    loadCustomerMatches(text.trim());
   };
 
   const handleSelectCustomer = (customer: CustomerAccountRow) => {
     setSelectedCustomerId(customer.id);
     setCustomerName(customer.name);
     setCustomerMatches([]);
+    setCustomerReadFailure(null);
   };
 
   // Complete Sale
   const handleCompleteSale = () => {
     if (submitting || lines.length === 0) return;
+    if (cartTotals === null) {
+      setSubmitError('This cart has an unsafe total. Review the affected line before recording the sale.');
+      return;
+    }
 
     if (paymentMethod === 'CREDIT') {
       if (totals.totalMinor <= 0) {
@@ -496,6 +578,10 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
       }
       if (customerName.trim().length > 200) {
         setSubmitError('Customer name cannot exceed 200 characters.');
+        return;
+      }
+      if (customerReadFailure && !selectedCustomerId) {
+        setSubmitError('Retry the customer search before creating a new credit customer account.');
         return;
       }
     }
@@ -544,13 +630,22 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
     setQuickAddDiscard(null);
     setViewMode('cart');
     setSearchQuery('');
-    const allHits = client.searchProducts('');
-    setSearchResults(allHits);
+    const allHits = loadProducts('');
+    if (!allHits) {
+      setQuickAddSavedNotice(
+        'Product saved on this device. Its catalogue listing could not be refreshed; retry before adding it to this sale.',
+      );
+      return;
+    }
     const createdHit = allHits.find((hit) => hit.storeProductId === newProductId);
     if (createdHit) {
       startConfiguringLine(createdHit);
+      return;
     }
-  }, [client, startConfiguringLine]);
+    setQuickAddSavedNotice(
+      'Product saved on this device. It is not currently available to add to this sale; refresh the catalogue and try again.',
+    );
+  }, [loadProducts, startConfiguringLine]);
 
   // Quick Add proxy client if needed
   const effectiveCatalogueClient: CatalogueClient = catalogueClient ?? {
@@ -592,6 +687,7 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
         onSaved={handleQuickAddSaved}
         onCancel={closeQuickAdd}
         onDirtyDraftChange={handleQuickAddDraftChange}
+        isFocused={isFocused}
       />
     );
   }
@@ -791,6 +887,11 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
     totals.discountTotalMinor > 0
       ? displayMoney(totals.discountTotalMinor, client.storeCurrencyCode)
       : null;
+  const creditCompletionBlocked =
+    paymentMethod === 'CREDIT' &&
+    customerName.trim().length > 0 &&
+    customerReadFailure !== null &&
+    selectedCustomerId === null;
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -877,24 +978,31 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
           })}
 
           {/* Totals Box */}
-          <View style={styles.totalsBox}>
-            <View style={styles.summaryRow}>
-              <Text style={styles.metaLabel}>Subtotal</Text>
-              <Text style={styles.metaValue}>{subtotalDisplay}</Text>
-            </View>
-            {discountTotalDisplay ? (
+          {cartTotals === null ? (
+            <ErrorPanel
+              title="Cart total unavailable"
+              message="One or more cart lines have an unsafe total. Edit or remove the affected line before recording this sale."
+            />
+          ) : (
+            <View style={styles.totalsBox}>
               <View style={styles.summaryRow}>
-                <Text style={styles.metaLabel}>Total discounts</Text>
-                <Text style={styles.discountValue}>- {discountTotalDisplay}</Text>
+                <Text style={styles.metaLabel}>Subtotal</Text>
+                <Text style={styles.metaValue}>{subtotalDisplay}</Text>
               </View>
-            ) : null}
-            <View style={[styles.summaryRow, styles.totalRow]}>
-              <Text style={styles.totalLabel}>Total</Text>
-              <Text accessibilityLabel={`Total: ${totalDisplay}`} style={styles.totalAmountText}>
-                {totalDisplay}
-              </Text>
+              {discountTotalDisplay ? (
+                <View style={styles.summaryRow}>
+                  <Text style={styles.metaLabel}>Total discounts</Text>
+                  <Text style={styles.discountValue}>- {discountTotalDisplay}</Text>
+                </View>
+              ) : null}
+              <View style={[styles.summaryRow, styles.totalRow]}>
+                <Text style={styles.totalLabel}>Total</Text>
+                <Text accessibilityLabel={`Total: ${totalDisplay}`} style={styles.totalAmountText}>
+                  {totalDisplay}
+                </Text>
+              </View>
             </View>
-          </View>
+          )}
         </View>
       ) : null}
 
@@ -913,7 +1021,28 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
           style={styles.search}
         />
 
-        {searchResults.length === 0 ? (
+        {quickAddSavedNotice ? (
+          <Text accessibilityRole="alert" style={styles.savedProductNotice}>
+            {quickAddSavedNotice}
+          </Text>
+        ) : null}
+
+        {packageReadFailure ? (
+          <ErrorPanel
+            title="Product packages unavailable"
+            message="Package options could not be read from this device. Your cart is preserved."
+            onRetry={() => startConfiguringLine(packageReadFailure.hit, packageReadFailure.existingLine)}
+            onDismiss={() => setPackageReadFailure(null)}
+          />
+        ) : null}
+
+        {productSearch.failure ? (
+          <ErrorPanel
+            title="Products unavailable"
+            message={productSearch.failure}
+            onRetry={() => loadProducts(searchQuery)}
+          />
+        ) : searchResults.length === 0 ? (
           <EmptyState
             title={searchQuery.trim().length > 0 ? 'No matching product' : 'No products yet'}
             body={
@@ -1007,6 +1136,27 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
                 testID="credit-customer-name"
               />
 
+              {customerReadFailure ? (
+                <ErrorPanel
+                  title="Customer search unavailable"
+                  message={customerReadFailure}
+                  onRetry={() => loadCustomerMatches(customerName.trim())}
+                />
+              ) : null}
+
+              {customerName.trim().length > 0 && !selectedCustomerId && !customerReadFailure ? (
+                <View style={styles.newCustomerNotice}>
+                  <Text style={styles.matchesLabel}>New customer account</Text>
+                  <Text style={styles.newCustomerNoticeText}>
+                    Completing this sale will create a new local customer account for “{customerName.trim()}”. Existing names are never merged automatically.
+                  </Text>
+                </View>
+              ) : null}
+
+              {selectedCustomerId ? (
+                <Text style={styles.selectedCustomerText}>Existing customer selected for this credit sale.</Text>
+              ) : null}
+
               {customerMatches.length > 0 ? (
                 <View style={styles.customerMatchesList}>
                   <Text style={styles.matchesLabel}>Existing customers:</Text>
@@ -1039,7 +1189,7 @@ export default function SellScreen({ client, catalogueClient, onDirtyDraftChange
             <PrimaryButton
               title={submitting ? 'Recording sale...' : `Complete sale · ${totalDisplay}`}
               onPress={handleCompleteSale}
-              disabled={submitting}
+              disabled={submitting || cartTotals === null || creditCompletionBlocked}
             />
           </View>
         </View>
@@ -1099,6 +1249,12 @@ const styles = StyleSheet.create({
   temporaryBadge: { color: theme.color.statusWarning, fontSize: theme.fontSize.small, fontWeight: '600' },
   hitMeta: { color: theme.color.textSecondary, fontSize: theme.fontSize.small },
   hitPrice: { color: theme.color.actionPrimary, fontSize: theme.fontSize.body, fontWeight: '700' },
+  savedProductNotice: {
+    color: theme.color.statusWarning,
+    fontSize: theme.fontSize.small,
+    fontWeight: '600',
+    lineHeight: 20,
+  },
 
   // Cart
   cartSection: { gap: theme.spacing(2) },
@@ -1253,6 +1409,16 @@ const styles = StyleSheet.create({
     gap: theme.spacing(2),
   },
   matchesLabel: { color: theme.color.textSecondary, fontSize: theme.fontSize.small, fontWeight: '600' },
+  newCustomerNotice: {
+    backgroundColor: theme.color.raised,
+    borderColor: theme.color.statusWarning,
+    borderWidth: 1,
+    borderRadius: theme.radius.field,
+    padding: theme.spacing(3),
+    gap: theme.spacing(1),
+  },
+  newCustomerNoticeText: { color: theme.color.textSecondary, fontSize: theme.fontSize.small, lineHeight: 20 },
+  selectedCustomerText: { color: theme.color.actionPrimary, fontSize: theme.fontSize.small, fontWeight: '600' },
   customerMatchRow: {
     minHeight: theme.minTouchTarget,
     justifyContent: 'center',

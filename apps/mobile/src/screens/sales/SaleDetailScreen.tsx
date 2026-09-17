@@ -50,6 +50,11 @@ function paymentMethodLabel(method: string): string {
   }
 }
 
+function formatSignedQuantityMicros(value: number): string {
+  const sign = value < 0 ? '-' : '';
+  return `${sign}${formatQuantityMicros(Math.abs(value))}`;
+}
+
 export default function SaleDetailScreen({ client, saleId, onBack }: SaleDetailScreenProps) {
   const [state, setState] = useState<DetailState>(() => loadDetail(client, saleId));
 
@@ -69,7 +74,17 @@ export default function SaleDetailScreen({ client, saleId, onBack }: SaleDetailS
     );
   }
 
-  const { sale, items, payment, customerAccount, receivable, syncStatus } = state.detail;
+  const {
+    sale,
+    items,
+    payment,
+    customerAccount,
+    receivable,
+    syncStatus,
+    inventoryEffects,
+    inventoryReadFailure,
+  } = state.detail;
+  const inventoryBySaleItemId = new Map(inventoryEffects.map((effect) => [effect.saleItemId, effect]));
   const totalDisplay = displayMoney(sale.totalMinor, sale.currencyCode) ?? '0.00';
   const subtotalDisplay = displayMoney(sale.subtotalMinor, sale.currencyCode) ?? '0.00';
   const discountDisplay =
@@ -147,6 +162,8 @@ export default function SaleDetailScreen({ client, saleId, onBack }: SaleDetailS
           const itemDiscount =
             item.discountAmountMinor > 0 ? displayMoney(item.discountAmountMinor, sale.currencyCode) : null;
           const qty = formatQuantityMicros(item.quantityPackagesMicros);
+          const inventoryEffect = inventoryBySaleItemId.get(item.id);
+          const currentBalance = inventoryEffect?.currentDerivedBalanceBaseMicros ?? null;
 
           return (
             <View key={item.id} style={styles.itemRow}>
@@ -158,12 +175,47 @@ export default function SaleDetailScreen({ client, saleId, onBack }: SaleDetailS
                 {itemDiscount ? (
                   <Text style={styles.discountValue}>Discount: - {itemDiscount}</Text>
                 ) : null}
+                {inventoryEffect ? (
+                  <View style={styles.inventoryEffect}>
+                    <Text style={styles.itemSub}>
+                      Historical sale inventory effect: {formatSignedQuantityMicros(
+                        inventoryEffect.historicalSaleDeltaBaseMicros,
+                      )}{' '}
+                      base units
+                    </Text>
+                    {currentBalance !== null ? (
+                      <Text
+                        accessibilityLabel={`Current derived stock: ${formatSignedQuantityMicros(currentBalance)} base units${
+                          currentBalance < 0 ? ', reconciliation needed' : ''
+                        }`}
+                        style={currentBalance < 0 ? styles.negativeStock : styles.itemSub}
+                      >
+                        Current derived stock: {formatSignedQuantityMicros(currentBalance)} base units
+                        {currentBalance < 0 ? ' · Reconciliation needed' : ''}
+                      </Text>
+                    ) : (
+                      <Text style={styles.inventoryUnavailable}>Current derived stock unavailable</Text>
+                    )}
+                  </View>
+                ) : null}
               </View>
               <Text style={styles.itemTotal}>{itemTotal}</Text>
             </View>
           );
         })}
       </View>
+
+      {inventoryReadFailure ? (
+        <View style={styles.inventoryReadWarning}>
+          <Text accessibilityRole="alert" style={styles.inventoryUnavailable}>
+            Current stock could not be read
+          </Text>
+          <Text style={styles.itemSub}>
+            The historical sale inventory effect above remains saved. Retry to refresh the current derived balance.
+          </Text>
+          <SecondaryButton title="Retry inventory balance" onPress={() => setState(loadDetail(client, saleId))} />
+        </View>
+      ) : null}
 
       <View style={styles.metaSection}>
         <Text style={styles.metaLine}>
@@ -259,6 +311,17 @@ const styles = StyleSheet.create({
   itemName: { color: theme.color.textPrimary, fontSize: theme.fontSize.body, fontWeight: '600' },
   itemSub: { color: theme.color.textSecondary, fontSize: theme.fontSize.small },
   itemTotal: { color: theme.color.textPrimary, fontSize: theme.fontSize.body, fontWeight: '700' },
+  inventoryEffect: { gap: theme.spacing(1), marginTop: theme.spacing(1) },
+  negativeStock: { color: theme.color.statusWarning, fontSize: theme.fontSize.small, fontWeight: '700' },
+  inventoryUnavailable: { color: theme.color.statusWarning, fontSize: theme.fontSize.small, fontWeight: '600' },
+  inventoryReadWarning: {
+    backgroundColor: theme.color.raised,
+    borderColor: theme.color.statusWarning,
+    borderWidth: 1,
+    borderRadius: theme.radius.card,
+    padding: theme.spacing(3),
+    gap: theme.spacing(2),
+  },
   metaSection: { gap: theme.spacing(1), paddingVertical: theme.spacing(2) },
   metaLine: { color: theme.color.textSecondary, fontSize: theme.fontSize.small },
   actions: { paddingVertical: theme.spacing(2) },

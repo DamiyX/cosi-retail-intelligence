@@ -8,6 +8,7 @@ import {
   optionalText,
   requireId,
   requireText,
+  sumSafeIntegers,
 } from './common';
 
 export type InventoryEventType =
@@ -252,11 +253,15 @@ export function getInventoryBalanceByStoreProduct(
   adapter: DatabaseAdapter,
   storeProductId: string,
 ): number {
-  const row = adapter.getFirstRow<{ balance: number | null }>(
-    `SELECT COALESCE(SUM(quantity_base_delta_micros), 0) AS balance
+  const rows = adapter.getAllRows<{ quantity_base_delta_micros: number }>(
+    `SELECT quantity_base_delta_micros
      FROM inventory_events
      WHERE store_product_id = ?;`,
     [requireId(storeProductId)],
   );
-  return row?.balance ?? 0;
+  return sumSafeIntegers(
+    rows.map((row) => row.quantity_base_delta_micros),
+    'Derived inventory balance',
+    'INVALID_QUANTITY',
+  );
 }

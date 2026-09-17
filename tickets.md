@@ -42,12 +42,18 @@ yet accepted for M4.
 - Because migration 3 was uncommitted and unshipped, its pending definition was
   corrected directly rather than appending migration 4. The populated-M2
   upgrade test proves no reset, loss, false history, or duplicate sales effect.
-- `npm run validate` passed 143 domain and 169 mobile tests (312 tests in 25
+- `npm run validate` passed 143 domain and 186 mobile tests (329 tests in 25
   suites), with strict typecheck and zero-warning lint; Doctor passed 21/21,
   Expo dependencies are current, and Android export succeeded.
 - M3 physical-device verification was deliberately not run in this pass. The
   preserved Galaxy A15 evidence is M1/M2-only and must not be used as M3 proof;
   M3 device verification remains a pre-beta/native-release gate.
+- The 2026-09-17 independent-audit correction pass added negative-stock
+  presentation, exact cross-row aggregate guards, screen-facing store-read
+  isolation, recoverable local-read states, full credit/multiline rollback and
+  replay coverage, and schema-valid workflow continuity. See
+  `docs/engineering/M3_AUDIT_CORRECTIONS.md`; independent re-audit remains
+  required.
 
 ## Ticket M3-01: Complete one cash sale offline
 
@@ -209,7 +215,7 @@ audit before restocking/costing starts.
 
 - [x] A clean `npm ci` installation (development dependencies included),
       environment check, strict typecheck, zero-warning lint, `npm run validate`
-      (143 domain + 169 mobile = 312 tests / 25 suites), Expo Doctor (21/21),
+      (143 domain + 186 mobile = 329 tests / 25 suites), Expo Doctor (21/21),
       Expo dependency check, and Android export pass with exact results recorded.
 - [x] Migration tests upgrade fresh and populated M2 databases without reset,
       loss, false history, or duplicate effects.

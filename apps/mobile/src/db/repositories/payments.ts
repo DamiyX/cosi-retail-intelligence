@@ -1,7 +1,7 @@
 import { DomainError } from '@retail/domain';
 
 import type { DatabaseAdapter } from '../adapter';
-import { nowIso, optionalText, requireId, requireText } from './common';
+import { nowIso, optionalText, requireId, requireText, sumSafeIntegers } from './common';
 
 export type PaymentMethod = 'CASH' | 'BANK_TRANSFER' | 'POS_CARD' | 'CREDIT';
 
@@ -111,25 +111,33 @@ export function listPaymentsBySaleId(adapter: DatabaseAdapter, saleId: string): 
  * D-037 requirement: Credit is excluded from cash received.
  */
 export function getCashReceivedTotalByStore(adapter: DatabaseAdapter, storeId: string): number {
-  const row = adapter.getFirstRow<{ total: number | null }>(
-    `SELECT COALESCE(SUM(p.amount_minor), 0) AS total
+  const rows = adapter.getAllRows<{ amount_minor: number }>(
+    `SELECT p.amount_minor
      FROM payments p
      JOIN sales s ON s.id = p.sale_id
      WHERE s.store_id = ? AND s.status = 'COMPLETED' AND p.method IN ('CASH', 'BANK_TRANSFER', 'POS_CARD');`,
     [requireId(storeId)],
   );
-  return row?.total ?? 0;
+  return sumSafeIntegers(
+    rows.map((row) => row.amount_minor),
+    'Cash received total',
+    'INVALID_MONEY',
+  );
 }
 
 /**
  * Total sales value for a store, including credit sales.
  */
 export function getTotalSalesValueByStore(adapter: DatabaseAdapter, storeId: string): number {
-  const row = adapter.getFirstRow<{ total: number | null }>(
-    `SELECT COALESCE(SUM(total_minor), 0) AS total
+  const rows = adapter.getAllRows<{ total_minor: number }>(
+    `SELECT total_minor
      FROM sales
      WHERE store_id = ? AND status = 'COMPLETED';`,
     [requireId(storeId)],
   );
-  return row?.total ?? 0;
+  return sumSafeIntegers(
+    rows.map((row) => row.total_minor),
+    'Total sales value',
+    'INVALID_MONEY',
+  );
 }

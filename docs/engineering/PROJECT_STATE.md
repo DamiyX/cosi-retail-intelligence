@@ -1,11 +1,11 @@
 # PROJECT_STATE — COSI
 
-Last updated: 2026-09-17  
-Current milestone: M3 Sales — M3-01 through M3-05 source implementation and
-automated validation are complete; independent audit is required before M4.  
+Last updated: 2026-09-18  
+Current milestone: M3 Sales — independent-audit corrections are implemented
+and independently re-audit is required before M4.  
 Completed engineering milestones: M0 Project Foundation; M1 Domain + Local
 Database (accepted with an explicit device waiver); M2 Catalogue + Package Units
-(accepted after independent audit); M3 implementation (audit pending).
+(accepted after independent audit); M3 implementation (re-audit pending).
 
 ## Active checkout
 
@@ -38,35 +38,42 @@ M3 delivers one complete offline sale on the M1/M2 foundation:
 - Dirty in-memory sale state is guarded through Android Back, tabs, Cancel,
   generic route removal, and the Quick Add return path. Completed-sale edit,
   delete, void, and return actions remain outside M3.
+- The corrective pass adds a read-only historical inventory delta/current
+  derived-balance presentation, store-scoped client reads, exact cross-row
+  aggregate rejection, and recoverable product/package/customer/history/local
+  context reads. See `M3_AUDIT_CORRECTIONS.md`.
 
 ### Migration correction note
 
-Migration 3 had not been committed, shipped, or persisted by an accepted M3
-build. The implementation therefore corrected its pending definition directly
-(rather than appending a fictitious migration 4): single-tender, immutable
-history, exact snapshot, and outbox invariants now apply on first M3 install.
-The populated-M2 upgrade test confirms M1/M2 rows and migration history survive
-the v2-to-v3 upgrade without a reset, loss, or false sales history. Once version
-3 reaches any persisted build, future changes must be append-only.
+Migration 3 was corrected while it was pending, before the initial M3 commit;
+it is now committed in `2ff7b4f` and was not edited by the audit-correction
+pass. Single-tender, immutable-history, exact-snapshot, and outbox invariants
+therefore apply on first M3 install. The populated-M2 upgrade test confirms
+M1/M2 rows and migration history survive the v2-to-v3 upgrade without a reset,
+loss, or false sales history. Any future persisted-schema change must append a
+new migration.
 
 ## Verified validation evidence
 
 - Clean dependency installation completed with `npm ci` (development dependencies
   included for workspace validation).
-- `npm run validate`: passed — 143 domain tests in 4 suites and 169 mobile tests
-  in 21 suites (312 tests / 25 suites total); strict typecheck and zero-warning
-  lint both passed.
+- Corrective-pass `npm run validate`: passed — 143 domain tests in 4 suites and
+  186 mobile tests in 21 suites (329 tests / 25 suites total); strict typecheck
+  and zero-warning lint both passed.
 - `npm run mobile:doctor`: 21/21 checks passed.
 - `npx expo install --check` from `apps/mobile`: dependencies are up to date;
   `expo` is intentionally excluded by the project configuration.
 - `npm run mobile:export`: Android export succeeded (1,341 modules; 3 MB Hermes
   bundle). Generated `apps/mobile/dist` is ignored and is not part of the diff.
-- Migration, rollback-at-every-write-boundary, replay/actor isolation, store
-  isolation, historical snapshot, inventory, credit, stored-sync-status, tab,
-  Android Back, Cancel, and Quick Add coverage passed.
-- `git diff --check` passed after the final documentation update. Generated
-  `apps/mobile/dist` remains ignored and is not part of the implementation
-  commit.
+- Corrective coverage includes every write position for new-credit, selected-
+  customer, and multiline aggregates; credit replay; cross-store client-read
+  denial; exact aggregate overflow; negative-stock detail label; local-read
+  retry; retained cart/customer failure; Quick Add refresh recovery; and focused
+  Android Back lifecycle. The focused correction suites passed 50 tests / 3
+  suites before the full run.
+- M3 workflow JSON Schema (including date-time formats) and gate dependencies
+  passed local validation. `git diff --check` passed in the final pre-commit
+  review; generated `apps/mobile/dist` remains ignored.
 
 ## Deferred evidence and risks
 
@@ -94,15 +101,16 @@ the v2-to-v3 upgrade without a reset, loss, or false sales history. Once version
 
 ## Next action
 
-Hand `feat/m3-sales` to an independent auditor for review of M3-01 through
-M3-05. Stop before M4 (Restocking + Costing); do not push, merge, deploy, or make
-the M3 device gate pass without the applicable authorization.
+Hand `feat/m3-sales` and its audit-correction commit to an independent auditor
+for re-review of M3-01 through M3-05. Stop before M4 (Restocking + Costing); do
+not push, merge, deploy, or make the M3 device gate pass without the applicable
+authorization.
 
 ## Continuity
 
 Read `AGENTS.md`, `.agents/contexts/project-context.md`,
 `.agents/workflows/index.json`, `.agents/workflows/m3-sales.json`, `tickets.md`,
-`docs/engineering/M3_SALES_PLAN.md`, `docs/design/DESIGN.md`, the M3 section of
-`BUILD_PLAN.md`, D-013/D-034/D-036/D-037, and `MULTI_AGENT_WORKFLOW.md`. Inspect
-Git status, history, and diff before edits. Repository documents and Git history
-are the project memory.
+`docs/engineering/M3_SALES_PLAN.md`, `docs/engineering/M3_AUDIT_CORRECTIONS.md`,
+`docs/design/DESIGN.md`, the M3 section of `BUILD_PLAN.md`, D-013/D-034/D-036/
+D-037, and `MULTI_AGENT_WORKFLOW.md`. Inspect Git status, history, and diff
+before edits. Repository documents and Git history are the project memory.

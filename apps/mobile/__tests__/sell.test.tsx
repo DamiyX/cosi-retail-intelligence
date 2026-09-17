@@ -308,6 +308,12 @@ describe('SellScreen', () => {
 
       // Provide customer name
       fireEvent.changeText(screen.getByTestId('credit-customer-name'), 'Mama Nkechi');
+      expect(screen.getByText('New customer account')).toBeTruthy();
+      expect(
+        screen.getByText(
+          'Completing this sale will create a new local customer account for “Mama Nkechi”. Existing names are never merged automatically.',
+        ),
+      ).toBeTruthy();
       fireEvent.press(screen.getByText('Complete sale · ₦1,200.00'));
 
       // Confirmation shows credit owed by Mama Nkechi
@@ -381,6 +387,11 @@ describe('SellScreen', () => {
       expect(screen.getByText('₦6,000.00')).toBeTruthy();
       expect(screen.getByText('- ₦400.00')).toBeTruthy();
       expect(screen.getAllByText('₦5,600.00').length).toBeGreaterThanOrEqual(1);
+
+      // The immutable sale effect is distinct from the current derived stock.
+      // Negative stock remains a valid sale outcome and is a reconciliation signal.
+      expect(screen.getByText('Historical sale inventory effect: -2 base units')).toBeTruthy();
+      expect(screen.getByText('Current derived stock: -2 base units · Reconciliation needed')).toBeTruthy();
 
       // Must show truthful local-save badge
       expect(screen.getByText('Saved on this device · Sync pending')).toBeTruthy();
@@ -603,6 +614,285 @@ describe('SellScreen', () => {
       expect(screen.getByText('Cart (1)')).toBeTruthy();
       expect(screen.getAllByText('Quick Add Biscuit').length).toBeGreaterThan(0);
 
+      unmount();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('recovers an initial catalogue read failure instead of presenting it as an empty catalogue', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      seedSellCatalogue(fixture);
+      const salesClient = createDatabaseSalesClient(fixture.adapter);
+      const searchSpy = jest
+        .spyOn(salesClient, 'searchProducts')
+        .mockImplementationOnce(() => {
+          throw new Error('Injected catalogue read failure');
+        });
+      const { unmount } = render(<SellScreen client={salesClient} />);
+
+      expect(screen.getByText('Products unavailable')).toBeTruthy();
+      expect(screen.queryByText('No products yet')).toBeNull();
+      fireEvent.press(screen.getByText('Try again'));
+      expect(screen.getByText('Milo 400g')).toBeTruthy();
+
+      searchSpy.mockRestore();
+      unmount();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('retains an existing cart and retries a package read failure', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      seedSellCatalogue(fixture);
+      const salesClient = createDatabaseSalesClient(fixture.adapter);
+      const { unmount } = render(<SellScreen client={salesClient} />);
+
+      fireEvent.press(screen.getByText('Milo 400g'));
+      fireEvent.press(screen.getByText('Add to cart'));
+      expect(screen.getByText('Cart (1)')).toBeTruthy();
+
+      const packageSpy = jest
+        .spyOn(salesClient, 'getProductPackages')
+        .mockImplementationOnce(() => {
+          throw new Error('Injected package read failure');
+        });
+      fireEvent.press(screen.getByText('Peak Milk'));
+      expect(screen.getByText('Product packages unavailable')).toBeTruthy();
+      expect(screen.getByText('Cart (1)')).toBeTruthy();
+      fireEvent.press(screen.getByText('Try again'));
+      expect(screen.getByText('Add to sale')).toBeTruthy();
+      expect(screen.getByText('Peak Milk')).toBeTruthy();
+
+      packageSpy.mockRestore();
+      unmount();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('preserves a Quick Add product as saved when its follow-up catalogue refresh fails', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const salesClient = createDatabaseSalesClient(fixture.adapter);
+      const originalSearch = salesClient.searchProducts.bind(salesClient);
+      let searches = 0;
+      const searchSpy = jest.spyOn(salesClient, 'searchProducts').mockImplementation((query) => {
+        searches += 1;
+        if (searches === 2) {
+          throw new Error('Injected refresh failure after product save');
+        }
+        return originalSearch(query);
+      });
+      const { unmount } = render(<SellScreen client={salesClient} />);
+
+      fireEvent.press(screen.getByText('Add product'));
+      fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Saved during refresh failure');
+      fireEvent.press(screen.getByText('Save product'));
+
+      expect(
+        screen.getByText(
+          'Product saved on this device. Its catalogue listing could not be refreshed; retry before adding it to this sale.',
+        ),
+      ).toBeTruthy();
+      expect(screen.getByText('Products unavailable')).toBeTruthy();
+      expect(countRows(fixture.adapter, 'store_products')).toBe(1);
+      expect(screen.queryByText('Not saved')).toBeNull();
+
+      fireEvent.press(screen.getByText('Try again'));
+      expect(screen.getByText('Saved during refresh failure')).toBeTruthy();
+
+      searchSpy.mockRestore();
+      unmount();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('retains a credit cart and customer after local commit failure, then records exactly once on retry', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      seedSellCatalogue(fixture);
+      const salesClient = createDatabaseSalesClient(fixture.adapter);
+      const completionSpy = jest
+        .spyOn(salesClient, 'completeSale')
+        .mockImplementationOnce(() => {
+          throw new Error('Injected local commit failure');
+        });
+      const { unmount } = render(<SellScreen client={salesClient} />);
+
+      fireEvent.press(screen.getByText('Peak Milk'));
+      fireEvent.press(screen.getByText('Add to cart'));
+      fireEvent.press(screen.getByText('Credit'));
+      fireEvent.changeText(screen.getByTestId('credit-customer-name'), 'Retry customer');
+      fireEvent.press(screen.getByText('Complete sale · ₦1,200.00'));
+
+      expect(screen.getByText('Sale not recorded')).toBeTruthy();
+      expect(screen.queryByText('Sale complete')).toBeNull();
+      expect(screen.getByText('Cart (1)')).toBeTruthy();
+      expect(screen.getByTestId('credit-customer-name').props.value).toBe('Retry customer');
+      expect(countRows(fixture.adapter, 'sales')).toBe(0);
+      expect(countRows(fixture.adapter, 'customer_accounts')).toBe(0);
+
+      fireEvent.press(screen.getByText('Complete sale · ₦1,200.00'));
+      expect(screen.getByText('Sale complete')).toBeTruthy();
+      expect(countRows(fixture.adapter, 'sales')).toBe(1);
+      expect(countRows(fixture.adapter, 'customer_accounts')).toBe(1);
+      expect(countRows(fixture.adapter, 'receivables')).toBe(1);
+      expect(countRows(fixture.adapter, 'inventory_events')).toBe(1);
+
+      completionSpy.mockRestore();
+      unmount();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('requires a customer-search retry before offering deliberate new-account creation', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      seedSellCatalogue(fixture);
+      const salesClient = createDatabaseSalesClient(fixture.adapter);
+      const customerSpy = jest
+        .spyOn(salesClient, 'searchCustomers')
+        .mockImplementationOnce(() => {
+          throw new Error('Injected customer search failure');
+        });
+      const { unmount } = render(<SellScreen client={salesClient} />);
+
+      fireEvent.press(screen.getByText('Peak Milk'));
+      fireEvent.press(screen.getByText('Add to cart'));
+      fireEvent.press(screen.getByText('Credit'));
+      fireEvent.changeText(screen.getByTestId('credit-customer-name'), 'Retry customer lookup');
+
+      expect(screen.getByText('Customer search unavailable')).toBeTruthy();
+      expect(screen.queryByText('New customer account')).toBeNull();
+      fireEvent.press(screen.getByText('Try again'));
+      expect(screen.queryByText('Customer search unavailable')).toBeNull();
+      expect(screen.getByText('New customer account')).toBeTruthy();
+
+      customerSpy.mockRestore();
+      unmount();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('retries an actual local sales-history read without claiming history was deleted', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const { catalogueClient } = seedSellCatalogue(fixture);
+      const salesClient = createDatabaseSalesClient(fixture.adapter);
+      const product = catalogueClient.listProducts('Milo')[0];
+      salesClient.completeSale({
+        lines: [
+          {
+            storeProductId: product.product.id,
+            packageUnitId: salesClient.getProductPackages(product.product.id)[0].id,
+            quantityPackagesMicros: 1_000_000,
+            unitPriceMinor: 300_000,
+          },
+        ],
+        payment: { method: 'CASH' },
+      });
+      const historySpy = jest
+        .spyOn(salesClient, 'listSales')
+        .mockImplementationOnce(() => {
+          throw new Error('Injected history read failure');
+        });
+      const { unmount } = render(
+        <SaleHistoryScreen client={salesClient} onOpenSale={() => undefined} onBack={() => undefined} />,
+      );
+
+      expect(screen.getByText('Sales history unavailable')).toBeTruthy();
+      expect(screen.queryByText('No sales recorded yet')).toBeNull();
+      fireEvent.press(screen.getByText('Try again'));
+      expect(screen.getByText('₦3,000.00')).toBeTruthy();
+
+      historySpy.mockRestore();
+      unmount();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('removes Sell hardware Back handling while blurred and restores it when focused again', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      seedSellCatalogue(fixture);
+      const salesClient = createDatabaseSalesClient(fixture.adapter);
+      const subscriptions: { handler: () => boolean; remove: jest.Mock }[] = [];
+      const addSpy = jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_eventName, handler) => {
+        const subscription = { remove: jest.fn() };
+        subscriptions.push({ handler: handler as () => boolean, remove: subscription.remove });
+        return subscription as never;
+      });
+      const { rerender, unmount } = render(<SellScreen client={salesClient} isFocused />);
+
+      fireEvent.press(screen.getByText('Recent sales'));
+      expect(screen.getByText('Recent sales')).toBeTruthy();
+      const focusedHistorySubscription = subscriptions.at(-1);
+      rerender(<SellScreen client={salesClient} isFocused={false} />);
+      expect(focusedHistorySubscription?.remove).toHaveBeenCalledTimes(1);
+
+      const subscriptionsWhileBlurred = subscriptions.length;
+      rerender(<SellScreen client={salesClient} isFocused />);
+      expect(subscriptions).toHaveLength(subscriptionsWhileBlurred + 1);
+      act(() => {
+        expect(subscriptions.at(-1)?.handler()).toBe(true);
+      });
+      expect(screen.getByText('Sell')).toBeTruthy();
+
+      addSpy.mockRestore();
+      unmount();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('keeps the cart and line form intact when adding or editing would overflow the sale total', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      seedSellCatalogue(fixture);
+      const salesClient = createDatabaseSalesClient(fixture.adapter);
+      const alertSpy = jest.spyOn(Alert, 'alert');
+      const { unmount } = render(<SellScreen client={salesClient} />);
+      const halfSafeMoney = '45035996273704.95';
+      const maximumSafeMoney = '90071992547409.91';
+
+      fireEvent.press(screen.getByText('Milo 400g'));
+      fireEvent.changeText(screen.getByTestId('line-price-input'), halfSafeMoney);
+      fireEvent.press(screen.getByText('Add to cart'));
+      fireEvent.press(screen.getByText('Peak Milk'));
+      fireEvent.changeText(screen.getByTestId('line-price-input'), halfSafeMoney);
+      fireEvent.press(screen.getByText('Add to cart'));
+      expect(screen.getByText('Cart (2)')).toBeTruthy();
+
+      fireEvent.press(screen.getByText('Dangote Sugar'));
+      fireEvent.changeText(screen.getByTestId('line-price-input'), maximumSafeMoney);
+      fireEvent.press(screen.getByText('Add to cart'));
+      expect(screen.getByText('Sale totals exceed the safe integer range.')).toBeTruthy();
+      expect(screen.getByText('Add to sale')).toBeTruthy();
+
+      fireEvent.press(screen.getByText('Cancel'));
+      const discardLine = alertSpy.mock.calls.at(-1)?.[2] as
+        | { text: string; onPress?: () => void }[]
+        | undefined;
+      act(() => {
+        discardLine?.find((action) => action.text === 'Discard')?.onPress?.();
+      });
+      expect(screen.getByText('Cart (2)')).toBeTruthy();
+
+      fireEvent.press(screen.getByLabelText('Edit Milo 400g'));
+      fireEvent.changeText(screen.getByTestId('line-price-input'), maximumSafeMoney);
+      fireEvent.press(screen.getByText('Update line'));
+      expect(screen.getByText('Sale totals exceed the safe integer range.')).toBeTruthy();
+      expect(screen.getByText('Edit line')).toBeTruthy();
+
+      alertSpy.mockRestore();
       unmount();
     } finally {
       fixture.closeAndDelete();

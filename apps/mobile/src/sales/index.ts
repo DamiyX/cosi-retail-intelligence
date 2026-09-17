@@ -34,6 +34,20 @@ export interface SaleDetail {
   customerAccount: CustomerAccountRow | null;
   receivable: ReceivableRow | null;
   syncStatus: OutboxStatus | null;
+  inventoryEffects: SaleItemInventoryEffect[];
+  inventoryReadFailure: string | null;
+}
+
+/**
+ * Read-only M3 view of the immutable sale effect versus the current derived
+ * balance. The historical delta is never rewritten if later events change
+ * stock; a missing balance only means the derived projection could not load.
+ */
+export interface SaleItemInventoryEffect {
+  saleItemId: string;
+  storeProductId: string;
+  historicalSaleDeltaBaseMicros: number;
+  currentDerivedBalanceBaseMicros: number | null;
 }
 
 export function getSaleDetail(
@@ -62,6 +76,28 @@ export function getSaleDetail(
     entityId: sale.id,
     operationType: 'COMPLETED_SALE_CREATED',
   });
+  let inventoryReadFailure: string | null = null;
+  const inventoryEffects = items.map((item) => {
+    try {
+      return {
+        saleItemId: item.id,
+        storeProductId: item.storeProductId,
+        historicalSaleDeltaBaseMicros: -item.quantityBaseMicros,
+        currentDerivedBalanceBaseMicros: getInventoryBalanceByStoreProduct(
+          adapter,
+          item.storeProductId,
+        ),
+      };
+    } catch {
+      inventoryReadFailure = 'Current inventory balance could not be read on this device.';
+      return {
+        saleItemId: item.id,
+        storeProductId: item.storeProductId,
+        historicalSaleDeltaBaseMicros: -item.quantityBaseMicros,
+        currentDerivedBalanceBaseMicros: null,
+      };
+    }
+  });
 
   return {
     sale,
@@ -70,6 +106,8 @@ export function getSaleDetail(
     customerAccount,
     receivable,
     syncStatus: outbox?.status ?? null,
+    inventoryEffects,
+    inventoryReadFailure,
   };
 }
 

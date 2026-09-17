@@ -1,5 +1,5 @@
 import { act, fireEvent, renderRouter, screen } from 'expo-router/testing-library';
-import { Alert } from 'react-native';
+import { Alert, BackHandler } from 'react-native';
 
 import RootLayout from '../app/_layout';
 import MoreScreen from '../app/(tabs)/more';
@@ -85,6 +85,21 @@ describe('M2 tab navigation', () => {
     expect(router.getPathname()).toBe('/products');
   });
 
+  it('shows an existing-store read failure with retry instead of offering duplicate setup', async () => {
+    if (!mockDatabase) {
+      throw new Error('Test database is not open.');
+    }
+    mockDatabase.adapter.run(`UPDATE devices SET status = 'INACTIVE';`);
+    const router = renderRouter(ROUTES, { initialUrl: '/sell' });
+    expect(await screen.findByText('Local store unavailable')).toBeTruthy();
+    expect(screen.queryByText('Set up this store')).toBeNull();
+
+    mockDatabase.adapter.run(`UPDATE devices SET status = 'ACTIVE';`);
+    fireEvent.press(screen.getByText('Try again'));
+    expect(await screen.findByPlaceholderText('Search name, local SKU, or barcode')).toBeTruthy();
+    expect(router.getPathname()).toBe('/sell');
+  });
+
   it('requires confirmation before a dirty in-memory cart can leave through a tab', async () => {
     if (!mockDatabase) {
       throw new Error('Test database is not open.');
@@ -155,5 +170,35 @@ describe('M2 tab navigation', () => {
     expect(router.getPathname()).toBe('/today');
 
     alertSpy.mockRestore();
+  });
+
+  it('removes Sell history Back handling while another tab is focused, then restores it on return', async () => {
+    const subscriptions: { handler: () => boolean; remove: jest.Mock }[] = [];
+    const addSpy = jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_eventName, handler) => {
+      const subscription = { remove: jest.fn() };
+      subscriptions.push({ handler: handler as () => boolean, remove: subscription.remove });
+      return subscription as never;
+    });
+    const router = renderRouter(ROUTES, { initialUrl: '/sell' });
+    expect(await screen.findByPlaceholderText('Search name, local SKU, or barcode')).toBeTruthy();
+
+    fireEvent.press(screen.getByText('Recent sales'));
+    expect(await screen.findByText('Recent sales')).toBeTruthy();
+    const sellHistorySubscription = subscriptions.at(-1);
+
+    fireEvent.press(screen.getByLabelText(/Products, tab/));
+    expect(await screen.findByText('No products yet')).toBeTruthy();
+    expect(router.getPathname()).toBe('/products');
+    expect(sellHistorySubscription?.remove).toHaveBeenCalledTimes(1);
+
+    fireEvent.press(screen.getByLabelText(/Sell, tab/));
+    expect(await screen.findByText('Recent sales')).toBeTruthy();
+    const returnedSellSubscription = subscriptions.at(-1);
+    act(() => {
+      expect(returnedSellSubscription?.handler()).toBe(true);
+    });
+    expect(await screen.findByPlaceholderText('Search name, local SKU, or barcode')).toBeTruthy();
+
+    addSpy.mockRestore();
   });
 });

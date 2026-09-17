@@ -13,6 +13,8 @@ interface QuickAddProductScreenProps {
   onCancel: () => void;
   /** Lets a host guard tab/navigation exit without persisting a draft. */
   onDirtyDraftChange?: (discard: (() => void) | null) => void;
+  /** The parent Sell route removes global Back handling while its tab is blurred. */
+  isFocused?: boolean;
 }
 
 interface FieldErrors {
@@ -41,6 +43,7 @@ export default function QuickAddProductScreen({
   onSaved,
   onCancel,
   onDirtyDraftChange,
+  isFocused = true,
 }: QuickAddProductScreenProps) {
   const [name, setName] = useState(initialName);
   const [baseUnitName, setBaseUnitName] = useState('piece');
@@ -73,6 +76,9 @@ export default function QuickAddProductScreen({
   }, [dirty, onCancel, onDirtyDraftChange]);
 
   useEffect(() => {
+    if (!isFocused) {
+      return;
+    }
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       if (!dirty) {
         return false;
@@ -81,7 +87,7 @@ export default function QuickAddProductScreen({
       return true;
     });
     return () => subscription.remove();
-  }, [cancel, dirty]);
+  }, [cancel, dirty, isFocused]);
 
   const save = (): void => {
     if (saving) {

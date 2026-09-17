@@ -1,4 +1,4 @@
-import { assertValidId, DomainError } from '@retail/domain';
+import { assertValidId, DomainError, type DomainErrorCode } from '@retail/domain';
 
 /** Validate a client-generated record ID. */
 export function requireId(id: string): string {
@@ -91,4 +91,29 @@ export function requirePositiveMicros(value: unknown, field: string): number {
     throw new DomainError('INVALID_VALUE', `${field} must be a positive integer in micro-units.`);
   }
   return value;
+}
+
+/**
+ * Aggregate values which are individually stored as JavaScript-safe integers
+ * without letting a SQLite SUM cross the native/JS boundary as a rounded
+ * number. The caller chooses the domain classification for its own invariant.
+ */
+export function sumSafeIntegers(
+  values: readonly number[],
+  field: string,
+  code: DomainErrorCode,
+): number {
+  let total = 0n;
+  for (const value of values) {
+    if (typeof value !== 'number' || !Number.isSafeInteger(value)) {
+      throw new DomainError(code, `${field} contains a value outside the safe integer range.`);
+    }
+    total += BigInt(value);
+  }
+
+  const maximum = BigInt(Number.MAX_SAFE_INTEGER);
+  if (total > maximum || total < -maximum) {
+    throw new DomainError(code, `${field} exceeds the safe integer range.`);
+  }
+  return Number(total);
 }

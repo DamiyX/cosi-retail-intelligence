@@ -1,8 +1,8 @@
 # COSI Application Flow
 
-**Status:** Active; MVP capability flow and M2 catalogue navigation approved  
+**Status:** Active; MVP capability flow plus M2 catalogue and M3 Sell navigation approved  
 **Scope:** MVP user journeys  
-**Updated:** 2026-09-14  
+**Updated:** 2026-09-18  
 **Confidence:** High for required jobs and transaction behavior; medium or low
 where later-milestone navigation, permissions, and recovery UI remain undecided.
 
@@ -39,9 +39,9 @@ is built.
 ## Approved Navigation Baseline
 
 The MVP begins with four primary destinations: Today, Sell, Products, and More.
-Scanner entry is contextual from Sell and Products. M2 implements Products;
-later milestone design gates expand the other destinations before their
-substantial UI is built. See `docs/design/DESIGN.md`.
+Scanner entry is contextual from Sell and Products. M2 implements Products and
+M3 implements Sell; Today and More remain later-milestone destinations. See
+`docs/design/DESIGN.md`.
 
 ## Primary Daily Flow
 

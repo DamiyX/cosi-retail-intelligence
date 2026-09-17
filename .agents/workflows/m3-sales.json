@@ -3,8 +3,8 @@
   "task_id": "m3-sales",
   "workflow_id": "build-feature",
   "mode": "implement",
-  "status": "ready-for-audit",
-  "current_state": "m3-ready-for-independent-audit",
+  "status": "in_progress",
+  "current_state": "m3-audit-corrections-ready-for-independent-re-audit",
   "completed_states": [
     "m2-independent-audit",
     "m3-architecture-decisions",
@@ -14,7 +14,7 @@
   ],
   "owner": {
     "agent": "m3-implementation-current-task",
-    "thread": "current-task",
+    "thread": "01a0afd6-ecad-7490-bc94-1f46b7d396ae",
     "worktree": null
   },
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m0",
@@ -39,6 +39,11 @@
       "kind": "tickets",
       "path": "tickets.md",
       "claim": "M3-01 through M3-05 are vertical, dependency-ordered, testable, and stop before M4."
+    },
+    {
+      "kind": "audit-corrections",
+      "path": "docs/engineering/M3_AUDIT_CORRECTIONS.md",
+      "claim": "Independent-audit corrections are recorded with focused SQLite, client-boundary, UI-recovery, and workflow-state evidence; M3 remains unaccepted."
     }
   ],
   "acceptance_gates": [
@@ -50,7 +55,7 @@
       "status": "met",
       "depends_on": [],
       "verification": {
-        "kind": "review-and-tests",
+        "kind": "review",
         "procedure": "Audit M2 source, migrations, tests, UI states, and recorded evidence.",
         "success_condition": "Catalogue/package ownership, exact conversion, local persistence, and outbox capture are safe inputs to M3."
       },
@@ -73,7 +78,7 @@
       "status": "met",
       "depends_on": ["m2-accepted-baseline"],
       "verification": {
-        "kind": "decision-review",
+        "kind": "review",
         "procedure": "Review D-036/D-037 against the PRD, domain model, D-013, D-034, and offline-sync aggregate contract.",
         "success_condition": "M3 can calculate and persist a coherent completed sale without hidden rounding, cash misstatement, or destructive history."
       },
@@ -96,7 +101,7 @@
       "status": "met",
       "depends_on": ["m3-transaction-decisions"],
       "verification": {
-        "kind": "design-review",
+        "kind": "review",
         "procedure": "Review the M3 section of DESIGN.md and M3_SALES_PLAN.md.",
         "success_condition": "An implementation agent can build Sell without inventing product behavior or later scanner/reversal scope."
       },
@@ -119,7 +124,7 @@
       "status": "met",
       "depends_on": ["m3-design-baseline"],
       "verification": {
-        "kind": "ticket-review",
+        "kind": "review",
         "procedure": "Review M3-01 through M3-05 outcomes, non-goals, dependencies, acceptance checks, and stop boundary.",
         "success_condition": "Each ticket fits a clean implementation context and leaves validation green."
       },
@@ -142,7 +147,7 @@
       "status": "blocked",
       "depends_on": [],
       "verification": {
-        "kind": "physical-device",
+        "kind": "inspection",
         "procedure": "Install the current development/preview build, use airplane mode, complete the scripted M3 flow, force-stop/relaunch, and record actual observations.",
         "success_condition": "Device/build identifiers and observed persistence, offline, navigation, and text-scaling results are recorded before external beta."
       },
@@ -168,18 +173,18 @@
       "status": "pending",
       "depends_on": ["m3-tickets-verified"],
       "verification": {
-        "kind": "tests-device-and-review",
+        "kind": "review",
         "procedure": "Execute tickets.md, record automated and available device evidence, then audit the final M3 branch.",
         "success_condition": "A complete offline sale is exact, atomic, attributable, idempotent, durable, historically stable, and reviewable."
       },
       "evidence": [
         {
-          "result": "M3-01 through M3-05 implementation evidence is prepared: npm run validate passed 143 domain and 169 mobile tests (312 total across 25 suites), strict typecheck, zero-warning lint, Doctor 21/21, a clean Expo dependency check, and Android export (1,341 modules; 3 MB Hermes bundle). Independent audit and M3 physical-device verification remain outstanding.",
-          "source": "tickets.md; docs/engineering/PROJECT_STATE.md",
-          "observed_at": "2026-09-17T15:59:14Z"
+          "result": "M3-01 through M3-05 corrective implementation evidence is prepared. npm run validate passed 143 domain and 186 mobile tests (329 total / 25 suites), strict typecheck, zero-warning lint, Doctor 21/21, a clean Expo dependency check, Android export (1,341 modules; 3 MB Hermes bundle), workflow JSON Schema/date-time and gate validation, and focused cross-store/aggregate/rollback/replay/recovery/Back coverage. Independent re-audit and M3 physical-device verification remain outstanding.",
+          "source": "docs/engineering/M3_AUDIT_CORRECTIONS.md; tickets.md; docs/engineering/PROJECT_STATE.md",
+          "observed_at": "2026-09-17T23:00:15Z"
         }
       ],
-      "limitations": ["Independent audit pending.", "No M3 physical-device session was performed in this implementation pass."],
+      "limitations": ["Independent re-audit pending after corrective changes.", "No M3 physical-device session was performed in this implementation pass."],
       "blocker": null,
       "waiver": null
     }
@@ -187,6 +192,7 @@
   "artifacts": [
     "tickets.md",
     "docs/engineering/M3_SALES_PLAN.md",
+    "docs/engineering/M3_AUDIT_CORRECTIONS.md",
     "docs/design/DESIGN.md",
     "docs/decisions/DECISION_LOG.md",
     "docs/architecture/DOMAIN_DATA_MODEL.md",
@@ -204,8 +210,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Perform independent audit of M3-01 through M3-05 on branch feat/m3-sales before restocking/costing (M4) starts.",
+  "next_action": "Perform independent re-audit of M3-01 through M3-05 corrective changes on branch feat/m3-sales before restocking/costing (M4) starts.",
   "created_at": "2026-09-14T12:30:00Z",
-  "updated_at": "2026-09-17T15:59:14Z",
+  "updated_at": "2026-09-17T23:00:15Z",
   "archived": false
 }

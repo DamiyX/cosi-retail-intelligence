@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigation } from 'expo-router';
+import { useIsFocused, useNavigation } from 'expo-router';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { SalesProvider, useSales } from '../../src/sales/SalesContext';
@@ -43,6 +43,14 @@ function MissingStore() {
   );
 }
 
+function LocalStoreUnavailable({ failure, onRetry }: { failure: string; onRetry: () => void }) {
+  return (
+    <ScrollView contentContainerStyle={styles.center} keyboardShouldPersistTaps="handled">
+      <ErrorPanel title="Local store unavailable" message={failure} onRetry={onRetry} />
+    </ScrollView>
+  );
+}
+
 interface BeforeRemoveEvent {
   preventDefault(): void;
   data: { action: unknown };
@@ -54,8 +62,9 @@ interface SellRouteNavigation {
 }
 
 function SellContent() {
-  const { client, catalogueClient } = useSales();
+  const { availability, catalogueClient, client, failure, retryLocalStore } = useSales();
   const navigation = useNavigation<SellRouteNavigation>();
+  const isFocused = useIsFocused();
   const { clearDraft, getDraft, setDraft } = useSaleDraftNavigation();
   const allowNavigationRef = useRef(false);
 
@@ -105,6 +114,9 @@ function SellContent() {
     };
   }, [confirmExit, getDraft, navigation]);
 
+  if (availability === 'failure') {
+    return <LocalStoreUnavailable failure={failure ?? 'The local store is unavailable.'} onRetry={retryLocalStore} />;
+  }
   if (!client) {
     return <MissingStore />;
   }
@@ -114,6 +126,7 @@ function SellContent() {
         client={client}
         catalogueClient={catalogueClient ?? undefined}
         onDirtyDraftChange={handleDirtyDraftChange}
+        isFocused={isFocused}
       />
     </View>
   );
