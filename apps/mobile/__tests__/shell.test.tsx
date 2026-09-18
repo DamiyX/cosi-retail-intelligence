@@ -21,7 +21,7 @@ import { provisionStoreContext } from '../src/storeContext/provisionStoreContext
 import { deterministicIds } from './catalogueSupport';
 
 let mockDatabase: IsolatedDatabase | null = null;
-const mockSchemaVersion = 4;
+const mockSchemaVersion = 5;
 
 jest.mock('../src/db/initialize', () => ({
   initializeAppDatabase: () => {

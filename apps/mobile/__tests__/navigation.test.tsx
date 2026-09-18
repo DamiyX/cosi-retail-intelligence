@@ -1,4 +1,4 @@
-import { act, fireEvent, renderRouter, screen } from 'expo-router/testing-library';
+import { act, fireEvent, renderRouter, screen, testRouter } from 'expo-router/testing-library';
 import { Alert, BackHandler } from 'react-native';
 
 import RootLayout from '../app/_layout';
@@ -23,7 +23,7 @@ import { provisionStoreContext } from '../src/storeContext/provisionStoreContext
 import { deterministicIds } from './catalogueSupport';
 
 let mockDatabase: IsolatedDatabase | null = null;
-const mockSchemaVersion = 4;
+const mockSchemaVersion = 5;
 
 jest.mock('../src/db/initialize', () => ({
   initializeAppDatabase: () => {
@@ -148,6 +148,77 @@ describe('M2 tab navigation', () => {
     expect(router.getPathname()).toBe('/today');
 
     alertSpy.mockRestore();
+  });
+
+  it('uses the supported route-removal guard for a dirty restock draft and discards once', async () => {
+    if (!mockDatabase) {
+      throw new Error('Shell test database is not open.');
+    }
+    const store = mockDatabase.adapter.getFirstRow<{ id: string }>('SELECT id FROM stores LIMIT 1;');
+    const device = mockDatabase.adapter.getFirstRow<{ id: string }>('SELECT id FROM devices LIMIT 1;');
+    if (!store || !device) {
+      throw new Error('Test store context is missing.');
+    }
+    createTemporaryProduct(
+      mockDatabase.adapter,
+      { storeId: store.id, deviceId: device.id, name: 'Restock guard item' },
+      { generateId: deterministicIds(3600) },
+    );
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    const router = renderRouter(ROUTES, { initialUrl: '/products' });
+    testRouter.push('/restock');
+    expect(await screen.findByText('Restock guard item')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Restock Restock guard item'));
+    fireEvent.changeText(screen.getByTestId('restock-total-cost'), '5.00');
+    fireEvent.press(screen.getByText('Add line'));
+
+    testRouter.back();
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Discard restock draft?',
+      'Your unsaved restock details will be cleared.',
+      expect.any(Array),
+    );
+    expect(router.getPathname()).toBe('/restock');
+    const actions = alertSpy.mock.calls.at(-1)?.[2] as
+      | { text: string; onPress?: () => void }[]
+      | undefined;
+    act(() => {
+      actions?.find((action) => action.text === 'Discard')?.onPress?.();
+      jest.runAllTimers();
+    });
+    expect(await screen.findByText('Restock guard item')).toBeTruthy();
+    expect(router.getPathname()).toBe('/products');
+    alertSpy.mockRestore();
+  });
+
+  it('returns contextual Quick Add to the existing restock route and selects the new product', async () => {
+    if (!mockDatabase) {
+      throw new Error('Shell test database is not open.');
+    }
+    const store = mockDatabase.adapter.getFirstRow<{ id: string }>('SELECT id FROM stores LIMIT 1;');
+    const device = mockDatabase.adapter.getFirstRow<{ id: string }>('SELECT id FROM devices LIMIT 1;');
+    if (!store || !device) {
+      throw new Error('Test store context is missing.');
+    }
+    createTemporaryProduct(
+      mockDatabase.adapter,
+      { storeId: store.id, deviceId: device.id, name: 'Existing restock line' },
+      { generateId: deterministicIds(3650) },
+    );
+    const router = renderRouter(ROUTES, { initialUrl: '/restock' });
+    expect(await screen.findByText('Existing restock line')).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('Restock Existing restock line'));
+    fireEvent.changeText(screen.getByTestId('restock-total-cost'), '5.00');
+    fireEvent.press(screen.getByText('Add line'));
+    fireEvent.changeText(screen.getByTestId('restock-product-search'), 'Context Quick Add');
+    fireEvent.press(screen.getByText('Quick Add product'));
+    expect(router.getPathname()).toBe('/products/new');
+    expect(screen.getByTestId('quick-add-name').props.value).toBe('Context Quick Add');
+    fireEvent.press(screen.getByText('Save product'));
+    expect(await screen.findByText('Context Quick Add')).toBeTruthy();
+    expect(router.getPathname()).toBe('/restock');
+    expect(screen.getByText('Context Quick Add')).toBeTruthy();
+    expect(screen.getByText('Purchase package')).toBeTruthy();
   });
 
   it('requires confirmation before a dirty Quick Add form can leave through a tab', async () => {

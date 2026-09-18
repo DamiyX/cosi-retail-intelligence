@@ -6,7 +6,7 @@ import {
   type NormalizedPurchaseCost,
   type PurchaseCostBasis,
 } from '@retail/domain';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { generateMobileId } from '../../crypto/mobileIds';
@@ -23,6 +23,10 @@ interface RestockScreenProps {
   onOpenReceipt?: (purchaseId: string) => void;
   onQuickAdd?: (query: string) => void;
   onDirtyDraftChange?: (dirty: boolean, discard: () => void) => void;
+  /** Route focus refreshes reads without remounting and losing the cart draft. */
+  isFocused?: boolean;
+  /** Product created by contextual Quick Add; select it on return. */
+  quickAddProductId?: string;
 }
 
 interface SearchState {
@@ -131,6 +135,8 @@ export default function RestockScreen({
   onOpenReceipt,
   onQuickAdd,
   onDirtyDraftChange,
+  isFocused = true,
+  quickAddProductId,
 }: RestockScreenProps) {
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState<SearchState>(() => readProducts(client, ''));
@@ -149,6 +155,8 @@ export default function RestockScreen({
   const [submitting, setSubmitting] = useState(false);
   const [operationId, setOperationId] = useState<string | null>(null);
   const [saved, setSaved] = useState<CompletedPurchaseGraph | null>(null);
+  const handledQuickAddIdRef = useRef<string | null>(null);
+  const initialFocusHandledRef = useRef(false);
 
   const dirty = saved === null && (
     query.trim().length > 0 ||
@@ -183,6 +191,41 @@ export default function RestockScreen({
   useEffect(() => {
     onDirtyDraftChange?.(dirty, discard);
   }, [dirty, discard, onDirtyDraftChange]);
+
+  useEffect(() => {
+    if (!isFocused) {
+      return;
+    }
+    if (!initialFocusHandledRef.current) {
+      initialFocusHandledRef.current = true;
+      return;
+    }
+    // Focus is an external navigation event; refresh only the durable reads so
+    // the in-memory cart/editor/supplier draft remains untouched.
+    setSearch(readProducts(client, query));
+    setSuppliers(readSuppliers(client));
+  }, [client, isFocused, query]);
+
+  useEffect(() => {
+    if (!isFocused || !quickAddProductId || handledQuickAddIdRef.current === quickAddProductId) {
+      return;
+    }
+    const refreshed = readProducts(client, '');
+    setSearch(refreshed);
+    if (refreshed.failure) {
+      return;
+    }
+    const hit = refreshed.results.find((product) => product.storeProductId === quickAddProductId);
+    if (!hit) {
+      return;
+    }
+    handledQuickAddIdRef.current = quickAddProductId;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setQuery('');
+    setSelectedProduct(hit);
+    setSelectedPackage(hit.preferredPackage ?? hit.packages[0] ?? null);
+    setErrors((current) => ({ ...current, product: undefined, general: undefined }));
+  }, [client, isFocused, quickAddProductId]);
 
   const editorValidation = useMemo(() => {
     if (!selectedPackage) {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { PurchasesClient } from '../../purchases/client';
@@ -10,6 +10,7 @@ interface PurchaseHistoryScreenProps {
   client: PurchasesClient;
   onOpenPurchase: (purchaseId: string) => void;
   onBack: () => void;
+  isFocused?: boolean;
 }
 
 interface HistoryState {
@@ -25,14 +26,29 @@ function load(client: PurchasesClient): HistoryState {
   }
 }
 
-export default function PurchaseHistoryScreen({ client, onOpenPurchase, onBack }: PurchaseHistoryScreenProps) {
+export default function PurchaseHistoryScreen({ client, onOpenPurchase, onBack, isFocused = true }: PurchaseHistoryScreenProps) {
   const [state, setState] = useState<HistoryState>(() => load(client));
+  const initialFocusHandledRef = useRef(false);
+  const refresh = useCallback((): void => {
+    setState(load(client));
+  }, [client]);
+  useEffect(() => {
+    if (isFocused) {
+      if (!initialFocusHandledRef.current) {
+        initialFocusHandledRef.current = true;
+        return;
+      }
+      // Focus is an external navigation event; refresh the durable read while
+      // retaining the screen's route state and error/retry surface.
+      refresh();
+    }
+  }, [isFocused, refresh]);
   return (
     <View style={styles.container}>
       <Text accessibilityRole="header" style={styles.title}>Purchase history</Text>
       <Text style={styles.storeLine}>{client.storeName} · <StatusNote>Available offline</StatusNote></Text>
       {state.failure ? (
-        <ErrorPanel title="Purchase history unavailable" message="Receipts remain saved on this device." onRetry={() => setState(load(client))} onDismiss={onBack} />
+        <ErrorPanel title="Purchase history unavailable" message="Receipts remain saved on this device." onRetry={refresh} onDismiss={onBack} />
       ) : state.rows.length === 0 ? (
         <EmptyState title="No restocks yet" body="Completed restocks will appear here with their original prices and quantities." actionTitle="Back" onAction={onBack} />
       ) : (

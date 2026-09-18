@@ -6,7 +6,7 @@ import QuickAddProductScreen from '../../../src/screens/products/QuickAddProduct
 
 export default function QuickAddRoute() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ name?: string }>();
+  const params = useLocalSearchParams<{ name?: string; returnTo?: string }>();
   const client = useCatalogueClient();
   if (!client) {
     return null;
@@ -16,7 +16,15 @@ export default function QuickAddRoute() {
       <QuickAddProductScreen
         client={client}
         initialName={typeof params.name === 'string' ? params.name : ''}
-        onSaved={(productId) => router.replace({ pathname: `/products/${productId}`, params: { saved: '1' } })}
+        onSaved={(productId) => {
+          if (params.returnTo === 'restock') {
+            // NAVIGATE returns to the existing restock route instead of
+            // replacing it, so its in-memory cart and supplier draft survive.
+            router.navigate({ pathname: '/restock', params: { quickAddProductId: productId } });
+            return;
+          }
+          router.replace({ pathname: `/products/${productId}`, params: { saved: '1' } });
+        }}
         onCancel={() => router.back()}
       />
     </View>

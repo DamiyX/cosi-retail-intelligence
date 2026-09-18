@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
-import { useIsFocused, useNavigation, useRouter } from 'expo-router';
+import { useIsFocused, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { usePreventRemove } from 'expo-router/build/react-navigation/core';
 
 import { PurchasesProvider, usePurchases } from '../src/purchases/PurchasesContext';
 import RestockScreen from '../src/screens/purchases/RestockScreen';
@@ -37,41 +38,41 @@ function RestockRouteContent() {
   const router = useRouter();
   const navigation = useNavigation();
   const focused = useIsFocused();
+  const params = useLocalSearchParams<{ quickAddProductId?: string }>();
   const { client, failure, retryLocalStore } = usePurchases();
-  const dirtyRef = useRef(false);
   const discardRef = useRef<() => void>(() => undefined);
-  const allowingRef = useRef(false);
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', (event) => {
-      if (!focused || !dirtyRef.current || allowingRef.current) return;
-      event.preventDefault();
-      Alert.alert('Discard restock draft?', 'Your unsaved restock details will be cleared.', [
-        { text: 'Keep editing', style: 'cancel' },
-        {
-          text: 'Discard',
-          style: 'destructive',
-          onPress: () => {
-            allowingRef.current = true;
-            discardRef.current();
-            navigation.dispatch(event.data.action);
-            allowingRef.current = false;
-          },
+  const [dirty, setDirty] = useState(false);
+  const [allowNavigation, setAllowNavigation] = useState(false);
+  usePreventRemove(focused && dirty && !allowNavigation, ({ data }) => {
+    Alert.alert('Discard restock draft?', 'Your unsaved restock details will be cleared.', [
+      { text: 'Keep editing', style: 'cancel' },
+      {
+        text: 'Discard',
+        style: 'destructive',
+        onPress: () => {
+          setAllowNavigation(true);
+          discardRef.current();
+          requestAnimationFrame(() => {
+            navigation.dispatch(data.action);
+            setAllowNavigation(false);
+          });
         },
-      ]);
-    });
-    return unsubscribe;
-  }, [focused, navigation]);
+      },
+    ]);
+  });
   if (!client) {
     return failure ? <ErrorPanel title="Restock unavailable" message={failure} onRetry={retryLocalStore} /> : <MissingStore />;
   }
   return (
     <RestockScreen
       client={client}
+      isFocused={focused}
+      quickAddProductId={typeof params.quickAddProductId === 'string' ? params.quickAddProductId : undefined}
       onBack={() => router.back()}
       onOpenReceipt={(purchaseId) => router.push(`/purchases/${purchaseId}`)}
-      onQuickAdd={(query) => router.push({ pathname: '/products/new', params: query.trim() ? { name: query.trim() } : {} })}
+      onQuickAdd={(query) => router.push({ pathname: '/products/new', params: query.trim() ? { name: query.trim(), returnTo: 'restock' } : { returnTo: 'restock' } })}
       onDirtyDraftChange={(dirty, discard) => {
-        dirtyRef.current = dirty;
+        setDirty(dirty);
         discardRef.current = discard;
       }}
     />

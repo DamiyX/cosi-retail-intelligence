@@ -1,8 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { MICROS_PER_UNIT } from '@retail/domain';
 
 import { createCatalogueClient } from '../src/catalogue/client';
 import { createSupplier } from '../src/db/repositories';
 import { createDatabasePurchasesClient, type PurchasesClient } from '../src/purchases/client';
+import { completeSale } from '../src/sales/completeSale';
+import PurchaseDetailScreen from '../src/screens/purchases/PurchaseDetailScreen';
+import PurchaseHistoryScreen from '../src/screens/purchases/PurchaseHistoryScreen';
 import RestockScreen from '../src/screens/purchases/RestockScreen';
 import { countRows, deterministicIds, openCatalogueFixture, testId } from './catalogueSupport';
 
@@ -150,6 +154,87 @@ describe('RestockScreen', () => {
       expect(quickAddQueries).toEqual(['New product']);
       expect(screen.getByText('Restock lines (1)')).toBeTruthy();
       expect(screen.getByText('Running total: ₦7.50')).toBeTruthy();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('selects a newly created Quick Add product on return without clearing the existing cart', () => {
+    const { fixture, client } = seedClient();
+    try {
+      const view = render(<RestockScreen client={client} onBack={() => undefined} isFocused />);
+      fireEvent.changeText(screen.getByTestId('restock-product-search'), 'Rice');
+      fireEvent.press(screen.getByLabelText('Restock Rice'));
+      fireEvent.changeText(screen.getByTestId('restock-total-cost'), '7.50');
+      fireEvent.press(screen.getByText('Add line'));
+      const newProduct = client.createTemporaryProduct({ name: 'Quick Added Restock Product' });
+      view.rerender(
+        <RestockScreen
+          client={client}
+          onBack={() => undefined}
+          isFocused
+          quickAddProductId={newProduct.storeProduct.id}
+        />,
+      );
+      expect(screen.getByText('Quick Added Restock Product')).toBeTruthy();
+      expect(screen.getByText('Purchase package')).toBeTruthy();
+      expect(screen.getByText('Restock lines (1)')).toBeTruthy();
+      expect(screen.getByText('Running total: ₦7.50')).toBeTruthy();
+      view.unmount();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('refreshes purchase history and detail reads when focus returns', () => {
+    const { fixture, client } = seedClient();
+    try {
+      const historyView = render(<PurchaseHistoryScreen client={client} onBack={() => undefined} onOpenPurchase={() => undefined} isFocused />);
+      expect(screen.getByText('No restocks yet')).toBeTruthy();
+      historyView.rerender(<PurchaseHistoryScreen client={client} onBack={() => undefined} onOpenPurchase={() => undefined} isFocused={false} />);
+      const rice = client.searchProducts('Rice')[0];
+      const purchase = client.recordPurchase({
+        lines: [{ storeProductId: rice.storeProductId, packageUnitId: rice.preferredPackage!.id, quantityPackagesMicros: MICROS_PER_UNIT, enteredCostMinor: 250 }],
+        operationId: testId(4300),
+      });
+      historyView.rerender(<PurchaseHistoryScreen client={client} onBack={() => undefined} onOpenPurchase={() => undefined} isFocused />);
+      expect(screen.getByText('₦2.50 · 1 line')).toBeTruthy();
+      historyView.unmount();
+
+      const detailView = render(<PurchaseDetailScreen client={client} purchaseId={purchase.purchase.id} onBack={() => undefined} isFocused />);
+      expect(screen.getByText('Restock receipt')).toBeTruthy();
+      const secondPurchase = client.recordPurchase({
+        lines: [{ storeProductId: rice.storeProductId, packageUnitId: rice.preferredPackage!.id, quantityPackagesMicros: MICROS_PER_UNIT, enteredCostMinor: 375 }],
+        operationId: testId(4301),
+      });
+      detailView.rerender(<PurchaseDetailScreen client={client} purchaseId={secondPurchase.purchase.id} onBack={() => undefined} isFocused={false} />);
+      detailView.rerender(<PurchaseDetailScreen client={client} purchaseId={secondPurchase.purchase.id} onBack={() => undefined} isFocused />);
+      expect(screen.getByText('Total')).toBeTruthy();
+      expect(screen.getByText('₦3.75')).toBeTruthy();
+      detailView.unmount();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('shows a readable receipt estimate while marking current stock unavailable after sale consumption', () => {
+    const { fixture, client } = seedClient();
+    try {
+      const rice = client.searchProducts('Rice')[0];
+      const purchase = client.recordPurchase({
+        lines: [{ storeProductId: rice.storeProductId, packageUnitId: rice.preferredPackage!.id, quantityPackagesMicros: 2 * MICROS_PER_UNIT, enteredCostMinor: 750 }],
+        operationId: testId(4310),
+      });
+      completeSale(fixture.adapter, {
+        storeId: client.storeId,
+        deviceId: client.deviceId,
+        userId: client.userId,
+        lines: [{ storeProductId: rice.storeProductId, packageUnitId: rice.preferredPackage!.id, quantityPackagesMicros: 2 * MICROS_PER_UNIT, unitPriceMinor: 500 }],
+        payment: { method: 'CASH' },
+      }, { generateId: deterministicIds(4311), operationId: testId(4312) });
+      render(<PurchaseDetailScreen client={client} purchaseId={purchase.purchase.id} onBack={() => undefined} />);
+      expect(screen.getByText('Receipt cost estimate: ₦3.75 per base unit (rounded to the nearest minor unit)')).toBeTruthy();
+      expect(screen.getByText('Current cost availability: Unavailable for current stock; do not infer profit')).toBeTruthy();
     } finally {
       fixture.closeAndDelete();
     }

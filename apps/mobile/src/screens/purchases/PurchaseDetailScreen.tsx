@@ -1,17 +1,18 @@
 import { formatQuantityMicros } from '@retail/domain';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { PurchasesClient } from '../../purchases/client';
 import type { PurchaseDetail } from '../../purchases/index';
 import { ErrorPanel, SecondaryButton, StatusNote } from '../../ui/components';
-import { displayMoney } from '../../ui/money';
+import { displayMoney, displayRationalMinorPerBaseUnit, isUsableCurrentCost } from '../../ui/money';
 import { theme } from '../../ui/theme';
 
 interface PurchaseDetailScreenProps {
   client: PurchasesClient;
   purchaseId: string;
   onBack: () => void;
+  isFocused?: boolean;
 }
 
 function load(client: PurchasesClient, purchaseId: string): { detail: PurchaseDetail | null; failure: string | null } {
@@ -23,10 +24,25 @@ function load(client: PurchasesClient, purchaseId: string): { detail: PurchaseDe
   }
 }
 
-export default function PurchaseDetailScreen({ client, purchaseId, onBack }: PurchaseDetailScreenProps) {
+export default function PurchaseDetailScreen({ client, purchaseId, onBack, isFocused = true }: PurchaseDetailScreenProps) {
   const [state, setState] = useState(() => load(client, purchaseId));
+  const initialFocusHandledRef = useRef(false);
+  const refresh = useCallback((): void => {
+    setState(load(client, purchaseId));
+  }, [client, purchaseId]);
+  useEffect(() => {
+    if (isFocused) {
+      if (!initialFocusHandledRef.current) {
+        initialFocusHandledRef.current = true;
+        return;
+      }
+      // Focus is an external navigation event; refresh the durable read while
+      // retaining the route's purchase identity and recovery surface.
+      refresh();
+    }
+  }, [isFocused, refresh]);
   if (!state.detail) {
-    return <View style={styles.container}><ErrorPanel title="Receipt unavailable" message={state.failure ?? 'The receipt could not be read.'} onRetry={() => setState(load(client, purchaseId))} onDismiss={onBack} /></View>;
+    return <View style={styles.container}><ErrorPanel title="Receipt unavailable" message={state.failure ?? 'The receipt could not be read.'} onRetry={refresh} onDismiss={onBack} /></View>;
   }
   const { detail } = state;
   return (
@@ -45,13 +61,24 @@ export default function PurchaseDetailScreen({ client, purchaseId, onBack }: Pur
         <Text style={styles.label}>Original purchase facts</Text>
         {detail.items.map((item) => {
           const observation = detail.observations.find((entry) => entry.purchaseItemId === item.id);
+          const currentCost = detail.costStates.find((stateRow) => stateRow.storeProductId === item.storeProductId) ?? null;
+          const receiptCostDisplay = displayRationalMinorPerBaseUnit(
+            item.baseUnitCostNumerator,
+            item.baseUnitCostDenominator,
+            item.currencyCode,
+          );
           return (
             <View key={item.id} style={styles.item}>
               <Text style={styles.itemTitle}>{item.productNameSnapshot}</Text>
               <Text style={styles.meta}>{formatQuantityMicros(item.quantityPackagesMicros)} {item.packageNameSnapshot} · {formatQuantityMicros(item.quantityBaseMicros)} base units</Text>
               <Text style={styles.meta}>Entered {item.costBasis.toLowerCase()} cost: {displayMoney(item.enteredCostMinor, item.currencyCode)}</Text>
-              <Text style={styles.meta}>Normalized base cost: {item.baseUnitCostNumerator}/{item.baseUnitCostDenominator} minor units per base unit</Text>
-              <Text style={styles.meta}>Cost availability: {detail.costStates.find((stateRow) => stateRow.storeProductId === item.storeProductId)?.coverageStatus ?? 'UNKNOWN'}</Text>
+              <Text style={styles.meta}>Receipt cost estimate: {receiptCostDisplay ?? 'Unavailable'} per base unit (rounded to the nearest minor unit)</Text>
+              <Text style={styles.meta}>Exact stored receipt basis: {item.baseUnitCostNumerator}/{item.baseUnitCostDenominator} minor units per base unit</Text>
+              <Text style={styles.meta}>Current cost availability: {isUsableCurrentCost(currentCost ?? {
+                coverageStatus: 'UNKNOWN',
+                quantityCostedBaseMicros: 0,
+                averageUnitCost: null,
+              }) ? 'Estimated cost available for current stock' : 'Unavailable for current stock; do not infer profit'}</Text>
               <Text style={styles.meta}>Shared contribution: {observation?.contributionConsent === false ? 'off' : 'not available'}</Text>
             </View>
           );
