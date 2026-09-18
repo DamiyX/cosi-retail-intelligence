@@ -14,6 +14,7 @@ import {
   type TemporaryProductGraph,
 } from '../src/catalogue/client';
 import { createDatabasePurchasesClient } from '../src/purchases/client';
+import { completeSale } from '../src/sales/completeSale';
 import { getActiveBasePackageUnit, type ProductLifecycleFilter, type ProductSearchHit } from '../src/db/repositories';
 import ProductDetailScreen from '../src/screens/products/ProductDetailScreen';
 import PackageFormScreen from '../src/screens/products/PackageFormScreen';
@@ -347,12 +348,143 @@ describe('ProductDetailScreen', () => {
       expect(screen.getByText('Purchase price history')).toBeTruthy();
       expect(screen.getByText('Entered total cost: ₦7.50')).toBeTruthy();
       expect(screen.getByText('Purchase total: ₦7.50')).toBeTruthy();
-      expect(screen.getByText('Normalized base cost: 375/1 minor units per base unit')).toBeTruthy();
-      expect(screen.getByText('Current cost availability: Estimated cost available')).toBeTruthy();
+      expect(screen.getByText('Receipt cost estimate: ₦3.75 per base unit (rounded to the nearest minor unit)')).toBeTruthy();
+      expect(screen.getByText('Exact stored receipt basis: 375/1 minor units per base unit')).toBeTruthy();
+      expect(screen.getByText('Current cost availability: Estimated cost available for current stock')).toBeTruthy();
       expect(screen.getByText('Supplier: History supplier')).toBeTruthy();
       expect(screen.getByText(/Contribution: off/)).toBeTruthy();
     } finally {
       fixture.closeAndDelete();
+    }
+  });
+
+  it('labels zero-stock and unknown current cost as unavailable while rounding fractional estimates for merchants', () => {
+    const fractionalFixture = openCatalogueFixture();
+    let fractionalView: { unmount: () => void } | null = null;
+    try {
+      const catalogue = createCatalogueClient(
+        fractionalFixture.adapter,
+        fractionalFixture.context.store,
+        fractionalFixture.context.device,
+        deterministicIds(8090),
+      );
+      const graph = catalogue.createTemporaryProduct({ name: 'Fractional history rice' });
+      const base = getActiveBasePackageUnit(fractionalFixture.adapter, graph.variant.id)!;
+      const purchases = createDatabasePurchasesClient(fractionalFixture.adapter, {
+        storeId: fractionalFixture.context.store.id,
+        deviceId: fractionalFixture.context.device.id,
+        userId: fractionalFixture.context.owner.id,
+        generateId: deterministicIds(8100),
+      });
+      purchases.recordPurchase({
+        lines: [{
+          storeProductId: graph.storeProduct.id,
+          packageUnitId: base.id,
+          quantityPackagesMicros: 3 * MICROS_PER_UNIT,
+          enteredCostMinor: 100,
+        }],
+        operationId: '00000000-0000-4000-8000-000000008101',
+      });
+      fractionalView = render(
+        <ProductDetailScreen
+          client={catalogue}
+          productId={graph.storeProduct.id}
+          onBack={() => undefined}
+          onAddPackage={() => undefined}
+          onEditPackage={() => undefined}
+        />,
+      );
+      expect(screen.getByText('Receipt cost estimate: ₦0.33 per base unit (rounded to the nearest minor unit)')).toBeTruthy();
+      expect(screen.getByText('Current cost availability: Estimated cost available for current stock')).toBeTruthy();
+    } finally {
+      fractionalView?.unmount();
+      fractionalFixture.closeAndDelete();
+    }
+
+    const zeroStockFixture = openCatalogueFixture();
+    let zeroStockView: { unmount: () => void } | null = null;
+    try {
+      const catalogue = createCatalogueClient(
+        zeroStockFixture.adapter,
+        zeroStockFixture.context.store,
+        zeroStockFixture.context.device,
+        deterministicIds(8120),
+      );
+      const graph = catalogue.createTemporaryProduct({ name: 'Zero stock history rice' });
+      const base = getActiveBasePackageUnit(zeroStockFixture.adapter, graph.variant.id)!;
+      const purchases = createDatabasePurchasesClient(zeroStockFixture.adapter, {
+        storeId: zeroStockFixture.context.store.id,
+        deviceId: zeroStockFixture.context.device.id,
+        userId: zeroStockFixture.context.owner.id,
+        generateId: deterministicIds(8130),
+      });
+      purchases.recordPurchase({
+        lines: [{ storeProductId: graph.storeProduct.id, packageUnitId: base.id, quantityPackagesMicros: MICROS_PER_UNIT, enteredCostMinor: 100 }],
+        operationId: '00000000-0000-4000-8000-000000008131',
+      });
+      completeSale(zeroStockFixture.adapter, {
+        storeId: zeroStockFixture.context.store.id,
+        deviceId: zeroStockFixture.context.device.id,
+        userId: zeroStockFixture.context.owner.id,
+        lines: [{ storeProductId: graph.storeProduct.id, packageUnitId: base.id, quantityPackagesMicros: MICROS_PER_UNIT, unitPriceMinor: 200 }],
+        payment: { method: 'CASH' },
+      }, { generateId: deterministicIds(8140), operationId: '00000000-0000-4000-8000-000000008141' });
+      zeroStockView = render(
+        <ProductDetailScreen
+          client={catalogue}
+          productId={graph.storeProduct.id}
+          onBack={() => undefined}
+          onAddPackage={() => undefined}
+          onEditPackage={() => undefined}
+        />,
+      );
+      expect(screen.getByText('Current cost availability: Unavailable for current stock; do not infer profit')).toBeTruthy();
+    } finally {
+      zeroStockView?.unmount();
+      zeroStockFixture.closeAndDelete();
+    }
+
+    const unknownFixture = openCatalogueFixture();
+    let unknownView: { unmount: () => void } | null = null;
+    try {
+      const catalogue = createCatalogueClient(
+        unknownFixture.adapter,
+        unknownFixture.context.store,
+        unknownFixture.context.device,
+        deterministicIds(8150),
+      );
+      const graph = catalogue.createTemporaryProduct({ name: 'Unknown stock history rice' });
+      const base = getActiveBasePackageUnit(unknownFixture.adapter, graph.variant.id)!;
+      const purchases = createDatabasePurchasesClient(unknownFixture.adapter, {
+        storeId: unknownFixture.context.store.id,
+        deviceId: unknownFixture.context.device.id,
+        userId: unknownFixture.context.owner.id,
+        generateId: deterministicIds(8160),
+      });
+      purchases.recordPurchase({
+        lines: [{ storeProductId: graph.storeProduct.id, packageUnitId: base.id, quantityPackagesMicros: MICROS_PER_UNIT, enteredCostMinor: 100 }],
+        operationId: '00000000-0000-4000-8000-000000008161',
+      });
+      completeSale(unknownFixture.adapter, {
+        storeId: unknownFixture.context.store.id,
+        deviceId: unknownFixture.context.device.id,
+        userId: unknownFixture.context.owner.id,
+        lines: [{ storeProductId: graph.storeProduct.id, packageUnitId: base.id, quantityPackagesMicros: 2 * MICROS_PER_UNIT, unitPriceMinor: 200 }],
+        payment: { method: 'CASH' },
+      }, { generateId: deterministicIds(8170), operationId: '00000000-0000-4000-8000-000000008171' });
+      unknownView = render(
+        <ProductDetailScreen
+          client={catalogue}
+          productId={graph.storeProduct.id}
+          onBack={() => undefined}
+          onAddPackage={() => undefined}
+          onEditPackage={() => undefined}
+        />,
+      );
+      expect(screen.getByText('Current cost availability: Unavailable for current stock; do not infer profit')).toBeTruthy();
+    } finally {
+      unknownView?.unmount();
+      unknownFixture.closeAndDelete();
     }
   });
 

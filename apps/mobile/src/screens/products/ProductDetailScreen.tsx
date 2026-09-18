@@ -5,7 +5,7 @@ import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } fro
 import type { CatalogueClient, ProductDetail } from '../../catalogue/client';
 import type { IdentifierType, PurchasePriceHistoryRow } from '../../db/repositories';
 import { ErrorPanel, Field, PrimaryButton, SecondaryButton, StatusNote } from '../../ui/components';
-import { displayMoney } from '../../ui/money';
+import { displayMoney, displayRationalMinorPerBaseUnit, isUsableCurrentCost } from '../../ui/money';
 import { theme } from '../../ui/theme';
 
 interface ProductDetailScreenProps {
@@ -430,16 +430,34 @@ export default function ProductDetailScreen({
               <Text style={styles.line}>No purchase price history yet.</Text>
             ) : (
               priceHistory.rows.map((entry) => (
-                <View key={entry.id} style={styles.historyRow}>
+              <View key={entry.id} style={styles.historyRow}>
                   <Text style={styles.line}>{entry.productNameSnapshot}</Text>
                   <Text style={styles.line}>
                     {formatQuantityMicros(entry.quantityPackagesMicros)} {entry.packageNameSnapshot} · 1 package = {formatQuantityMicros(entry.conversionToBaseSnapshotMicros)} base units
                   </Text>
                   <Text style={styles.line}>Entered {entry.costBasis.toLowerCase()} cost: {displayMoney(entry.enteredCostMinor, entry.currencyCode)}</Text>
                   <Text style={styles.line}>Purchase total: {displayMoney(entry.totalPurchaseCostMinor, entry.currencyCode)}</Text>
-                  <Text style={styles.line}>Normalized base cost: {entry.baseUnitCostNumerator}/{entry.baseUnitCostDenominator} minor units per base unit</Text>
                   <Text style={styles.line}>
-                    Current cost availability: {entry.currentCostCoverageStatus === 'KNOWN' ? 'Estimated cost available' : 'Unavailable; do not infer profit'}
+                    Receipt cost estimate: {displayRationalMinorPerBaseUnit(
+                      entry.baseUnitCostNumerator,
+                      entry.baseUnitCostDenominator,
+                      entry.currencyCode,
+                    ) ?? 'Unavailable'} per base unit (rounded to the nearest minor unit)
+                  </Text>
+                  <Text style={styles.line}>
+                    Exact stored receipt basis: {entry.baseUnitCostNumerator}/{entry.baseUnitCostDenominator} minor units per base unit
+                  </Text>
+                  <Text style={styles.line}>
+                    Current cost availability: {isUsableCurrentCost({
+                      coverageStatus: entry.currentCostCoverageStatus,
+                      quantityCostedBaseMicros: entry.currentCostQuantityCostedBaseMicros,
+                      averageUnitCost: entry.currentCostAverageUnitCostNumerator && entry.currentCostAverageUnitCostDenominator
+                        ? {
+                            numerator: entry.currentCostAverageUnitCostNumerator,
+                            denominator: entry.currentCostAverageUnitCostDenominator,
+                          }
+                        : null,
+                    }) ? 'Estimated cost available for current stock' : 'Unavailable for current stock; do not infer profit'}
                   </Text>
                   <Text style={styles.line}>Supplier: {entry.supplierNameSnapshot ?? 'Not recorded'}</Text>
                   <Text style={styles.line}>Observed: {new Date(entry.occurredAt).toLocaleString()} · Contribution: off</Text>

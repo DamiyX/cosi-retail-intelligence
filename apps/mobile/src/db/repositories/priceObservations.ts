@@ -37,6 +37,9 @@ export interface PurchasePriceHistoryRow extends PriceObservationRow {
   packageNameSnapshot: string;
   supplierNameSnapshot: string | null;
   currentCostCoverageStatus: CostCoverageStatus;
+  currentCostQuantityCostedBaseMicros: number | null;
+  currentCostAverageUnitCostNumerator: string | null;
+  currentCostAverageUnitCostDenominator: string | null;
 }
 
 export interface CreatePriceObservationInput {
@@ -73,6 +76,9 @@ type PurchasePriceHistoryRecord = PriceObservationRecord & {
   package_name_snapshot: string;
   supplier_name_snapshot: string | null;
   current_cost_coverage_status: string | null;
+  current_cost_quantity_costed_base_micros: number | null;
+  current_cost_average_unit_cost_numerator: string | null;
+  current_cost_average_unit_cost_denominator: string | null;
 };
 
 const COLUMNS =
@@ -89,7 +95,10 @@ const HISTORY_COLUMNS =
   'po.base_unit_cost_numerator, po.base_unit_cost_denominator, po.currency_code, po.source_type, po.source_id, ' +
   'po.validation_status, po.contribution_consent, po.observed_at, po.created_at, p.id AS purchase_id, ' +
   'p.occurred_at, pi.product_name_snapshot, pi.package_name_snapshot, p.supplier_name_snapshot, ' +
-  'cs.coverage_status AS current_cost_coverage_status';
+  'cs.coverage_status AS current_cost_coverage_status, ' +
+  'cs.quantity_costed_base_micros AS current_cost_quantity_costed_base_micros, ' +
+  'cs.average_unit_cost_numerator AS current_cost_average_unit_cost_numerator, ' +
+  'cs.average_unit_cost_denominator AS current_cost_average_unit_cost_denominator';
 
 function mapRow(row: PriceObservationRecord): PriceObservationRow {
   return {
@@ -129,6 +138,9 @@ function mapHistoryRow(row: PurchasePriceHistoryRecord): PurchasePriceHistoryRow
     packageNameSnapshot: row.package_name_snapshot,
     supplierNameSnapshot: row.supplier_name_snapshot ?? null,
     currentCostCoverageStatus: row.current_cost_coverage_status === 'KNOWN' ? 'KNOWN' : 'UNKNOWN',
+    currentCostQuantityCostedBaseMicros: row.current_cost_quantity_costed_base_micros ?? null,
+    currentCostAverageUnitCostNumerator: row.current_cost_average_unit_cost_numerator ?? null,
+    currentCostAverageUnitCostDenominator: row.current_cost_average_unit_cost_denominator ?? null,
   };
 }
 

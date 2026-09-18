@@ -1,4 +1,13 @@
-import { DomainError, formatMoney, money, moneyFromMajorUnits } from '@retail/domain';
+import {
+  DomainError,
+  formatMoney,
+  money,
+  moneyFromMajorUnits,
+  parseRational,
+  roundRationalHalfUp,
+  type CostCoverageStatus,
+  type Rational,
+} from '@retail/domain';
 
 /** Retailer-facing currency symbols. Unknown codes fall back to the code. */
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -27,6 +36,48 @@ export function displayMoney(
     return canonical;
   }
   return `${symbol}${canonical.slice(currencyCode.length + 1)}`;
+}
+
+/**
+ * Display an exact minor-unit rational as a retailer-facing currency estimate.
+ * The stored rational is never changed; only the screen projection is rounded
+ * to the nearest minor unit using the domain half-up rule.
+ */
+export function displayRationalMinorPerBaseUnit(
+  numerator: string | null | undefined,
+  denominator: string | null | undefined,
+  currencyCode: string,
+): string | null {
+  if (numerator === null || numerator === undefined || denominator === null || denominator === undefined) {
+    return null;
+  }
+  try {
+    return displayMoney(roundRationalHalfUp(parseRational({ numerator, denominator }, 'display cost')), currencyCode);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A cost state is usable for a current-stock estimate only when it covers a
+ * positive quantity and carries a valid average.  KNOWN by itself is not
+ * enough after stock reaches zero or a sale creates an unknown remainder.
+ */
+export function isUsableCurrentCost(input: {
+  coverageStatus: CostCoverageStatus | null | undefined;
+  quantityCostedBaseMicros: number | null | undefined;
+  averageUnitCost: Rational | null | undefined;
+}): boolean {
+  const quantityCostedBaseMicros = input.quantityCostedBaseMicros;
+  if (input.coverageStatus !== 'KNOWN' || typeof quantityCostedBaseMicros !== 'number' || !Number.isSafeInteger(quantityCostedBaseMicros) || quantityCostedBaseMicros <= 0 || !input.averageUnitCost) {
+    return false;
+  }
+  try {
+    parseRational(input.averageUnitCost, 'current average cost');
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
