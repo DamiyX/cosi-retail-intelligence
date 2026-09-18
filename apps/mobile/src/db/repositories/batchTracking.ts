@@ -634,6 +634,19 @@ function validateBatchOperationGraph(
     }
     return total;
   }
+  if (operation.kind === 'ADJUSTMENT') {
+    if (operation.sourceType !== 'MANUAL_ADJUSTMENT' || !operation.sourceId || total !== 0n) {
+      throw new DomainError('INVALID_VALUE', 'Adjustment batch reclassification must be a net-zero manual adjustment.');
+    }
+    const adjustment = adapter.getFirstRow<{ store_id: string }>(
+      'SELECT store_id FROM inventory_adjustments WHERE id = ?;',
+      [operation.sourceId],
+    );
+    if (!adjustment || adjustment.store_id !== operation.storeId) {
+      throw new DomainError('INVALID_VALUE', 'Adjustment batch reclassification does not match its durable adjustment.');
+    }
+    return total;
+  }
   throw new DomainError('INVALID_VALUE', 'Unsupported batch inventory operation kind.');
 }
 

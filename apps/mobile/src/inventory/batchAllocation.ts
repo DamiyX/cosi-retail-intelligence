@@ -66,6 +66,18 @@ export interface AdjustmentBatchAllocationInput {
   createdAt: string;
 }
 
+export interface UnallocatedShortageReclassificationInput {
+  operationId: string;
+  sourceId: string;
+  storeId: string;
+  storeProductId: string;
+  recordedByStoreMemberId: string;
+  recordedByUserId: string;
+  deviceId: string;
+  generateId: () => string;
+  createdAt: string;
+}
+
 export interface BatchAllocationResult {
   group?: InventoryBatchGroupRow;
   operation: BatchInventoryOperationRow;
@@ -87,6 +99,39 @@ function assertEntryTotal(entries: readonly BatchInventoryEntryRow[], expected: 
   const actual = entries.reduce((total, entry) => total + BigInt(entry.deltaBaseMicros), 0n);
   if (actual !== expected) {
     throw new DomainError('INVALID_QUANTITY', 'Batch allocation entries do not explain the inventory event delta.');
+  }
+}
+
+function appendSignedBatchEntries(
+  adapter: DatabaseAdapter,
+  entries: BatchInventoryEntryRow[],
+  input: {
+    operationId: string;
+    storeId: string;
+    storeProductId: string;
+    groupId: string | null;
+    entryType: BatchInventoryEntryRow['entryType'];
+    delta: bigint;
+    generateId: () => string;
+    createdAt: string;
+  },
+): void {
+  const maxSafe = BigInt(Number.MAX_SAFE_INTEGER);
+  let remaining = input.delta;
+  while (remaining !== 0n) {
+    const chunk = remaining > maxSafe ? maxSafe : remaining < -maxSafe ? -maxSafe : remaining;
+    entries.push(createBatchInventoryEntry(adapter, {
+      id: input.generateId(),
+      operationId: input.operationId,
+      storeId: input.storeId,
+      storeProductId: input.storeProductId,
+      groupId: input.groupId,
+      entryType: input.entryType,
+      deltaBaseMicros: Number(chunk),
+      entryOrder: entries.length + 1,
+      createdAt: input.createdAt,
+    }));
+    remaining -= chunk;
   }
 }
 
@@ -284,6 +329,60 @@ export function recordAdjustmentBatchAllocation(
   });
   assertEntryTotal([entry], BigInt(input.quantityBaseDeltaMicros));
   return { operation: finalizeBatchInventoryOperation(adapter, operation.id, input.createdAt), entries: [entry] };
+}
+
+/**
+ * Move the currently named composition to the unallocated remainder before a
+ * total-only shortage is applied. This preserves the fact that the retailer
+ * did not identify which recorded batch was removed without leaving named
+ * stock greater than the resulting inventory balance.
+ */
+export function recordUnallocatedShortageBatchReclassification(
+  adapter: DatabaseAdapter,
+  input: UnallocatedShortageReclassificationInput,
+): BatchAllocationResult | null {
+  const groups = listInventoryBatchGroupsByStoreProduct(adapter, input.storeProductId)
+    .map((group) => ({ group, balance: getInventoryBatchGroupBalanceBigInt(adapter, group.id) }))
+    .filter((entry) => entry.balance > 0n);
+  if (groups.length === 0) return null;
+  const namedTotal = groups.reduce((total, entry) => total + entry.balance, 0n);
+  const operation = createBatchInventoryOperation(adapter, {
+    id: input.operationId,
+    storeId: input.storeId,
+    storeProductId: input.storeProductId,
+    kind: 'ADJUSTMENT',
+    sourceType: 'MANUAL_ADJUSTMENT',
+    sourceId: input.sourceId,
+    policyVersion: 'UNALLOCATED_SHORTAGE_RECLASSIFICATION_V1',
+    evidenceVersion: BATCH_POLICY_VERSION,
+    recordedByStoreMemberId: input.recordedByStoreMemberId,
+    recordedByUserId: input.recordedByUserId,
+    deviceId: input.deviceId,
+    createdAt: input.createdAt,
+  });
+  const entries: BatchInventoryEntryRow[] = [];
+  groups.forEach(({ group, balance }) => appendSignedBatchEntries(adapter, entries, {
+    operationId: operation.id,
+    storeId: input.storeId,
+    storeProductId: input.storeProductId,
+    groupId: group.id,
+    entryType: 'CLASSIFICATION',
+    delta: -balance,
+    generateId: input.generateId,
+    createdAt: input.createdAt,
+  }));
+  appendSignedBatchEntries(adapter, entries, {
+    operationId: operation.id,
+    storeId: input.storeId,
+    storeProductId: input.storeProductId,
+    groupId: null,
+    entryType: 'UNKNOWN_RESIDUAL',
+    delta: namedTotal,
+    generateId: input.generateId,
+    createdAt: input.createdAt,
+  });
+  assertEntryTotal(entries, 0n);
+  return { operation: finalizeBatchInventoryOperation(adapter, operation.id, input.createdAt), entries };
 }
 
 export interface BatchProjection {

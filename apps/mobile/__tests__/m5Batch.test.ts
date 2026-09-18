@@ -425,7 +425,7 @@ describe('M5 batch inventory tracking', () => {
       expect(getInventoryBalanceBigIntByStoreProduct(fixture.adapter, beans.storeProduct.id)).toBe(0n);
 
       const report = openDatabase(fixture.adapter, MIGRATIONS);
-      expect(report.schemaVersion).toBe(12);
+      expect(report.schemaVersion).toBe(13);
       expect(fixture.adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM inventory_events;')?.total).toBe(6);
       expect(getInventoryBalanceBigIntByStoreProduct(fixture.adapter, rice.storeProduct.id)).toBe(9007199254740994n);
       expect(getInventoryBalanceBigIntByStoreProduct(fixture.adapter, beans.storeProduct.id)).toBe(0n);

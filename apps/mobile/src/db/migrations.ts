@@ -2206,6 +2206,37 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'sealed batch inventory operations cannot accept entries'); END;`,
     ],
   },
+  {
+    version: 13,
+    name: 'adjustment_batch_reclassification_sealing',
+    statements: [
+      `CREATE TRIGGER trg_batch_operations_adjustment_source_insert
+        BEFORE INSERT ON batch_inventory_operations
+        WHEN NEW.kind = 'ADJUSTMENT' AND (
+          NEW.source_type <> 'MANUAL_ADJUSTMENT'
+          OR NEW.source_id IS NULL
+          OR NOT EXISTS (
+            SELECT 1 FROM inventory_adjustments ia
+            WHERE ia.id = NEW.source_id AND ia.store_id = NEW.store_id
+          )
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch adjustment source does not match adjustment'); END;`,
+      `CREATE TRIGGER trg_batch_operations_adjustment_seal_graph
+        BEFORE UPDATE ON batch_inventory_operations
+        WHEN OLD.sealed_at IS NULL AND NEW.sealed_at IS NOT NULL
+          AND NEW.kind = 'ADJUSTMENT'
+          AND (
+            NEW.source_type <> 'MANUAL_ADJUSTMENT'
+            OR NEW.source_id IS NULL
+            OR NOT EXISTS (
+              SELECT 1 FROM inventory_adjustments ia
+              WHERE ia.id = NEW.source_id AND ia.store_id = NEW.store_id
+            )
+            OR CAST(COALESCE((SELECT SUM(delta_base_micros) FROM batch_inventory_entries WHERE operation_id = NEW.id), 0) AS TEXT) <> '0'
+          )
+        BEGIN SELECT RAISE(ABORT, 'adjustment batch reclassification is incomplete or mismatched'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

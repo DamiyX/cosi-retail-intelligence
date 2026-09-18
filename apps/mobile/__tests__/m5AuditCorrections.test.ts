@@ -14,6 +14,8 @@ import {
   getBatchInventoryOperationById,
 } from '../src/db/repositories';
 import { classifyInventoryBatches } from '../src/inventory/classifyBatches';
+import { getBatchProjectionForStoreProduct } from '../src/inventory/batchAllocation';
+import { recordInventoryAdjustment } from '../src/inventory/adjustInventory';
 import { completeSale } from '../src/sales/completeSale';
 import { recordPurchase } from '../src/purchases/recordPurchase';
 import { FailOnWriteAdapter, deterministicIds, openCatalogueFixture, testId } from './catalogueSupport';
@@ -207,7 +209,7 @@ describe('M5 A01 batch graph sealing', () => {
       const beforeEventCount = isolated.adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM inventory_events;')?.total;
       const beforeOperationId = purchase.batchOperations[0].id;
       const report = openDatabase(isolated.adapter, MIGRATIONS);
-      expect(report.schemaVersion).toBe(12);
+      expect(report.schemaVersion).toBe(13);
       expect(isolated.adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM inventory_events;')?.total).toBe(beforeEventCount);
       expect(isolated.adapter.getFirstRow<{ sealed_at: string; sealed_entry_count: number }>(
         'SELECT sealed_at, sealed_entry_count FROM batch_inventory_operations WHERE id = ?;',
@@ -277,6 +279,84 @@ describe('M5 A02 FEFO ordering', () => {
       expect(sale.batchEntries).toEqual([
         expect.objectContaining({ entryType: 'UNKNOWN_RESIDUAL', groupId: null, deltaBaseMicros: -5 * MICROS_PER_UNIT }),
       ]);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+});
+
+describe('M5 A03 unallocated shortage composition', () => {
+  it('moves named composition to unknown before a total-only shortage and rejects invalid directions', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(8400));
+      const rice = catalogue.createTemporaryProduct({ name: 'Rice' });
+      recordPurchase(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        lines: [{
+          storeProductId: rice.storeProduct.id,
+          packageUnitId: rice.basePackage.id,
+          quantityPackagesMicros: 10 * MICROS_PER_UNIT,
+          enteredCostMinor: 100,
+          expiryPrecision: 'DAY',
+          expiryValue: '2026-10-20',
+          expiryMeaning: 'EXPIRY',
+        }],
+      }, { generateId: deterministicIds(8410), operationId: testId(8420) });
+      const before = getBatchProjectionForStoreProduct(fixture.adapter, rice.storeProduct.id);
+      const graph = recordInventoryAdjustment(fixture.adapter, {
+        operationId: testId(8430),
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        reasonCode: 'MISSING',
+        lines: [{
+          storeProductId: rice.storeProduct.id,
+          quantityBaseDeltaMicros: -5 * MICROS_PER_UNIT,
+          expectedInventoryWatermark: before.inventoryWatermark,
+          expectedBatchWatermark: before.batchWatermark,
+        }],
+      }, { generateId: deterministicIds(8440) });
+      expect(graph.batchOperations.map((operation) => operation.kind)).toEqual(['ADJUSTMENT', 'EVENT_ALLOCATION']);
+      expect(graph.batchEntries.filter((entry) => entry.operationId === graph.batchOperations[0].id).reduce((sum, entry) => sum + entry.deltaBaseMicros, 0)).toBe(0);
+      expect(getBatchProjectionForStoreProduct(fixture.adapter, rice.storeProduct.id)).toMatchObject({
+        inventoryBalanceBaseMicros: String(5 * MICROS_PER_UNIT),
+        unknownResidualBaseMicros: String(5 * MICROS_PER_UNIT),
+      });
+      expect(getBatchProjectionForStoreProduct(fixture.adapter, rice.storeProduct.id).groups[0].balanceBaseMicros).toBe('0');
+
+      const replay = recordInventoryAdjustment(fixture.adapter, {
+        operationId: testId(8430),
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        reasonCode: 'MISSING',
+        lines: [{
+          storeProductId: rice.storeProduct.id,
+          quantityBaseDeltaMicros: -5 * MICROS_PER_UNIT,
+          expectedInventoryWatermark: before.inventoryWatermark,
+          expectedBatchWatermark: before.batchWatermark,
+        }],
+      });
+      expect(replay.batchOperations.map((operation) => operation.kind)).toEqual(['EVENT_ALLOCATION', 'ADJUSTMENT']);
+      expect(replay.batchEntries).toHaveLength(graph.batchEntries.length);
+
+      const after = getBatchProjectionForStoreProduct(fixture.adapter, rice.storeProduct.id);
+      expect(() => recordInventoryAdjustment(fixture.adapter, {
+        operationId: testId(8450),
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        reasonCode: 'EXPIRED',
+        lines: [{
+          storeProductId: rice.storeProduct.id,
+          quantityBaseDeltaMicros: MICROS_PER_UNIT,
+          expectedInventoryWatermark: after.inventoryWatermark,
+          expectedBatchWatermark: after.batchWatermark,
+        }],
+      })).toThrow('can only remove stock');
     } finally {
       fixture.closeAndDelete();
     }

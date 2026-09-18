@@ -80,6 +80,7 @@ export default function AdjustmentScreen({ client, onBack, onDirtyDraftChange, i
   const selectedProduct = state.products.find((product) => product.storeProductId === selectedProductId) ?? state.products[0] ?? null;
   const positiveGroups = state.projection?.groups.filter((group) => BigInt(group.balanceBaseMicros) > 0n) ?? [];
   const unknownResidual = state.projection ? BigInt(state.projection.unknownResidualBaseMicros) : 0n;
+  const reasonAllowsAdd = reasonCode === 'CORRECTION' || reasonCode === 'CUSTOMER_RETURN';
   const dirty = !saved && (quantityText !== '1' || note.trim().length > 0 || groupId !== null || direction !== 'REMOVE' || reasonCode !== 'EXPIRED');
 
   const refresh = useCallback(() => {
@@ -121,9 +122,6 @@ export default function AdjustmentScreen({ client, onBack, onDirtyDraftChange, i
         if (!group || BigInt(quantityBaseMicros) > BigInt(group.balanceBaseMicros)) {
           throw new Error('The selected group does not have enough recorded remainder.');
         }
-      }
-      if (direction === 'REMOVE' && !groupId && unknownResidual <= 0n) {
-        throw new Error('Choose a recorded group when no unknown stock remains.');
       }
       setSubmitting(true);
       setError(null);
@@ -174,11 +172,11 @@ export default function AdjustmentScreen({ client, onBack, onDirtyDraftChange, i
           <Text style={styles.sectionLabel}>Change</Text>
           <View style={styles.packageList} accessibilityRole="radiogroup">
             <Pressable accessibilityRole="radio" accessibilityLabel="Remove stock" accessibilityState={{ checked: direction === 'REMOVE' }} onPress={() => { setDirection('REMOVE'); setGroupId(null); }} style={[styles.packageChip, direction === 'REMOVE' && styles.packageChipSelected]}><Text style={[styles.packageText, direction === 'REMOVE' && styles.packageTextSelected]}>Remove stock</Text></Pressable>
-            <Pressable accessibilityRole="radio" accessibilityLabel="Add stock" accessibilityState={{ checked: direction === 'ADD' }} onPress={() => { setDirection('ADD'); setGroupId(null); }} style={[styles.packageChip, direction === 'ADD' && styles.packageChipSelected]}><Text style={[styles.packageText, direction === 'ADD' && styles.packageTextSelected]}>Add stock</Text></Pressable>
+            <Pressable accessibilityRole="radio" accessibilityLabel="Add stock" accessibilityState={{ checked: direction === 'ADD', disabled: !reasonAllowsAdd }} disabled={!reasonAllowsAdd} onPress={() => { setDirection('ADD'); setGroupId(null); }} style={[styles.packageChip, direction === 'ADD' && styles.packageChipSelected, !reasonAllowsAdd && styles.packageChipDisabled]}><Text style={[styles.packageText, direction === 'ADD' && styles.packageTextSelected, !reasonAllowsAdd && styles.packageTextDisabled]}>Add stock</Text></Pressable>
           </View>
           <Text style={styles.sectionLabel}>Reason</Text>
           <View style={styles.packageList} accessibilityRole="radiogroup">
-            {REASONS.map((reason) => <Pressable key={reason.value} accessibilityRole="radio" accessibilityLabel={`Adjustment reason ${reason.label}`} accessibilityState={{ checked: reasonCode === reason.value }} onPress={() => setReasonCode(reason.value)} style={[styles.packageChip, reasonCode === reason.value && styles.packageChipSelected]}><Text style={[styles.packageText, reasonCode === reason.value && styles.packageTextSelected]}>{reason.label}</Text></Pressable>)}
+            {REASONS.map((reason) => <Pressable key={reason.value} accessibilityRole="radio" accessibilityLabel={`Adjustment reason ${reason.label}`} accessibilityState={{ checked: reasonCode === reason.value }} onPress={() => { setReasonCode(reason.value); if (reason.value !== 'CORRECTION' && reason.value !== 'CUSTOMER_RETURN') setDirection('REMOVE'); }} style={[styles.packageChip, reasonCode === reason.value && styles.packageChipSelected]}><Text style={[styles.packageText, reasonCode === reason.value && styles.packageTextSelected]}>{reason.label}</Text></Pressable>)}
           </View>
           <Field label="Base quantity" value={quantityText} onChangeText={setQuantityText} keyboardType="decimal-pad" testID="adjustment-quantity" />
           {direction === 'REMOVE' && positiveGroups.length > 0 ? <>
@@ -210,7 +208,9 @@ const styles = StyleSheet.create({
   packageList: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing(2) },
   packageChip: { minHeight: theme.minTouchTarget, borderColor: theme.color.border, borderWidth: 1, borderRadius: theme.radius.field, paddingHorizontal: theme.spacing(3), justifyContent: 'center', backgroundColor: theme.color.raised },
   packageChipSelected: { backgroundColor: theme.color.actionPrimary, borderColor: theme.color.actionPrimary },
+  packageChipDisabled: { opacity: 0.5 },
   packageText: { color: theme.color.textPrimary, fontSize: theme.fontSize.body },
   packageTextSelected: { color: theme.color.raised, fontWeight: '600' },
+  packageTextDisabled: { color: theme.color.textSecondary },
   generalError: { color: theme.color.statusDanger, fontSize: theme.fontSize.body },
 });

@@ -23,6 +23,7 @@ import {
   listCostMovementsBySource,
   listInventoryAdjustmentLinesByAdjustment,
   listInventoryEventsBySource,
+  listBatchInventoryOperationsByStoreProduct,
   type BatchInventoryEntryRow,
   type BatchInventoryOperationRow,
   type CostMovementRow,
@@ -33,7 +34,11 @@ import {
   type InventoryEventRow,
   type OutboxOperationRow,
 } from '../db/repositories';
-import { getBatchProjectionForStoreProduct, recordAdjustmentBatchAllocation } from './batchAllocation';
+import {
+  getBatchProjectionForStoreProduct,
+  recordAdjustmentBatchAllocation,
+  recordUnallocatedShortageBatchReclassification,
+} from './batchAllocation';
 import { nowIso, requireId } from '../db/repositories/common';
 
 export interface InventoryAdjustmentLineInput {
@@ -109,6 +114,11 @@ function normalizeInput(input: RecordInventoryAdjustmentInput): RecordInventoryA
     }
     return { ...line, storeProductId, groupId, packageUnitId, quantityPackageSnapshotMicros, conversionToBaseSnapshotMicros };
   });
+  if (['EXPIRED', 'DAMAGED', 'MISSING', 'PERSONAL_USE', 'SUPPLIER_RETURN'].includes(input.reasonCode)) {
+    if (lines.some((line) => line.quantityBaseDeltaMicros > 0)) {
+      throw new DomainError('INVALID_VALUE', `${input.reasonCode} adjustments can only remove stock.`);
+    }
+  }
   if (new Set(lines.map((line) => line.storeProductId)).size !== lines.length) {
     throw new DomainError('INVALID_VALUE', 'Use one adjustment line per product.');
   }
@@ -141,7 +151,10 @@ function replayGraph(adapter: DatabaseAdapter, outbox: OutboxOperationRow, reque
   const inventoryEvents = listInventoryEventsBySource(adapter, 'MANUAL_ADJUSTMENT', adjustment.id);
   const costMovements = listCostMovementsBySource(adapter, 'ADJUSTMENT', adjustment.id);
   const costStates = lines.map((line) => getCostState(adapter, line.storeProductId)).filter((state): state is CostStateRow => state !== null);
-  const batchOperations = inventoryEvents.flatMap((event) => listBatchInventoryOperationsByEvent(adapter, event.id));
+  const eventOperations = inventoryEvents.flatMap((event) => listBatchInventoryOperationsByEvent(adapter, event.id));
+  const reclassificationOperations = lines.flatMap((line) => listBatchInventoryOperationsByStoreProduct(adapter, line.storeProductId))
+    .filter((operation) => operation.kind === 'ADJUSTMENT' && operation.sourceId === adjustment.id);
+  const batchOperations = [...eventOperations, ...reclassificationOperations];
   const batchEntries = batchOperations.flatMap((operation) => listBatchInventoryEntriesByOperation(adapter, operation.id));
   return { adjustment, lines, inventoryEvents, costMovements, costStates, batchOperations, batchEntries, outbox };
 }
@@ -214,6 +227,23 @@ export function recordInventoryAdjustment(
       } catch (error) {
         if (!(error instanceof DomainError) || error.code !== 'INVALID_QUANTITY') throw error;
         forceUnknown = true;
+      }
+      if (line.quantityBaseDeltaMicros < 0 && !line.groupId) {
+        const reclassification = recordUnallocatedShortageBatchReclassification(adapter, {
+          operationId: generateId(),
+          sourceId: adjustment.id,
+          storeId: input.storeId,
+          storeProductId: line.storeProductId,
+          recordedByStoreMemberId: memberId,
+          recordedByUserId: input.userId,
+          deviceId: input.deviceId,
+          generateId,
+          createdAt: occurredAt,
+        });
+        if (reclassification) {
+          batchOperations.push(reclassification.operation);
+          batchEntries.push(...reclassification.entries);
+        }
       }
       const inventoryEventId = generateId();
       const inventoryEvent = createInventoryEvent(adapter, {
