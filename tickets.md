@@ -1,7 +1,7 @@
 # Tickets: M5 Inventory, Batch Awareness and Reconciliation
 
-**Status:** M5-01 and M5-02 are implemented on the implementation branch and
-await independent audit; M5-03 through M5-07 remain in sequential implementation.
+**Status:** M5-01 through M5-03 are implemented on the implementation branch and
+await independent audit; M5-04 through M5-07 remain in sequential implementation.
 Batch direction was explicitly approved 2026-09-18. The acceptance boxes below
 are implementation evidence only and are not independent acceptance.
 **Baseline:** accepted M4 source 9700ee3; M5 planning authored from c1753b6 on
@@ -104,25 +104,49 @@ history, product group-review UI with retained input/retry and actual watermark.
 
 ## M5-03 — Record stock adjustments and actual expired removal
 
-**Status:** Not started. **Blocked by:** M5-01.
+**Status:** Implemented; awaiting independent audit. **Blocked by:** coordinator audit gate.
 **Delivers:** real loss/addition/expiry removal is recorded, with truthful cost
 availability, rather than silently overwriting stock or dismissing an alert.
 **Scope:** sourced adjustment/line migration and cost vocabulary extension
 (expected 8), exact adjustment cost/rebuild, shared transaction writer and manual
 adjustment/group removal UI; historical dates/costs remain immutable.
 
-- [ ] Supported nonzero reasoned adjustments create sourced aggregate/line,
+- [x] Supported nonzero reasoned adjustments create sourced aggregate/line,
   InventoryEvent, matching batch effects, exact cost movement/projection and one
   outbox atomically; removing selected expired stock decreases its actual recorded
   remainder. Date passage/dismissal alone never changes inventory.
-- [ ] Fully covered shortages consume proportional exact MWA value; unknown/
+- [x] Fully covered shortages consume proportional exact MWA value; unknown/
   excessive shortages, nonpositive remainder and unexplained additions have
   truthful unavailable coverage. Classification changes no cost. Live and rebuilt
   cost states agree; original M4 rows/IDs/order/values/COGS remain unchanged through
   the transactional cost-table CHECK extension and populated upgrade.
-- [ ] All-write rollback, raw relationship/immutability constraints, ownership/
+- [x] All-write rollback, raw relationship/immutability constraints, ownership/
   OWNER versus ADMIN/STAFF, stale selected-group removal, same/conflicting replay,
   cold reopen and retained UI failure paths pass alongside existing M1–M4 tests.
+
+**Implementation evidence (awaiting independent audit):**
+
+- Commits: `1fe9f91` (`feat(M5-03): add sourced inventory adjustments`) and
+  `8f35238` (`fix(M5-03): support multi-product adjustments`).
+- Added schema v8 sourced adjustment aggregates/lines and immutable relationship
+  guards; migrated the M4 cost movement table transactionally to support
+  `ADJUSTMENT` while preserving existing rows. Adjustment commands now write the
+  aggregate, line, inventory event, exact batch allocation, cost transition and
+  one outbox envelope atomically, with owner authorization, replay conflict
+  checks, selected-group watermarks and truthful known/unknown/unavailable cost
+  coverage.
+- Added More -> Record adjustment with reason, add/remove direction, selected
+  group removal, retained input on durable failure, focus refresh and dirty
+  navigation protection. Multi-product commands use distinct event allocation
+  sources under one outbox operation.
+- `apps/mobile/__tests__/m5Adjustments.test.ts`: 5 passing SQLite tests covering
+  exact MWA removal, unknown/addition/excessive coverage, multi-product atomic
+  envelopes, replay/authorization/stale-group/immutability/rollback/reopen and
+  populated-v7 migration retention. `apps/mobile/__tests__/m5AdjustmentScreen.test.tsx`:
+  2 passing UI tests. M5 focused suites: 21 passing tests; focused purchase,
+  sales and restock regression: 49 passing tests. Mobile typecheck, zero-warning
+  lint and `git diff --check` pass. Physical Android, independent audit and
+  full-repository validation remain outstanding.
 
 ## M5-04 — Blind count and reconcile recorded differences
 

@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m5-02-implemented",
+  "current_state": "m5-03-implemented",
   "completed_states": [
     "m4-independent-source-automated-acceptance",
     "m5-founder-batch-fefo-approval",
@@ -12,7 +12,8 @@
     "m5-design-contract-and-ticket-dependency-review",
     "m5-implementation-assigned",
     "m5-01-implemented",
-    "m5-02-implemented"
+    "m5-02-implemented",
+    "m5-03-implemented"
   ],
   "owner": {
     "agent": "m5-implementation-engineer",
@@ -86,7 +87,7 @@
       ],
       "limitations": [
         "Independent audit, physical Android verification, development-build/Metro verification, second-laptop verification and accounting review remain outstanding.",
-        "M5-03 through M5-07 are not implemented yet."
+        "M5-04 through M5-07 are not implemented yet."
       ],
       "observed_at": "2026-09-18T17:10:34.227+01:00"
     },
@@ -103,9 +104,26 @@
       ],
       "limitations": [
         "Independent audit, physical Android verification, development-build/Metro verification, second-laptop verification and accounting review remain outstanding.",
-        "M5-03 through M5-07 are not implemented yet."
+        "M5-04 through M5-07 are not implemented yet."
       ],
       "observed_at": "2026-09-18T17:41:35.5127605+01:00"
+    },
+    {
+      "kind": "validation",
+      "path": "apps/mobile/__tests__/m5Adjustments.test.ts; apps/mobile/__tests__/m5AdjustmentScreen.test.tsx",
+      "claim": "M5-03 implementation commits 1fe9f91 and 8f35238 add schema v8 sourced adjustments, exact cost/batch/outbox atomic writes, multi-product allocations, owner/replay/stale protection, retained-input UI and populated-v7 migration retention.",
+      "checks": [
+        "npm run typecheck --workspace @retail/mobile PASS",
+        "npm run lint --workspace @retail/mobile PASS with zero warnings",
+        "M5 focused suites PASS: 5 suites, 21 tests",
+        "Focused purchases/sales/restock regression PASS: 3 suites, 49 tests",
+        "git diff --check PASS"
+      ],
+      "limitations": [
+        "Independent audit, physical Android, development-build/Metro, second-laptop, accounting and full-repository validation remain outstanding.",
+        "M5-04 through M5-07 are not implemented yet."
+      ],
+      "observed_at": "2026-09-18T18:09:58.6243329+01:00"
     }
   ],
   "acceptance_gates": [
@@ -294,8 +312,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Implement M5-03 through M5-07 sequentially on feat/m5-inventory-reconciliation, record truthful ticket evidence and commits, then stop for coordinator independent audit. Keep implementation-evidence and independent-audit gates pending; no M6, push, merge or deployment.",
+  "next_action": "Implement M5-04 through M5-07 sequentially on feat/m5-inventory-reconciliation, record truthful ticket evidence and commits, then stop for coordinator independent audit. Keep implementation-evidence and independent-audit gates pending; no M6, push, merge or deployment.",
   "created_at": "2026-09-18T12:55:50.482Z",
-  "updated_at": "2026-09-18T16:41:35.512Z",
+  "updated_at": "2026-09-18T18:09:58.6243329+01:00",
   "archived": false
 }
