@@ -46,6 +46,7 @@ lines, inventory/group inspection entry and immutable receipt/sale detail.
 
 **Implementation evidence (awaiting independent audit):**
 
+- Commit: `f453b0a` (`feat(M5-01): add automatic batch-aware receipts and FEFO`).
 - Added schema v7 immutable receipt groups, event allocation operations/entries,
   ownership/source guards, exact BigInt projections and canonical batch payload
   fields. Existing migrations v1-v6 remain unchanged.

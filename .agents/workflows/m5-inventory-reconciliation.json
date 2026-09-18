@@ -4,13 +4,14 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m5-implementation-started",
+  "current_state": "m5-01-implemented",
   "completed_states": [
     "m4-independent-source-automated-acceptance",
     "m5-founder-batch-fefo-approval",
     "m5-actual-schema-impact-review",
     "m5-design-contract-and-ticket-dependency-review",
-    "m5-implementation-assigned"
+    "m5-implementation-assigned",
+    "m5-01-implemented"
   ],
   "owner": {
     "agent": "m5-implementation-engineer",
@@ -69,6 +70,24 @@
       "path": "feat/m5-inventory-reconciliation@646b3e6cf537e81fc2c6c11ad795eaa6dfdca95c",
       "claim": "Implementation task 01a0b525-289e-7b40-8f4b-2701fe541ad9 is the sole active writer for M5-01 through M5-07 on the exact COSI-m0 checkout; coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 retains independent audit. Documentation checkpoint is recorded before feature implementation.",
       "observed_at": "2026-09-18T15:34:39.359Z"
+    },
+    {
+      "kind": "validation",
+      "path": "apps/mobile/__tests__/m5Batch.test.ts",
+      "claim": "M5-01 implementation commit f453b0a adds schema v7 receipt groups, automatic FEFO/unknown residual allocation, exact overflow-safe projections, receipt date UI/detail, replay/restart coverage and atomic write-boundary rollback coverage.",
+      "checks": [
+        "npm run typecheck PASS",
+        "npm run lint PASS with zero warnings",
+        "m5Batch.test.ts PASS: 7 tests",
+        "restock.test.tsx PASS: 13 tests",
+        "focused purchases/sales regression PASS: 36 tests",
+        "git diff --check PASS"
+      ],
+      "limitations": [
+        "Independent audit, physical Android verification, development-build/Metro verification, second-laptop verification and accounting review remain outstanding.",
+        "M5-02 through M5-07 are not implemented yet."
+      ],
+      "observed_at": "2026-09-18T17:10:34.227+01:00"
     }
   ],
   "acceptance_gates": [
@@ -257,7 +276,7 @@
     }
   ],
   "blockers": [],
-  "next_action": "Implement M5-01 through M5-07 sequentially on feat/m5-inventory-reconciliation, record truthful ticket evidence and commits, then stop for coordinator independent audit. Keep implementation-evidence and independent-audit gates pending; no M6, push, merge or deployment.",
+  "next_action": "Implement M5-02 through M5-07 sequentially on feat/m5-inventory-reconciliation, record truthful ticket evidence and commits, then stop for coordinator independent audit. Keep implementation-evidence and independent-audit gates pending; no M6, push, merge or deployment.",
   "created_at": "2026-09-18T12:55:50.482Z",
   "updated_at": "2026-09-18T15:34:39.359Z",
   "archived": false
