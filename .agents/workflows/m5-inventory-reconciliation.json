@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m5-independent-audit-reaudit-changes-required",
+  "current_state": "m5-independent-audit-reaudit-ready",
   "completed_states": [
     "m4-independent-source-automated-acceptance",
     "m5-founder-batch-fefo-approval",
@@ -354,8 +354,8 @@
       },
       "evidence": [
         {
-          "source": "docs/engineering/PROJECT_STATE.md; commits 0d76093..4e8e81c",
-          "result": "A01-A11 correction commits are complete with focused regressions and full local validation: 437 tests / 42 suites, strict typecheck, zero-warning lint, Doctor 21/21, Expo dependency check, Android export, active workflow/index/migration checks and clean status. The implementation task stops here for coordinator re-audit."
+          "source": "docs/engineering/PROJECT_STATE.md; commits 0d76093..4e8e81c, 7ccf672, 985478c, de5cb2c",
+          "result": "A01-A11 plus A05-R/A08-R/A07-R correction commits are complete with focused regressions and full local validation: 444 tests / 42 suites, strict typecheck, zero-warning lint, Doctor 21/21, Expo dependency check, Android export, active workflow/index/migration checks and clean status. The implementation task stops here for coordinator re-audit."
         }
       ],
       "limitations": [
@@ -387,12 +387,16 @@
         {
           "source": "docs/engineering/M5_AUDIT_CORRECTIONS.md",
           "result": "2026-09-19 coordinator re-audit changes required at a6f4153: unsaved count finalization, same-severity snooze expiry and month-precision copy."
+        },
+        {
+          "source": "docs/engineering/M5_AUDIT_CORRECTIONS.md; commits 7ccf672, 985478c, de5cb2c",
+          "result": "Coordinator checkpoint was committed separately; A05-R now blocks unsaved finalization evidence, A08-R rebuilds stable condition episodes from durable history, and A07-R uses interval-aware MONTH wording. Focused regressions and full validation pass; independent acceptance remains pending coordinator review."
         }
       ],
       "limitations": [
         "Implementation completion is verified; independent acceptance is not. Physical checks are explicitly deferred."
       ],
-      "blocker": "A05-R/A08-R/A07-R require correction and independent verification at stopped handoff a6f4153.",
+      "blocker": "A05-R/A08-R/A07-R are corrected; coordinator re-audit and independent acceptance remain required.",
       "waiver": null
     },
     {
@@ -446,8 +450,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Existing M5 task 01a0b525-289e-7b40-8f4b-2701fe541ad9 commits the coordinator re-audit checkpoint separately, then corrects A05-R/A08-R/A07-R and returns a clean handoff for independent review. Phone checks explicitly deferred; no M6 until source acceptance and M6 planning.",
+  "next_action": "Existing M5 task 01a0b525-289e-7b40-8f4b-2701fe541ad9 has committed the coordinator checkpoint separately, corrected A05-R/A08-R/A07-R, completed local validation and returned a clean handoff for coordinator re-audit. Phone checks explicitly deferred; no M6 until source acceptance and M6 planning.",
   "created_at": "2026-09-18T12:55:50.482Z",
-  "updated_at": "2026-09-18T23:31:34.426Z",
+  "updated_at": "2026-09-18T23:54:59.731Z",
   "archived": false
 }

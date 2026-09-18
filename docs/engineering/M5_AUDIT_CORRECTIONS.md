@@ -315,3 +315,69 @@ Founder explicitly defers physical Galaxy verification. Carry it as pending
 before pilot/beta/native-release readiness; it does not prevent source acceptance
 or later M6 source continuation once the independent M5 gate is actually met.
 No phone actions or physical evidence were performed in this review.
+
+## Correction return — 2026-09-19
+
+The coordinator checkpoint was preserved separately in `7ccf672` before any
+source correction. The three findings were then corrected on the same branch;
+independent acceptance remains the coordinator's decision.
+
+### A05-R — corrected in `985478c`
+
+`ReconciliationScreen.tsx` now compares the current normalized physical/base
+evidence, package/base mode and complete-group values with the latest saved
+submission before allowing finalization. Unsaved or invalid evidence cannot
+write a `RECONCILIATION_FINALIZED` outbox operation. Successful saves clear the
+old finalization operation ID; edits create a new intent ID, while an unchanged
+recoverable retry keeps its original ID. Existing note/reason retention and
+failed-save input retention remain in place.
+
+Baseline against the reviewed source: `m5ReconciliationCorrections.test.tsx`
+had 5 new regressions failing and 5 existing tests passing. After the fix, the
+focused suite passes 10/10, covering quantity, package/base, complete-group and
+group-count edits, failed saves, no-write protection, changed-intent IDs and
+saved recount finalization.
+
+### A08-R — corrected in `de5cb2c`
+
+Attention condition keys no longer use inventory/batch watermarks or attention
+settings versions. Stock episodes are rebuilt from product inventory events in
+durable ledger order; named batch/unknown episodes are rebuilt from their batch
+entry history. Same-severity movement, unrelated group movement and settings
+changes therefore preserve the active episode. Resolution changes the episode
+token, so recurrence resurfaces without requiring an intervening overview read;
+severity changes still resurface through the existing severity-rank guard. No
+new migration was needed.
+
+Baseline against the reviewed source: the two new SQLite regressions for stock
+and expiry snooze episodes failed while the six existing attention tests passed.
+After the fix, `m5Attention.test.ts` passes 8/8, including same-severity stock
+and expiry movement, unrelated groups/settings, due time, worsening, restart,
+replay and resolution/recurrence without an overview read.
+
+### A07-R — corrected in `de5cb2c`
+
+MONTH records reached during their represented interval now print `is within
+this month`; the next-month PASSED boundary remains unchanged. DAY records still
+print `reaches today`. The focused attention regressions cover the first, middle
+and last day of October, expiry versus best-before printed meaning, the DAY
+wording, no day countdown and unchanged stock projection.
+
+### Final local verification
+
+- `npm run validate`: PASS — 5 domain suites/150 tests and 37 mobile suites/294
+  tests, 444 total; strict typecheck and zero-warning lint.
+- `npm run mobile:doctor`: PASS — 21/21 after one transient `exp.host:443`
+  timeout on the first attempt.
+- `npm exec --workspace @retail/mobile -- expo install --check`: PASS;
+  dependencies are up to date.
+- `npm run mobile:export`: PASS — 1,382 Android modules and a 3.5 MB Hermes
+  bundle; generated `apps/mobile/dist` remains ignored/untracked.
+- Active workflow/index AJV draft-2020/date-time validation, gate dependency
+  DAG, registered-artifact existence, contiguous migration registry 1..14 and
+  `git diff --check`: PASS.
+
+The branch is returned for coordinator re-audit; this record does not grant
+independent acceptance. Physical/device, development-client/Metro, second-
+laptop, cloud/deployment and professional accounting checks remain pending.
+No M6 work, phone action, push, merge or deployment was performed.

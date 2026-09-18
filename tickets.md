@@ -189,6 +189,14 @@ recount/reason/finalization and complete group-count or unknown-breakdown handli
   7 suites, 29 tests. Focused purchase/sales/restock regression: 3 suites, 49
   tests. Typecheck, zero-warning lint and `git diff --check` pass. Physical
   Android, independent audit and full-repository validation remain outstanding.
+- Coordinator re-audit A05-R correction: commit `985478c` blocks finalization
+  while quantity, package/base mode or complete-group evidence differs from the
+  saved submission; failed saves retain input and unchanged retries retain their
+  operation ID while changed finalization intent receives a new one.
+  `apps/mobile/__tests__/m5ReconciliationCorrections.test.tsx` adds five
+  failing-before component regressions covering unsaved quantity/package/group
+  edits, failed save retention, no finalization outbox write and saved recount
+  finalization. Focused result: 10 passing tests.
 
 ## M5-05 — Guided owner stock checks and auditable replacements
 
@@ -271,7 +279,13 @@ and reminders from actual recorded remaining inventory.
   isolation, rollback, restart and migration v11 persistence.
   `m5AttentionScreen.test.tsx`: 2 component tests covering real low-stock
   action routing, snooze feedback and retained settings input after failure.
-  M5 focused run: 11 suites, 42 tests; navigation route tests: 12 tests.
+  Coordinator re-audit corrections are in `de5cb2c`: rebuildable episode tokens
+  preserve same-severity stock/group snoozes through unrelated movements,
+  settings changes and restart, while resolution creates a new episode; MONTH
+  current-interval copy now says `within this month`, with printed
+  `expiry`/`best-before` meaning and DAY-specific `reaches today` coverage.
+  The focused attention suite has 8 passing tests, including due-time,
+  worsening, recurrence without an overview read, restart and replay cases.
 - Physical Android, development-build/Metro, second-laptop, accounting and
   independent-audit evidence remain outstanding; no Home/M6 cards were added.
 
@@ -296,21 +310,24 @@ review what actually passed. No feature scope expansion.
 
 **Implementation evidence (awaiting independent audit):**
 
-- Validation commits: `f8d63d7` (M5-06) and `af475c2` (M5-07 route/schema
-  harness correction). Migration history is additive through v11: v7 receipt
-  groups, v8 adjustments, v9 reconciliation, v10 guided checks, v11 attention.
+- Validation/correction commits: `f8d63d7` (M5-06), `af475c2` (M5-07
+  route/schema harness correction), `7ccf672` (coordinator re-audit checkpoint),
+  `985478c` (A05-R), and `de5cb2c` (A08-R/A07-R). Migration history is additive
+  through v14: v7 receipt groups, v8 adjustments, v9 reconciliation, v10 guided
+  checks, v11 attention, and v14 reorder thresholds.
 - `npm run validate` PASS: environment pinned Node 24.21.0/npm 11.19.0/git
-  2.55.0 with adb available; domain 5 suites/150 tests; mobile 34 suites/260
-  tests; strict typecheck and zero-warning lint. Focused M1-M4 purchase/sales/
-  restock regression PASS: 3 suites/49 tests. M5 focused run PASS: 11 suites/
-  42 tests. Populated-v6/v7 migration retention, rollback, reopen and rebuilt
-  projection/cost evidence is included in the M5 batch/adjustment suites.
+  2.55.0 with adb available; domain 5 suites/150 tests; mobile 37 suites/294
+  tests; 444 tests total, strict typecheck and zero-warning lint. The focused
+  A05-R reconciliation correction suite has 1 suite/10 tests; the A08-R/A07-R
+  attention suite has 1 suite/8 tests. Populated-v6/v7 migration retention,
+  rollback, reopen and rebuilt projection/cost evidence is included in the M5
+  batch/adjustment suites.
 - `npm run mobile:doctor` PASS 21/21; `npm exec --workspace @retail/mobile --
   expo install --check` PASS with dependencies up to date; `npm run mobile:export`
-  PASS with 1,381 Android modules and a 3.5 MB Hermes bundle. Generated
+  PASS with 1,382 Android modules and a 3.5 MB Hermes bundle. Generated
   `apps/mobile/dist` remains ignored and untracked. Active workflow/index JSON
-  validation PASS: schema/date-time, 7-gate dependency graph, 13 registered
-  artifacts and contiguous migration registry 1..11; `git diff --check` PASS.
+  validation PASS: schema/date-time, 7-gate dependency graph, 14 registered
+  artifacts and contiguous migration registry 1..14; `git diff --check` PASS.
 - Physical Galaxy/offline/restart/text-scale/native-exit, development-client/
   Metro, second-laptop, cloud, deployment, push/merge and professional
   accounting checks were not performed and remain carried. Independent audit

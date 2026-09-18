@@ -7,8 +7,9 @@ are implemented on the same branch. The coordinator completed the first
 independent pass at 0a0ea94; coordinator re-audit is still required before any
 acceptance claim. Coordinator re-audit of stopped handoff a6f4153 found
 A05-R/A08-R/A07-R: unsaved recount finalization, premature snooze resurfacing
-and month-precision wording. Return corrections to the same M5 task; source
-acceptance remains blocked. See M5_AUDIT_CORRECTIONS.md.
+and month-precision wording. The checkpoint and all three corrections are now
+recorded on the same M5 task; source acceptance remains blocked pending
+coordinator re-audit. See M5_AUDIT_CORRECTIONS.md.
 Completed engineering milestones: M0; M1 (explicit device waiver); M2 after
 independent audit; M3 and M4 source/automated scope after independent audit,
 with physical/release readiness gates carried.
@@ -25,8 +26,10 @@ with physical/release readiness gates carried.
   M5-07 route/schema harness correction: af475c2. Audit correction commits:
   A01 0d76093, A02 272b144, A03 0665504, A04 d326ec4, A05 86c8644, A06
   b9a12fa, A07 3c81bc9, A08 9dd032d, A09 0db8846, A10 86de529, A01 receipt
-  snapshot follow-up 629b027, and A11 4e8e81c. Final ledger/workflow
-  evidence is recorded in the correction handoff documentation commit.
+  snapshot follow-up 629b027, and A11 4e8e81c. Coordinator re-audit checkpoint:
+  7ccf672. A05-R correction: 985478c. A08-R/A07-R corrections: de5cb2c.
+  Final ledger/workflow evidence is recorded in the correction return
+  documentation commit.
 - Accepted M3 checkpoint: 66cc64d; approved M4 plan/contract checkpoint: db5a835.
 - Coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 owns product review,
   plans, tickets, workflow registration and independent acceptance. M5
@@ -123,14 +126,19 @@ input evidence. M5-07 completed full validation, Expo Doctor, dependency
 compatibility, Android export, workflow/schema/artifact checks and the route-map
 warning correction. Coordinator independent audit at 0a0ea94 reproduced material
 contract failures despite 410 passing tests, Doctor 21/21 and Android export.
-The A01-A11 correction handoff now has passing focused regressions and full
-validation: 5 domain suites/150 tests and 37 mobile suites/287 tests, strict
-typecheck, zero-warning lint, Doctor 21/21, dependency compatibility, Android
-export, active workflow/index/migration checks and clean diff/status. See
-M5_AUDIT_CORRECTIONS.md for the original findings and correction boundary.
+The coordinator checkpoint was committed separately before the three return
+corrections. A05-R now blocks unsaved or invalid recount evidence from
+finalization and preserves deliberate retry IDs; A08-R now rebuilds stable
+attention episodes from durable event/batch history; A07-R now uses interval-
+aware MONTH wording while preserving DAY wording. Focused regressions pass:
+10/10 reconciliation-correction tests and 8/8 attention tests. Latest full
+validation passes with 5 domain suites/150 tests and 37 mobile suites/294 tests
+(444 total), strict typecheck, zero-warning lint, Doctor 21/21, dependency
+compatibility, Android export and active workflow/index/migration checks. See
+M5_AUDIT_CORRECTIONS.md for the original findings and return evidence.
 Independent acceptance remains blocked and implementation evidence remains
 pending coordinator review; this task does not self-accept. Next: coordinator
-re-audit A01-A11 on this same task/branch.
+re-audit A01-A11 and A05-R/A08-R/A07-R on this same task/branch.
 No M6 yet. Live Home remains proposed M6,
 global Scan navigation M8, real price signals M9/M10 and staff review M11.
 
