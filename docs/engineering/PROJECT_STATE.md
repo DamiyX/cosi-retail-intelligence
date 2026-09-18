@@ -1,11 +1,14 @@
 # PROJECT_STATE — COSI
 
-Last updated: 2026-09-18  
+Last updated: 2026-09-19  
 Current milestone: M5 batch-aware inventory/reconciliation implementation
 under D-039/D-040; M5-01 through M5-07 and the requested A01-A11 correction set
 are implemented on the same branch. The coordinator completed the first
 independent pass at 0a0ea94; coordinator re-audit is still required before any
-acceptance claim. See M5_AUDIT_CORRECTIONS.md.
+acceptance claim. Coordinator re-audit of stopped handoff a6f4153 found
+A05-R/A08-R/A07-R: unsaved recount finalization, premature snooze resurfacing
+and month-precision wording. Return corrections to the same M5 task; source
+acceptance remains blocked. See M5_AUDIT_CORRECTIONS.md.
 Completed engineering milestones: M0; M1 (explicit device waiver); M2 after
 independent audit; M3 and M4 source/automated scope after independent audit,
 with physical/release readiness gates carried.
@@ -137,6 +140,9 @@ global Scan navigation M8, real price signals M9/M10 and staff review M11.
   relaunch, history, cost-availability, dirty header/hardware exits and
   large-text checks remain unperformed. adb is available but was not used during
   this implementation handoff.
+- Founder explicitly deferred phone checks on 2026-09-19. Keep these pending
+  before pilot/beta/native-release readiness; M6 source work can follow M5
+  independent acceptance and M6 planning without claiming device readiness.
 - M1/M2 evidence only: Galaxy A15 5G SM-A156E, Android 16, 1080×2340; preview
   90c3fd47-e9be-49cb-bdbc-f9ab649f3c34, version 0.0.1/code 1, APK SHA-256
   687F787730E437DEEE1CAC4353192C2B7A44313EF2EBE92FDFC41261A4FEDA7C.

@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m5-independent-audit-reaudit-pending",
+  "current_state": "m5-independent-audit-reaudit-changes-required",
   "completed_states": [
     "m4-independent-source-automated-acceptance",
     "m5-founder-batch-fefo-approval",
@@ -224,6 +224,20 @@
         "Physical Galaxy/offline/restart/text-scale/native-exit, development-client/Metro, second-laptop, cloud/deployment and professional accounting checks remain unperformed."
       ],
       "observed_at": "2026-09-18T22:24:53.1361867Z"
+    },
+    {
+      "kind": "independent-audit",
+      "path": "docs/engineering/M5_AUDIT_CORRECTIONS.md",
+      "claim": "Coordinator reviewed stopped correction HEAD a6f4153: task status confirms completed implementation. Production SQLite probe shows a tomorrow low-stock snooze resurfaces after a same-severity sale and current-month expiry detail invents reaches today. Screen/service trace shows unsaved recount/group edits can finalize prior saved evidence. Changes required A05-R/A08-R/A07-R; no physical evidence or independent source acceptance.",
+      "observed_at": "2026-09-18T23:31:34.426Z",
+      "checks": [
+        "Independent npm run validate PASS: strict typecheck, zero-warning lint, 150 domain + 287 mobile tests (437 tests / 42 suites).",
+        "Independent active M5 workflow/index AJV draft-2020/date-time and git diff --check PASS."
+      ],
+      "limitations": [
+        "Doctor/export not rerun in this pass; latest success implementer-reported.",
+        "Physical phone checks explicitly deferred. A05-R is source/user-path evidence; A08-R/A07-R independently reproduced using production SQLite services."
+      ]
     }
   ],
   "acceptance_gates": [
@@ -369,12 +383,16 @@
         {
           "source": "docs/engineering/M5_AUDIT_CORRECTIONS.md",
           "result": "Changes required at 0a0ea94; automation passes but batch finalization, FEFO unknown order, count recovery/comparison and expiry/attention/replay/control contracts require correction."
+        },
+        {
+          "source": "docs/engineering/M5_AUDIT_CORRECTIONS.md",
+          "result": "2026-09-19 coordinator re-audit changes required at a6f4153: unsaved count finalization, same-severity snooze expiry and month-precision copy."
         }
       ],
       "limitations": [
-        "Correction evidence is available, but coordinator source re-audit has not yet occurred."
+        "Implementation completion is verified; independent acceptance is not. Physical checks are explicitly deferred."
       ],
-      "blocker": "Coordinator re-audit of A01-A11 remains required; implementation evidence is not self-accepted.",
+      "blocker": "A05-R/A08-R/A07-R require correction and independent verification at stopped handoff a6f4153.",
       "waiver": null
     },
     {
@@ -428,8 +446,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Coordinator re-audits A01-A11 on the same M5 implementation task 01a0b525-289e-7b40-8f4b-2701fe541ad9 and branch. No M6, push, merge or deployment.",
+  "next_action": "Existing M5 task 01a0b525-289e-7b40-8f4b-2701fe541ad9 commits the coordinator re-audit checkpoint separately, then corrects A05-R/A08-R/A07-R and returns a clean handoff for independent review. Phone checks explicitly deferred; no M6 until source acceptance and M6 planning.",
   "created_at": "2026-09-18T12:55:50.482Z",
-  "updated_at": "2026-09-18T22:24:53.1361867Z",
+  "updated_at": "2026-09-18T23:31:34.426Z",
   "archived": false
 }

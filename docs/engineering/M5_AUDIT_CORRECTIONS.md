@@ -237,3 +237,81 @@ Return a clean branch/full HEAD/status and stop for coordinator re-audit. Do not
 self-accept or begin M6. Only escalate if a correction truly changes an approved
 durable product/architecture contract; fixing these documented behaviors is
 already authorized.
+
+## Coordinator re-audit — 2026-09-19
+
+Reviewed stopped correction handoff `a6f4153c5d751f54de5367d22422ac30a5919038`
+on the same branch. Implementer task was confirmed completed through the task
+status tool; implementation is finished, but independent acceptance remains
+blocked by the findings below. Original A01–A11 fixes are not collectively
+accepted merely because the reported 437 tests pass.
+
+### Specification: A05-R — High: unsaved recount can finalize older evidence
+
+`ReconciliationScreen.tsx` marks edits to physical quantity, quantity mode,
+complete-group mode and group quantities dirty, but `finalize` and its button
+check only that a saved submission exists. Finalization sends no current count
+values. `finalizeInventoryReconciliation` correctly consumes the latest saved
+submission. Consequently, save 35 against recorded 40, edit the field to 36,
+then press Confirm discrepancy: the screen can finalize 35 while displaying 36.
+Unsaved group edits can likewise be ignored. This is a source/user-path finding,
+not claimed physical-device evidence.
+
+Prevent finalization while count evidence differs from its saved submission;
+require saving/reviewing the recount or explicitly restoring the saved evidence.
+Keep reason/note handling deliberate and preserve inputs on failure. Reset or
+bind retained finalization operation IDs appropriately when explicit finalization
+intent changes, while retaining the ID for an unchanged recoverable retry.
+Add real component regressions for quantity edits, package/base changes, group
+mode/group counts and failed saves. Prove no inventory/finalization/outbox write
+occurs from unsaved or invalid count evidence, then prove the saved recount
+finalizes the newly reviewed value.
+
+### Specification: A08-R — Medium: normal movements cancel active snoozes
+
+`attention.ts:conditionKey` incorporates every inventory/batch watermark and
+the attention settings version. This solves recurrence by also invalidating a
+snooze on any routine stock movement. Independent real SQLite production-service
+probe: receive 4, set reorder threshold 5, snooze LOW_STOCK until tomorrow,
+sell 1, query 30 minutes later. LOW_STOCK returns at balance 3 with unchanged
+severity, before its due time. The same product-level key pattern affects expiry
+and coverage conditions, including unrelated group movements/settings changes.
+
+Preserve suppression for the same active condition until due or genuine
+worsening; clear it when that condition resolves, so a later episode does not
+inherit an old snooze. Use the smallest durable/rebuildable episode mechanism
+consistent with the existing event history; do not equate every watermark change
+with resolution. Include low-stock and expiry same-severity movements, unrelated
+group/settings changes, resolution followed by recurrence without an intervening
+overview read, worsening, due time, restart and original-operation replay tests.
+
+### Specification: A07-R — Medium: current-month copy invents an exact day
+
+The interval severity correction works: October MONTH expiry on October 15 is
+REACHED. However the same independent probe returns detail saying the recorded
+date "reaches today". Month precision cannot establish that October 15 is the
+actual expiry day. Use interval-aware text throughout the current month, retaining
+the next-month PASSED boundary and DAY-specific today wording. Add first/middle/
+last-day and printed meaning copy assertions; do not introduce a day countdown
+for MONTH or mutate inventory merely because the interval advances.
+
+### Re-audit disposition and return
+
+Independent checks at this handoff: `npm run validate` PASS (strict typecheck,
+zero-warning lint, 150 domain tests / 5 suites and 287 mobile tests / 37 suites;
+437 total). Active workflow/index AJV draft-2020/date-time validation and
+`git diff --check` PASS. The SQLite probe used the real migrated fixture,
+production purchase/sale/reorder/attention services and isolated synthetic data;
+its database was closed/deleted afterwards. Doctor and Android export were not
+rerun in this correction pass; their latest success is implementer-reported.
+
+Changes required; return A05-R/A08-R/A07-R to the existing Luna max M5 task,
+not a new milestone/task. Commit this checkpoint separately before corrections.
+Do not rewrite historical migrations or completed business transactions. Report
+focused regression results and the final full validation, branch/full HEAD/status,
+then stop and notify the coordinator for independent re-audit. No M6 yet.
+
+Founder explicitly defers physical Galaxy verification. Carry it as pending
+before pilot/beta/native-release readiness; it does not prevent source acceptance
+or later M6 source continuation once the independent M5 gate is actually met.
+No phone actions or physical evidence were performed in this review.
