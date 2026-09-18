@@ -1,8 +1,8 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-18  
-Current milestone: M4 source/automated scope accepted; expiry-aware M5 planning
-and founder design review next. M5 implementation has not started.  
+Current milestone: M5 batch-aware inventory/reconciliation planning package
+prepared under D-039/D-040. M5 implementation and delegation have not started.  
 Completed engineering milestones: M0; M1 (explicit device waiver); M2 after
 independent audit; M3 and M4 source/automated scope after independent audit,
 with physical/release readiness gates carried.
@@ -19,7 +19,8 @@ with physical/release readiness gates carried.
   plans, tickets, workflow registration and independent acceptance. Separate
   Luna max task 01a0b1a5-4512-79f0-ae55-58d39559944d implemented M4 and
   assigned fixes, then stopped. Implementation and independent audit run
-  sequentially. No M5 assignment has been issued.
+  sequentially. No M5 assignment has been issued. Active workflow is
+  .agents/workflows/m5-inventory-reconciliation.json; M4 workflow is archived.
 - M0 PR #1 remains open; main is at a393498 and milestone branches are stacked.
   No push, merge, rebase, deployment, remote-service or cloud-build action was
   performed during M4 implementation/audit. Do not rewrite history.
@@ -67,17 +68,22 @@ protection and conservative shortage/unexplained-surplus costing. Founder
 requires expiry alerts in the first real-shop pilot/MVP/prototype.
 
 Current stock is a product-level event ledger, with no lot/batch expiry balances.
-Specific expiry-aware lot capture, sale/adjustment allocation, unknown opening
-stock, coverage and warning behavior remain proposed. Choosing physical batches
-does not silently change moving-average accounting. No expiry feature or new
-reconciliation workflow is implemented by this review.
+Founder resolved minimal batch capture and automatic assumed FEFO without
+normal sale batch confirmation, with unknown stock and truthful coverage.
+D-039/D-040, PRD, domain/technical/offline sources and DESIGN now record approved
+behavior. Coordinator prepared M5_INVENTORY_RECONCILIATION_PLAN and seven
+unstarted rolling tickets; accepted M4 ledger is archived unchanged in
+engineering/tickets/M4_RESTOCKING_COSTING.md. Expected new migrations 7–11
+are a plan only; schema/source still ends at v6. No M4 reopening or M5 code.
 
-Next: coordinator prepares the concrete expiry-aware M5 contract and flows for
-founder review, then aligns approved PRD/decision/domain/design/build-plan
-sources and publishes rolling dependency-reviewed tickets and the M5 workflow.
-Do not delegate M5 before that gate. Live Home is proposed for M6, global Scan
-navigation for M8, real price signals M9/M10 and staff assignment/review M11.
-Do not treat those future proposals as released implementation scope.
+Planning schema/dependency/artifact checks and unchanged M4 archive passed;
+no runtime/configuration diff. Planning documentation checkpoint is discoverable
+in Git history once committed. Next: create the task branch and a NEW separate
+implementation task after review. Current approved model
+default is Luna max; coordinator recommends Terra max for M5 complexity, but
+no model change or dispatch is assumed. Implementer stops after M5-07 for
+coordinator independent audit. No M6 yet. Live Home remains proposed M6,
+global Scan navigation M8, real price signals M9/M10 and staff review M11.
 
 ## Carried readiness gates
 
@@ -96,7 +102,7 @@ Do not treat those future proposals as released implementation scope.
 - Second-laptop clean reproduction is explicitly deferred, still required before
   external beta. Existing dependency audit baseline remains recorded separately.
 - Professional accounting review precedes formal accounting claims. M7 must
-  review concurrent-device reconciliation, costing and proposed lot allocation.
+  review concurrent-device reconciliation, costing and batch allocation.
 - First pilot requires the approved expiry capability; source acceptance does
   not waive that new product requirement.
 
@@ -105,9 +111,9 @@ passed and external beta/native-release readiness is not approved.
 
 ## Continuity
 
-Read AGENTS.md, the workflow index and M4 record, project-context, tickets.md,
-M4_RESTOCKING_COSTING_PLAN.md, M4_AUDIT_CORRECTIONS.md, the product change
-record, BUILD_PLAN and relevant approved decisions before the next step.
+Read AGENTS.md, workflow index and active M5 record, project-context, tickets.md,
+M5_INVENTORY_RECONCILIATION_PLAN.md, DESIGN, M4_AUDIT_CORRECTIONS.md, the product
+change record, BUILD_PLAN and D-039/D-040 plus relevant prior decisions.
 Accepted M3 tickets are archived in docs/engineering/tickets/M3_SALES.md.
 Inspect branch, HEAD, status and diff before editing. Git and repository records
 must remain sufficient without prior chat history.

@@ -251,7 +251,7 @@
     }
   ],
   "artifacts": [
-    "tickets.md",
+    "docs/engineering/tickets/M4_RESTOCKING_COSTING.md",
     "docs/engineering/M4_RESTOCKING_COSTING_PLAN.md",
     "docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md",
     "docs/engineering/tickets/M3_SALES.md",
@@ -275,8 +275,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Coordinator prepares expiry-aware M5 product/data/design contract for founder review, then aligns approved authorities and publishes dependency-reviewed tickets/workflow before delegation. Founder approved stock-check/attention and conservative adjustment-cost behavior, and requires expiry for the first pilot; the specific lot/allocation contract is still proposed. No M5 implementation, push, merge or deployment.",
+  "next_action": "Accepted M4 source is retained; active planning is m5-inventory-reconciliation. Carried physical/release gates remain required before external beta/native readiness.",
   "created_at": "2026-09-17T23:22:42Z",
-  "updated_at": "2026-09-18T12:38:18.716Z",
-  "archived": false
+  "updated_at": "2026-09-18T12:55:50.482Z",
+  "archived": true
 }

@@ -432,7 +432,9 @@ But carton of 12 × Milo 400g is a packaging level of **Milo 400g**.
 ⚪ Future pharmaceutical model may extend:
 > tablet → blister → pack → carton
 
-with batch and expiry handling.
+with stricter batch identification/traceability. Minimal FMCG batch-aware expiry
+is now required for the first pilot under D-039; it does not require the future
+pharmaceutical workflow or ordinary sale batch confirmation.
 
 ---
 

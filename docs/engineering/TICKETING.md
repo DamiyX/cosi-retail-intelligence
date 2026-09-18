@@ -72,21 +72,11 @@ copying full histories between them.
 
 ## Current Milestone Gate
 
-M1 passed independent source and automated re-audit on 2026-09-14. On
-2026-09-15, the Galaxy A15 5G preview build proved local-store and temporary
-catalogue creation, force-stop/relaunch retention, airplane-mode retention,
-and 1.3 text-scale rendering. The development-client/Metro-specific check is
-still open because its downloaded APK was corrupted before installation; it
-remains required before an external beta/native release claim.
-
-M2 passed independent source and automated audit on 2026-09-14 after correction
-of integrity, replay, preference, fresh-install, and navigation defects. The
-founder then approved D-036/D-037 and the M3 Sell-flow baseline. M3-01 through
-M3-05 are preserved in `docs/engineering/tickets/M3_SALES.md` and registered in
-`.agents/workflows/m3-sales.json`; their source/automated scope was independently
-accepted on 2026-09-18, with physical/release gates carried. The next milestone
-has opened its coordinator-owned planning gate on `feat/m4-restocking-costing`.
-Founder approved M4 cost/design rules on 2026-09-18; D-038 and DESIGN record
-the contract. Coordinator-reviewed M4 tickets are published in `tickets.md`.
-The separate Luna max task implements them and assigned fixes, then stops for
-coordinator audit. It does not create plans or independent audit acceptance.
+M1–M4 source scope passed independent audits, with physical/release gates carried.
+M4's accepted ledger is archived in docs/engineering/tickets/M4_RESTOCKING_COSTING.md.
+Founder approved minimal pilot batch awareness/automatic assumed FEFO and blind
+owner checks/attention/conservative adjustment costing on 2026-09-18. D-039/D-040
+record durable behavior; coordinator-reviewed M5 tickets are now published in
+tickets.md and registered in .agents/workflows/m5-inventory-reconciliation.json.
+They are unstarted. The separate implementation task has not been created;
+coordinator owns delegation and final independent acceptance. No M6 work.

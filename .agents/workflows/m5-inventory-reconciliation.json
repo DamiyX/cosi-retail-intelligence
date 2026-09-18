@@ -1,0 +1,249 @@
+{
+  "schema_version": 1,
+  "task_id": "m5-inventory-reconciliation",
+  "workflow_id": "build-feature",
+  "mode": "propose",
+  "status": "pending",
+  "current_state": "m5-planned-ready-for-separate-implementation-task",
+  "completed_states": [
+    "m4-independent-source-automated-acceptance",
+    "m5-founder-batch-fefo-approval",
+    "m5-actual-schema-impact-review",
+    "m5-design-contract-and-ticket-dependency-review"
+  ],
+  "owner": {
+    "agent": "coordinating-planner-independent-auditor",
+    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
+    "worktree": null
+  },
+  "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m0",
+  "lease": null,
+  "evidence": [
+    {
+      "kind": "inspection",
+      "claim": "Planning started from clean feat/m4-restocking-costing at c1753b6, accepted M4 source 9700ee3. Inspected migration registry v1-v6, immutable product inventory, receipt/sale transactions, exact cost movements/rebuild, actor/membership and canonical version-1 outbox. No M5 runtime code exists."
+    },
+    {
+      "kind": "planning",
+      "path": "docs/engineering/M5_INVENTORY_RECONCILIATION_PLAN.md",
+      "claim": "Coordinator reviewed bounded official FEFO/lot/adjustment conventions, prepared minimal extension and seven dependency-reviewed vertical tickets under delegated design/sizing judgment. Only documentation changed; runtime and device acceptance are not claimed."
+    },
+    {
+      "kind": "ticket-dependencies",
+      "dependencies": {
+        "M5-01": [],
+        "M5-02": [
+          "M5-01"
+        ],
+        "M5-03": [
+          "M5-01"
+        ],
+        "M5-04": [
+          "M5-02",
+          "M5-03"
+        ],
+        "M5-05": [
+          "M5-04"
+        ],
+        "M5-06": [
+          "M5-03",
+          "M5-04"
+        ],
+        "M5-07": [
+          "M5-02",
+          "M5-03",
+          "M5-04",
+          "M5-05",
+          "M5-06"
+        ]
+      },
+      "claim": "Execution remains sequential; independent edges do not authorize parallel checkout writers."
+    },
+    {
+      "kind": "validation",
+      "claim": "Local M4/M5 workflow schema/date-time, gate/artifact/index and ticket graph checks PASS; seven unstarted tickets with three grouped binary criteria each; archived M4 ledger byte-identical to c1753b6:tickets.md; tracked runtime/configuration diff empty; git diff --check PASS. No M5 runtime/migration/device evidence."
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "m4-source-accepted",
+      "claim": "M4 source/automated scope independently accepted.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Read M4 workflow and final audit.",
+        "success_condition": "Accepted source 9700ee3 with readiness carried."
+      },
+      "evidence": [
+        {
+          "result": "367 tests, strict typecheck, zero-warning lint, Doctor 21/21 and Android export; independent final acceptance recorded.",
+          "source": "docs/engineering/M4_AUDIT_CORRECTIONS.md; .agents/workflows/m4-restocking-costing.json"
+        }
+      ],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m5-product-batch-approved",
+      "claim": "Founder approves pilot batch awareness, assumed automatic FEFO and owner checks/cost/attention.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "m4-source-accepted"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Record explicit founder decisions and align existing authorities.",
+        "success_condition": "D-039/D-040, PRD/domain/design/build plan reflect approved behavior."
+      },
+      "evidence": [
+        {
+          "result": "Founder explicitly approved automatic FEFO without normal batch confirmation, unknown stock, pilot expiry and existing cost preservation; previously approved blind checks/attention/conservative adjustment costs.",
+          "source": "docs/decisions/DECISION_LOG.md; docs/product/PRODUCT_CHANGE_BACKLOG.md"
+        }
+      ],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m5-plan-design-tickets-reviewed",
+      "claim": "Coordinator reviews actual schema, design states and rolling ticket dependencies.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "m5-product-batch-approved"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Verify smallest extension and binary evidence criteria under founder-delegated judgment.",
+        "success_condition": "M5 plan/design/ledger published without speculative M6 work."
+      },
+      "evidence": [
+        {
+          "result": "Seven unstarted tickets published; M4 ledger archived unchanged. Receipt-line integration, unknown residual, exact date precision and batch versus cost boundaries documented.",
+          "source": "tickets.md; docs/engineering/M5_INVENTORY_RECONCILIATION_PLAN.md; docs/design/DESIGN.md"
+        }
+      ],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m5-implementation-assigned",
+      "claim": "Separate Luna max user-owned implementation task receives recoverable planning baseline.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m5-plan-design-tickets-reviewed"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Commit planning baseline, reconcile branch, create task branch and NEW Luna max task when instructed.",
+        "success_condition": "Known task ID/branch/baseline and no concurrent writers."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m5-implementation-evidence",
+      "claim": "Implementer returns actual passing M5 ticket commits/checks then stops.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m5-implementation-assigned"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Implement M5-01 through M5-07 sequentially with focused/full validation.",
+        "success_condition": "Truthful evidence and clean recoverable branch; no M6 or self-acceptance."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m5-independent-audit",
+      "claim": "Coordinator independently reviews source/evidence and accepted corrections.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m5-implementation-evidence"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Audit only after implementation stops; return corrections to same task and re-audit.",
+        "success_condition": "No blocking findings for declared scope; carried readiness explicit."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "carried-device-release-readiness",
+      "claim": "Actual device/setup/accounting checks and working expiry precede pilot/beta claims.",
+      "owner": "founder-and-verification-task",
+      "required": false,
+      "status": "blocked",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Perform actual Galaxy M3-M5 offline/restart/native exits/text-scale, Metro and second-laptop verification and accounting review for formal claims.",
+        "success_condition": "Actual observations recorded; first pilot has working expiry."
+      },
+      "evidence": [],
+      "limitations": [
+        "Existing Galaxy evidence is M1/M2 only; no M5 code or physical evidence yet.",
+        "Source-continuation waiver does not pass release readiness or waive first-pilot expiry."
+      ],
+      "blocker": "Physical/setup/accounting gates remain outstanding for their respective claims.",
+      "waiver": {
+        "reason": "Founder allows source continuation with readiness carried.",
+        "approved_by": "founder"
+      }
+    }
+  ],
+  "artifacts": [
+    "tickets.md",
+    "docs/engineering/tickets/M4_RESTOCKING_COSTING.md",
+    "docs/engineering/M5_INVENTORY_RECONCILIATION_PLAN.md",
+    "docs/engineering/PROJECT_STATE.md",
+    "docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md",
+    "docs/product/PRODUCT_CHANGE_BACKLOG.md",
+    "docs/product/PRD_MVP.md",
+    "docs/architecture/DOMAIN_DATA_MODEL.md",
+    "docs/architecture/TECHNICAL_ARCHITECTURE.md",
+    "docs/architecture/OFFLINE_SYNC.md",
+    "docs/decisions/DECISION_LOG.md",
+    "docs/design/DESIGN.md",
+    ".agents/contexts/app-flow.md"
+  ],
+  "approvals": [
+    {
+      "date": "2026-09-18",
+      "scope": "Founder delegates ticket sizing/design judgment and retains coordinator planning/independent-audit versus separate Luna max implementation responsibilities."
+    },
+    {
+      "date": "2026-09-18",
+      "scope": "Founder approves expanded M5 owner checks/attention, conservative adjustment costing and mandatory first-pilot expiry; explicitly resolves minimal batch awareness and automatic assumed FEFO without routine sale batch selection."
+    }
+  ],
+  "blockers": [],
+  "next_action": "Record planning baseline through authorized utility checkpoint, then prepare task branch and NEW separate implementation task after review. Current approved default Luna max; Terra max recommended for M5, but no model change assumed. No M6, coordinator implementation, push/merge/deployment.",
+  "created_at": "2026-09-18T12:55:50.482Z",
+  "updated_at": "2026-09-18T12:59:38.950Z",
+  "archived": false
+}

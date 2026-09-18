@@ -854,6 +854,121 @@ Do not overwrite the balance without an adjustment event.
 
 ---
 
+## 10.5 Minimal Batch Awareness — D-039 / M5
+
+Approved on 2026-09-18 for the first pilot; not implemented in accepted M4.
+All batch/check/attention facts are store-private. Product stock remains the
+sum of immutable InventoryEvents. Batch tracking explains its composition,
+never adds the received quantity a second time or becomes another stock total.
+
+### InventoryBatchGroup
+
+An internally generated UUID identifies one received/inspected group of a
+StoreProduct. Optional manufacturer/supplier batch text is metadata, not a
+globally unique key. Distinct receipts/groups never merge just because dates
+or printed numbers match. Core facts:
+
+- id, storeId, storeProductId;
+- origin: RECEIPT or PHYSICAL_INSPECTION;
+- purchaseItemId for receipt groups (one initial group per new purchase line);
+- quantityReceivedBaseMicros for receipts, exactly matching the immutable line;
+  nullable for an inspection, which is classification rather than a receipt;
+- optional printedBatchNumber;
+- datePrecision: UNKNOWN, MONTH or DAY;
+- dateValue: null, YYYY-MM or YYYY-MM-DD, calendar-validated;
+- dateMeaning: EXPIRY, BEST_BEFORE or UNSPECIFIED, preserved without substituting
+  one label's meaning for another;
+- evidenceSource, recordedByStoreMemberId/user/device, createdAt and stable local
+  creation order. Physical evidence is time-specific, not a permanent accuracy flag.
+
+These historical facts are immutable. Correcting a date/breakdown creates a
+new inspected group plus explicit classification entries; it does not edit an
+old receipt. Group stock is reconstructed from movements, not an editable field.
+Date precision and unknown are first-class; no synthetic day for month labels.
+
+### BatchInventoryOperation / BatchInventoryEntry
+
+A finalized operation header identifies one event allocation or one net-zero
+classification for a product, with UUID, store/product, parent operation ID,
+kind, source ID, actor/device, policy/evidence version and local application
+order. EVENT headers reference exactly one InventoryEvent, uniquely;
+CLASSIFICATION headers retain original inspection input/evidence and both
+watermarks in an immutable payload, plus an optional reconciliation reference.
+The header may itself be the durable inspection fact; a separate inspection
+table is unnecessary for M5-02. Group creation/date facts must agree with it.
+Entries carry header ID, group ID (nullable for unknown/unallocated stock),
+signed base-micro delta and attribution evidence. Source event/group/product/
+store relationships must agree. Finalized headers/entries cannot change.
+
+Every new completed sale/purchase/adjustment must have a finalized allocation
+whose entry deltas sum exactly to its event delta. Classification entries sum
+to zero and produce no product InventoryEvent or cost movement. Enforce row
+validity, ownership relationships, event uniqueness and immutability in SQLite;
+validate/finalize cross-row sums inside the write transaction, and prevent
+completion/outbox claims for incomplete graphs at the strongest practical
+boundary. Do not call an application-only sum check a raw-SQL invariant.
+
+Regular deltas inherit D-034 safe integer micro-units. Aggregate/rebuild and
+unknown residual arithmetic use BigInt; canonical signed decimal strings at
+JSON/read boundaries avoid narrowing existing M3 overflow cases to Number.
+Named group balances are nonnegative. Unknown residual equals product-ledger
+total minus named-group balances and may be negative. Legacy events need no
+guessed companions: their surviving stock is unknown/unallocated, derived
+without creating another opening stock event. Missing new allocations are an
+integrity/coverage issue, never invented physically verified stock.
+
+### Default depletion and physical verification
+
+Normal sale completion performs automatic FEFO: dated positive groups ordered
+by earliest recorded date interval, then undated received groups/positive
+unknown stock, with stable local origin order and UUID ties. A month interval
+sorts by its first day as a conservative ordering convention, without claiming
+that day is the printed expiry. Unknown groups use stable oldest-origin order;
+legacy unknown residual precedes later undated receipts. Allocation records
+ASSUMED_FEFO and policy version, with no ordinary batch picker/confirmation.
+Uncovered sale remainder consumes unknown/unallocated stock and preserves real
+negative product stock. Receipts first offset any unallocated deficit, leaving
+only the positive remainder as group stock; original received quantity stays
+unchanged. Explicit receipt, consumption and deficit-offset entries must explain
+the same product event delta, without duplicate stock effects.
+
+Recorded FEFO quantities are estimates of physical batch composition. A
+PHYSICAL_COUNT submission verifies observed groups at its captured watermark;
+subsequent inferred movement must again be labelled estimated. A total-only
+discrepancy cannot determine which group is absent: record the total correction
+and conservatively classify the unresolved current group breakdown as unknown,
+or obtain a complete group count. Preserve all prior batch history. Progressive
+inspection can classify unknown stock without changing its total or cost.
+
+### Counts, assignments and attention — D-040
+
+Reconciliation sessions/lines extend 10.3/10.4 with durable first and recount
+submissions, hidden expected quantity, event AND batch-operation watermarks,
+actor/device, reasons, optional group observations, finalization operation ID
+and sourced adjustment references. Capture and revalidate watermarks in the
+write transaction: offsetting moves or reclassification also invalidate a count.
+Matching counts produce a completed check fact and no zero inventory event.
+
+Guided owner checks retain store-local due windows, configurable daily target
+(default 3)/pause, policy version, assignments and immutable replacements/attempt
+reasons. Exclude inactive/non-countable and normally nonpositive-stock items;
+no eligible candidate is valid. Physical zero against recorded positive stock
+is a discrepancy, not a silent replacement. Repeated replacements are factual
+review evidence, not misconduct conclusions. M11 adds staff permissions/review.
+
+Attention derives low/zero/negative stock, unresolved differences and remaining
+dated groups from current projections. Durable suppression stores actor,
+condition/group identity, severity at snooze, due time and operation ID; it
+does not change stock. Resolution clears the condition; worsening severity
+resurfaces it. Retain immutable snooze actions and derive current suppression.
+DAY countdowns use store timezone; MONTH displays the month, never an exact
+day countdown. Unknown/unresolved date coverage remains visible. Depletion to
+zero removes that group's expiry condition. Date passage only raises attention;
+actual expired removal requires a sourced negative InventoryEvent and atomic
+batch/cost/outbox adjustment. No automatic removal or safety/accuracy guarantee.
+
+---
+
 # 11. Costing Domain
 
 ## 11.1 StoreProductCostState
@@ -896,7 +1011,8 @@ crossing a zero/negative balance into positive stock initializes only the
 positive remainder at the receipt's unit cost. A sale exceeding coverage keeps
 whole-line COGS unavailable, consumes remaining coverage and preserves genuine
 negative-stock sales. Nonpositive stock has no usable average and zero costed
-quantity. Later adjustment and multi-device rules require M5/M7 review.
+quantity. D-040 defines M5 adjustment engineering below; multi-device rules
+remain an M7 review gate.
 
 New fully covered sale lines preserve exact basis/method version in immutable
 snapshots, optionally through an additive companion record. Estimated COGS is
@@ -906,6 +1022,33 @@ change. D-036 selling arithmetic remains exact-or-reject. Cost basis, movements
 and projection changes commit within the same sale transaction as its business
 aggregate, inventory and outbox. The UI labels estimates and unavailable costs;
 D-027 remains provisional pending professional accounting review.
+
+---
+
+## 11.2 M5 Adjustment Costing Extension — D-040
+
+A sourced InventoryAdjustment aggregate/line records store/product, nonzero
+signed delta, reason/event type, actor/device, operation ID and optional count/
+group references. Its InventoryEvent, exact cost movement/projection and batch
+entries commit with the aggregate and one outbox envelope. EXPIRED removal is
+a real negative event, not a dismissal. Cross-store, replay and source guards
+apply to adjustment lines just as they do to purchase/sale lines.
+
+Add ADJUSTMENT to the immutable cost movement vocabulary using a NEW migration;
+preserve original PURCHASE/SALE rows and local application order. A shortage/
+removal from fully costed positive stock consumes exact proportional value at
+the current moving average. If it exceeds coverage, consumes nonpositive stock
+or starts with unknown coverage, cost availability must remain truthful under
+D-038. Nonpositive remainder has no usable average. Unexplained positive stock
+invalidates current aggregate cost coverage; never assign guessed/zero/last-price
+value or silently restore cost by inspecting expiry. Retain prior immutable
+value evidence. Net-zero batch classification changes no financial costing.
+Rebuild handles adjustment transitions and agrees with live projection.
+
+FEFO affects physical allocation only. Historical purchase inputs, sale COGS,
+cost snapshots, and observations remain immutable. D-027 financial interpretation
+and professional accounting review remain provisional; no FIFO/lot profit or
+full-accounting claim is introduced.
 
 ---
 
@@ -1340,6 +1483,11 @@ erDiagram
 
     STORE_PRODUCT ||--o{ INVENTORY_EVENT : changes
     STORE_PRODUCT ||--|| INVENTORY_BALANCE : summarizes
+    STORE_PRODUCT ||--o{ INVENTORY_BATCH_GROUP : groups_stock
+    PURCHASE_ITEM |o--o| INVENTORY_BATCH_GROUP : may_originate
+    INVENTORY_EVENT |o--o| BATCH_INVENTORY_OPERATION : may_allocate
+    BATCH_INVENTORY_OPERATION ||--|{ BATCH_INVENTORY_ENTRY : contains
+    INVENTORY_BATCH_GROUP |o--o{ BATCH_INVENTORY_ENTRY : may_classify
 
     STORE ||--o{ INVENTORY_RECONCILIATION : performs
     INVENTORY_RECONCILIATION ||--|{ INVENTORY_RECONCILIATION_LINE : contains
@@ -1471,6 +1619,11 @@ Exact retention rules belong in the security/data-retention architecture.
 - InventoryBalance
 - InventoryReconciliation
 - InventoryReconciliationLine
+- InventoryBatchGroup
+- BatchInventoryOperation / BatchInventoryEntry
+- InventoryAdjustment / adjustment lines
+- Durable check submissions, guided assignments/replacements, inventory settings
+  and snooze action facts (M5; see 10.5, not a second stock authority)
 - StoreProductCostState
 - Expense
 - OwnerWithdrawal

@@ -109,6 +109,8 @@ When a major decision changes, update the affected source-of-truth document too.
 | D-036 | Local sale arithmetic is exact-or-reject | ACTIVE |
 | D-037 | M3 uses one tender allocation with explicit credit truth | ACTIVE |
 | D-038 | M4 exact cost basis, provisional COGS rounding and conservative coverage | ACTIVE |
+| D-039 | Pilot batch awareness, automatic assumed FEFO and first-class unknown stock | ACTIVE |
+| D-040 | Blind owner checks, sourced adjustment costing and durable attention | ACTIVE |
 
 ---
 
@@ -1214,6 +1216,102 @@ returns, voids, taxes and landed-cost allocation remain outside M4.
 
 ---
 
+## D-039 — Minimal Batch Awareness and Automatic Assumed FEFO
+
+**Status:** ACTIVE; implementation assigned to M5 planning, not completed M4.  
+**Date:** 2026-09-18.  
+**Approval:** Founder resolved pilot expiry/batch direction explicitly, including
+automatic FEFO without ordinary batch selection and valid unknown stock.
+
+### Decision
+
+Use internal received/inspected groups for multiple dates per store product,
+while retaining one ordinary product stock total. Dates are optional and preserve
+DAY/MONTH/UNKNOWN precision and printed meaning; internal UUIDs are generated,
+manufacturer lot numbers optional. One expiry group per new receipt line is
+the minimum initial integration; repeated same-product lines handle mixed dates.
+Product inventory events remain total-stock truth. Batch movements explain those
+events and explicit net-zero classifications; projections are rebuildable.
+
+Ordinary sales automatically use FEFO over recorded dates, then undated stock,
+with stable ties and an ASSUMED_FEFO policy/evidence version. No mandatory
+physical batch selection or confirmation. Inferred allocation is not physical
+proof, even if the group was physically counted earlier. Unknown legacy/residual
+stock, missing dates and genuine negative-stock sales remain supported.
+
+Actual remaining recorded groups drive alerts, with estimated quantity wording
+and coverage limits. No day countdown for a month-only label. Date passage
+raises attention without stock subtraction; expired removal is a sourced
+inventory/cost/batch/outbox operation. Normal sale recording stays possible;
+elapsed-date warnings must not be confused with strict traceability/sale policy.
+
+FEFO does not change D-027/D-038 moving-average financial costing. Old purchase,
+sale, COGS, observation and outbox history remain immutable. Add schema through
+new migrations after version 6; no unsafe historical date/lot reconstruction.
+DOMAIN_DATA_MODEL 10.5 defines the facts and invariant placement.
+
+### Rationale / alternatives
+
+Single product expiry cannot represent mixed dates; historical receipt reminders
+cannot indicate surviving grouped stock. Mandatory checkout batch selection adds
+friction rejected by the founder. Automatic allocation with honest evidence and
+physical reconciliation meets the small-retailer need. Unknown residual derived
+from the event ledger avoids fabricated receipts or duplicate opening stock.
+
+### Limits and revisit gates
+
+M5 is local-first, not warehouse management, regulated traceability or batch-cost
+accounting. M7 must review concurrent offline lot allocation and count conflicts
+without discarding real sales. Strict physical identification, GS1 expiry/lot
+capture and OCR are future enhancements; recognition identity stays separate.
+
+---
+
+## D-040 — Blind Checks, Inventory Adjustment Costing and Attention
+
+**Status:** ACTIVE engineering/product behavior; D-027 remains provisional.  
+**Date:** 2026-09-18.  
+**Approval:** Founder approved expanded M5 stock-check/attention and conservative
+unexplained-surplus costing before resolving D-039. Supersedes the previous
+expected-quantity-first PRD 15.2 flow; extends D-038 to sourced M5 adjustments.
+
+### Decision
+
+Hide expected quantity before the first physical submission; retain count/recount
+facts, compare and reconcile differences instead of training the user to guess.
+Revalidate inventory and batch watermarks in finalization. A matching count
+finishes without a zero-delta event. A total-only discrepancy cannot prove which
+batch is missing; preserve the correction and mark unresolved composition unknown
+or obtain a group count. Net-zero classification changes no cost or product stock.
+
+Owner-only management is the first slice; new commands resolve the active OWNER
+role rather than granting ADMIN/STAFF management implicitly. STAFF assignment and
+supervisor review belong to M11. Default target three guided checks/day is
+configurable/pausable and uses store-local foreground due windows. Selection is
+versioned/extensible. Exclude ordinary nonpositive stock; replacements need
+reasons and retain attempts. Repeated replacement is not an automatic accusation.
+
+All nonzero adjustments/removals have immutable sourced aggregate/line facts,
+explicit events and atomic cost/batch/outbox completion. Fully covered shortages
+consume exact proportional moving-average value. Unknown coverage stays unknown;
+unexplained positive additions make current aggregate cost unavailable, retaining
+immutable value history rather than assigning zero/guessed cost. Extend cost
+movement vocabulary/rebuild in a new migration; never rewrite historical COGS.
+
+One attention list derives low/zero/negative stock, unresolved differences and
+expiry. Durable snooze does not mutate inventory; resolved conditions vanish,
+worsening severity resurfaces. Restock records a purchase; removed/expired actions
+record real quantity effects. M6 promotes real attention to calm Home/See All.
+
+### Consequences / rejected alternatives
+
+Check completion proves only the observed stock facts at that time, not full
+business/report accuracy. FEFO shrinkage guessing, absolute balance overwrites,
+fabricated surplus costs and dismiss-only stock actions are rejected. Professional
+accounting review and M7 concurrent-device order/conflict review remain gates.
+
+---
+
 # 6. Explicitly Deferred Decisions
 
 These are intentionally unresolved and should not be reopened as though they were forgotten.
@@ -1420,11 +1518,14 @@ Superseded by:
 As of 2026-09-18:
 
 - no active decision is known to conflict with the current Product Inception, PRD, Domain Model, Technical Architecture, Offline Sync or Scanning Architecture;
-- M0–M3 source/automated scope is accepted after independent audit, with physical
-  and release readiness carried; M4 cost/design contracts are approved and its
-  implementation is assigned to a separate Luna max task;
+- M0–M4 source/automated scope is accepted after independent audit, with physical
+  and release readiness carried; M5 planning now incorporates D-039/D-040 and
+  has not been implemented or delegated;
 - D-038 fixes engineering precision/coverage/rounding for M4; it does not finalize
   D-027 as accounting policy;
+- D-039/D-040 approve pilot batch/FEFO, blind-check and adjustment behavior;
+  implementation readiness depends on the coordinator's M5 plan/tickets/design,
+  not on reopening completed M4 or treating the new documents as executed tests;
 - provisional decisions requiring the strongest later validation are:
   - custom sync vs managed sync;
   - moving weighted-average costing;

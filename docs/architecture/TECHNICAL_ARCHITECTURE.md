@@ -906,8 +906,8 @@ committed M1–M3 definitions or old cost fields. Persist purchase effects and
 cost movements/state/observations/outbox in one transaction, and new sale cost
 snapshots/depletion in the existing sale transaction. Projection reconstruction
 uses immutable local movement order, not timestamps alone; no separate stock
-truth or sync protocol is introduced. M5 adjustment and M7 concurrent-device
-costing remain review gates. Cost is provisional, not formal accounting profit.
+truth or sync protocol is introduced. D-040 extends adjustment costing in M5;
+M7 concurrent-device costing remains a review gate. Cost is provisional, not formal accounting profit.
 
 ---
 
@@ -1898,6 +1898,41 @@ The technical architecture is being implemented correctly when:
 13. the active AI coding agent can open the repo and determine current architecture from documentation rather than old chat history.
 14. Future web code can reuse domain/contracts without requiring the native SQLite implementation.
 15. Core tests run through documented commands.
+
+---
+
+## M5 Batch and Reconciliation Extension — D-039 / D-040
+
+Approved first-pilot direction, not implemented in accepted M4. Keep SQLite,
+domain exact arithmetic, local-write-first services and the existing outbox.
+The authoritative batch facts/invariants are DOMAIN_DATA_MODEL 10.5/11.2;
+M5_INVENTORY_RECONCILIATION_PLAN supplies sequencing and compatibility tests.
+
+Batch projections explain the immutable product event total with named groups
+and an unknown residual. They do not own a competing stock balance. Integrate
+allocation in completeSale and recordPurchase inside their existing transactions;
+classification is a durable net-zero operation, adjustment/removal a sourced
+nonzero event. Regular deltas preserve D-034; aggregate/residual arithmetic
+uses BigInt with JSON-safe canonical strings, including legacy overflow cases.
+
+Default FEFO is automatic and assumed, never ordinary checkout confirmation or
+physical traceability proof. Unknown dates/legacy stock are sellable. Date
+precision is retained; batch choice is independent of moving-average costing.
+New sourced adjustments extend cost movement vocabulary/rebuild, leaving all
+old purchase/sale costs and observations unchanged.
+
+SQLite enforces ownership/source links, row checks, event allocation uniqueness
+and finalized immutability. Services finalize cross-row sums/watermarks atomically
+before completion and outbox; distinguish those checks from raw-SQL guarantees.
+Reads derive active store scope; owner-only management cannot rely on a UI flag.
+No ADMIN/STAFF management permissions are introduced before M11.
+
+Use only additive registry migrations after v6; a constrained cost_movements
+table replacement may occur inside a new transactional migration with exact
+copy/integrity checks. Existing CHECK cannot be widened by editing migration 4.
+No Supabase/remote migration, native dependency or new sync protocol is needed.
+M7 must handle concurrent offline consumption/verification and older envelopes;
+M5 local allocation order/watermarks do not claim global coordination.
 
 ---
 

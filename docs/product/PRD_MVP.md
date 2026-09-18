@@ -493,7 +493,21 @@ Allow the retailer to compare recorded stock against physical stock.
 
 ## 15.2 Flow
 
-> Select product → see recorded quantity → enter checked physical quantity → system shows difference → choose reason → confirm adjustment.
+> Select assigned/manual product → enter first physical count with expected
+> quantity hidden → compare → optionally recount → confirm discrepancy and
+> reason/review → reconcile through an explicit inventory event if nonzero.
+
+Preserve first/recount entries; a mismatch is useful information, not an answer
+to reject until it matches the database. Matching counts create a durable check
+fact without a zero stock event. New inventory or batch movements while counting
+require refresh/recount before finalization. Genuine sales remain possible.
+
+Guided owner checks default to three configurable checks/day, with pausable
+store-local windows and a versioned selector using quick-count preference,
+recent activity and last check. Normally exclude recorded out-of-stock items.
+Reasoned replacements and attempts remain auditable; they are not automatic
+evidence of wrongdoing. Different staff assignments/owner review arrive M11.
+Completed checks do not certify the entire business or Reports as 100% accurate.
 
 ## 15.3 Reasons
 
@@ -512,6 +526,35 @@ At minimum:
 Adjustments create explicit inventory events.
 
 The system must not silently rewrite history.
+
+---
+
+## 15.5 Batch-Aware Expiry and Attention — first pilot requirement
+
+Normal product views show aggregate stock. Internally distinguish received
+groups with different expiry information. Restock accepts quantity, cost and
+optional day/month expiry; “Add another expiry group” adds another line for the
+same product. Internal IDs are automatic; printed lot numbers are optional.
+Unknown expiry/legacy stock must not block onboarding or selling.
+
+Normal checkout automatically assumes earliest-date-first (FEFO), without a
+group picker or confirmation. Recorded remaining groups are estimates unless
+physically checked at a particular point; never imply automatic allocation
+proves shelf picking. Batch allocation must not change the approved costing
+method. Physical group inspection/reconciliation can correct the breakdown.
+
+Expiry alerts concern remaining groups, not historical receipts alone. Use
+wording such as “About 8 cartons from this October-expiry group remain”. Month
+labels never produce an invented day countdown. Unknown/uncertain coverage is
+visible. Date passage does not remove stock. Review stock, Snooze, Reconcile
+and Mark expired/removed are contextual actions; removal records real quantity,
+reason and inventory effects, never merely hides the alert.
+
+M5 supplies one compact attention list for low/zero/negative stock, unresolved
+discrepancies and expiry, with contextual Restock/review and durable Snooze.
+M6 promotes real conditions to Home with See All before pilot. Resolution and
+worsening severity supersede snooze; no flood of dashboard cards. Strict lot
+traceability, GS1/OCR capture and staff workflows are future enhancements.
 
 ---
 

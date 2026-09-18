@@ -1,290 +1,170 @@
-# Tickets: M4 Offline Restocking + Provisional Costing
+# Tickets: M5 Inventory, Batch Awareness and Reconciliation
 
-**Status:** Coordinator accepted M4 source/automated scope at `9700ee3` on
-2026-09-18 after independent re-audit. Physical/release/accounting gates remain
-carried. Founder approved the M4 costing and screen/state contract; D-038 and
-DESIGN record the approved rules. Ticket granularity/dependencies were reviewed
-under delegated judgment. Historical returns below describe earlier audit stages.
-**Branch:** feat/m4-restocking-costing. **Accepted baseline:** 66cc64d.
-Accepted M3 tickets/evidence are archived in the engineering M3_SALES ledger.
+**Status:** Published by coordinator under founder-delegated ticket/design judgment;
+not started. Batch direction explicitly approved 2026-09-18. Implementation has
+not been delegated. No acceptance box below is implementation evidence yet.
+**Baseline:** accepted M4 source 9700ee3; M5 planning authored from c1753b6 on
+feat/m4-restocking-costing. Intended task branch: feat/m5-inventory-reconciliation.
+Accepted M4 ledger is archived in docs/engineering/tickets/M4_RESTOCKING_COSTING.md.
 
-## Independent audit return
+## Shared execution contract
 
-Coordinator independently passed 356 tests / 28 suites, typecheck and lint at
-`2bfa3ef`; further checks found A1–A6 in `docs/engineering/M4_AUDIT_CORRECTIONS.md`.
-Completion checkboxes below are implementation evidence, not audit acceptance.
-The same implementation task repairs those findings and returns evidence for
-re-audit; no M5.
+Read AGENTS, M5_INVENTORY_RECONCILIATION_PLAN, DESIGN, PRD, domain/technical/
+offline sources and D-013/D-034/D-036–D-040. Coordinator owns planning, ticket
+changes, workflow registration and independent acceptance. Luna max implements
+these tickets and assigned fixes only, sequentially with no overlapping writers.
 
-## Correction handoff
+Each functional ticket includes its minimum domain/repository/service/UI/tests.
+Keep typecheck and zero-warning lint green; run focused actual SQLite and user
+behavior tests and commit separately with the ticket ID. Update actual evidence
+in this ledger/workflow, never infer unperformed physical checks. Relevant cases
+are defined in the plan evidence matrix, which complements the binary criteria.
+Scope: M5 only. No M6/dashboard, scanner/nav redesign, GS1/OCR/recognition model,
+warehouse, staff assignments, cloud sync, push, merge or deployment.
 
-The same implementation task returned all six requested corrections without
-changing the approved M4 scope:
+## M5-01 — Receive expiry groups and sell automatically
 
-- `457d9d9` (`M4-A1,A4,A5`) preserves exact fractional sale costs when the
-  legacy integer projection is unsafe, validates immutable sale-cost coverage /
-  arithmetic at the repository boundary, appends migration 5 for SQLite
-  coverage/field invariants, and rejects conflicting explicit purchase dates on
-  replay.
-- `08871db` (`M4-A2,A3`) replaces the native-stack draft listener with
-  `usePreventRemove`, preserves discard/Cancel/header/route behavior, refreshes
-  focus-bound reads without clearing drafts, and returns contextual Quick Add
-  selections to the existing restock route.
-- `cb0566e` (`M4-A6`) centralizes readable rational cost estimates and derives
-  current availability from positive covered stock plus a valid average while
-  retaining exact stored bases.
+**Status:** Not started. **Blocked by:** accepted M4 and approved M5 planning gate.
+**Delivers:** retailer can receive different dates of one product, see one total,
+and complete an ordinary sale without choosing a batch.
+**Scope:** smallest batch migration (expected 7), exact domain/projection logic,
+existing receipt/sale completion and replay, restock expiry fields/repeated group
+lines, inventory/group inspection entry and immutable receipt/sale detail.
 
-Focused regressions and the full workspace checks passed after these commits.
-This is implementation evidence only; the coordinator must independently
-re-audit A1–A6 before source acceptance. No M5 work is authorized.
+- [ ] Receive 20 October + 30 January (explicit years), sell 5: earlier group
+  15, later 30, product 45; multi-group/equal-date/undated FEFO tests pass with
+  no ordinary picker/confirmation. DAY/MONTH/UNKNOWN and optional printed number
+  persist; display is estimated, with no invented day countdown.
+- [ ] Populated-v6 positive/zero/negative/legacy-overflow cases survive migration
+  and sale/restart; unknown residual stays sellable. -3 + receipt 5 leaves
+  two positive group units. Batch projection agrees with product ledger/rebuild;
+  new receipt quantities/conversions and original financial snapshots stay exact.
+- [ ] Every new sale/purchase event has complete atomic batch/cost/outbox effects;
+  all-write failure injection, same-op stable replay, conflicting date/precision/
+  group metadata reuse, store/source isolation and violating SQLite writes pass.
+  Old payload replay adds no batches; existing sale/restock regressions pass.
 
-## Re-audit return
+## M5-02 — Inspect and classify existing expiry stock
 
-Coordinator independently passed 364 tests / 28 suites, typecheck and lint at
-`52a772a`. A1/A5 are independently reproduced resolved and A2 source/routed
-evidence is accepted; A4-R/A3-R/A6-R remain in M4_AUDIT_CORRECTIONS.md. Luna
-repairs only those gaps and returns. M5 also waits for founder approval of the
-separate product-change review.
+**Status:** Not started. **Blocked by:** M5-01.
+**Delivers:** unknown stock becomes usefully dated through optional physical review
+without recreating purchases or changing total stock/cost.
+**Scope:** durable inspection facts and net-zero group classification, correction
+history, product group-review UI with retained input/retry and actual watermark.
 
-## Re-audit correction return — A4-R / A3-R / A6-R
+- [ ] Classify existing 40 as 10/30 dated groups without product InventoryEvent,
+  duplicate opening stock, cost movement, receipt/observation/COGS mutation;
+  partial review retains unknown remainder and time-specific evidence.
+- [ ] Correcting date/breakdown appends classification history; group totals,
+  unknown residual and immutability survive rebuild/reopen. Changed movement/
+  classification watermark rejects stale review even if total is unchanged.
+- [ ] Same operation replays original result; changed count/date/group input,
+  invalid totals, wrong store/device/inactive member or STAFF management fail
+  without side effects. All-write rollback and dirty exit/read-retry UI pass.
 
-The same implementation task returned only the three bounded re-audit fixes:
+## M5-03 — Record stock adjustments and actual expired removal
 
-- `c30d3f7` (`M4-A4R`) adds typed parent sale-item cost checks and additive
-  migration 6 SQLite enforcement. AVAILABLE snapshots must match the immutable
-  parent COGS and safe legacy unit-cost projection; UNAVAILABLE snapshots retain
-  null parent COGS. Fractional and unsafe-integral exact bases remain valid with
-  a null legacy projection, while old M3 null rows are not backfilled.
-- `9535451` (`M4-A3R`) makes the contextual Quick Add retry itself resume the
-  pending selection after a failed catalogue read, exactly once, while retaining
-  the cart, editor and supplier state. The permanent regression covers retry
-  failure then success and a focus/quantity cycle after selection.
-- `c91d16a` (`M4-A6R`) removes raw stored rational fractions from ProductDetail
-  and PurchaseDetail, explains NGN display rounding as nearest kobo, and uses
-  exact BigInt/string formatting for overflow-sized valid receipt estimates.
+**Status:** Not started. **Blocked by:** M5-01.
+**Delivers:** real loss/addition/expiry removal is recorded, with truthful cost
+availability, rather than silently overwriting stock or dismissing an alert.
+**Scope:** sourced adjustment/line migration and cost vocabulary extension
+(expected 8), exact adjustment cost/rebuild, shared transaction writer and manual
+adjustment/group removal UI; historical dates/costs remain immutable.
 
-`npm run validate` passed after these commits: 150 domain tests and 217 mobile
-tests (367 tests / 28 suites), strict typecheck and zero-warning lint. Focused
-correction suites passed 54 tests. Doctor 21/21, Expo dependency check, Android
-export (1,357 modules; 3.2 MB Hermes), active M4 workflow validation and
-`git diff --check` also passed. This is implementation evidence only; the
-coordinator must independently re-audit and decide source acceptance. No M5,
-device, cloud, push, merge or release action was performed.
+- [ ] Supported nonzero reasoned adjustments create sourced aggregate/line,
+  InventoryEvent, matching batch effects, exact cost movement/projection and one
+  outbox atomically; removing selected expired stock decreases its actual recorded
+  remainder. Date passage/dismissal alone never changes inventory.
+- [ ] Fully covered shortages consume proportional exact MWA value; unknown/
+  excessive shortages, nonpositive remainder and unexplained additions have
+  truthful unavailable coverage. Classification changes no cost. Live and rebuilt
+  cost states agree; original M4 rows/IDs/order/values/COGS remain unchanged through
+  the transactional cost-table CHECK extension and populated upgrade.
+- [ ] All-write rollback, raw relationship/immutability constraints, ownership/
+  OWNER versus ADMIN/STAFF, stale selected-group removal, same/conflicting replay,
+  cold reopen and retained UI failure paths pass alongside existing M1–M4 tests.
 
-## Execution contract
+## M5-04 — Blind count and reconcile recorded differences
 
-Coordinator owns planning, dependencies, decisions, workflow registration and
-independent audit. Luna max implements approved tickets and assigned fixes,
-returning completion for audit. Founder delegated sizing/dependency judgment.
+**Status:** Not started. **Blocked by:** M5-02, M5-03.
+**Delivers:** a truthful physical count can match or correct stock, retaining
+first/recount evidence instead of forcing agreement with the database.
+**Scope:** durable check/submission migration (expected 9), blind UI, compare/
+recount/reason/finalization and complete group-count or unknown-breakdown handling.
 
-Shared sources: BUILD_PLAN M4, PRD restocking/costing, DOMAIN_DATA_MODEL,
-TECHNICAL_ARCHITECTURE, OFFLINE_SYNC, DESIGN, M4_RESTOCKING_COSTING_PLAN and
-D-013/D-027/D-028/D-034/D-036/D-037/D-038. Cost/design approval is recorded;
-follow these contracts and report contradictions rather than changing them.
+- [ ] First expected quantity is hidden from text/accessibility/prefill; first
+  and recount submissions persist. Match creates a check with no zero event;
+  positive/negative discrepancies create real sourced corrections. Total-only
+  discrepancy leaves unresolved group composition unknown; complete group count
+  can correct groups without FEFO shrinkage guessing.
+- [ ] Finalization transaction revalidates event AND batch watermarks; intervening
+  sale/restock, offsetting moves or net-zero classification requires refresh/recount,
+  retaining prior input/evidence and never blocking genuine sales.
+- [ ] Check finalization, adjustment, batch/cost effects and one envelope succeed
+  or roll back together at every write. Same/conflicting op replay, store/actor/
+  role isolation, package exactness, restart, dirty header/hardware/Cancel and
+  recoverable UI failures pass; no full-report accuracy claim or history rewrite.
 
-Per ticket: relevant domain/repository/component tests, typecheck and
-zero-warning lint must pass. Commit separately with ticket ID; record commands,
-results, commits and deferred checks. No M5, remote schema/transport, purchase
-payments/payables, returns, shared contributions, recognition, push, merge or
-deployment. Never edit committed migrations 1-3 or fabricate old sale costs.
+## M5-05 — Guided owner stock checks and auditable replacements
 
-## M4-01 — Complete and reopen one offline restock
+**Status:** Not started. **Blocked by:** M5-04.
+**Delivers:** configurable due checks encourage a manageable daily stock routine.
+**Scope:** settings/assignment/attempt/replacement migration (expected 10),
+versioned selector, owner due-work/settings UI; no staff dispatch/auth UX.
 
-**Status:** Implementation complete; independent audit pending. **Blocked by:** M3 acceptance (met); M4 approval gate (met).
-**Outcome:** Save one product/package with quantity and total cost, increase
-stock and reopen its immutable receipt.
-**Scope/modules:** Purchase domain, additive SQLite repositories/schema,
-record-purchase aggregate, minimal More/restock/receipt screens and tests.
-No supplier form, unit-cost mode, multiline cart, reconciliation or sale COGS yet.
+- [ ] Default target 3 is configurable/pausable with store-local foreground windows;
+  due/unfinished work survives restart/day rollover. Selector rotates using
+  quick-count/activity/last-check inputs, excludes ordinary nonpositive/inactive/
+  non-countable candidates and handles no candidates without fake assignments.
+- [ ] Replacement needs a reason, retains original assignment/attempt history and
+  avoids immediate repetition; exhausted pool is truthful. Physical zero for
+  recorded-positive stock follows discrepancy flow. Repeated replacements do not
+  allege theft or imply all inventory is verified.
+- [ ] Settings/assignment/replacement operations preserve owner authorization,
+  actual actor/device, atomic outbox/replay and store isolation; deterministic
+  time/selection, rollback, cold-reopen and accessible retained-error UI tests pass.
 
-- [x] Exact package/base quantity and total/currency validation; immutable names,
-  conversion, input basis and normalized rational price. Purchase/item, positive
-  inventory event, provisional cost state/movement, private non-contributing
-  observation and one outbox aggregate commit atomically. Receipt reads stored
-  facts and distinguishes estimated/unavailable cost.
-- [x] Populated-M3 upgrade retains all prior rows/history/null costs; rollback
-  injection at every aggregate write proves no partial effects. Actor-scoped
-  replay returns the original graph without duplicate stock/observation/outbox;
-  cross-store/device/member/product/package/currency misuse and conflicting
-  operation reuse are rejected without writes.
-- [x] UI covers valid save/reopen, exact input errors, retained failed draft,
-  retry with same operation ID, duplicate-submit prevention and dirty exits.
-  Domain tests cover fractional normalization, zero/negative/unknown-stock
-  transitions and overflow. Ticket tests, typecheck and zero-warning lint pass.
+## M5-06 — Local attention, remaining-stock expiry and snooze
 
-**Risks/manual checks:** Native restart/offline proof needs the device gate;
-Node/component tests do not provide physical evidence.
-**Completion evidence:** Commits `3c4eef9` and `c810f5b` add the offline
-purchase aggregate, additive migration 4, atomic inventory/cost/observation/
-outbox writes, receipt/history routes, replay protection, conflict rejection,
-per-write rollback matrices, populated-M3 upgrade retention, exact costing edge
-cases and cold-reopen projection evidence. The final `npm run validate` passed
-with 150 domain tests in 5 suites and 214 mobile tests in 23 suites (364 tests
-/ 28 suites), strict typecheck and zero-warning lint. Correction commit `08871db`
-adds supported restock route-removal protection and focus-safe draft return.
-Physical offline/restart, large-text and independent source acceptance remain
-pending.
+**Status:** Not started. **Blocked by:** M5-03, M5-04.
+**Delivers:** one calm Needs attention list supports real restock/review/removal
+and reminders from actual recorded remaining inventory.
+**Scope:** condition queries/reorder control, durable snooze/lead-time settings
+(expected migration 11), More attention/See All/detail/actions; Home waits M6.
 
-## M4-02 — Restock multiple packages and optionally identify a supplier
+- [ ] Low/zero/negative/discrepancy/remaining expiry and unknown coverage states are
+  store-scoped and truthful. Depleted/resolved groups disappear; DAY store-local
+  countdown/lead boundaries, MONTH labels, printed meaning and estimated quantity
+  tests pass. Current elapsed dates warn without automatic stock removal.
+- [ ] Restock routes to actual purchase, Reconcile to checks and Mark expired/removed
+  to real adjustment. Later today/Tomorrow/Choose time snooze persists separately
+  from inventory, expires when due, and worsening low->zero/negative or date
+  severity resurfaces despite earlier suppression. No simulated price alerts.
+- [ ] Complete range/projection queries avoid paged-history totals; reads refresh
+  after durable writes/focus/resume/date rollover. Settings/snooze action history,
+  same/conflicting replay, role/store isolation, rollback/restart and loading/
+  empty/error/large-text component paths pass without new financial Home cards.
 
-**Status:** Implementation complete; independent audit pending. **Blocked by:** M4-01.
-**Outcome:** Review/save several lines using total or per-package unit cost,
-with optional explicitly selected/created supplier.
-**Scope/modules:** Restock cart/normalization, supplier repository, aggregate,
-client and tests. Append a migration for new persisted contracts if necessary.
-No tender/credit, supplier auto-merge, contacts import or landed costs.
+## M5-07 — Complete evidence and stop for independent audit
 
-The record-purchase aggregate and Restock screen accept multiple lines,
-TOTAL/UNIT normalization and explicit supplier attribution. Supplier names are
-store-private and duplicate names remain separate rows.
+**Status:** Not started. **Blocked by:** M5-02, M5-03, M5-04, M5-05, M5-06.
+**Delivers:** another agent/laptop can recover the implemented milestone and
+review what actually passed. No feature scope expansion.
 
-- [x] Add/edit/remove lines with exact running totals; unit-cost mode rejects
-  fractional minor-unit totals while total-cost mode retains fractional derived
-  prices. Mixed packages/repeated products process in stable line order using
-  transaction-time active-package ownership checks.
-- [x] Supplier is store-private and explicit; duplicate names do not merge.
-  Receipt attribution survives later supplier/product/package changes. New
-  supplier and all purchase effects/envelope commit or roll back together;
-  tests inject failure at every multiline write, replay and isolate stores,
-  including repeated-product cost updates and safe arithmetic bounds.
-- [x] Component tests cover no-match/Quick Add return with retained draft,
-  supplier modes, line edits, read retry, package deactivation, overflow and
-  dirty header/hardware/tab/Cancel exits. No unhandled initial/follow-up reads;
-  ticket tests, typecheck and zero-warning lint pass.
+- [ ] Complete documented validation, Expo Doctor/dependency compatibility and
+  Android export pass; fresh/populated-v6 upgrade, migration rollback/row retention,
+  rebuilt projections and existing M1–M4 regression suite have recorded commands
+  and results. Active workflow schema/date-time/dependencies/artifacts and diff
+  checks pass; no secrets/generated builds are committed.
+- [ ] Ledger, PROJECT_STATE and M5 workflow record ticket commits, migrations,
+  evidence and unresolved risks accurately; physical Galaxy/offline/restart/text/
+  native exits, Metro, second-laptop and accounting gates are either actually
+  performed with evidence or explicitly carried, never claimed from mocks.
+- [ ] Return clean task branch/HEAD/status and structured handoff to coordinator,
+  then stop editing. Independent-audit gate remains pending until coordinator
+  reviews and accepts; do not start M6, push/merge/deploy or self-accept.
 
-**Risks/manual checks:** Keyboard, dirty exits and large text need device checks.
-**Completion evidence:** Commit `b12ff0c` completes the multiline Restock
-cart, edit/remove flow, TOTAL/UNIT choice, exact running totals, supplier
-selection/creation, retained failed drafts, retry and Quick Add states. Commit
-`c810f5b` covers repeated-product/mixed-package rollback and store isolation;
-`9ec9075` covers the safe-total overflow state. Correction commit `08871db`
-covers supported native-stack dirty exits, focus refresh and contextual Quick
-Add return; focused Restock/navigation regressions pass. Physical
-keyboard/large-text/dirty-exit checks remain deferred to the carried device
-gate; independent audit is pending.
+## Evidence log
 
-## M4-03 — Snapshot available provisional cost on subsequent sales
-
-**Status:** Implementation complete; independent audit pending. **Blocked by:** M4-01.
-**Outcome:** Preserve validated receipt-derived basis/estimated COGS on new sales
-without changing old sales or blocking unknown-cost checkout.
-**Scope/modules:** Cost domain/projection, complete-sale aggregate, additive
-immutable sale-basis persistence, receipt/detail display and tests.
-No backfill, full profit, alternative costing method or M5 adjustment. M4-02 is
-not a logical dependency; this shared-checkout assignment remains sequential.
-
-- [x] Resolve cost inside the sale/items/inventory/outbox transaction; exact
-  rational basis/method version and approved per-line rounded COGS are immutable.
-  Do not misrepresent a fractional basis in an integer unit-cost field. New
-  restocks never change prior snapshots; D-036 arithmetic/tender/credit and
-  D-013 genuine overselling remain intact.
-- [x] Tests cover remaining-value/average transitions, one-versus-three-unit
-  rational examples, half-kobo rounding, zero cost, unknown coverage, overselling
-  and replenishment through nonpositive stock. Pre-M4 costs remain null; failure
-  and replay cannot partially consume or duplicate stock/cost movements; enforce
-  store/device/member isolation and safe bounds.
-- [x] Sale detail labels estimated/unavailable cost. Integration tests exercise
-  purchase -> sale -> changed-price purchase -> sale, then cold reopen and
-  projection rebuild from immutable local movement order with identical basis
-  and snapshots. Ticket tests, typecheck and zero-warning lint pass.
-
-**Risks/manual checks:** Professional accounting review and M7 concurrent-device
-costing remain separate gates; the method stays provisional.
-**Completion evidence:** Commits `3c4eef9` and `c810f5b` add exact rational
-weighted-average transitions, immutable sale cost companions, unavailable-cost
-handling, conflicting replay rejection, full sale-cost rollback coverage,
-rebuild coverage and sale-detail labels. Domain costing tests cover fractional
-averages, half-up rounding, zero cost, unknown coverage, overselling,
-replenishment and overflow. The full workspace validation passed; M3 historical
-sale costs remain unchanged/null. Correction commits `457d9d9` and `cb0566e`
-cover fractional legacy-column overflow, immutable snapshot invariants, exact
-rounding and merchant-readable current-cost states.
-Accounting review and independent audit are still pending.
-
-## M4-04 — Inspect private purchase and original price history offline
-
-**Status:** Implementation complete; independent audit pending. **Blocked by:** M4-02, M4-03.
-**Outcome:** Reopen receipts/product purchase-price history with original
-package facts, supplier attribution and truthful local sync status.
-**Scope/modules:** Store-scoped queries, history/detail/product price UI,
-projection verification and tests. No trend charts, market signals or sharing.
-
-- [x] Reads show saved names, quantities, conversion, currency and entered
-  total/unit basis plus labelled normalization, supplier and cost availability.
-  Later catalogue/supplier changes do not rewrite history; consent stays false.
-- [x] Cold-reopen/upgrade tests retain receipts, observations, movements and
-  operation IDs. History never substitutes current prices or leaks another
-  store's observations. Local ordered projection rebuild matches state without
-  treating device timestamps as sole ordering authority.
-- [x] Empty/loading/error/retry and detail refresh states are tested; tabs/header/hardware
-  Back preserve draft guards and large-text components remain usable. No future
-  More action appears implemented. Ticket tests, typecheck and lint pass.
-
-**Risks/manual checks:** Physical offline/history/text-scaling gate remains open.
-**Completion evidence:** Commit `b12ff0c` integrates store-scoped original
-purchase-price history into ProductDetail with saved package/conversion,
-supplier, basis, normalized cost, current cost-availability and contribution
-state; error/retry and detail refresh paths are covered by ProductDetail tests.
-Commit `c810f5b` proves cold-reopen history/projection preservation and store
-isolation. Correction commits `08871db` and `cb0566e` add focus refresh,
-contextual Quick Add selection and readable current-versus-historical cost
-labels. Physical offline/history/text-scale proof and independent audit remain
-pending.
-
-## M4-05 — Demonstrate the restock-to-sale workflow and return for audit
-
-**Status:** Automated implementation evidence complete; independent audit and physical evidence pending. **Blocked by:** M4-01, M4-02, M4-03, M4-04.
-**Outcome:** Prove the complete workflow and hand back a reproducible source
-milestone. This cross-flow verification slice does not substitute independent audit.
-**Scope/modules:** Regression/integration evidence, developer/device procedures
-and execution ledgers. No new feature scope or readiness waiver.
-
-- [x] Full documented validation passes: domain/mobile tests, typecheck,
-  zero-warning lint, Doctor, dependency compatibility, Android export, workflow
-  schema/date-time/dependency checks and diff hygiene. Report exact commands,
-  results, commits, migrations and unavailable checks.
-- [x] Cross-flow tests prove multiline restock -> sale -> changed-price restock
-  -> history/projection after reopen; failure/replay produces no partial or
-  duplicate effects. Document Galaxy airplane-mode/force-stop/large-text/dirty
-  exit procedure; record only physical checks actually performed and preserve
-  unpassed carried readiness gates.
-- [x] Tickets, PROJECT_STATE and workflow contain actual evidence/deferred risks;
-  completed commits leave a clean checkout. Notify coordinating task, mark
-  independent audit pending and STOP. Do not self-accept M4 or start M5.
-
-**Risks/manual checks:** Source acceptance and external release readiness are
-separate. Only coordinator records independent acceptance.
-**Completion evidence:** Baseline commits `b12ff0c`, `c810f5b` and `9ec9075`
-complete the source scope; correction commits `457d9d9`, `08871db` and
-`cb0566e` returned A1–A6, followed by bounded re-audit returns `c30d3f7`,
-`9535451` and `c91d16a`. The latest `npm run validate` passed (150 domain
-tests / 217 mobile tests; 367 tests / 28 suites), strict typecheck and
-zero-warning lint. `npm run mobile:doctor` passed 21/21, `npx expo install
---check` reported dependencies up to date, and `npm run mobile:export` passed
-(1,357 Android modules; 3.2 MB Hermes bundle). The active M4 workflow
-JSON Schema/date-time/dependency/artifact check passed; the historical M2
-record retains its previously recorded `tests-and-review` schema limitation.
-`git diff --check` passed. The Galaxy M4 offline/restart/history/large-text/
-dirty-exit session, development-client/Metro check and second-laptop
-reproduction remain unperformed; no device, cloud, push, merge or release
-action was performed. The independent audit remains pending; do not self-accept
-M4 or begin M5.
-
-**Deferred Galaxy procedure:** On the Galaxy A15 5G (`SM-A156E`), install a
-current authorized build, provision a test store/product, record a multiline
-restock with supplier, complete a sale, change the purchase price, reopen
-history after force-stop and airplane-mode relaunch, exercise Cancel/header/
-hardware-Back dirty guards, and repeat at 1.3 text scale. Restore airplane
-mode and the original text scale; record build/device IDs and observations.
-
-## Final independent source acceptance — 2026-09-18
-
-Coordinator reviewed `52a772a..9700ee3` and independently passed `npm run
-validate`: 150 domain and 217 mobile tests (367 / 28 suites), strict typecheck
-and zero-warning lint. Independent Expo Doctor: 21/21; Android export: 1,357
-modules / 3.2 MB. A4-R parent consistency, A3-R contextual retry and A6-R exact
-large-value display are resolved; the audit record contains the independent
-SQLite/formatting evidence. No blocking source findings remain in this review.
-This does not pass actual Galaxy M3/M4, Metro, second-laptop or accounting gates.
-M5 remains at the separate expiry-aware product/data/design and ticket gate;
-no implementation delegation is authorized by this acceptance.
+Planning validation only. No M5 code/tests/migrations/device session performed.
+Implementation evidence must be appended per ticket with actual commit and checks.

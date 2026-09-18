@@ -546,18 +546,23 @@ Record restocking and generate reliable purchase-cost history.
 
 ## Goal
 
-Make recorded stock inspectable and correctable.
+Make recorded stock inspectable/correctable and minimally batch-aware for
+first-pilot expiry, with owner stock checks and local attention. D-039/D-040,
+DOMAIN_DATA_MODEL and M5_INVENTORY_RECONCILIATION_PLAN govern the extension.
 
 ## Build
 
-- inventory event history;
-- inventory balance projection;
-- reconciliation session;
-- reconciliation line;
-- discrepancy reasons;
-- correction event;
-- negative stock visibility;
-- basic low-stock logic.
+- product event history and reconstructable aggregate/group projections;
+- automatic receipt groups, optional DAY/MONTH expiry and UNKNOWN coverage;
+- assumed automatic FEFO sale depletion, no ordinary batch confirmation;
+- progressive net-zero physical classification without receipt/COGS rewrites;
+- sourced adjustments, actual expired removal and exact conservative cost extension;
+- blind-first reconciliation with retained recount/reason and movement protection;
+- configurable guided owner checks, auditable replacements and empty-pool handling;
+- low/zero/negative/discrepancy/expiry attention with durable snooze/review/restock.
+
+Extend M3/M4 services additively in M5; do not reopen M4 or edit migrations 1–6.
+No warehouse, staff assignment, strict pharmacy mode, GS1/OCR or scanning model.
 
 ## Acceptance
 
@@ -565,7 +570,16 @@ Make recorded stock inspectable and correctable.
 - adjustment creates explicit event;
 - stock is reconstructable from events;
 - no direct silent stock overwrite;
-- negative inventory does not destroy real sales.
+- negative inventory does not destroy real sales;
+- multiple dates retain one ordinary product total and exact FEFO group effects;
+- unknown/legacy stock stays sellable without invented dates or duplicate stock;
+- expiry reflects estimated remaining groups and honest date precision;
+- cost/sale history is unchanged; adjustments and batch effects are atomic/replay-safe;
+- populated-v6 upgrade, projection rebuild, failure rollback and store isolation pass.
+
+Rolling M5 tickets include receipt/sale groups, physical classification,
+adjustment/removal, blind reconciliation, guided checks, attention and handoff.
+Stop after M5 for independent audit; M6 promotes these real alerts to Home.
 
 ---
 

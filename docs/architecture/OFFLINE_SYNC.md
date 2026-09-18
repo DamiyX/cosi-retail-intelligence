@@ -1730,6 +1730,37 @@ These should be answered with implementation evidence, not guessed prematurely.
 
 ---
 
+## M5 Batch / Reconciliation Envelope Compatibility — D-039 / D-040
+
+The mobile SQLite business services are current producers; no deployed batch
+consumer/server is implemented. Keep the existing canonical envelope/version
+and operation identity. New sale/purchase entities add batchTrackingVersion: 1,
+groups/allocation headers/entries; new inspection/adjustment/check/assignment/
+snooze commands use that same builder and one atomic envelope with their complete
+private facts. Do not create a separate batch queue or upload protocol.
+
+Old payloads without the extension remain valid. Historical same-operation replay
+returns original graphs with no reconstructed batches; never rewrite old payloads
+or rerun FEFO against today's groups. New explicit expiry precision/value/meaning,
+printed metadata and group/adjustment/count inputs bind the idempotency key;
+conflicting reuse fails without side effects. Omitted old expiry means UNKNOWN.
+
+Completed batch movements, finalized observations/adjustments/checks and action
+history are append-oriented Category A facts. Current stock/coverage/suppression
+are reconstructable projections. Mutable check frequency/windows/lead-time and
+reorder configuration use Category B version/conflict rules in M7. Physical
+classification is not an absolute authoritative overwrite of the store ledger.
+
+M7 must test both legacy and extended envelopes, preserve concurrent genuine
+sales even if they oversubscribe a batch, expose unknown/uncertain allocation,
+and revalidate stale count/physical classifications with server revisions.
+Do not accept local row order or device timestamps as a global count watermark,
+deduplicate physical observations by overwriting others, or silently recompute
+historical assumed allocations/COGS. Those server/conflict contracts remain M7
+gates before coordinated multi-device claims; M5 prepares immutable local facts.
+
+---
+
 # 75. Source-of-Truth Relationship
 
 This document is subordinate to:

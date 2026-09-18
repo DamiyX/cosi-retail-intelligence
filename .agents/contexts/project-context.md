@@ -78,14 +78,14 @@ partial measure, never full profit or P&L.
 
 ## Current Priorities
 
-1. Coordinator prepares the expiry-aware M5 product/data/design contract and
-   dependency-reviewed tickets before delegation. Founder approved expanded
-   stock-check/attention behavior and conservative discrepancy costing, and
-   requires expiry alerts for the first pilot. Specific lot/allocation behavior
-   remains proposed in docs/product/PRODUCT_CHANGE_BACKLOG.md; do not implement
-   it or silently override existing authorities before that review/alignment.
-   Coordinator owns plans/tickets/audit; separate Luna max tasks implement
-   approved milestones and assigned fixes sequentially.
+1. M5 planning/design/tickets are prepared under approved D-039/D-040: minimal
+   pilot batch awareness, automatic assumed FEFO without normal batch selection,
+   first-class unknown stock, blind owner checks, conservative adjustment cost
+   and attention/snooze. Read M5_INVENTORY_RECONCILIATION_PLAN and the active M5
+   workflow/ledger before delegation. No M5 code or task assignment yet.
+   Coordinator owns plans/tickets/independent audit; separate implementation
+   tasks execute sequentially. Current approved default is Luna max; a different
+   implementation model requires the founder's explicit choice.
 2. Complete the explicitly deferred M3 physical-device/offline-sale,
    development-client/Metro, large-text, and second-laptop checks before any
    external beta/native-release claim; preserve the M1/M2 Galaxy evidence as
@@ -125,12 +125,11 @@ partial measure, never full profit or P&L.
 - Confirm onboarding, session recovery, store creation/membership, multiple
   stores, and exact staff permissions before those flows are implemented.
 - D-038 approves M4 engineering costing. Founder approved conservative M5
-  shortage/surplus handling in the product change record; its detailed contract
-  and decision/architecture alignment precede implementation. Professional
+  shortage/surplus handling in the product change record; D-040 and domain/design sources now record its engineering contract. Professional
   accounting review and M7 concurrent-device cost/lot allocation remain gates.
-- Approve the application flow and design direction before substantial product
-  UI implementation. See .agents/contexts/app-flow.md and
-  docs/design/README.md.
+- M5 application flow/design states are prepared under founder delegation;
+  validate actual retailer/device use before pilot. Future Home/Scan navigation
+  retains later design gates. See app-flow and docs/design/README.md.
 - Define consent and privacy rules before contributing observations to shared
   price or recognition datasets.
 

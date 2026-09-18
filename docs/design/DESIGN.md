@@ -1,8 +1,8 @@
-# COSI Product Experience and M2–M4 Design Baseline
+# COSI Product Experience and M2–M5 Design Baseline
 
 **Status:** Approved implementation baseline  
 **Approved:** 2026-09-14 through founder delegation of design and ticket judgement  
-**Scope:** Whole-MVP experience direction, with implementation detail for M2–M4  
+**Scope:** Whole-MVP experience direction, with implementation detail for M2–M5  
 **M4 approval:** Founder approved restock screens/states and D-038 on 2026-09-18  
 **Reference device:** Galaxy A15 5G; low-end Android remains a required constraint
 
@@ -281,6 +281,98 @@ and detail reads, with focus reload and retained drafts. Reuse accessible labels
 field errors, 48dp targets, keyboard-safe review, large-text wrapping and existing
 contrast tokens. Galaxy offline/restart/history/dirty-exit/large-text evidence is
 still required; approval of this baseline is not physical-device proof.
+
+## M5 Inventory, Expiry Groups and Blind Checks
+
+Founder approved the behavior/expiry direction on 2026-09-18; coordinator
+prepared these states under delegated design judgment. D-039/D-040 govern data
+behavior. Reuse existing tokens, components, guards and accessible typography;
+no visual redesign or navigation/tab replacement in M5.
+
+### Entry and inspection
+
+More -> Inventory opens searchable aggregate product stock, with Active/All
+scope and clear low/zero/negative distinctions. Product detail links to the
+same product inventory/history surface. Show “Milo — 50 cartons”; “Expiry
+groups” reveals dates and recorded remaining quantities only when useful.
+Label assumed quantities “Estimated remaining”; show unknown-date/unknown
+breakdown coverage, last physical observation date and pending local sync.
+Never call recorded FEFO quantities physically guaranteed.
+
+### Restock and ordinary sale
+
+Extend the existing restock line with optional expiry (Unknown / Month / Date),
+keeping quantity and TOTAL/UNIT cost. “Same product, different expiry? Add another
+group” creates a separate repeated-product line with its own quantity/cost/date;
+do not automatically distribute rounded totals. Optional printed batch number
+is secondary metadata. No “lot setup” prerequisite. Dirty exit/Quick Add recovery
+must retain date inputs as well as existing cart/supplier facts. Receipt detail
+shows original group date facts without editing history.
+
+Sales stay at the existing M3 speed: no batch picker/confirmation. Allocation
+happens at durable completion. Optional sale detail explains estimated expiry
+group effects. Show a concise elapsed-date warning when recorded relevant stock
+has passed its date, without an invented guarantee or new mandatory prompt.
+Unknown/negative-stock manual sale remains possible.
+
+### Review expiry / classify existing stock
+
+Inventory group review accepts observed quantity and printed date, allowing
+another group and an unknown remainder. Preview “Total stock unchanged” for
+classification-only inspection; mismatched product totals route into the real
+reconciliation flow. Corrections preserve prior observations/dates. Partial
+inspection cannot imply the entire stock was physically verified.
+
+“Mark expired/removed” asks actual quantity/group and reason, previews the
+negative stock effect and confirms a durable adjustment. It is not a dismiss
+button or an automatic whole-batch write-off. If quantity changed meanwhile,
+refresh/review rather than apply a stale removal.
+
+### Blind reconciliation and guided checks
+
+More -> Stock checks or Inventory -> Count starts a durable session. The first
+count screen hides expected quantity in text, accessibility labels and prefills;
+it accepts exact supported package/base quantities. After submission show
+recorded versus physical, the difference, Recount and Confirm/reason. Retain
+both submissions. A match finishes as “Matched”; discrepancy can finish as
+“Reconciled”, not “wrong until you guess correctly”. Batch observations are
+optional unless claiming a verified breakdown; total-only changes show unknown
+group coverage and a Review groups action.
+
+If sales/restocks/classification changed the watermark, preserve entered evidence
+and offer Refresh and recount. Never block sales or silently overwrite newer
+stock. First/recount submissions survive restart; guard unsaved input and
+destructive Cancel/header/Android Back using existing supported navigation
+patterns. Finalization failure retains the session and operation ID for retry.
+
+Guided check list shows due/pending/completed facts. Settings offer daily target
+(default 3), pause and store-local check windows. Selection rotates eligible
+items using a versioned policy; no candidates is a calm empty state. “Can't count
+this item?” records a reason and replacement history; physical zero for expected
+positive stock offers a zero-count discrepancy. No accusation or accuracy badge.
+No staff invitation/assignment or supervisor-review workflow in this first
+owner-only slice; ADMIN/STAFF management permissions await explicit later review.
+
+### Attention and snooze
+
+More -> Needs attention is one compact list with condition-specific detail/actions:
+Restock for low/zero stock; Review/Reconcile for negative stock/differences;
+Review stock/Snooze/Mark expired or removed for expiry. Unknown breakdown/date
+coverage is explicit. Keep financial Home/report cards for M6.
+
+DAY date messages may show a calendar-day countdown; MONTH says “October 2026
+expiry”, never invented exact days. BEST_BEFORE/UNSPECIFIED labels retain their
+meaning rather than calling every date “unsafe expiry”. About/estimated wording
+explains inferred remaining quantities. Zero remaining removes that condition.
+
+Snooze offers Later today, Tomorrow and Choose date/time; it affects reminders,
+not stock. Display due time; reject past times. Condition resolution clears it,
+and worsening severity (low -> zero/negative, upcoming date -> reached/passed)
+resurfaces the item. No report locking or 100% accurate claim. M6 adds Home/See All.
+
+All surfaces require loading/empty/error/retry, retained input after read errors,
+locally saved/pending sync versus acknowledged status, accessible labelled actions,
+large text and hardware/header exit checks. Physical evidence remains separate.
 
 ## Gates for Later Milestones
 

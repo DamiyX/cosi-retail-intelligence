@@ -1,8 +1,6 @@
 # COSI Application Flow
 
-**Status:** Active; MVP capability flow plus M2 catalogue and M3 Sell navigation
-approved, with M3 source/automated scope accepted and physical/release gates
-carried  
+**Status:** Active; M1–M4 source scope accepted with readiness carried. M5 batch/FEFO and blind-count behavior approved; M5 implementation not started.  
 **Scope:** MVP user journeys  
 **Updated:** 2026-09-18  
 **Confidence:** High for required jobs and transaction behavior; medium or low
@@ -61,6 +59,10 @@ upload must not block local transaction completion.
 
 ## Sale Journey
 
+M5 automatically records assumed FEFO consumption at durable sale completion;
+ordinary checkout requires no batch selection/confirmation. Unknown stock stays
+sellable; physical batch identity is distinct from product recognition.
+
     Start sale
       -> identify product by search, barcode, recognition, or recent items
       -> if ambiguous, ask the user to choose
@@ -85,7 +87,8 @@ settlement, void, return, correction, and reversal remain deferred.
       -> find or create the product
       -> choose the purchase package
       -> enter quantity and total or unit cost
-      -> optionally record supplier and other approved metadata
+      -> optionally record supplier, expiry month/day or Unknown
+      -> add another same-product line for a different expiry group
       -> review
       -> commit purchase, inventory events, cost snapshot/history, attribution,
          and required outbox work atomically to the local database
@@ -98,8 +101,8 @@ The founder approved the M4 screen/state baseline on 2026-09-18. Restock and
 purchase history enter through More; product Quick Add retains the in-memory
 draft, dirty exits require confirmation, and total/unit input retains its exact
 basis. Cost is estimated or unavailable under D-038; personal observations remain
-private/non-contributing. See DESIGN and M4_RESTOCKING_COSTING_PLAN. M4 source
-implementation is assigned; its completion and physical evidence are not claimed.
+private/non-contributing. See DESIGN and M4_RESTOCKING_COSTING_PLAN. M4 source scope is accepted. M5 adds automatic internal groups and allocation
+inside the existing atomic transactions; physical readiness is still carried.
 
 ## Catalogue and Progressive Setup
 
@@ -116,15 +119,22 @@ or explicitly match it later without losing store-owned or historical facts.
 
 ## Inventory and Reconciliation
 
-    Open inventory or product
-      -> view derived stock and relevant event history
-      -> count or identify a discrepancy
-      -> choose an explicit adjustment/reconciliation reason
-      -> review the quantity effect
-      -> append an inventory event with actor and timestamp metadata
-      -> keep the prior history intact
+    More -> Inventory / Stock checks / Needs attention
+      -> inspect aggregate stock and optional expiry-group detail
+      -> start assigned/manual count with expected quantity hidden
+      -> submit first count, compare, optionally recount
+      -> choose reason and review nonzero difference
+      -> revalidate inventory AND batch movement watermark
+      -> commit check, sourced adjustment, batch/cost/outbox atomically
+      -> preserve history and show locally saved / pending sync
 
-Direct silent stock overwrites are prohibited.
+A matching count has no zero stock event. Optional physical group inspection
+can classify unknown stock net zero; total-only discrepancy does not identify
+missing batches and leaves breakdown unknown. Actual expired removal records
+real quantity/event effects. Guided owner checks are configurable and reasoned
+replacements auditable. Attention snooze suppresses reminders, never stock.
+No 100% business accuracy, misconduct or physically guaranteed FEFO claim.
+D-039/D-040 and DESIGN define the approved M5 behavior; not implemented yet.
 
 ## Expenses and Withdrawals
 
@@ -181,8 +191,8 @@ transaction completed if its local atomic commit failed.
 | Today/Home | Daily task entry and honest summary | Layout open |
 | Sale/cart/payment/completion | Required offline workflow | Capability flow approved |
 | Catalogue/search/product edit | Progressive digitization | M2 flow approved in `docs/design/DESIGN.md` |
-| Restock/purchase | Required offline workflow | M4 screen/state baseline approved; implementation pending |
-| Inventory/reconciliation | Event-based control | Screen split open |
+| Restock/purchase | Required offline workflow | M4 source accepted; M5 expiry-group extension planned |
+| Inventory/reconciliation | Event-based blind checks and batch control | M5 states specified in DESIGN; not implemented |
 | Expense/withdrawal | Required offline record | Screen split open |
 | Transactions/history | Review and accountability | Filters/actions open |
 | Price history/signals | Lead value proposition | Presentation open |
