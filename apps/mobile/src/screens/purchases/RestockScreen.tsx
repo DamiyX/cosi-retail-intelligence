@@ -158,6 +158,28 @@ export default function RestockScreen({
   const handledQuickAddIdRef = useRef<string | null>(null);
   const initialFocusHandledRef = useRef(false);
 
+  const resolveQuickAddProduct = useCallback((refreshed: SearchState): void => {
+    if (!isFocused || !quickAddProductId || handledQuickAddIdRef.current === quickAddProductId || refreshed.failure) {
+      return;
+    }
+    const hit = refreshed.results.find((product) => product.storeProductId === quickAddProductId);
+    if (!hit) {
+      return;
+    }
+    handledQuickAddIdRef.current = quickAddProductId;
+    setQuery('');
+    setSelectedProduct(hit);
+    setSelectedPackage(hit.preferredPackage ?? hit.packages[0] ?? null);
+    setErrors((current) => ({ ...current, product: undefined, general: undefined }));
+  }, [isFocused, quickAddProductId]);
+
+  const retryProducts = useCallback((): void => {
+    const pendingQuickAdd = quickAddProductId !== undefined && handledQuickAddIdRef.current !== quickAddProductId;
+    const refreshed = readProducts(client, pendingQuickAdd ? '' : query);
+    setSearch(refreshed);
+    resolveQuickAddProduct(refreshed);
+  }, [client, query, quickAddProductId, resolveQuickAddProduct]);
+
   const dirty = saved === null && (
     query.trim().length > 0 ||
     selectedProduct !== null ||
@@ -200,11 +222,14 @@ export default function RestockScreen({
       initialFocusHandledRef.current = true;
       return;
     }
+    if (quickAddProductId && handledQuickAddIdRef.current !== quickAddProductId) {
+      return;
+    }
     // Focus is an external navigation event; refresh only the durable reads so
     // the in-memory cart/editor/supplier draft remains untouched.
     setSearch(readProducts(client, query));
     setSuppliers(readSuppliers(client));
-  }, [client, isFocused, query]);
+  }, [client, isFocused, query, quickAddProductId]);
 
   useEffect(() => {
     if (!isFocused || !quickAddProductId || handledQuickAddIdRef.current === quickAddProductId) {
@@ -212,20 +237,8 @@ export default function RestockScreen({
     }
     const refreshed = readProducts(client, '');
     setSearch(refreshed);
-    if (refreshed.failure) {
-      return;
-    }
-    const hit = refreshed.results.find((product) => product.storeProductId === quickAddProductId);
-    if (!hit) {
-      return;
-    }
-    handledQuickAddIdRef.current = quickAddProductId;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setQuery('');
-    setSelectedProduct(hit);
-    setSelectedPackage(hit.preferredPackage ?? hit.packages[0] ?? null);
-    setErrors((current) => ({ ...current, product: undefined, general: undefined }));
-  }, [client, isFocused, quickAddProductId]);
+    resolveQuickAddProduct(refreshed);
+  }, [client, isFocused, quickAddProductId, resolveQuickAddProduct]);
 
   const editorValidation = useMemo(() => {
     if (!selectedPackage) {
@@ -391,7 +404,7 @@ export default function RestockScreen({
         error={errors.product}
         testID="restock-product-search"
       />
-      {search.failure ? <ErrorPanel title="Product list unavailable" message={search.failure} onRetry={() => setSearch(readProducts(client, query))} /> : null}
+      {search.failure ? <ErrorPanel title="Product list unavailable" message={search.failure} onRetry={retryProducts} /> : null}
       {search.results.length > 0 && !selectedProduct ? (
         <View style={styles.results}>
           {search.results.map((hit) => (

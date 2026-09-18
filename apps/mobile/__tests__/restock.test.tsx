@@ -186,6 +186,80 @@ describe('RestockScreen', () => {
     }
   });
 
+  it('retries a failed contextual Quick Add read and selects once without losing the cart', () => {
+    const { fixture, client: realClient } = seedClient();
+    let view: ReturnType<typeof render> | null = null;
+    try {
+      view = render(<RestockScreen client={realClient} onBack={() => undefined} isFocused />);
+      fireEvent.changeText(screen.getByTestId('restock-product-search'), 'Rice');
+      fireEvent.press(screen.getByLabelText('Restock Rice'));
+      fireEvent.changeText(screen.getByTestId('restock-total-cost'), '7.50');
+      fireEvent.press(screen.getByText('Add line'));
+
+      const newProduct = realClient.createTemporaryProduct({ name: 'Retry Quick Add Product' });
+      let failuresRemaining = 2;
+      const failingClient: PurchasesClient = {
+        ...realClient,
+        searchProducts(query) {
+          if (failuresRemaining > 0) {
+            failuresRemaining -= 1;
+            throw new Error('Catalogue read failed during contextual return.');
+          }
+          return realClient.searchProducts(query);
+        },
+      };
+      view.rerender(
+        <RestockScreen
+          client={failingClient}
+          onBack={() => undefined}
+          isFocused={false}
+          quickAddProductId={newProduct.storeProduct.id}
+        />,
+      );
+      view.rerender(
+        <RestockScreen
+          client={failingClient}
+          onBack={() => undefined}
+          isFocused
+          quickAddProductId={newProduct.storeProduct.id}
+        />,
+      );
+      expect(screen.getByText('Products could not be read from this device. Your draft is preserved.')).toBeTruthy();
+
+      fireEvent.press(screen.getByText('Try again'));
+      expect(screen.getByText('Products could not be read from this device. Your draft is preserved.')).toBeTruthy();
+      fireEvent.press(screen.getByText('Try again'));
+      expect(screen.getByText('Retry Quick Add Product')).toBeTruthy();
+      expect(screen.getByText('Purchase package')).toBeTruthy();
+      expect(screen.getByText('Restock lines (1)')).toBeTruthy();
+      expect(screen.getByText('Running total: ₦7.50')).toBeTruthy();
+
+      fireEvent.changeText(screen.getByTestId('restock-quantity'), '2');
+      view.rerender(
+        <RestockScreen
+          client={failingClient}
+          onBack={() => undefined}
+          isFocused={false}
+          quickAddProductId={newProduct.storeProduct.id}
+        />,
+      );
+      view.rerender(
+        <RestockScreen
+          client={failingClient}
+          onBack={() => undefined}
+          isFocused
+          quickAddProductId={newProduct.storeProduct.id}
+        />,
+      );
+      expect(screen.getByTestId('restock-quantity').props.value).toBe('2');
+      expect(screen.getByText('Restock lines (1)')).toBeTruthy();
+      expect(screen.getByText('Running total: ₦7.50')).toBeTruthy();
+    } finally {
+      view?.unmount();
+      fixture.closeAndDelete();
+    }
+  });
+
   it('refreshes purchase history and detail reads when focus returns', () => {
     const { fixture, client } = seedClient();
     try {
@@ -233,7 +307,7 @@ describe('RestockScreen', () => {
         payment: { method: 'CASH' },
       }, { generateId: deterministicIds(4311), operationId: testId(4312) });
       render(<PurchaseDetailScreen client={client} purchaseId={purchase.purchase.id} onBack={() => undefined} />);
-      expect(screen.getByText('Receipt cost estimate: ₦3.75 per base unit (rounded to the nearest minor unit)')).toBeTruthy();
+      expect(screen.getByText('Receipt cost estimate: ₦3.75 per base unit (display rounded to the nearest kobo)')).toBeTruthy();
       expect(screen.getByText('Current cost availability: Unavailable for current stock; do not infer profit')).toBeTruthy();
     } finally {
       fixture.closeAndDelete();
