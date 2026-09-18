@@ -1,10 +1,17 @@
 # Tickets: M4 Offline Restocking + Provisional Costing
 
-**Status:** Implementation complete for source/automated scope; independent audit pending. Founder approved the M4 costing and
+**Status:** Implementation returned; independent audit requires corrections A1–A6. Source acceptance withheld. Founder approved the M4 costing and
 screen/state contract on 2026-09-18; D-038 and DESIGN record the approved rules.
 Coordinator verified ticket granularity/dependencies under delegated judgment.
 **Branch:** feat/m4-restocking-costing. **Accepted baseline:** 66cc64d.
 Accepted M3 tickets/evidence are archived in the engineering M3_SALES ledger.
+
+## Independent audit return
+
+Coordinator independently passed 356 tests / 28 suites, typecheck and lint at
+`2bfa3ef`; further checks found A1–A6 in `docs/engineering/M4_AUDIT_CORRECTIONS.md`.
+Completion checkboxes below are implementation evidence, not audit acceptance.
+Luna max repairs those findings and returns evidence for re-audit; no M5.
 
 ## Execution contract
 

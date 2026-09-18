@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m4-implementation-evidence-returned-for-independent-audit",
+  "current_state": "m4-audit-corrections-required",
   "completed_states": [
     "m3-independent-source-automated-acceptance",
     "m4-intake",
@@ -153,7 +153,7 @@
       "claim": "Coordinator independently accepts source/automated scope after correction and re-audit.",
       "owner": "coordinator",
       "required": true,
-      "status": "pending",
+      "status": "blocked",
       "depends_on": [
         "m4-implementation-evidence"
       ],
@@ -162,9 +162,15 @@
         "procedure": "Inspect code/migrations/tests and each criterion; send fixes to same task and independently verify them.",
         "success_condition": "No blocking findings; source acceptance distinguished from physical/release readiness."
       },
-      "evidence": [],
+      "evidence": [
+        {
+          "result": "Coordinator independently reran validation: 356 tests / 28 suites, strict typecheck and zero-warning lint passed; service/repository reproductions and source review identified six correction requests. Source acceptance withheld.",
+          "source": "docs/engineering/M4_AUDIT_CORRECTIONS.md",
+          "observed_at": "2026-09-18T11:10:17.545Z"
+        }
+      ],
       "limitations": [],
-      "blocker": null,
+      "blocker": "Coordinator findings A1–A6 require implementation corrections and independent re-audit.",
       "waiver": null
     },
     {
@@ -202,7 +208,8 @@
     "docs/architecture/TECHNICAL_ARCHITECTURE.md",
     "docs/design/DESIGN.md",
     ".agents/contexts/app-flow.md",
-    "docs/engineering/M4_IMPLEMENTATION_HANDOFF.md"
+    "docs/engineering/M4_IMPLEMENTATION_HANDOFF.md",
+    "docs/engineering/M4_AUDIT_CORRECTIONS.md"
   ],
   "approvals": [
     {
@@ -215,8 +222,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Coordinator independently audits the completed M4 source/automated evidence, preserving the carried physical/release readiness gate; the implementation task sends its structured handoff via send_message_to_thread to coordinator 01a098ef-d830-7531-bca7-2d66b0a5b587 and stops. Do not begin M5.",
+  "next_action": "Same Luna max implementation task repairs M4 audit findings A1–A6, reports evidence via send_message_to_thread and stops for coordinator re-audit. No M5.",
   "created_at": "2026-09-17T23:22:42Z",
-  "updated_at": "2026-09-18T11:01:14Z",
+  "updated_at": "2026-09-18T11:10:17.545Z",
   "archived": false
 }

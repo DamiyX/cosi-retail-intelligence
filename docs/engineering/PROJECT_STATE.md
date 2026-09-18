@@ -1,8 +1,8 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-18  
-Current milestone: M4 Restocking + Costing — source/automated implementation
-complete; independent audit pending. Physical/release gates remain pending.  
+Current milestone: M4 Restocking + Costing — independent audit requires
+corrections A1–A6; source acceptance withheld. Physical/release gates remain pending.  
 Completed engineering milestones: M0 Project Foundation; M1 Domain + Local
 Database (accepted with an explicit device waiver); M2 Catalogue + Package Units
 (accepted after independent audit); M3 source/automated scope (accepted after
@@ -68,6 +68,17 @@ therefore apply on first M3 install. The populated-M2 upgrade test confirms
 M1/M2 rows and migration history survive the v2-to-v3 upgrade without a reset,
 loss, or false sales history. Any future persisted-schema change must append a
 new migration.
+
+## M4 independent audit
+
+Coordinator reviewed `db5a835..2bfa3ef` and independently passed `npm run validate`
+(356 tests / 28 suites, strict typecheck, zero-warning lint). Additional actual
+service/repository checks reproduced a fractional-quantity sale cost rejection,
+a conflicting explicit-date replay, and contradictory immutable cost snapshots.
+Native-stack draft prevention, focus/Quick Add recovery and truthful current-cost
+labels also require correction. See `M4_AUDIT_CORRECTIONS.md` (A1–A6).
+Same Luna max task owns fixes; coordinator re-audits after it stops. M5 remains
+blocked. No physical or cloud action performed in this review.
 
 ## M4 implementation handoff
 
