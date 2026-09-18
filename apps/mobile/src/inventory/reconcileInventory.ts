@@ -337,14 +337,13 @@ function validateCompleteGroupCounts(
   physical: bigint,
 ): Map<string | null, bigint> {
   const currentGroups = listInventoryBatchGroupsByStoreProduct(adapter, line.storeProductId)
-    .map((group) => ({ group, balance: getInventoryBatchGroupBalanceBigInt(adapter, group.id) }))
-    .filter((row) => row.balance > 0n);
+    .map((group) => ({ group, balance: getInventoryBatchGroupBalanceBigInt(adapter, group.id) }));
   const byGroup = new Map<string | null, bigint>();
   for (const count of counts) {
     if (byGroup.has(count.groupId)) throw new DomainError('INVALID_VALUE', 'A physical group may be counted only once.');
     byGroup.set(count.groupId, canonicalInteger(count.physicalBaseUnits, 'group physicalBaseUnits', true));
   }
-  for (const current of currentGroups) {
+  for (const current of currentGroups.filter((row) => row.balance > 0n)) {
     if (!byGroup.has(current.group.id)) throw new DomainError('INVALID_VALUE', 'Complete group counts must include every recorded positive group.');
   }
   const currentUnknown = getInventoryBalanceBigIntByStoreProduct(adapter, line.storeProductId) - currentGroups.reduce((sum, row) => sum + row.balance, 0n);
@@ -593,12 +592,15 @@ export function finalizeInventoryReconciliation(
     });
     const batchOperations: BatchInventoryOperationRow[] = [];
     const batchEntries: BatchInventoryEntryRow[] = [];
-    const positiveGroups = listInventoryBatchGroupsByStoreProduct(adapter, line.storeProductId)
+    const currentGroups = listInventoryBatchGroupsByStoreProduct(adapter, line.storeProductId)
       .map((group) => ({ group, balance: getInventoryBatchGroupBalanceBigInt(adapter, group.id) }))
-      .filter((row) => row.balance > 0n);
+    const positiveGroups = currentGroups.filter((row) => row.balance > 0n);
     if (latest.completeGroupCount) {
       const counts = validateCompleteGroupCounts(adapter, line, latest, savedCounts, physical);
-      const deltas: { groupId: string | null; delta: bigint }[] = positiveGroups.map(({ group, balance }) => ({ groupId: group.id, delta: (counts.get(group.id) ?? 0n) - balance }));
+      const deltas: { groupId: string | null; delta: bigint }[] = currentGroups
+        .filter(({ group }) => counts.has(group.id))
+        .map(({ group, balance }) => ({ groupId: group.id, delta: (counts.get(group.id) ?? 0n) - balance }))
+        .filter((row) => row.delta !== 0n);
       const namedDelta = deltas.reduce((sum, row) => sum + row.delta, 0n);
       if (namedDelta !== 0n) deltas.push({ groupId: null, delta: -namedDelta });
       const corrected = createReconciliationBatchOperation(adapter, {

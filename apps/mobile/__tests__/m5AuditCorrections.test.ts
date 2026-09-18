@@ -16,6 +16,7 @@ import {
 import { classifyInventoryBatches } from '../src/inventory/classifyBatches';
 import { getBatchProjectionForStoreProduct } from '../src/inventory/batchAllocation';
 import { recordInventoryAdjustment } from '../src/inventory/adjustInventory';
+import { createDatabaseInventoryClient } from '../src/inventory/client';
 import { completeSale } from '../src/sales/completeSale';
 import { recordPurchase } from '../src/purchases/recordPurchase';
 import { FailOnWriteAdapter, deterministicIds, openCatalogueFixture, testId } from './catalogueSupport';
@@ -357,6 +358,63 @@ describe('M5 A03 unallocated shortage composition', () => {
           expectedBatchWatermark: after.batchWatermark,
         }],
       })).toThrow('can only remove stock');
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+});
+
+describe('M5 A04 complete group counts', () => {
+  it('applies an explicitly rediscovered zero-balance group', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(8500));
+      const rice = catalogue.createTemporaryProduct({ name: 'Rice' });
+      recordPurchase(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        lines: [{
+          storeProductId: rice.storeProduct.id,
+          packageUnitId: rice.basePackage.id,
+          quantityPackagesMicros: 2 * MICROS_PER_UNIT,
+          enteredCostMinor: 100,
+          expiryPrecision: 'DAY',
+          expiryValue: '2026-10-20',
+          expiryMeaning: 'EXPIRY',
+        }],
+      }, { generateId: deterministicIds(8510), operationId: testId(8520) });
+      completeSale(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        lines: [{ storeProductId: rice.storeProduct.id, packageUnitId: rice.basePackage.id, quantityPackagesMicros: 2 * MICROS_PER_UNIT, unitPriceMinor: 20 }],
+        payment: { method: 'CASH' },
+      }, { generateId: deterministicIds(8530), operationId: testId(8540) });
+      const before = getBatchProjectionForStoreProduct(fixture.adapter, rice.storeProduct.id);
+      const group = before.groups[0];
+      expect(group.balanceBaseMicros).toBe('0');
+      const client = createDatabaseInventoryClient(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        generateId: deterministicIds(8550),
+      });
+      const draft = client.startReconciliation(rice.storeProduct.id);
+      client.submitReconciliation({
+        reconciliationId: draft.reconciliationId,
+        expectedInventoryWatermark: draft.inventoryWatermark,
+        expectedBatchWatermark: draft.batchWatermark,
+        physicalBaseUnits: MICROS_PER_UNIT,
+        completeGroupCount: true,
+        groupCounts: [{ groupId: group.id, physicalBaseUnits: MICROS_PER_UNIT }],
+      });
+      const graph = client.finalizeReconciliation({ reconciliationId: draft.reconciliationId, operationId: testId(8560) });
+      expect(graph.batchOperations.filter((operation) => operation.kind === 'RECONCILIATION')).toHaveLength(1);
+      const after = getBatchProjectionForStoreProduct(fixture.adapter, rice.storeProduct.id);
+      expect(after.groups[0].balanceBaseMicros).toBe(String(MICROS_PER_UNIT));
+      expect(after.unknownResidualBaseMicros).toBe('0');
+      expect(after.inventoryBalanceBaseMicros).toBe(String(MICROS_PER_UNIT));
     } finally {
       fixture.closeAndDelete();
     }
