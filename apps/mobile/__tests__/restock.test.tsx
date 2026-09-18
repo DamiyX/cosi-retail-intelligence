@@ -233,4 +233,22 @@ describe('RestockScreen', () => {
       fixture.closeAndDelete();
     }
   });
+
+  it('shows an unavailable running total when individually valid lines exceed safe money bounds', () => {
+    const { fixture, client } = seedClient();
+    try {
+      render(<RestockScreen client={client} onBack={() => undefined} />);
+      fireEvent.changeText(screen.getByTestId('restock-product-search'), 'Rice');
+      fireEvent.press(screen.getByLabelText('Restock Rice'));
+      fireEvent.changeText(screen.getByTestId('restock-total-cost'), '90071992547409.91');
+      fireEvent.press(screen.getByText('Add line'));
+      fireEvent.changeText(screen.getByTestId('restock-product-search'), 'Sugar');
+      fireEvent.press(screen.getByLabelText('Restock Sugar'));
+      fireEvent.changeText(screen.getByTestId('restock-total-cost'), '90071992547409.91');
+      fireEvent.press(screen.getByText('Add line'));
+      expect(screen.getByText('Running total: Unavailable; review line costs')).toBeTruthy();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
 });
