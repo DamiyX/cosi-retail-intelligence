@@ -4,14 +4,15 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "partial-implementation-returned-for-completion",
+  "current_state": "m4-implementation-evidence-returned-for-independent-audit",
   "completed_states": [
     "m3-independent-source-automated-acceptance",
     "m4-intake",
     "m4-coordinator-ticket-decomposition",
     "m4-founder-costing-design-approval",
     "m4-source-document-alignment",
-    "m4-ticket-release"
+    "m4-ticket-release",
+    "m4-implementation-evidence"
   ],
   "owner": {
     "agent": "implementation-engineer-luna-max",
@@ -123,7 +124,7 @@
       "claim": "M4 tickets have actual passing checks and recoverable commits.",
       "owner": "implementation-task-01a0b1a5-4512-79f0-ae55-58d39559944d",
       "required": true,
-      "status": "pending",
+      "status": "met",
       "depends_on": [
         "m4-tickets-released"
       ],
@@ -134,17 +135,17 @@
       },
       "evidence": [
         {
-          "result": "Commit 3c4eef9 records the M4 purchase aggregate, additive migration 4, provisional cost integration, receipt/history UI and focused tests. npm run validate passed (337 tests / 27 suites); Android export passed; active M3/M4 workflow validation passed.",
-          "source": "3c4eef9; tickets.md; docs/engineering/PROJECT_STATE.md",
-          "observed_at": "2026-09-18T09:54:27Z"
+          "result": "Commits b12ff0c, c810f5b and 9ec9075 complete the M4 source scope. npm run validate passed (150 domain tests and 206 mobile tests; 356 tests / 28 suites), strict typecheck and zero-warning lint; npm run mobile:doctor passed 21/21; Expo install compatibility passed after the authorized patch updates; Android export passed (1,357 modules; 3.2 MB Hermes); workflow schema/date-time/dependency/artifact validation and git diff --check passed.",
+          "source": "b12ff0c; c810f5b; 87e96a6; 9ec9075; tickets.md; docs/engineering/PROJECT_STATE.md",
+          "observed_at": "2026-09-18T10:52:08Z"
         }
       ],
       "limitations": [
-        "The current Restock screen is the M4-01 one-line TOTAL flow; M4-02 cart/supplier UI acceptance is not claimed.",
-        "Expo Doctor and Expo install check report expo-constants and expo-router patch-version drift; no dependency update was authorized.",
+        "Galaxy M3/M4 physical flows, development-client/Metro and second-laptop reproduction remain unperformed and are not source acceptance evidence.",
+        "Professional accounting review remains a separate provisional-costing gate.",
         "Physical/device/cloud/release checks remain unperformed and are not source acceptance evidence."
       ],
-      "blocker": "Published required scope and compatibility/evidence gaps must be completed before this gate is met.",
+      "blocker": null,
       "waiver": null
     },
     {
@@ -213,13 +214,9 @@
       "scope": "Founder explicitly approved proposed M4 cost/design rules and instructed coordinator to send M4 implementation to the separate AI task; D-038 and DESIGN record the approved contract."
     }
   ],
-  "blockers": [
-    "M4-02 cart/unit-cost/supplier UI incomplete.",
-    "M4-04 product purchase-price history incomplete.",
-    "Required new-boundary test/cross-flow evidence incomplete; Expo compatibility checks fail."
-  ],
-  "next_action": "Same Luna max task completes published M4 scope and evidence according to M4_IMPLEMENTATION_HANDOFF.md, applies authorized compatible patches, then sends structured handoff via send_message_to_thread to coordinator 01a098ef-d830-7531-bca7-2d66b0a5b587 and stops. Full independent audit follows; do not begin M5.",
+  "blockers": [],
+  "next_action": "Coordinator independently audits the completed M4 source/automated evidence, preserving the carried physical/release readiness gate; the implementation task sends its structured handoff via send_message_to_thread to coordinator 01a098ef-d830-7531-bca7-2d66b0a5b587 and stops. Do not begin M5.",
   "created_at": "2026-09-17T23:22:42Z",
-  "updated_at": "2026-09-18T10:03:43Z",
+  "updated_at": "2026-09-18T10:52:08Z",
   "archived": false
 }

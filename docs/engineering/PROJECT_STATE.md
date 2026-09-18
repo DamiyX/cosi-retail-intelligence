@@ -1,9 +1,8 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-18  
-Current milestone: M4 Restocking + Costing — PARTIAL implementation; completion
-required before independent audit. Existing source evidence and physical/release
-gates remain pending.  
+Current milestone: M4 Restocking + Costing — source/automated implementation
+complete; independent audit pending. Physical/release gates remain pending.  
 Completed engineering milestones: M0 Project Foundation; M1 Domain + Local
 Database (accepted with an explicit device waiver); M2 Catalogue + Package Units
 (accepted after independent audit); M3 source/automated scope (accepted after
@@ -13,7 +12,8 @@ independent audit with physical/release gates carried).
 
 - Canonical remote: https://github.com/DamiyX/cosi-retail-intelligence
 - Current branch: `feat/m4-restocking-costing`, from accepted M3 checkpoint
-  `66cc64d`. M4 implementation is committed in `3c4eef9`.
+  `66cc64d`. M4 implementation is committed in `3c4eef9`, with follow-up
+  commits `b12ff0c`, `c810f5b`, `87e96a6` and `9ec9075`.
 - Coordinator-created M4 plan, published tickets, D-038, cost/design sources and
   workflow registration were recorded in checkpoint `db5a835`; implementation
   evidence is now recorded separately for coordinator audit.
@@ -72,20 +72,14 @@ new migration.
 ## M4 implementation handoff
 
 Commit `3c4eef9` adds migration 4 and the offline purchase/costing path without
-editing migrations 1–3. Purchases write immutable product/package/currency
-snapshots, positive inventory events, exact rational cost movements/state,
-private non-contributing price observations and one idempotent purchase outbox
-envelope atomically. Purchase replay is actor/store/device scoped and rejects
-conflicting operation reuse. New sales consume available provisional weighted
-average cost in the same transaction, preserve exact basis and rounded line
-COGS companions, and leave pre-M4 sale costs unchanged/null when unavailable.
-More now exposes Restock and Purchase history with receipt/detail reads,
-retained drafts, dirty-exit guards and offline status language.
-
-The aggregate/repository path also accepts multiline, UNIT/TOTAL and explicit
-supplier inputs. The current Restock screen remains the M4-01 one-line TOTAL
-flow; M4-02 cart/supplier UI acceptance is intentionally not claimed in this
-handoff. Independent audit owns the final source decision.
+editing migrations 1–3. Follow-up commit `b12ff0c` completes the multiline
+Restock cart, TOTAL/UNIT basis, supplier modes and ProductDetail purchase-price
+history. Commit `c810f5b` adds exact costing edge cases, full purchase/sale
+rollback matrices, conflicting sale replay rejection, populated-M3 upgrade
+retention, store/device/member/product/package/currency boundary coverage and
+the changed-price cold-reopen cross-flow. Commit `9ec9075` adds safe-total
+overflow UI coverage; `87e96a6` aligns the authorized Expo patch versions.
+Independent audit owns the final source decision.
 
 ## Verified validation evidence
 
@@ -115,20 +109,19 @@ handoff. Independent audit owns the final source decision.
 
 ### M4 implementation checks
 
-- `npm run validate`: passed — 148 domain tests in 5 suites and 189 mobile
-  tests in 22 suites (337 tests / 27 suites total); strict typecheck and
+- `npm run validate`: passed — 150 domain tests in 5 suites and 206 mobile
+  tests in 23 suites (356 tests / 28 suites total); strict typecheck and
   zero-warning lint passed.
-- `npm run mobile:doctor`: 20/21 checks passed. The remaining check reports
-  patch drift: `expo-constants` 57.0.18 (expected ~57.0.19) and `expo-router`
-  57.0.21 (expected ~57.0.22).
-- `npx expo install --check` from `apps/mobile`: reports the same two patch
-  mismatches; no dependency update was performed in this implementation task.
+- `npm run mobile:doctor`: 21/21 checks passed after the authorized patch
+  updates (`expo-constants` ~57.0.19 and `expo-router` ~57.0.22).
+- `npx expo install --check` from `apps/mobile`: dependencies are up to date;
+  Expo itself remains intentionally excluded by project configuration.
 - `npm run mobile:export`: Android export passed (1,357 modules; 3.2 MB Hermes
   bundle). Generated `apps/mobile/dist` is ignored.
-- Active M3/M4 workflow JSON Schema, date-time and gate-dependency validation
-  passed. The historical M2 workflow retains its previously recorded
-  `tests-and-review` schema limitation.
-- `git diff --check` passed before the documentation handoff commit. No device,
+- Active M3/M4 workflow JSON Schema, date-time, gate-dependency and artifact
+  validation passed. The historical M2 workflow retains its previously
+  recorded `tests-and-review` schema limitation.
+- `git diff --check` passed. No device,
   cloud, push, merge or release action was performed.
 
 ## Deferred evidence and risks
@@ -160,14 +153,11 @@ handoff. Independent audit owns the final source decision.
 
 ## Next action
 
-Complete outstanding M4 scope and evidence in the same Luna max task/branch,
-following `M4_IMPLEMENTATION_HANDOFF.md` findings S1/S2/T1/T2/T3 and the approved
-plan/tickets. Compatible expo-constants/expo-router patch corrections are
-specifically authorized; no SDK/major dependency change. Return structured
-completion via send_message_to_thread to coordinator task
-`01a098ef-d830-7531-bca7-2d66b0a5b587`, then stop for full independent audit.
-The coordinator collected the partial report and performed a completeness
-review only; no M4 code acceptance or M5 release has occurred. Accepted M3 tickets are archived in
+Independent coordinator audit of the completed M4 source/automated evidence is
+the next action. The implementation task must return structured completion via
+send_message_to_thread to coordinator task
+`01a098ef-d830-7531-bca7-2d66b0a5b587`, then stop; no M4 code acceptance or M5
+release has occurred. Accepted M3 tickets are archived in
 `docs/engineering/tickets/M3_SALES.md`. Complete the carried
 M3 physical-device/offline-sale, development-client/Metro, large-text, and
 second-laptop reproduction checks before any external beta or native-release
