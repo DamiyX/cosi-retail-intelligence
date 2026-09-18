@@ -321,7 +321,7 @@ describe('M5 inventory adjustments', () => {
       }, { generateId: deterministicIds(5320), operationId: testId(5330) });
       const before = isolated.adapter.getAllRows<Record<string, string | number | null>>('SELECT * FROM cost_movements ORDER BY application_order;');
       const report = openDatabase(isolated.adapter, MIGRATIONS);
-      expect(report.schemaVersion).toBe(8);
+      expect(report.schemaVersion).toBe(9);
       expect(isolated.adapter.getAllRows<Record<string, string>>('SELECT * FROM cost_movements ORDER BY application_order;')).toEqual(before);
       expect(isolated.adapter.getAllRows<Record<string, string>>('PRAGMA foreign_key_check;')).toEqual([]);
       expect(isolated.adapter.getFirstRow<{ name: string }>("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'cost_movements_m4';")).toBeNull();

@@ -15,6 +15,7 @@ export interface InventoryAdjustmentRow {
   createdByStoreMemberId: string;
   createdByUserId: string;
   deviceId: string;
+  reconciliationId: string | null;
   createdAt: string;
 }
 
@@ -43,6 +44,7 @@ export interface CreateInventoryAdjustmentInput {
   createdByStoreMemberId: string;
   createdByUserId: string;
   deviceId: string;
+  reconciliationId?: string | null;
   createdAt?: string;
 }
 
@@ -63,7 +65,7 @@ export interface CreateInventoryAdjustmentLineInput {
 
 type Row = Record<string, string | number | null>;
 
-const ADJUSTMENT_COLUMNS = 'id, store_id, operation_id, reason_code, note, occurred_at, created_by_store_member_id, created_by_user_id, device_id, created_at';
+const ADJUSTMENT_COLUMNS = 'id, store_id, operation_id, reason_code, note, occurred_at, created_by_store_member_id, created_by_user_id, device_id, reconciliation_id, created_at';
 const LINE_COLUMNS = 'id, adjustment_id, store_id, store_product_id, group_id, inventory_event_id, package_unit_id, quantity_package_snapshot_micros, conversion_to_base_snapshot_micros, quantity_base_delta_micros, line_order, created_at';
 const REASONS: readonly InventoryAdjustmentReason[] = ['EXPIRED', 'DAMAGED', 'MISSING', 'PERSONAL_USE', 'CORRECTION', 'CUSTOMER_RETURN', 'SUPPLIER_RETURN'];
 
@@ -78,6 +80,7 @@ function mapAdjustment(row: Row): InventoryAdjustmentRow {
     createdByStoreMemberId: row.created_by_store_member_id as string,
     createdByUserId: row.created_by_user_id as string,
     deviceId: row.device_id as string,
+    reconciliationId: (row.reconciliation_id as string | null) ?? null,
     createdAt: row.created_at as string,
   };
 }
@@ -104,12 +107,12 @@ export function createInventoryAdjustment(adapter: DatabaseAdapter, input: Creat
   adapter.run(
     `INSERT INTO inventory_adjustments
       (id, store_id, operation_id, reason_code, note, occurred_at,
-       created_by_store_member_id, created_by_user_id, device_id, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+       created_by_store_member_id, created_by_user_id, device_id, reconciliation_id, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
     [
       requireId(input.id), requireId(input.storeId), requireId(input.operationId), input.reasonCode,
       optionalText(input.note, 'note', 500), requireText(input.occurredAt, 'occurredAt', 64),
-      requireId(input.createdByStoreMemberId), requireId(input.createdByUserId), requireId(input.deviceId), input.createdAt ?? nowIso(),
+      requireId(input.createdByStoreMemberId), requireId(input.createdByUserId), requireId(input.deviceId), optionalId(input.reconciliationId), input.createdAt ?? nowIso(),
     ],
   );
   const row = adapter.getFirstRow<Row>(`SELECT ${ADJUSTMENT_COLUMNS} FROM inventory_adjustments WHERE id = ?;`, [input.id]);

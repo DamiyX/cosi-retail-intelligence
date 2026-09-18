@@ -1329,6 +1329,255 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'cost movements are append-only'); END;`,
     ],
   },
+  {
+    version: 9,
+    name: 'inventory_reconciliation_checks',
+    statements: [
+      `CREATE TABLE inventory_reconciliations (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        status TEXT NOT NULL CHECK (status IN ('IN_PROGRESS', 'COMPLETED', 'CANCELLED')),
+        created_by_store_member_id TEXT NOT NULL REFERENCES store_members(id) ON DELETE RESTRICT,
+        created_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        started_at TEXT NOT NULL,
+        completed_at TEXT,
+        finalization_operation_id TEXT UNIQUE,
+        created_at TEXT NOT NULL
+      );`,
+      'CREATE INDEX idx_inventory_reconciliations_store_status ON inventory_reconciliations(store_id, status, started_at DESC);',
+      `CREATE TABLE inventory_reconciliation_lines (
+        id TEXT PRIMARY KEY,
+        reconciliation_id TEXT NOT NULL REFERENCES inventory_reconciliations(id) ON DELETE RESTRICT,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        recorded_base_units_snapshot TEXT NOT NULL,
+        initial_inventory_watermark TEXT NOT NULL,
+        initial_batch_watermark TEXT NOT NULL,
+        physical_base_units TEXT,
+        difference_base_units TEXT,
+        reason_code TEXT,
+        note TEXT,
+        adjustment_id TEXT REFERENCES inventory_adjustments(id) ON DELETE RESTRICT,
+        adjustment_inventory_event_id TEXT REFERENCES inventory_events(id) ON DELETE RESTRICT,
+        created_at TEXT NOT NULL,
+        UNIQUE (reconciliation_id, store_product_id)
+      );`,
+      'CREATE INDEX idx_inventory_reconciliation_lines_store_product ON inventory_reconciliation_lines(store_product_id, created_at DESC);',
+      `CREATE TABLE inventory_reconciliation_submissions (
+        id TEXT PRIMARY KEY,
+        reconciliation_line_id TEXT NOT NULL REFERENCES inventory_reconciliation_lines(id) ON DELETE RESTRICT,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        submission_type TEXT NOT NULL CHECK (submission_type IN ('FIRST', 'RECOUNT')),
+        recorded_base_units_snapshot TEXT NOT NULL,
+        physical_base_units TEXT NOT NULL,
+        difference_base_units TEXT NOT NULL,
+        inventory_watermark TEXT NOT NULL,
+        batch_watermark TEXT NOT NULL,
+        complete_group_count INTEGER NOT NULL DEFAULT 0 CHECK (complete_group_count IN (0, 1)),
+        reason_code TEXT,
+        note TEXT,
+        created_by_store_member_id TEXT NOT NULL REFERENCES store_members(id) ON DELETE RESTRICT,
+        created_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        created_at TEXT NOT NULL
+      );`,
+      'CREATE INDEX idx_inventory_reconciliation_submissions_line ON inventory_reconciliation_submissions(reconciliation_line_id, created_at ASC, id ASC);',
+      `CREATE TABLE inventory_reconciliation_group_counts (
+        id TEXT PRIMARY KEY,
+        submission_id TEXT NOT NULL REFERENCES inventory_reconciliation_submissions(id) ON DELETE RESTRICT,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        group_id TEXT REFERENCES inventory_batch_groups(id) ON DELETE RESTRICT,
+        physical_base_units TEXT NOT NULL,
+        line_order INTEGER NOT NULL CHECK (line_order > 0),
+        created_at TEXT NOT NULL,
+        UNIQUE (submission_id, line_order)
+      );`,
+      'CREATE INDEX idx_inventory_reconciliation_group_counts_submission ON inventory_reconciliation_group_counts(submission_id, line_order ASC);',
+      'CREATE INDEX idx_inventory_reconciliation_group_counts_group ON inventory_reconciliation_group_counts(group_id, created_at DESC);',
+      'ALTER TABLE inventory_adjustments ADD COLUMN reconciliation_id TEXT REFERENCES inventory_reconciliations(id) ON DELETE RESTRICT;',
+      'CREATE UNIQUE INDEX uq_inventory_adjustments_reconciliation ON inventory_adjustments(reconciliation_id) WHERE reconciliation_id IS NOT NULL;',
+      'DROP TRIGGER trg_inventory_adjustment_lines_event_insert;',
+      `CREATE TRIGGER trg_inventory_adjustment_lines_event_insert
+        BEFORE INSERT ON inventory_adjustment_lines
+        WHEN NOT EXISTS (
+          SELECT 1 FROM inventory_events ie
+          WHERE ie.id = NEW.inventory_event_id
+            AND ie.store_id = NEW.store_id
+            AND ie.store_product_id = NEW.store_product_id
+            AND ie.source_type IN ('MANUAL_ADJUSTMENT', 'RECONCILIATION')
+            AND ie.source_id = NEW.adjustment_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'inventory adjustment line event does not match adjustment'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliations_member_store_insert
+        BEFORE INSERT ON inventory_reconciliations
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.created_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.created_by_user_id
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'reconciliation actor is not an active store member'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliations_device_store_insert
+        BEFORE INSERT ON inventory_reconciliations
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id AND d.store_id = NEW.store_id AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'reconciliation device does not belong to store'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_lines_parent_insert
+        BEFORE INSERT ON inventory_reconciliation_lines
+        WHEN NOT EXISTS (
+          SELECT 1 FROM inventory_reconciliations r
+          WHERE r.id = NEW.reconciliation_id AND r.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'reconciliation line parent does not match store'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_lines_product_insert
+        BEFORE INSERT ON inventory_reconciliation_lines
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          WHERE sp.id = NEW.store_product_id AND sp.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'reconciliation line product does not belong to store'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_lines_final_refs_insert
+        BEFORE INSERT ON inventory_reconciliation_lines
+        WHEN (NEW.adjustment_id IS NOT NULL OR NEW.adjustment_inventory_event_id IS NOT NULL)
+          AND NOT EXISTS (
+            SELECT 1
+            FROM inventory_adjustment_lines ial
+            JOIN inventory_adjustments ia ON ia.id = ial.adjustment_id
+            WHERE ia.id = NEW.adjustment_id
+              AND ial.inventory_event_id = NEW.adjustment_inventory_event_id
+              AND ial.store_id = NEW.store_id
+              AND ial.store_product_id = NEW.store_product_id
+          )
+        BEGIN SELECT RAISE(ABORT, 'reconciliation final adjustment references do not match'); END;`,
+      `CREATE TRIGGER trg_inventory_adjustments_reconciliation_insert
+        BEFORE INSERT ON inventory_adjustments
+        WHEN NEW.reconciliation_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM inventory_reconciliations r
+          WHERE r.id = NEW.reconciliation_id AND r.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'adjustment reconciliation does not match store'); END;`,
+      `CREATE TRIGGER trg_batch_reconciliation_source_insert
+        BEFORE INSERT ON batch_inventory_operations
+        WHEN NEW.kind = 'RECONCILIATION' AND NOT EXISTS (
+          SELECT 1 FROM inventory_reconciliation_lines rl
+          WHERE rl.id = NEW.source_id
+            AND rl.store_id = NEW.store_id
+            AND rl.store_product_id = NEW.store_product_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'reconciliation batch operation source does not match line'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_submissions_parent_insert
+        BEFORE INSERT ON inventory_reconciliation_submissions
+        WHEN NOT EXISTS (
+          SELECT 1 FROM inventory_reconciliation_lines rl
+          WHERE rl.id = NEW.reconciliation_line_id
+            AND rl.store_id = NEW.store_id
+            AND rl.store_product_id = NEW.store_product_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'reconciliation submission parent does not match product'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_submissions_actor_insert
+        BEFORE INSERT ON inventory_reconciliation_submissions
+        WHEN NOT EXISTS (
+          SELECT 1 FROM inventory_reconciliations r
+          JOIN inventory_reconciliation_lines rl ON rl.reconciliation_id = r.id
+          WHERE rl.id = NEW.reconciliation_line_id
+            AND r.created_by_store_member_id = NEW.created_by_store_member_id
+            AND r.created_by_user_id = NEW.created_by_user_id
+            AND r.device_id = NEW.device_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'reconciliation submission actor does not match session'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_group_counts_parent_insert
+        BEFORE INSERT ON inventory_reconciliation_group_counts
+        WHEN NOT EXISTS (
+          SELECT 1 FROM inventory_reconciliation_submissions rs
+          WHERE rs.id = NEW.submission_id
+            AND rs.store_id = NEW.store_id
+            AND rs.store_product_id = NEW.store_product_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'reconciliation group count parent does not match product'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_group_counts_group_insert
+        BEFORE INSERT ON inventory_reconciliation_group_counts
+        WHEN NEW.group_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM inventory_batch_groups bg
+          WHERE bg.id = NEW.group_id
+            AND bg.store_id = NEW.store_id
+            AND bg.store_product_id = NEW.store_product_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'reconciliation group count group does not match product'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliations_finalized_update
+        BEFORE UPDATE ON inventory_reconciliations
+        WHEN OLD.status <> 'IN_PROGRESS'
+          OR NEW.id <> OLD.id
+          OR NEW.store_id <> OLD.store_id
+          OR NEW.created_by_store_member_id <> OLD.created_by_store_member_id
+          OR NEW.created_by_user_id <> OLD.created_by_user_id
+          OR NEW.device_id <> OLD.device_id
+          OR NEW.started_at <> OLD.started_at
+          OR NEW.created_at <> OLD.created_at
+          OR (NEW.status = 'IN_PROGRESS' AND (NEW.completed_at IS NOT NULL OR NEW.finalization_operation_id IS NOT NULL))
+          OR (NEW.status = 'COMPLETED' AND (
+            NEW.completed_at IS NULL
+            OR NEW.finalization_operation_id IS NULL
+            OR NOT EXISTS (
+              SELECT 1 FROM inventory_reconciliation_lines rl
+              WHERE rl.reconciliation_id = NEW.id
+                AND rl.physical_base_units IS NOT NULL
+                AND rl.difference_base_units IS NOT NULL
+            )
+            OR NOT EXISTS (
+              SELECT 1 FROM inventory_reconciliation_submissions rs
+              JOIN inventory_reconciliation_lines rl ON rl.id = rs.reconciliation_line_id
+              WHERE rl.reconciliation_id = NEW.id
+            )
+          ))
+        BEGIN SELECT RAISE(ABORT, 'finalized reconciliations are immutable'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_lines_final_refs_update
+        BEFORE UPDATE ON inventory_reconciliation_lines
+        WHEN (NEW.adjustment_id IS NOT NULL OR NEW.adjustment_inventory_event_id IS NOT NULL)
+          AND NOT EXISTS (
+            SELECT 1
+            FROM inventory_adjustment_lines ial
+            JOIN inventory_adjustments ia ON ia.id = ial.adjustment_id
+            WHERE ia.id = NEW.adjustment_id
+              AND ial.inventory_event_id = NEW.adjustment_inventory_event_id
+              AND ial.store_id = NEW.store_id
+              AND ial.store_product_id = NEW.store_product_id
+          )
+        BEGIN SELECT RAISE(ABORT, 'reconciliation final adjustment references do not match'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_lines_finalized_update
+        BEFORE UPDATE ON inventory_reconciliation_lines
+        WHEN EXISTS (
+          SELECT 1 FROM inventory_reconciliations r
+          WHERE r.id = OLD.reconciliation_id AND r.status <> 'IN_PROGRESS'
+        )
+          OR NEW.id <> OLD.id
+          OR NEW.reconciliation_id <> OLD.reconciliation_id
+          OR NEW.store_id <> OLD.store_id
+          OR NEW.store_product_id <> OLD.store_product_id
+          OR NEW.recorded_base_units_snapshot <> OLD.recorded_base_units_snapshot
+          OR NEW.initial_inventory_watermark <> OLD.initial_inventory_watermark
+          OR NEW.initial_batch_watermark <> OLD.initial_batch_watermark
+          OR NEW.created_at <> OLD.created_at
+        BEGIN SELECT RAISE(ABORT, 'finalized reconciliation lines are immutable'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_submissions_immutable_update
+        BEFORE UPDATE ON inventory_reconciliation_submissions
+        BEGIN SELECT RAISE(ABORT, 'reconciliation submissions are immutable'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_submissions_immutable_delete
+        BEFORE DELETE ON inventory_reconciliation_submissions
+        BEGIN SELECT RAISE(ABORT, 'reconciliation submissions are immutable'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_group_counts_immutable_update
+        BEFORE UPDATE ON inventory_reconciliation_group_counts
+        BEGIN SELECT RAISE(ABORT, 'reconciliation group counts are immutable'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_group_counts_immutable_delete
+        BEFORE DELETE ON inventory_reconciliation_group_counts
+        BEGIN SELECT RAISE(ABORT, 'reconciliation group counts are immutable'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

@@ -124,6 +124,7 @@ describe('M3 Sales milestone', () => {
             { version: 6, name: 'sale_cost_snapshot_parent_invariants' },
             { version: 7, name: 'batch_inventory_tracking' },
             { version: 8, name: 'inventory_adjustments_and_cost_extension' },
+            { version: 9, name: 'inventory_reconciliation_checks' },
           ]);
         } finally {
           reopened.close();

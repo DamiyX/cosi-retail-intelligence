@@ -56,6 +56,7 @@ export interface AdjustmentBatchAllocationInput {
   sourceId: string;
   groupId?: string | null;
   quantityBaseDeltaMicros: number;
+  sourceType?: 'MANUAL_ADJUSTMENT' | 'RECONCILIATION';
   recordedByStoreMemberId: string;
   recordedByUserId: string;
   deviceId: string;
@@ -236,7 +237,7 @@ export function recordAdjustmentBatchAllocation(
     storeProductId: input.storeProductId,
     kind: 'EVENT_ALLOCATION',
     inventoryEventId: input.inventoryEventId,
-    sourceType: 'MANUAL_ADJUSTMENT',
+    sourceType: input.sourceType ?? 'MANUAL_ADJUSTMENT',
     sourceId: input.sourceId,
     policyVersion: 'ADJUSTMENT_ALLOCATION_V1',
     evidenceVersion: BATCH_POLICY_VERSION,

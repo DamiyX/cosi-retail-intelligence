@@ -169,6 +169,35 @@ export {
   listSaleItemCostSnapshotsBySaleId,
   rebuildCostStateFromMovements,
 } from './costing';
+export {
+  cancelInventoryReconciliation,
+  completeInventoryReconciliation,
+  createInventoryReconciliation,
+  createInventoryReconciliationGroupCount,
+  createInventoryReconciliationLine,
+  createInventoryReconciliationSubmission,
+  finalizeInventoryReconciliationLine,
+  getInventoryReconciliationById,
+  getInventoryReconciliationGroupCountById,
+  getInventoryReconciliationLineById,
+  getInventoryReconciliationSubmissionById,
+  getLatestInventoryReconciliationSubmission,
+  listInventoryReconciliationGroupCountsBySubmission,
+  listInventoryReconciliationLinesByReconciliation,
+  listInventoryReconciliationSubmissionsByLine,
+} from './reconciliations';
+export type {
+  CreateInventoryReconciliationGroupCountInput,
+  CreateInventoryReconciliationInput,
+  CreateInventoryReconciliationLineInput,
+  CreateInventoryReconciliationSubmissionInput,
+  InventoryReconciliationGroupCountRow,
+  InventoryReconciliationLineRow,
+  InventoryReconciliationRow,
+  InventoryReconciliationStatus,
+  InventoryReconciliationSubmissionRow,
+  ReconciliationSubmissionType,
+} from './reconciliations';
 export type {
   CostMovementRow,
   CostStateRow,

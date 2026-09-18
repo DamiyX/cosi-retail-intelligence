@@ -20,6 +20,16 @@ import {
   type BatchClassificationMode,
 } from './classifyBatches';
 import { recordInventoryAdjustment, type InventoryAdjustmentGraph } from './adjustInventory';
+import {
+  cancelInventoryReconciliation,
+  finalizeInventoryReconciliation,
+  getInventoryReconciliationDraft,
+  startInventoryReconciliation,
+  submitInventoryReconciliation,
+  type ReconciliationDraft,
+  type ReconciliationGraph,
+  type ReconciliationGroupCountInput,
+} from './reconcileInventory';
 
 export interface InventoryReviewProduct {
   storeProductId: string;
@@ -64,6 +74,28 @@ export interface InventoryClient {
     note?: string | null;
     operationId?: string;
   }): InventoryAdjustmentGraph;
+  startReconciliation(storeProductId: string): ReconciliationDraft;
+  getReconciliationDraft(reconciliationId: string): ReconciliationDraft;
+  submitReconciliation(input: {
+    reconciliationId: string;
+    expectedInventoryWatermark: string;
+    expectedBatchWatermark: string;
+    physicalBaseUnits: string | number | bigint;
+    completeGroupCount?: boolean;
+    groupCounts?: ReconciliationGroupCountInput[];
+    reasonCode?: string | null;
+    note?: string | null;
+  }): ReconciliationDraft;
+  finalizeReconciliation(input: {
+    reconciliationId: string;
+    reasonCode?: InventoryAdjustmentReason;
+    note?: string | null;
+    packageUnitId?: string | null;
+    quantityPackageSnapshotMicros?: number | null;
+    conversionToBaseSnapshotMicros?: number | null;
+    operationId?: string;
+  }): ReconciliationGraph;
+  cancelReconciliation(reconciliationId: string): ReconciliationDraft;
 }
 
 export interface CreateInventoryClientOptions {
@@ -176,6 +208,48 @@ export function createDatabaseInventoryClient(
           conversionToBaseSnapshotMicros: input.conversionToBaseSnapshotMicros,
         }],
       }, { generateId });
+    },
+    startReconciliation(storeProductId: string): ReconciliationDraft {
+      activeProduct(adapter, store, storeProductId);
+      return startInventoryReconciliation(adapter, {
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+        storeProductId,
+      }, { generateId });
+    },
+    getReconciliationDraft(reconciliationId: string): ReconciliationDraft {
+      return getInventoryReconciliationDraft(adapter, {
+        reconciliationId,
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+      });
+    },
+    submitReconciliation(input): ReconciliationDraft {
+      return submitInventoryReconciliation(adapter, {
+        ...input,
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+      }, { generateId });
+    },
+    finalizeReconciliation(input): ReconciliationGraph {
+      return finalizeInventoryReconciliation(adapter, {
+        ...input,
+        operationId: input.operationId ?? generateId(),
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+      }, { generateId });
+    },
+    cancelReconciliation(reconciliationId: string): ReconciliationDraft {
+      return cancelInventoryReconciliation(adapter, {
+        reconciliationId,
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+      });
     },
   };
 }
