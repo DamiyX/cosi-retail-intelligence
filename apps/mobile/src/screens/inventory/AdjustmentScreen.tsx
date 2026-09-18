@@ -2,6 +2,7 @@ import { formatQuantityMicros, parseQuantityDecimal } from '@retail/domain';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { generateMobileId } from '../../crypto/mobileIds';
 import type { InventoryClient, InventoryReviewProduct } from '../../inventory/client';
 import type { BatchProjection } from '../../inventory/batchAllocation';
 import type { InventoryAdjustmentReason } from '../../db/repositories';
@@ -76,6 +77,7 @@ export default function AdjustmentScreen({ client, onBack, onDirtyDraftChange, i
   const [saved, setSaved] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const initialFocusHandledRef = useRef(false);
+  const operationIdRef = useRef<string | null>(null);
 
   const selectedProduct = state.products.find((product) => product.storeProductId === selectedProductId) ?? state.products[0] ?? null;
   const positiveGroups = state.projection?.groups.filter((group) => BigInt(group.balanceBaseMicros) > 0n) ?? [];
@@ -96,6 +98,7 @@ export default function AdjustmentScreen({ client, onBack, onDirtyDraftChange, i
       setNote('');
       setError(null);
       setSaved(false);
+      operationIdRef.current = null;
     });
   }, [dirty, onDirtyDraftChange]);
 
@@ -125,7 +128,10 @@ export default function AdjustmentScreen({ client, onBack, onDirtyDraftChange, i
       }
       setSubmitting(true);
       setError(null);
+      const operationId = operationIdRef.current ?? generateMobileId();
+      operationIdRef.current = operationId;
       client.recordAdjustment({
+        operationId,
         storeProductId: selectedProduct.storeProductId,
         expectedInventoryWatermark: state.projection.inventoryWatermark,
         expectedBatchWatermark: state.projection.batchWatermark,
@@ -135,6 +141,7 @@ export default function AdjustmentScreen({ client, onBack, onDirtyDraftChange, i
         note,
       });
       setSaved(true);
+      operationIdRef.current = null;
       refresh();
       onDirtyDraftChange?.(false, () => undefined);
     } catch (caught) {
@@ -161,7 +168,7 @@ export default function AdjustmentScreen({ client, onBack, onDirtyDraftChange, i
           <View style={styles.packageList} accessibilityRole="radiogroup">
             {state.products.map((product) => {
               const selected = product.storeProductId === selectedProduct?.storeProductId;
-              return <Pressable key={product.storeProductId} accessibilityRole="radio" accessibilityLabel={`Adjust ${product.productName}`} accessibilityState={{ checked: selected }} onPress={() => { setSelectedProductId(product.storeProductId); setGroupId(null); setSaved(false); setError(null); }} style={[styles.packageChip, selected && styles.packageChipSelected]}><Text style={[styles.packageText, selected && styles.packageTextSelected]}>{product.productName}</Text></Pressable>;
+              return <Pressable key={product.storeProductId} accessibilityRole="radio" accessibilityLabel={`Adjust ${product.productName}`} accessibilityState={{ checked: selected }} onPress={() => { setSelectedProductId(product.storeProductId); setGroupId(null); setSaved(false); setError(null); operationIdRef.current = null; }} style={[styles.packageChip, selected && styles.packageChipSelected]}><Text style={[styles.packageText, selected && styles.packageTextSelected]}>{product.productName}</Text></Pressable>;
             })}
           </View>
           {selectedProduct && state.projection ? <><Text style={styles.meta}>Recorded stock: {quantityLabel(state.projection.inventoryBalanceBaseMicros)}</Text><Text style={styles.meta}>Unknown/unallocated: {quantityLabel(state.projection.unknownResidualBaseMicros)}</Text></> : null}
@@ -190,7 +197,7 @@ export default function AdjustmentScreen({ client, onBack, onDirtyDraftChange, i
           <PrimaryButton title={submitting ? 'Saving…' : 'Record adjustment'} onPress={submit} disabled={submitting} />
         </View>
       ) : null}
-      {saved ? <View style={styles.card}><Text style={styles.cardTitle}>Adjustment saved</Text><Text style={styles.meta}>Stock, batch explanation, cost coverage, and the pending sync envelope were recorded together.</Text><SecondaryButton title="Record another" onPress={() => { setSaved(false); setQuantityText('1'); setGroupId(null); setNote(''); setError(null); refresh(); }} /></View> : null}
+      {saved ? <View style={styles.card}><Text style={styles.cardTitle}>Adjustment saved</Text><Text style={styles.meta}>Stock, batch explanation, cost coverage, and the pending sync envelope were recorded together.</Text><SecondaryButton title="Record another" onPress={() => { setSaved(false); setQuantityText('1'); setGroupId(null); setNote(''); setError(null); operationIdRef.current = null; refresh(); }} /></View> : null}
       {error ? <Text accessibilityRole="alert" style={styles.generalError}>{error}</Text> : null}
       <SecondaryButton title="Back" onPress={onBack} />
     </ScrollView>

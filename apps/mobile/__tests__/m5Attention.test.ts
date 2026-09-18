@@ -49,6 +49,46 @@ function sellOne(fixture: ReturnType<typeof openCatalogueFixture>, product: Retu
 }
 
 describe('M5 local attention and snooze', () => {
+  it('replays a relative snooze without recomputing the due time from the current clock', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(9800));
+      const product = catalogue.createTemporaryProduct({ name: 'Clock-stable rice' });
+      buy(fixture, product, 2, 9810);
+      setReorderLevel(fixture, product.storeProduct.id, 5);
+      const client = createDatabaseInventoryClient(fixture.adapter, { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, userId: fixture.context.owner.id });
+      const low = client.getAttentionOverview('2026-09-18T08:00:00.000Z').items.find((item) => item.storeProductId === product.storeProduct.id)!;
+      jest.useFakeTimers({ now: new Date('2026-09-18T08:00:00.000Z') });
+      try {
+        const first = client.snoozeAttention({
+          operationId: testId(9820),
+          conditionKey: low.conditionKey,
+          conditionType: low.conditionType,
+          storeProductId: low.storeProductId,
+          groupId: low.groupId,
+          severityRank: low.severityRank,
+          snoozeKind: 'LATER_TODAY',
+        });
+        jest.setSystemTime(new Date('2026-09-18T09:00:00.000Z'));
+        const replay = client.snoozeAttention({
+          operationId: testId(9820),
+          conditionKey: low.conditionKey,
+          conditionType: low.conditionType,
+          storeProductId: low.storeProductId,
+          groupId: low.groupId,
+          severityRank: low.severityRank,
+          snoozeKind: 'LATER_TODAY',
+        });
+        expect(replay.snooze.id).toBe(first.snooze.id);
+        expect(replay.snooze.dueLocalMinute).toBe(first.snooze.dueLocalMinute);
+      } finally {
+        jest.useRealTimers();
+      }
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
   it('derives low, zero, negative, unknown, discrepancy and remaining expiry conditions from current truth', () => {
     const fixture = openCatalogueFixture();
     try {
@@ -162,11 +202,58 @@ describe('M5 local attention and snooze', () => {
         snoozeKind: 'LATER_TODAY',
         now: '2026-09-18T08:00:00.000Z',
       }).snooze.id).toBe(snoozed.snooze.id);
+      expect(client.snoozeAttention({
+        operationId: testId(9220),
+        conditionKey: low.conditionKey,
+        conditionType: low.conditionType,
+        storeProductId: low.storeProductId,
+        groupId: low.groupId,
+        severityRank: low.severityRank,
+        snoozeKind: 'LATER_TODAY',
+        now: '2026-09-18T09:30:00.000Z',
+      }).snooze.id).toBe(snoozed.snooze.id);
       expect(fixture.adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM inventory_attention_snoozes;')?.total).toBe(1);
       expect(client.getAttentionOverview('2026-09-18T08:30:00.000Z').items).toEqual([
         expect.objectContaining({ storeProductId: product.storeProduct.id, kind: 'UNKNOWN_COVERAGE' }),
       ]);
       expect(client.getAttentionOverview('2026-09-18T08:30:00.000Z').suppressedCount).toBe(1);
+      const chosen = client.snoozeAttention({
+        operationId: testId(9221),
+        conditionKey: low.conditionKey,
+        conditionType: low.conditionType,
+        storeProductId: low.storeProductId,
+        groupId: low.groupId,
+        severityRank: low.severityRank,
+        snoozeKind: 'CHOOSE_DATE_TIME',
+        dueLocalDate: '2026-09-18',
+        dueLocalMinute: 600,
+        now: '2026-09-18T08:00:00.000Z',
+      });
+      expect(client.snoozeAttention({
+        operationId: testId(9221),
+        conditionKey: low.conditionKey,
+        conditionType: low.conditionType,
+        storeProductId: low.storeProductId,
+        groupId: low.groupId,
+        severityRank: low.severityRank,
+        snoozeKind: 'CHOOSE_DATE_TIME',
+        dueLocalDate: '2026-09-18',
+        dueLocalMinute: 600,
+        now: '2026-09-18T10:00:00.000Z',
+      }).snooze.id).toBe(chosen.snooze.id);
+      expect(() => client.snoozeAttention({
+        operationId: testId(9221),
+        conditionKey: low.conditionKey,
+        conditionType: low.conditionType,
+        storeProductId: low.storeProductId,
+        groupId: low.groupId,
+        severityRank: low.severityRank,
+        snoozeKind: 'CHOOSE_DATE_TIME',
+        dueLocalDate: '2026-09-19',
+        dueLocalMinute: 600,
+        now: '2026-09-18T10:00:00.000Z',
+      })).toThrow('different attention snooze');
+      expect(fixture.adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM inventory_attention_snoozes;')?.total).toBe(2);
 
       const projection = client.getBatchProjection(product.storeProduct.id);
       client.recordAdjustment({

@@ -10,7 +10,6 @@ import {
   enqueueOutboxOperation,
   findExpectedOutboxReplay,
   getInventoryBatchGroupById,
-  getCostState,
   getDeviceById,
   getInventoryBatchGroupBalanceBigInt,
   getInventoryBalanceBigIntByStoreProduct,
@@ -143,14 +142,15 @@ function assertOwner(adapter: DatabaseAdapter, input: ReturnType<typeof normaliz
 }
 
 function replayGraph(adapter: DatabaseAdapter, outbox: OutboxOperationRow, request: RequestFingerprint): InventoryAdjustmentGraph {
-  const envelope = JSON.parse(outbox.payload) as { entities?: { request?: RequestFingerprint } };
+  const envelope = JSON.parse(outbox.payload) as { entities?: { request?: RequestFingerprint; costStates?: unknown } };
   if (JSON.stringify(envelope.entities?.request) !== JSON.stringify(request)) throw new DomainError('INVALID_VALUE', 'This operation ID already belongs to a different inventory adjustment.');
+  if (!Array.isArray(envelope.entities?.costStates)) throw new Error('Inventory adjustment replay is missing its original cost snapshots.');
   const adjustment = getInventoryAdjustmentById(adapter, outbox.entityId);
   if (!adjustment) throw new Error('Inventory adjustment replay references a missing aggregate.');
   const lines = listInventoryAdjustmentLinesByAdjustment(adapter, adjustment.id);
   const inventoryEvents = listInventoryEventsBySource(adapter, 'MANUAL_ADJUSTMENT', adjustment.id);
   const costMovements = listCostMovementsBySource(adapter, 'ADJUSTMENT', adjustment.id);
-  const costStates = lines.map((line) => getCostState(adapter, line.storeProductId)).filter((state): state is CostStateRow => state !== null);
+  const costStates = envelope.entities.costStates as CostStateRow[];
   const eventOperations = inventoryEvents.flatMap((event) => listBatchInventoryOperationsByEvent(adapter, event.id));
   const reclassificationOperations = lines.flatMap((line) => listBatchInventoryOperationsByStoreProduct(adapter, line.storeProductId))
     .filter((operation) => operation.kind === 'ADJUSTMENT' && operation.sourceId === adjustment.id);

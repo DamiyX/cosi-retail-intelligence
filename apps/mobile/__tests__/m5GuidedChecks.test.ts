@@ -42,6 +42,24 @@ function seedProducts(count: number) {
 }
 
 describe('M5 guided owner checks', () => {
+  it('replays a generation whose clock was omitted after the current clock advances', () => {
+    const { fixture, client } = seedProducts(4);
+    try {
+      jest.useFakeTimers({ now: new Date('2026-09-18T10:00:00.000Z') });
+      try {
+        const first = client.generateGuidedChecks({ operationId: testId(7350) });
+        jest.setSystemTime(new Date('2026-09-18T10:01:00.000Z'));
+        const replay = client.generateGuidedChecks({ operationId: testId(7350) });
+        expect(replay.assignments.map((assignment) => assignment.id)).toEqual(first.assignments.map((assignment) => assignment.id));
+        expect(replay.overview.localMinute).toBe(first.overview.localMinute);
+      } finally {
+        jest.useRealTimers();
+      }
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
   it('uses the default target, rotates eligible positive stock, links completion to blind reconciliation, and reopens with history', () => {
     const { fixture, client } = seedProducts(4);
     try {
@@ -55,6 +73,10 @@ describe('M5 guided owner checks', () => {
       const replay = client.generateGuidedChecks({ operationId: testId(7400), now: at });
       expect(replay.assignments.map((assignment) => assignment.id)).toEqual(generated.assignments.map((assignment) => assignment.id));
       expect(countRows(fixture.adapter, 'inventory_check_assignments')).toBe(3);
+      client.saveGuidedCheckSettings({ operationId: testId(7405), dailyTarget: 1, paused: false, windowStartMinute: 0, windowEndMinute: 1439 });
+      const settingsChangedReplay = client.generateGuidedChecks({ operationId: testId(7400), now: at });
+      expect(settingsChangedReplay.overview.settings.dailyTarget).toBe(3);
+      expect(settingsChangedReplay.assignments.map((assignment) => assignment.id)).toEqual(generated.assignments.map((assignment) => assignment.id));
 
       const first = generated.assignments[0];
       const draft = client.startReconciliation(first.storeProductId, first.id);

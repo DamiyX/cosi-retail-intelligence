@@ -257,13 +257,8 @@ function selectionCandidates(
   });
 }
 
-function requestFingerprint(input: { localDate: string; iso: string; dailyTarget: number; policyVersion: string }): Record<string, unknown> {
-  return {
-    localDate: input.localDate,
-    iso: input.iso,
-    dailyTarget: input.dailyTarget,
-    policyVersion: input.policyVersion,
-  };
+function requestFingerprint(input: { now?: string }): Record<string, unknown> {
+  return { now: input.now ?? null };
 }
 
 function replacementFingerprint(input: { assignmentId: string; reasonCode: string; note: string | null }): Record<string, unknown> {
@@ -406,13 +401,8 @@ export function generateGuidedChecks(
 ): GuidedCheckGenerationResult {
   const actor: GuidedCheckActor = input;
   const owner = assertOwner(adapter, actor);
-  const store = getStoreById(adapter, input.storeId);
-  if (!store) throw new DomainError('INVALID_VALUE', 'Store does not exist.');
-  const atIso = input.now ?? nowIso();
-  const time = localTime(store.timezone, atIso);
-  const settings = mapSettings(store.id, getInventoryCheckSettings(adapter, store.id));
-  const request = requestFingerprint({ localDate: time.date, iso: atIso, dailyTarget: settings.dailyTarget, policyVersion: settings.policyVersion });
   const operationId = requireId(input.operationId);
+  const request = requestFingerprint(input);
   const replayed = findExpectedOutboxReplay(adapter, {
     operationId,
     storeId: input.storeId,
@@ -422,18 +412,24 @@ export function generateGuidedChecks(
   });
   if (replayed) {
     const payload = assertReplayRequest(replayed, request, 'This operation ID already belongs to a different guided check generation.');
+    const storedOverview = payload.entities?.overview;
+    const overview = storedOverview && typeof storedOverview === 'object'
+      ? storedOverview as GuidedCheckOverview
+      : overviewFor(adapter, actor, replayed.createdAt);
     return {
-      overview: overviewFor(adapter, actor, atIso),
+      overview,
       assignments: viewsFromIds(adapter, assignmentIdsFromPayload(payload)),
       outbox: replayed,
     };
   }
+  const store = getStoreById(adapter, input.storeId);
+  if (!store) throw new DomainError('INVALID_VALUE', 'Store does not exist.');
+  const atIso = input.now ?? nowIso();
+  const time = localTime(store.timezone, atIso);
   const generateId = options.generateId ?? generateMobileId;
   return adapter.transaction(() => {
     assertOwner(adapter, actor);
     const currentSettings = mapSettings(store.id, getInventoryCheckSettings(adapter, store.id));
-    const currentRequest = requestFingerprint({ localDate: time.date, iso: atIso, dailyTarget: currentSettings.dailyTarget, policyVersion: currentSettings.policyVersion });
-    if (JSON.stringify(currentRequest) !== JSON.stringify(request)) throw new DomainError('INVALID_VALUE', 'Guided check settings changed; refresh before generating checks.');
     const before = overviewFor(adapter, actor, atIso);
     if (before.reason !== 'READY') {
       return { overview: before, assignments: [], outbox: null };
@@ -476,6 +472,7 @@ export function generateGuidedChecks(
       assignments.push(assignment);
       attempts.push(attempt);
     }
+    const overview = overviewFor(adapter, actor, atIso);
     const outbox = enqueueOutboxOperation(adapter, {
       operationType: 'CHECK_ASSIGNMENT_CREATED',
       operationId,
@@ -491,10 +488,11 @@ export function generateGuidedChecks(
         assignmentIds,
         assignments,
         attempts,
+        overview,
       },
     });
     return {
-      overview: overviewFor(adapter, actor, atIso),
+      overview,
       assignments: assignments.map((assignment) => assignmentView(adapter, assignment)),
       outbox,
     };

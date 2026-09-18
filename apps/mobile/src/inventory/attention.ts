@@ -485,7 +485,7 @@ function settingsFingerprint(input: SaveAttentionSettingsInput): Record<string, 
   return { expiryLeadDays: input.expiryLeadDays };
 }
 
-function snoozeFingerprint(input: SnoozeAttentionInput, dueLocalDate: string, dueLocalMinute: number): Record<string, unknown> {
+function snoozeFingerprint(input: SnoozeAttentionInput): Record<string, unknown> {
   return {
     conditionKey: input.conditionKey,
     conditionType: input.conditionType,
@@ -493,8 +493,10 @@ function snoozeFingerprint(input: SnoozeAttentionInput, dueLocalDate: string, du
     groupId: input.groupId ?? null,
     severityRank: input.severityRank,
     snoozeKind: input.snoozeKind,
-    dueLocalDate,
-    dueLocalMinute,
+    // Relative reminders are requests, not resolved clock values. Their
+    // durable due time is derived only for the first successful write.
+    dueLocalDate: input.snoozeKind === 'CHOOSE_DATE_TIME' ? input.dueLocalDate ?? null : null,
+    dueLocalMinute: input.snoozeKind === 'CHOOSE_DATE_TIME' ? input.dueLocalMinute ?? null : null,
   };
 }
 
@@ -566,11 +568,8 @@ export function saveAttentionSettings(adapter: DatabaseAdapter, input: SaveAtten
 
 export function snoozeAttention(adapter: DatabaseAdapter, input: SnoozeAttentionInput, options: { generateId?: () => string } = {}): SnoozeAttentionResult {
   const { store } = assertActor(adapter, input, true);
-  const atIso = input.now ?? nowIso();
-  const at = localTime(store.timezone, atIso);
-  const due = resolveDue(input, at);
   const operationId = requireId(input.operationId);
-  const request = snoozeFingerprint(input, due.date, due.minute);
+  const request = snoozeFingerprint(input);
   const replayed = findExpectedOutboxReplay(adapter, {
     operationId,
     storeId: input.storeId,
@@ -583,12 +582,19 @@ export function snoozeAttention(adapter: DatabaseAdapter, input: SnoozeAttention
     const snoozeId = typeof payload.entities?.snoozeId === 'string' ? payload.entities.snoozeId : replayed.entityId;
     const snooze = getInventoryAttentionSnoozeById(adapter, snoozeId);
     if (!snooze) throw new DomainError('INVALID_VALUE', 'Attention snooze replay references missing history.');
+    const storedOverview = payload.entities?.overview;
+    const overview = storedOverview && typeof storedOverview === 'object'
+      ? storedOverview as AttentionOverview
+      : overviewFor(adapter, store, mapSettings(store.id, getInventoryAttentionSettings(adapter, store.id)), snooze.createdAt);
     return {
       snooze,
-      overview: overviewFor(adapter, store, mapSettings(store.id, getInventoryAttentionSettings(adapter, store.id)), atIso),
+      overview,
       outbox: replayed,
     };
   }
+  const atIso = input.now ?? nowIso();
+  const at = localTime(store.timezone, atIso);
+  const due = resolveDue(input, at);
   const generateId = options.generateId ?? generateMobileId;
   return adapter.transaction(() => {
     const currentActor = assertActor(adapter, input, true);
@@ -614,6 +620,7 @@ export function snoozeAttention(adapter: DatabaseAdapter, input: SnoozeAttention
       deviceId: input.deviceId,
       createdAt: atIso,
     });
+    const overview = overviewFor(adapter, store, settings, atIso);
     const outbox = enqueueOutboxOperation(adapter, {
       operationType: 'ATTENTION_SNOOZE_CREATED',
       operationId,
@@ -622,11 +629,11 @@ export function snoozeAttention(adapter: DatabaseAdapter, input: SnoozeAttention
       entityType: 'ATTENTION_SNOOZE',
       entityId: snooze.id,
       occurredAt: atIso,
-      entities: { attentionVersion: 1, request, snoozeId: snooze.id, snooze },
+      entities: { attentionVersion: 1, request, snoozeId: snooze.id, snooze, overview },
     });
     return {
       snooze,
-      overview: overviewFor(adapter, store, settings, atIso),
+      overview,
       outbox,
     };
   });

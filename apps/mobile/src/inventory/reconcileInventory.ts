@@ -20,7 +20,6 @@ import {
   finalizeBatchInventoryOperation,
   finalizeInventoryReconciliationLine,
   findExpectedOutboxReplay,
-  getCostState,
   getDeviceById,
   getInventoryBalanceBigIntByStoreProduct,
   getInventoryReconciliationById,
@@ -382,13 +381,14 @@ function validateCompleteGroupCounts(
 }
 
 function replayGraph(adapter: DatabaseAdapter, outbox: OutboxOperationRow, request: FinalizationFingerprint): ReconciliationGraph {
-  let stored: { request?: FinalizationFingerprint } = {};
+  let stored: { request?: FinalizationFingerprint; costStates?: unknown } = {};
   try {
-    stored = (JSON.parse(outbox.payload) as { entities?: { request?: FinalizationFingerprint } }).entities ?? {};
+    stored = (JSON.parse(outbox.payload) as { entities?: { request?: FinalizationFingerprint; costStates?: unknown } }).entities ?? {};
   } catch {
     throw new Error('Stored reconciliation replay envelope is not readable.');
   }
   if (JSON.stringify(stored.request) !== JSON.stringify(request)) throw new DomainError('INVALID_VALUE', 'This operation ID already belongs to a different reconciliation finalization.');
+  if (!Array.isArray(stored.costStates)) throw new Error('Reconciliation replay is missing its original cost snapshots.');
   const reconciliation = getInventoryReconciliationById(adapter, request.reconciliationId);
   if (!reconciliation) throw new Error('Reconciliation replay references a missing session.');
   const lines = listInventoryReconciliationLinesByReconciliation(adapter, reconciliation.id);
@@ -401,7 +401,7 @@ function replayGraph(adapter: DatabaseAdapter, outbox: OutboxOperationRow, reque
   const adjustmentLines = adjustment ? listInventoryAdjustmentLinesByAdjustment(adapter, adjustment.id) : [];
   const inventoryEvents = adjustment ? listInventoryEventsBySource(adapter, 'RECONCILIATION', adjustment.id) : [];
   const costMovements = adjustment ? listCostMovementsBySource(adapter, 'ADJUSTMENT', adjustment.id) : [];
-  const costStates = adjustmentLines.map((row) => getCostState(adapter, row.storeProductId)).filter((row): row is CostStateRow => row !== null);
+  const costStates = stored.costStates as CostStateRow[];
   const reconciliationOperations = listBatchInventoryOperationsByStoreProduct(adapter, line.storeProductId)
     .filter((operation) => operation.sourceType === 'RECONCILIATION' && operation.sourceId === line.id);
   const eventOperations = inventoryEvents.flatMap((event) => listBatchInventoryOperationsByEvent(adapter, event.id));

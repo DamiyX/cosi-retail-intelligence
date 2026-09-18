@@ -97,6 +97,8 @@ describe('M5 inventory adjustments', () => {
 
       const replay = recordInventoryAdjustment(fixture.adapter, input, { generateId: deterministicIds(5050) });
       expect(replay.adjustment.id).toBe(graph.adjustment.id);
+      expect(replay.costStates).toEqual(graph.costStates);
+      expect(replay.costStates).not.toEqual(excessive.costStates);
       expect(countRows(fixture.adapter, 'inventory_adjustments')).toBe(2);
       expect(() => recordInventoryAdjustment(fixture.adapter, { ...input, note: 'different retry' })).toThrow('different inventory adjustment');
       expect(listInventoryEventsBySource(fixture.adapter, 'MANUAL_ADJUSTMENT', graph.adjustment.id)).toHaveLength(1);

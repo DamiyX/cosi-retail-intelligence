@@ -2,6 +2,7 @@ import { convertPackagesToBase, formatQuantityMicros, parseQuantityDecimal } fro
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { generateMobileId } from '../../crypto/mobileIds';
 import type { BatchProjection } from '../../inventory/batchAllocation';
 import type { InventoryClient, InventoryReviewProduct } from '../../inventory/client';
 import type { InventoryAdjustmentReason } from '../../db/repositories';
@@ -92,6 +93,7 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
   const initialFocusHandledRef = useRef(false);
   const draftRef = useRef<ReconciliationDraft | null>(null);
   const inputDirtyRef = useRef(false);
+  const finalizationOperationIdRef = useRef<string | null>(null);
   const [inputDirty, setInputDirty] = useState(false);
 
   const selectedProduct = state.products.find((product) => product.storeProductId === selectedProductId) ?? state.products[0] ?? null;
@@ -179,6 +181,7 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
       setError(null);
       hydrateDraft(client.startReconciliation(selectedProduct.storeProductId, activeAssignmentId));
       setSaved(false);
+      finalizationOperationIdRef.current = null;
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'The stock check could not start.');
     }
@@ -191,6 +194,7 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
       setActiveAssignmentId(nextDraft.checkAssignmentId);
       setSaved(false);
       setError(null);
+      finalizationOperationIdRef.current = null;
       hydrateDraft(nextDraft);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'The saved stock check could not be resumed.');
@@ -239,12 +243,15 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
     try {
       setSubmitting(true);
       setError(null);
-      client.finalizeReconciliation({ reconciliationId: draft.reconciliationId, reasonCode, note });
+      const operationId = finalizationOperationIdRef.current ?? generateMobileId();
+      finalizationOperationIdRef.current = operationId;
+      client.finalizeReconciliation({ reconciliationId: draft.reconciliationId, operationId, reasonCode, note });
       setSaved(true);
       setActiveAssignmentId(null);
       setDraft({ ...draft, status: 'COMPLETED' });
       inputDirtyRef.current = false;
       setInputDirty(false);
+      finalizationOperationIdRef.current = null;
       onDirtyDraftChange?.(false, () => undefined);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'The stock check could not be finalized. Your count is preserved.');
@@ -267,6 +274,7 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
       setGroupCounts({});
       inputDirtyRef.current = false;
       setInputDirty(false);
+      finalizationOperationIdRef.current = null;
       setError(null);
       setState(read(client));
       onDirtyDraftChange?.(false, () => undefined);
@@ -390,7 +398,7 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
           <SecondaryButton title="Cancel stock check" onPress={cancel} />
         </View>
       ) : null}
-      {saved ? <View style={styles.card}><Text style={styles.cardTitle}>Stock check finalized</Text><Text style={styles.meta}>{hasDiscrepancy ? 'The physical evidence, discrepancy reason, stock correction, and pending sync envelope were saved together.' : 'The physical evidence was saved; no stock correction was needed.'}</Text><SecondaryButton title="Check another product" onPress={() => { setDraft(null); setProjection(null); setActiveAssignmentId(null); setSaved(false); setPhysicalText(''); setNote(''); setReasonCode('CORRECTION'); setCompleteGroupCount(false); setGroupCounts({}); inputDirtyRef.current = false; setInputDirty(false); refresh(); }} /></View> : null}
+      {saved ? <View style={styles.card}><Text style={styles.cardTitle}>Stock check finalized</Text><Text style={styles.meta}>{hasDiscrepancy ? 'The physical evidence, discrepancy reason, stock correction, and pending sync envelope were saved together.' : 'The physical evidence was saved; no stock correction was needed.'}</Text><SecondaryButton title="Check another product" onPress={() => { setDraft(null); setProjection(null); setActiveAssignmentId(null); setSaved(false); setPhysicalText(''); setNote(''); setReasonCode('CORRECTION'); setCompleteGroupCount(false); setGroupCounts({}); inputDirtyRef.current = false; setInputDirty(false); finalizationOperationIdRef.current = null; refresh(); }} /></View> : null}
       {error ? <Text accessibilityRole="alert" style={styles.generalError}>{error}</Text> : null}
       <SecondaryButton title="Back" onPress={onBack} />
     </ScrollView>

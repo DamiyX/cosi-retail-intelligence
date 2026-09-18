@@ -115,6 +115,17 @@ describe('M5 blind reconciliation checks', () => {
       expect(projection.unknownResidualBaseMicros).toBe(String(35 * MICROS_PER_UNIT));
       expect(getCostState(fixture.adapter, rice.storeProduct.id)).toMatchObject({ coverageStatus: 'KNOWN', quantityCostedBaseMicros: 35 * MICROS_PER_UNIT });
       expect(listInventoryEventsBySource(fixture.adapter, 'RECONCILIATION', graph.adjustment!.id)).toHaveLength(1);
+      const originalCostStates = graph.costStates;
+      recordPurchase(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        occurredAt: '2026-09-19T10:00:00.000Z',
+        lines: [{ storeProductId: rice.storeProduct.id, packageUnitId: rice.basePackage.id, quantityPackagesMicros: MICROS_PER_UNIT, enteredCostMinor: 999 }],
+      }, { generateId: deterministicIds(6056), operationId: testId(6055) });
+      expect(getCostState(fixture.adapter, rice.storeProduct.id)).not.toEqual(originalCostStates[0]);
+      const replay = client.finalizeReconciliation({ reconciliationId: draft.reconciliationId, operationId: testId(6050) });
+      expect(replay.costStates).toEqual(originalCostStates);
     } finally {
       fixture.closeAndDelete();
     }

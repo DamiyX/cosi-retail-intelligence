@@ -59,4 +59,36 @@ describe('ReconciliationScreen', () => {
       fixture.closeAndDelete();
     }
   });
+
+  it('reuses the same operation ID when finalization is retried after a recoverable failure', () => {
+    const { fixture, rice, client: realClient } = seed();
+    try {
+      const calls: { operationId?: string }[] = [];
+      let failed = true;
+      const client: InventoryClient = {
+        ...realClient,
+        finalizeReconciliation(input) {
+          calls.push(input);
+          if (failed) {
+            failed = false;
+            throw new Error('Temporary storage failure.');
+          }
+          return realClient.finalizeReconciliation(input);
+        },
+      };
+      render(<ReconciliationScreen client={client} storeProductId={rice.storeProduct.id} onBack={() => undefined} />);
+      fireEvent.press(screen.getByText('Start blind count'));
+      fireEvent.changeText(screen.getByTestId('reconciliation-physical-quantity'), '40');
+      fireEvent.press(screen.getByText('Save first count'));
+      fireEvent.press(screen.getByText('Finalize stock check'));
+      expect(screen.getByText('Temporary storage failure.')).toBeTruthy();
+      fireEvent.press(screen.getByText('Finalize stock check'));
+      expect(screen.getByText('Stock check finalized')).toBeTruthy();
+      expect(calls).toHaveLength(2);
+      expect(calls[0].operationId).toBeDefined();
+      expect(calls[1].operationId).toBe(calls[0].operationId);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
 });

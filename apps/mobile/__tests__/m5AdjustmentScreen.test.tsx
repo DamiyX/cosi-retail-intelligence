@@ -70,4 +70,33 @@ describe('AdjustmentScreen', () => {
       fixture.closeAndDelete();
     }
   });
+
+  it('reuses the same operation ID when an adjustment action is retried', () => {
+    const { fixture, rice, client: realClient } = seed();
+    try {
+      const calls: { operationId?: string }[] = [];
+      let failed = true;
+      const client: InventoryClient = {
+        ...realClient,
+        recordAdjustment(input) {
+          calls.push(input);
+          if (failed) {
+            failed = false;
+            throw new Error('Temporary storage failure.');
+          }
+          return realClient.recordAdjustment(input);
+        },
+      };
+      render(<AdjustmentScreen client={client} storeProductId={rice.storeProduct.id} onBack={() => undefined} />);
+      fireEvent.press(screen.getByText('Record adjustment'));
+      expect(screen.getByText('Temporary storage failure.')).toBeTruthy();
+      fireEvent.press(screen.getByText('Record adjustment'));
+      expect(screen.getByText('Adjustment saved')).toBeTruthy();
+      expect(calls).toHaveLength(2);
+      expect(calls[0].operationId).toBeDefined();
+      expect(calls[1].operationId).toBe(calls[0].operationId);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
 });
