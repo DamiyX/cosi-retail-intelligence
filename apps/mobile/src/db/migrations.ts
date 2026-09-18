@@ -885,6 +885,29 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'purchase inventory event conversion snapshot does not match package'); END;`,
     ],
   },
+  {
+    version: 5,
+    name: 'sale_cost_snapshot_invariants',
+    statements: [
+      `CREATE TRIGGER trg_sale_cost_snapshots_quantity_insert
+        BEFORE INSERT ON sale_item_cost_snapshots
+        WHEN NEW.costed_quantity_base_micros > NEW.quantity_base_micros
+          OR (NEW.coverage_status = 'AVAILABLE' AND NEW.costed_quantity_base_micros <> NEW.quantity_base_micros)
+        BEGIN SELECT RAISE(ABORT, 'sale cost snapshot quantity coverage is invalid'); END;`,
+      `CREATE TRIGGER trg_sale_cost_snapshots_fields_insert
+        BEFORE INSERT ON sale_item_cost_snapshots
+        WHEN (NEW.coverage_status = 'AVAILABLE' AND (
+          NEW.unit_cost_numerator IS NULL OR NEW.unit_cost_denominator IS NULL
+          OR NEW.cogs_numerator IS NULL OR NEW.cogs_denominator IS NULL
+        ))
+        OR (NEW.coverage_status = 'UNAVAILABLE' AND (
+          NEW.unit_cost_numerator IS NOT NULL OR NEW.unit_cost_denominator IS NOT NULL
+          OR NEW.cogs_numerator IS NOT NULL OR NEW.cogs_denominator IS NOT NULL
+          OR NEW.cogs_amount_minor IS NOT NULL
+        ))
+        BEGIN SELECT RAISE(ABORT, 'sale cost snapshot fields do not match coverage'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

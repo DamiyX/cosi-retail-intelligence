@@ -10,6 +10,7 @@ import {
   createPurchase,
   createSale,
   createSaleItem,
+  createSaleItemCostSnapshot,
   createStoreMember,
   createUser,
   enqueueOutboxOperation,
@@ -87,6 +88,167 @@ describe('M4 restocking and costing', () => {
     }
   });
 
+  it('keeps an exact fractional-quantity sale cost when the legacy integer projection would overflow', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const product = createTemporaryProduct(
+        fixture.adapter,
+        { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, name: 'Micro quantity item' },
+        { generateId: deterministicIds(450) },
+      );
+      const base = getActiveBasePackageUnit(fixture.adapter, product.variant.id)!;
+      const purchaseInput = {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        lines: [{
+          storeProductId: product.storeProduct.id,
+          packageUnitId: base.id,
+          quantityPackagesMicros: 1,
+          enteredCostMinor: 10_000_000_000,
+        }],
+      };
+      recordPurchase(fixture.adapter, purchaseInput, {
+        generateId: deterministicIds(460),
+        operationId: testId(461),
+      });
+      const saleInput = {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        lines: [{
+          storeProductId: product.storeProduct.id,
+          packageUnitId: base.id,
+          quantityPackagesMicros: 1,
+          unitPriceMinor: 1_000_000,
+        }],
+        payment: { method: 'CASH' as const },
+      };
+      const operationId = testId(471);
+      const sale = completeSale(fixture.adapter, saleInput, {
+        generateId: deterministicIds(470),
+        operationId,
+      });
+      expect(sale.items[0].unitCostBaseSnapshotMinor).toBeNull();
+      expect(sale.items[0].cogsAmountMinor).toBe(10_000_000_000);
+      expect(sale.costSnapshots[0]).toMatchObject({
+        coverageStatus: 'AVAILABLE',
+        unitCost: { numerator: '10000000000000000', denominator: '1' },
+        cogs: { numerator: '10000000000', denominator: '1' },
+        cogsAmountMinor: 10_000_000_000,
+      });
+      const countsAfterSale = saleCostGraphCounts(fixture.adapter);
+      const replay = completeSale(fixture.adapter, saleInput, {
+        operationId,
+        generateId: deterministicIds(480),
+      });
+      expect(replay.sale.id).toBe(sale.sale.id);
+      expect(replay.costSnapshots[0].unitCost).toEqual({ numerator: '10000000000000000', denominator: '1' });
+      expect(saleCostGraphCounts(fixture.adapter)).toEqual(countsAfterSale);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('rejects contradictory sale cost snapshots before writing and preserves valid coverage variants', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const product = createTemporaryProduct(
+        fixture.adapter,
+        { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, name: 'Snapshot validation item' },
+        { generateId: deterministicIds(490) },
+      );
+      const base = getActiveBasePackageUnit(fixture.adapter, product.variant.id)!;
+      const occurredAt = '2026-09-18T12:00:00.000Z';
+      const sale = createSale(fixture.adapter, {
+        id: testId(491),
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        createdByUserId: fixture.context.owner.id,
+        occurredAt,
+        currencyCode: 'NGN',
+        subtotalMinor: 200,
+        totalMinor: 200,
+        createdAt: occurredAt,
+        completedAt: occurredAt,
+      });
+      const makeSaleItem = (id: string) => createSaleItem(fixture.adapter, {
+        id,
+        saleId: sale.id,
+        storeProductId: product.storeProduct.id,
+        productVariantId: product.variant.id,
+        packageUnitId: base.id,
+        quantityPackagesMicros: MICROS_PER_UNIT,
+        conversionToBaseSnapshotMicros: MICROS_PER_UNIT,
+        quantityBaseMicros: MICROS_PER_UNIT,
+        unitPriceMinor: 100,
+        grossTotalMinor: 100,
+        netTotalMinor: 100,
+        productNameSnapshot: 'Snapshot validation item',
+        packageNameSnapshot: 'piece',
+        createdAt: occurredAt,
+      });
+      const item = makeSaleItem(testId(492));
+      const snapshotInput = {
+        saleItemId: item.id,
+        saleId: sale.id,
+        storeId: fixture.context.store.id,
+        storeProductId: product.storeProduct.id,
+        quantityBaseMicros: MICROS_PER_UNIT,
+      };
+      const before = countRows(fixture.adapter, 'sale_item_cost_snapshots');
+      expect(() => createSaleItemCostSnapshot(fixture.adapter, {
+        ...snapshotInput,
+        costedQuantityBaseMicros: 0,
+        coverageStatus: 'AVAILABLE',
+        unitCost: { numerator: '100', denominator: '1' },
+        cogs: { numerator: '999', denominator: '1' },
+        cogsAmountMinor: 1,
+      })).toThrow(DomainError);
+      expect(() => createSaleItemCostSnapshot(fixture.adapter, {
+        ...snapshotInput,
+        costedQuantityBaseMicros: MICROS_PER_UNIT,
+        coverageStatus: 'AVAILABLE',
+        unitCost: { numerator: '2', denominator: '2' },
+        cogs: { numerator: '2', denominator: '2' },
+        cogsAmountMinor: 1,
+      })).toThrow(DomainError);
+      expect(() => createSaleItemCostSnapshot(fixture.adapter, {
+        ...snapshotInput,
+        costedQuantityBaseMicros: MICROS_PER_UNIT,
+        coverageStatus: 'AVAILABLE',
+        unitCost: { numerator: '100', denominator: '3' },
+        cogs: { numerator: '101', denominator: '3' },
+        cogsAmountMinor: 34,
+      })).toThrow(DomainError);
+      expect(countRows(fixture.adapter, 'sale_item_cost_snapshots')).toBe(before);
+
+      const valid = createSaleItemCostSnapshot(fixture.adapter, {
+        ...snapshotInput,
+        costedQuantityBaseMicros: MICROS_PER_UNIT,
+        coverageStatus: 'AVAILABLE',
+        unitCost: { numerator: '100', denominator: '3' },
+        cogs: { numerator: '100', denominator: '3' },
+        cogsAmountMinor: 33,
+      });
+      expect(valid.cogsAmountMinor).toBe(33);
+
+      const unavailableItem = makeSaleItem(testId(493));
+      const unavailable = createSaleItemCostSnapshot(fixture.adapter, {
+        ...snapshotInput,
+        saleItemId: unavailableItem.id,
+        costedQuantityBaseMicros: 1,
+        coverageStatus: 'UNAVAILABLE',
+        unitCost: null,
+        cogs: null,
+        cogsAmountMinor: null,
+      });
+      expect(unavailable).toMatchObject({ coverageStatus: 'UNAVAILABLE', costedQuantityBaseMicros: 1, unitCost: null, cogs: null, cogsAmountMinor: null });
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
   it('normalizes fractional total costs exactly and rejects inexact unit totals', () => {
     const normalized = normalizePurchaseCost({
       basis: 'TOTAL',
@@ -154,11 +316,13 @@ describe('M4 restocking and costing', () => {
       );
       const base = getActiveBasePackageUnit(fixture.adapter, product.variant.id)!;
       const operationId = testId(701);
+      const originalOccurredAt = '2026-09-18T01:00:00.000Z';
       const input = {
         storeId: fixture.context.store.id,
         deviceId: fixture.context.device.id,
         userId: fixture.context.owner.id,
         supplierName: 'Original Supplier',
+        occurredAt: originalOccurredAt,
         lines: [{
           storeProductId: product.storeProduct.id,
           packageUnitId: base.id,
@@ -171,6 +335,17 @@ describe('M4 restocking and costing', () => {
         operationId,
       });
       const before = purchaseGraphCounts(fixture.adapter);
+
+      const { occurredAt: _omittedOccurredAt, ...retryableInput } = input;
+      const omittedDateReplay = recordPurchase(fixture.adapter, retryableInput, { operationId });
+      expect(omittedDateReplay.purchase.id).toBe(graph.purchase.id);
+      expect(purchaseGraphCounts(fixture.adapter)).toEqual(before);
+
+      expect(() => recordPurchase(fixture.adapter, {
+        ...input,
+        occurredAt: '2026-09-19T01:00:00.000Z',
+      }, { operationId })).toThrow(/different occurredAt/);
+      expect(purchaseGraphCounts(fixture.adapter)).toEqual(before);
 
       expect(() => recordPurchase(fixture.adapter, {
         ...input,

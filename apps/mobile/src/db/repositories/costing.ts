@@ -5,10 +5,13 @@ import {
   initialCostState,
   makeRational,
   parseRational,
+  compareRational,
+  roundRationalHalfUp,
   subtractRational,
   type CostCoverageStatus,
   type CostState,
   type Rational,
+  valueForBaseMicros,
   DomainError,
 } from '@retail/domain';
 
@@ -431,8 +434,22 @@ export function createSaleItemCostSnapshot(
   if (input.coverageStatus === 'AVAILABLE' && (!unitCost || !cogs || input.cogsAmountMinor === null || input.cogsAmountMinor === undefined)) {
     throw new DomainError('INVALID_VALUE', 'Available sale cost snapshots require exact unit cost and COGS.');
   }
-  if (input.coverageStatus === 'UNAVAILABLE' && (cogs || input.cogsAmountMinor !== null && input.cogsAmountMinor !== undefined)) {
-    throw new DomainError('INVALID_VALUE', 'Unavailable sale cost snapshots cannot include COGS.');
+  if (input.coverageStatus === 'UNAVAILABLE' && (unitCost || cogs || input.cogsAmountMinor !== null && input.cogsAmountMinor !== undefined)) {
+    throw new DomainError('INVALID_VALUE', 'Unavailable sale cost snapshots cannot include cost values.');
+  }
+  const parsedUnitCost = unitCost ? parseRational(unitCost, 'unitCost') : null;
+  const parsedCogs = cogs ? parseRational(cogs, 'cogs') : null;
+  if (input.coverageStatus === 'AVAILABLE') {
+    if (input.costedQuantityBaseMicros !== input.quantityBaseMicros || !parsedUnitCost || !parsedCogs) {
+      throw new DomainError('INVALID_VALUE', 'Available sale cost snapshots require full quantity coverage.');
+    }
+    const expectedCogs = valueForBaseMicros(parsedUnitCost, input.quantityBaseMicros);
+    if (compareRational(parsedCogs, expectedCogs) !== 0) {
+      throw new DomainError('INVALID_VALUE', 'Sale COGS must equal the exact unit cost multiplied by the sold quantity.');
+    }
+    if (roundRationalHalfUp(expectedCogs) !== input.cogsAmountMinor) {
+      throw new DomainError('INVALID_MONEY', 'Sale COGS must use the exact half-up rounded amount.');
+    }
   }
   const methodVersion = requireText(input.methodVersion ?? 'M4-MWA-1', 'methodVersion', 32);
   if (input.cogsAmountMinor !== null && input.cogsAmountMinor !== undefined && (!Number.isSafeInteger(input.cogsAmountMinor) || input.cogsAmountMinor < 0)) {
@@ -455,10 +472,10 @@ export function createSaleItemCostSnapshot(
       input.costedQuantityBaseMicros,
       input.coverageStatus,
       methodVersion,
-      unitCost?.numerator ?? null,
-      unitCost?.denominator ?? null,
-      cogs?.numerator ?? null,
-      cogs?.denominator ?? null,
+      parsedUnitCost?.numerator ?? null,
+      parsedUnitCost?.denominator ?? null,
+      parsedCogs?.numerator ?? null,
+      parsedCogs?.denominator ?? null,
       input.cogsAmountMinor ?? null,
       createdAt,
     ],

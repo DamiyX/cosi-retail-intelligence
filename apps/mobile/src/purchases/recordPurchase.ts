@@ -379,6 +379,7 @@ export function recordPurchase(
 
 function assertReplayMatchesRequest(outbox: OutboxOperationRow, input: RecordPurchaseInput): void {
   let entities: {
+    purchase?: { occurredAt?: string };
     items?: {
       storeProductId?: string;
       packageUnitId?: string;
@@ -392,6 +393,9 @@ function assertReplayMatchesRequest(outbox: OutboxOperationRow, input: RecordPur
     entities = (JSON.parse(outbox.payload) as { entities?: typeof entities }).entities ?? {};
   } catch {
     throw new Error('Stored purchase replay envelope is not readable.');
+  }
+  if (input.occurredAt !== undefined && entities.purchase?.occurredAt !== input.occurredAt) {
+    throw new DomainError('INVALID_VALUE', 'This operation ID already belongs to a purchase with a different occurredAt.');
   }
   const storedLines = entities.items ?? [];
   if (storedLines.length !== input.lines.length) {

@@ -335,9 +335,18 @@ export function completeSale(
           saleQuantityBaseMicros: vLine.calculated.quantityBaseMicros,
         });
       }
-      const legacyUnitCost = costTransition.available && currentCostState?.averageUnitCost?.denominator === '1'
-        ? Number(currentCostState.averageUnitCost.numerator)
-        : null;
+      // Keep the legacy integer column only as a compatibility projection.  An
+      // exact rational average may be integral but still too large for the
+      // persisted JavaScript/SQLite integer contract; the companion snapshot
+      // remains the authoritative exact value in that case.
+      const legacyUnitCost = (() => {
+        const average = currentCostState?.averageUnitCost;
+        if (!costTransition.available || !average || average.denominator !== '1') {
+          return null;
+        }
+        const numerator = BigInt(average.numerator);
+        return numerator <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(numerator) : null;
+      })();
       const item = createSaleItem(adapter, {
         id: generateId(),
         saleId: sale.id,

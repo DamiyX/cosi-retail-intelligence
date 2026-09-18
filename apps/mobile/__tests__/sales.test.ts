@@ -120,6 +120,7 @@ describe('M3 Sales milestone', () => {
             { version: 2, name: 'catalogue' },
             { version: 3, name: 'sales_and_inventory' },
             { version: 4, name: 'restocking_costing' },
+            { version: 5, name: 'sale_cost_snapshot_invariants' },
           ]);
         } finally {
           reopened.close();
