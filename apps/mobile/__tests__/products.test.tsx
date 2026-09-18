@@ -348,8 +348,7 @@ describe('ProductDetailScreen', () => {
       expect(screen.getByText('Purchase price history')).toBeTruthy();
       expect(screen.getByText('Entered total cost: ₦7.50')).toBeTruthy();
       expect(screen.getByText('Purchase total: ₦7.50')).toBeTruthy();
-      expect(screen.getByText('Receipt cost estimate: ₦3.75 per base unit (rounded to the nearest minor unit)')).toBeTruthy();
-      expect(screen.getByText('Exact stored receipt basis: 375/1 minor units per base unit')).toBeTruthy();
+      expect(screen.getByText('Receipt cost estimate: ₦3.75 per base unit (display rounded to the nearest kobo)')).toBeTruthy();
       expect(screen.getByText('Current cost availability: Estimated cost available for current stock')).toBeTruthy();
       expect(screen.getByText('Supplier: History supplier')).toBeTruthy();
       expect(screen.getByText(/Contribution: off/)).toBeTruthy();
@@ -394,7 +393,7 @@ describe('ProductDetailScreen', () => {
           onEditPackage={() => undefined}
         />,
       );
-      expect(screen.getByText('Receipt cost estimate: ₦0.33 per base unit (rounded to the nearest minor unit)')).toBeTruthy();
+      expect(screen.getByText('Receipt cost estimate: ₦0.33 per base unit (display rounded to the nearest kobo)')).toBeTruthy();
       expect(screen.getByText('Current cost availability: Estimated cost available for current stock')).toBeTruthy();
     } finally {
       fractionalView?.unmount();
@@ -485,6 +484,48 @@ describe('ProductDetailScreen', () => {
     } finally {
       unknownView?.unmount();
       unknownFixture.closeAndDelete();
+    }
+  });
+
+  it('keeps an overflow-sized receipt estimate readable in currency terms', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(
+        fixture.adapter,
+        fixture.context.store,
+        fixture.context.device,
+        deterministicIds(8180),
+      );
+      const graph = catalogue.createTemporaryProduct({ name: 'Large basis rice' });
+      const base = getActiveBasePackageUnit(fixture.adapter, graph.variant.id)!;
+      const purchases = createDatabasePurchasesClient(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        generateId: deterministicIds(8190),
+      });
+      purchases.recordPurchase({
+        lines: [{
+          storeProductId: graph.storeProduct.id,
+          packageUnitId: base.id,
+          quantityPackagesMicros: 1,
+          enteredCostMinor: 10_000_000_000_000,
+          costBasis: 'TOTAL',
+        }],
+        operationId: '00000000-0000-4000-8000-000000008191',
+      });
+      render(
+        <ProductDetailScreen
+          client={catalogue}
+          productId={graph.storeProduct.id}
+          onBack={() => undefined}
+          onAddPackage={() => undefined}
+          onEditPackage={() => undefined}
+        />,
+      );
+      expect(screen.getByText('Receipt cost estimate: ₦100,000,000,000,000,000.00 per base unit (display rounded to the nearest kobo)')).toBeTruthy();
+    } finally {
+      fixture.closeAndDelete();
     }
   });
 

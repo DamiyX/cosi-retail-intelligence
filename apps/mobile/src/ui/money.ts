@@ -4,7 +4,6 @@ import {
   money,
   moneyFromMajorUnits,
   parseRational,
-  roundRationalHalfUp,
   type CostCoverageStatus,
   type Rational,
 } from '@retail/domain';
@@ -17,6 +16,33 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   GBP: '£',
   GHS: '₵',
 };
+
+const CURRENCY_MINOR_UNIT_LABELS: Record<string, string> = {
+  NGN: 'kobo',
+  USD: 'cents',
+  EUR: 'cents',
+  GBP: 'pence',
+  GHS: 'pesewas',
+};
+
+function groupThousands(digits: string): string {
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function displayExactMinorUnits(amountMinorUnits: bigint, currencyCode: string): string {
+  const sign = amountMinorUnits < 0n ? '-' : '';
+  const magnitude = amountMinorUnits < 0n ? -amountMinorUnits : amountMinorUnits;
+  const whole = magnitude / 100n;
+  const fraction = String(magnitude % 100n).padStart(2, '0');
+  const canonical = `${currencyCode} ${sign}${groupThousands(String(whole))}.${fraction}`;
+  const symbol = CURRENCY_SYMBOLS[currencyCode];
+  return symbol ? `${symbol}${canonical.slice(currencyCode.length + 1)}` : canonical;
+}
+
+/** Name the smallest currency unit used when explaining a rounded display. */
+export function currencyMinorUnitLabel(currencyCode: string): string {
+  return CURRENCY_MINOR_UNIT_LABELS[currencyCode] ?? 'smallest currency unit';
+}
 
 /**
  * Display a minor-unit price such as "₦1,450.50". Returns null when no
@@ -52,7 +78,14 @@ export function displayRationalMinorPerBaseUnit(
     return null;
   }
   try {
-    return displayMoney(roundRationalHalfUp(parseRational({ numerator, denominator }, 'display cost')), currencyCode);
+    if (!/^[A-Z]{3}$/.test(currencyCode)) {
+      return null;
+    }
+    const parsed = parseRational({ numerator, denominator }, 'display cost');
+    const numeratorBigInt = BigInt(parsed.numerator);
+    const denominatorBigInt = BigInt(parsed.denominator);
+    const rounded = (numeratorBigInt * 2n + denominatorBigInt) / (2n * denominatorBigInt);
+    return displayExactMinorUnits(rounded, currencyCode);
   } catch {
     return null;
   }

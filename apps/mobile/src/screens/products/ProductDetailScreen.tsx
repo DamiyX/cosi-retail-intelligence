@@ -5,7 +5,7 @@ import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } fro
 import type { CatalogueClient, ProductDetail } from '../../catalogue/client';
 import type { IdentifierType, PurchasePriceHistoryRow } from '../../db/repositories';
 import { ErrorPanel, Field, PrimaryButton, SecondaryButton, StatusNote } from '../../ui/components';
-import { displayMoney, displayRationalMinorPerBaseUnit, isUsableCurrentCost } from '../../ui/money';
+import { currencyMinorUnitLabel, displayMoney, displayRationalMinorPerBaseUnit, isUsableCurrentCost } from '../../ui/money';
 import { theme } from '../../ui/theme';
 
 interface ProductDetailScreenProps {
@@ -442,10 +442,7 @@ export default function ProductDetailScreen({
                       entry.baseUnitCostNumerator,
                       entry.baseUnitCostDenominator,
                       entry.currencyCode,
-                    ) ?? 'Unavailable'} per base unit (rounded to the nearest minor unit)
-                  </Text>
-                  <Text style={styles.line}>
-                    Exact stored receipt basis: {entry.baseUnitCostNumerator}/{entry.baseUnitCostDenominator} minor units per base unit
+                    ) ?? 'Unavailable'} per base unit (display rounded to the nearest {currencyMinorUnitLabel(entry.currencyCode)})
                   </Text>
                   <Text style={styles.line}>
                     Current cost availability: {isUsableCurrentCost({

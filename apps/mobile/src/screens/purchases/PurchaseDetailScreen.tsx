@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { PurchasesClient } from '../../purchases/client';
 import type { PurchaseDetail } from '../../purchases/index';
 import { ErrorPanel, SecondaryButton, StatusNote } from '../../ui/components';
-import { displayMoney, displayRationalMinorPerBaseUnit, isUsableCurrentCost } from '../../ui/money';
+import { currencyMinorUnitLabel, displayMoney, displayRationalMinorPerBaseUnit, isUsableCurrentCost } from '../../ui/money';
 import { theme } from '../../ui/theme';
 
 interface PurchaseDetailScreenProps {
@@ -72,8 +72,7 @@ export default function PurchaseDetailScreen({ client, purchaseId, onBack, isFoc
               <Text style={styles.itemTitle}>{item.productNameSnapshot}</Text>
               <Text style={styles.meta}>{formatQuantityMicros(item.quantityPackagesMicros)} {item.packageNameSnapshot} · {formatQuantityMicros(item.quantityBaseMicros)} base units</Text>
               <Text style={styles.meta}>Entered {item.costBasis.toLowerCase()} cost: {displayMoney(item.enteredCostMinor, item.currencyCode)}</Text>
-              <Text style={styles.meta}>Receipt cost estimate: {receiptCostDisplay ?? 'Unavailable'} per base unit (rounded to the nearest minor unit)</Text>
-              <Text style={styles.meta}>Exact stored receipt basis: {item.baseUnitCostNumerator}/{item.baseUnitCostDenominator} minor units per base unit</Text>
+              <Text style={styles.meta}>Receipt cost estimate: {receiptCostDisplay ?? 'Unavailable'} per base unit (display rounded to the nearest {currencyMinorUnitLabel(item.currencyCode)})</Text>
               <Text style={styles.meta}>Current cost availability: {isUsableCurrentCost(currentCost ?? {
                 coverageStatus: 'UNKNOWN',
                 quantityCostedBaseMicros: 0,

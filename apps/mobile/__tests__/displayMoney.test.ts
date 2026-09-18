@@ -1,6 +1,6 @@
 import { formatMoney, money } from '@retail/domain';
 
-import { displayMoney } from '../src/ui/money';
+import { displayMoney, displayRationalMinorPerBaseUnit } from '../src/ui/money';
 
 describe('displayMoney', () => {
   it.each([
@@ -19,5 +19,12 @@ describe('displayMoney', () => {
 
   it('falls back to the currency code for unknown currencies', () => {
     expect(displayMoney(100, 'KES')).toBe(formatMoney(money(100, 'KES')));
+  });
+
+  it('formats exact rational estimates without narrowing valid large values to Number', () => {
+    expect(displayRationalMinorPerBaseUnit('10000000000000000', '1', 'NGN')).toBe('₦100,000,000,000,000.00');
+    expect(displayRationalMinorPerBaseUnit('100', '3', 'NGN')).toBe('₦0.33');
+    expect(displayRationalMinorPerBaseUnit('0', '1', 'NGN')).toBe('₦0.00');
+    expect(displayRationalMinorPerBaseUnit(null, '1', 'NGN')).toBeNull();
   });
 });
