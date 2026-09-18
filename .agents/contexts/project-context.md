@@ -24,7 +24,10 @@ M0 Project Foundation, M1 Domain + Local Database, and M2 Catalogue + Package
 Units are accepted. M3 Sales source/automated scope is accepted on
 `feat/m3-sales` after independent re-audit, under a carried physical-device
 waiver; native/release readiness is not yet approved.
-Network sync, market network, and recognition inference are not implemented.
+M4 Restocking + Costing source/automated scope is accepted at `9700ee3` after
+independent re-audit; physical/release gates remain carried. Network sync,
+expiry-aware lots, stock-check workflows, market network and recognition
+inference are not implemented.
 
 ## Product Snapshot
 
@@ -75,11 +78,14 @@ partial measure, never full profit or P&L.
 
 ## Current Priorities
 
-1. Implement published M4 tickets on feat/m4-restocking-costing from 66cc64d.
-   Founder approved M4 cost/design rules; D-038 records engineering precision,
-   rounding and coverage while D-027 stays provisional. Coordinator owns plans,
-   tickets, workflow and independent audit; separate Luna max task implements
-   approved tickets and assigned fixes. Stop at the independent audit boundary.
+1. Coordinator prepares the expiry-aware M5 product/data/design contract and
+   dependency-reviewed tickets before delegation. Founder approved expanded
+   stock-check/attention behavior and conservative discrepancy costing, and
+   requires expiry alerts for the first pilot. Specific lot/allocation behavior
+   remains proposed in docs/product/PRODUCT_CHANGE_BACKLOG.md; do not implement
+   it or silently override existing authorities before that review/alignment.
+   Coordinator owns plans/tickets/audit; separate Luna max tasks implement
+   approved milestones and assigned fixes sequentially.
 2. Complete the explicitly deferred M3 physical-device/offline-sale,
    development-client/Metro, large-text, and second-laptop checks before any
    external beta/native-release claim; preserve the M1/M2 Galaxy evidence as
@@ -118,7 +124,10 @@ partial measure, never full profit or P&L.
   split tender, partial credit settlement, and reversal remain later gates.
 - Confirm onboarding, session recovery, store creation/membership, multiple
   stores, and exact staff permissions before those flows are implemented.
-- D-038 approves M4 engineering costing; professional accounting review, M5 adjustment costing and M7 concurrent-device costing remain gates.
+- D-038 approves M4 engineering costing. Founder approved conservative M5
+  shortage/surplus handling in the product change record; its detailed contract
+  and decision/architecture alignment precede implementation. Professional
+  accounting review and M7 concurrent-device cost/lot allocation remain gates.
 - Approve the application flow and design direction before substantial product
   UI implementation. See .agents/contexts/app-flow.md and
   docs/design/README.md.

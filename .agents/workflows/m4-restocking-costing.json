@@ -3,8 +3,8 @@
   "task_id": "m4-restocking-costing",
   "workflow_id": "build-feature",
   "mode": "implement",
-  "status": "in_progress",
-  "current_state": "m4-reaudit-three-corrections-returned",
+  "status": "complete",
+  "current_state": "m4-accepted-source-automated-with-carried-readiness-gates",
   "completed_states": [
     "m3-independent-source-automated-acceptance",
     "m4-intake",
@@ -12,11 +12,12 @@
     "m4-founder-costing-design-approval",
     "m4-source-document-alignment",
     "m4-ticket-release",
-    "m4-implementation-evidence"
+    "m4-implementation-evidence",
+    "m4-independent-source-automated-audit"
   ],
   "owner": {
-    "agent": "implementation-engineer-luna-max",
-    "thread": "01a0b1a5-4512-79f0-ae55-58d39559944d",
+    "agent": "coordinating-independent-auditor",
+    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
     "worktree": null
   },
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m0",
@@ -58,6 +59,12 @@
       "claim": "The implementation task returned only A4-R/A3-R/A6-R: typed and SQLite parent sale-cost consistency with additive migration 6; contextual Quick Add retry selection after failure with retained cart/editor state; and merchant-facing exact BigInt/string receipt estimates without raw fractions. npm run validate passed 150 domain and 217 mobile tests (367 tests / 28 suites), strict typecheck and zero-warning lint; Doctor 21/21, Expo dependency check, Android export, active M4 workflow validation and git diff --check passed. Coordinator re-audit and source acceptance remain pending; physical/device/cloud/release checks remain unperformed.",
       "source": "c30d3f7; 9535451; c91d16a; tickets.md; docs/engineering/PROJECT_STATE.md",
       "observed_at": "2026-09-18T12:29:20Z"
+    },
+    {
+      "kind": "audit",
+      "claim": "Coordinator independently accepted M4 source/automated scope at 9700ee3 after final A4-R/A3-R/A6-R re-audit. npm run validate passed strict typecheck, zero-warning lint and 367 tests / 28 suites (150 domain, 217 mobile); independently rerun Expo Doctor passed 21/21 and Android export passed (1,357 modules, 3.2 MB). Real SQLite populated-M3-to-v6 reproduction rejected typed/raw AVAILABLE companion costs against an old NULL parent without rewriting history; migrations 1-5 registry remained unchanged. Routed retry regression and exact large-value formatting were verified. Physical/release/accounting gates remain carried.",
+      "source": "9700ee3; docs/engineering/M4_AUDIT_CORRECTIONS.md",
+      "observed_at": "2026-09-18T12:38:18.716Z"
     }
   ],
   "acceptance_gates": [
@@ -177,7 +184,7 @@
       "claim": "Coordinator independently accepts source/automated scope after correction and re-audit.",
       "owner": "coordinator",
       "required": true,
-      "status": "blocked",
+      "status": "met",
       "depends_on": [
         "m4-implementation-evidence"
       ],
@@ -206,10 +213,17 @@
           "result": "Implementation returned c30d3f7, 9535451 and c91d16a for the three bounded re-audit requests. The coordinator must inspect the changes and independently rerun the required evidence before deciding source acceptance.",
           "source": "c30d3f7; 9535451; c91d16a; docs/engineering/M4_AUDIT_CORRECTIONS.md",
           "observed_at": "2026-09-18T12:29:20Z"
+        },
+        {
+          "result": "Coordinator independently accepted M4 source/automated scope at 9700ee3 after final A4-R/A3-R/A6-R re-audit. npm run validate passed strict typecheck, zero-warning lint and 367 tests / 28 suites (150 domain, 217 mobile); independently rerun Expo Doctor passed 21/21 and Android export passed (1,357 modules, 3.2 MB). Real SQLite populated-M3-to-v6 reproduction rejected typed/raw AVAILABLE companion costs against an old NULL parent without rewriting history; migrations 1-5 registry remained unchanged. Routed retry regression and exact large-value formatting were verified. Physical/release/accounting gates remain carried.",
+          "source": "docs/engineering/M4_AUDIT_CORRECTIONS.md",
+          "observed_at": "2026-09-18T12:38:18.716Z"
         }
       ],
-      "limitations": [],
-      "blocker": "Coordinator re-audit of A4-R parent cost consistency, A3-R return-read retry selection and A6-R merchant cost display is required; source acceptance remains withheld.",
+      "limitations": [
+        "Source/automated acceptance only; actual Galaxy M3/M4, development-client/Metro, second-laptop and professional accounting gates are not passed."
+      ],
+      "blocker": null,
       "waiver": null
     },
     {
@@ -261,8 +275,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Coordinator independently re-audits A4-R, A3-R and A6-R, decides source acceptance, and records the result. M5 also waits for founder approval of the product-change review; do not implement new ideas.",
+  "next_action": "Coordinator prepares expiry-aware M5 product/data/design contract for founder review, then aligns approved authorities and publishes dependency-reviewed tickets/workflow before delegation. Founder approved stock-check/attention and conservative adjustment-cost behavior, and requires expiry for the first pilot; the specific lot/allocation contract is still proposed. No M5 implementation, push, merge or deployment.",
   "created_at": "2026-09-17T23:22:42Z",
-  "updated_at": "2026-09-18T12:29:20Z",
+  "updated_at": "2026-09-18T12:38:18.716Z",
   "archived": false
 }

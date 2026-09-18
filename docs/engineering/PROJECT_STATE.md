@@ -1,226 +1,113 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-18  
-Current milestone: M4 Restocking + Costing — A4-R, A3-R and A6-R corrections
-returned at `c91d16a`. Coordinator re-audit and source acceptance remain
-pending; physical/release gates carried.  
-Completed engineering milestones: M0 Project Foundation; M1 Domain + Local
-Database (accepted with an explicit device waiver); M2 Catalogue + Package Units
-(accepted after independent audit); M3 source/automated scope (accepted after
-independent audit with physical/release gates carried).
+Current milestone: M4 source/automated scope accepted; expiry-aware M5 planning
+and founder design review next. M5 implementation has not started.  
+Completed engineering milestones: M0; M1 (explicit device waiver); M2 after
+independent audit; M3 and M4 source/automated scope after independent audit,
+with physical/release readiness gates carried.
 
-## Active checkout
+## Active checkout and ownership
 
+- Checkout: C:\Users\doyew\Documents\DEV 2\COSI-m0
 - Canonical remote: https://github.com/DamiyX/cosi-retail-intelligence
-- Current branch: `feat/m4-restocking-costing`, from accepted M3 checkpoint
-  `66cc64d`. M4 implementation is committed in `3c4eef9`, with follow-up
-  commits `b12ff0c`, `c810f5`, `87e96a6`, `9ec9075`, correction commits
-  `457d9d9`, `08871db`, `cb0566e`, and re-audit returns `c30d3f7`, `9535451`,
-  `c91d16a`.
-- Coordinator-created M4 plan, published tickets, D-038, cost/design sources and
-  workflow registration were recorded in checkpoint `db5a835`; implementation
-  evidence is now recorded separately for coordinator audit.
-- Separate implementation task `01a0b1a5-4512-79f0-ae55-58d39559944d` is assigned
-  M4 only as Luna max. Coordinator owns planning/tickets/workflow registration
-  and independent audit; implementer owns implementation and assigned fixes.
-- Local checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m0`
-- M0 pull request #1 remains open and `main` remains at `a393498`; the milestone
-  branches are currently stacked. Rebase or retarget only after the earlier pull
-  request is accepted.
-- No push, merge, deployment, production-service change, device action, or cloud
-  build was performed in this M4 implementation pass.
+- Branch: feat/m4-restocking-costing. Reviewed source HEAD:
+  9700ee32dc6fe6db05ddafed65a4ce170db54f31. Later documentation-only audit
+  commits do not change this source checkpoint; inspect Git for current HEAD.
+- Accepted M3 checkpoint: 66cc64d; approved M4 plan/contract checkpoint: db5a835.
+- Coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 owns product review,
+  plans, tickets, workflow registration and independent acceptance. Separate
+  Luna max task 01a0b1a5-4512-79f0-ae55-58d39559944d implemented M4 and
+  assigned fixes, then stopped. Implementation and independent audit run
+  sequentially. No M5 assignment has been issued.
+- M0 PR #1 remains open; main is at a393498 and milestone branches are stacked.
+  No push, merge, rebase, deployment, remote-service or cloud-build action was
+  performed during M4 implementation/audit. Do not rewrite history.
 
-## M3 source/automated outcome
+## M4 accepted source outcome
 
-The coordinating independent auditor accepted the source/automated M3 scope at
-`0a5f8c8` on 2026-09-18 (task/thread
-`01a098ef-d830-7531-bca7-2d66b0a5b587`). This acceptance covers the code,
-automated evidence, workflow records, and repository review described below;
-it does not pass the carried physical-device, development-client/Metro, or
-second-laptop readiness gates.
+M4 delivers durable offline multiline purchases/restocking, supplier inputs,
+immutable receipt/conversion/cost snapshots, private price observations,
+provisional moving-average costing and historical sale-cost companions.
+Purchase, inventory, cost and outbox effects commit atomically and replay
+idempotently. Receipt history and product purchase-price history are available.
 
-M3 delivers one complete offline sale on the M1/M2 foundation:
+The coordinator accepted source/automated scope at 9700ee3 on 2026-09-18 after
+A1–A6 and A4-R/A3-R/A6-R correction cycles. Final corrections: c30d3f7
+(parent sale-cost consistency), 9535451 (contextual Quick Add retry) and
+c91d16a (exact merchant-readable large-value estimates). Migrations 4, 5 and 6
+are additive; migrations 1–5 registry entries remain unchanged by migration 6.
+Historical receipts/COGS are not rewritten. D-038 records approved engineering
+precision/coverage; D-027 remains provisional for financial interpretation.
 
-- `@retail/domain` calculates sale lines and totals with D-034 micro-unit
-  quantities, integer minor units, and exact rejection rather than rounding.
-- Migration 3 creates `sales`, `sale_items`, `payments`, `inventory_events`,
-  `customer_accounts`, and `receivables`. Sale completion atomically writes the
-  Sale aggregate, its single tender, per-line negative inventory events, optional
-  credit account/OPEN receivable, and one `COMPLETED_SALE_CREATED` outbox envelope.
-- Store, device, active member, product/package ownership, exact snapshots,
-  single-tender amount, credit receivable, and immutable-history invariants are
-  enforced at the application and SQLite boundaries where enforceable.
-- The Sell flow supports catalogue search, line configuration/edit/remove,
-  exact multi-line totals, Cash/Transfer/POS/Card/Credit, explicit customer
-  selection or creation, durable confirmation/history/detail, and stored outbox
-  sync status. Credit is not represented as cash received.
-- Dirty in-memory sale state is guarded through Android Back, tabs, Cancel,
-  generic route removal, and the Quick Add return path. Completed-sale edit,
-  delete, void, and return actions remain outside M3.
-- The corrective pass adds a read-only historical inventory delta/current
-  derived-balance presentation, store-scoped client reads, exact cross-row
-  aggregate rejection, and recoverable product/package/customer/history/local
-  context reads. See `M3_AUDIT_CORRECTIONS.md`.
+Independent checks at 9700ee3:
 
-### Migration correction note
+- npm run validate: PASS — strict typecheck, zero-warning lint, 150 domain
+  tests / 5 suites and 217 mobile tests / 23 suites (367 tests total).
+- npm run mobile:doctor: PASS — 21/21.
+- npm run mobile:export: PASS — 1,357 Android modules, 3.2 MB Hermes bundle;
+  generated dist is ignored.
+- Real SQLite populated-M3-to-v6 reproduction: typed/raw contradictory
+  AVAILABLE cost companions rejected; original NULL historical COGS retained.
+- Routed Quick Add retry and exact display boundaries verified. See
+  docs/engineering/M4_AUDIT_CORRECTIONS.md for comparisons and evidence.
 
-Migration 3 was corrected while it was pending, before the initial M3 commit;
-it is now committed in `2ff7b4f` and was not edited by the audit-correction
-pass. Single-tender, immutable-history, exact-snapshot, and outbox invariants
-therefore apply on first M3 install. The populated-M2 upgrade test confirms
-M1/M2 rows and migration history survive the v2-to-v3 upgrade without a reset,
-loss, or false sales history. Any future persisted-schema change must append a
-new migration.
+The implementation also reports Expo dependency compatibility and active
+workflow validation; distinguish those runs from independent auditor runs.
+The active workflow records the source acceptance and carried readiness gate.
+The historical M2 workflow has its previously recorded tests-and-review schema
+limitation; do not silently rewrite closed milestone evidence.
 
-## Latest M4 re-audit
+## Product change review and next gate
 
-Coordinator independently passed `npm run validate` at `52a772a`: 364 tests /
-28 suites, strict typecheck, zero-warning lint. A1/A5 service reproductions pass;
-A2 supported guard/routed evidence is accepted for source scope. The same Luna
-task returned the bounded A4-R/A3-R/A6-R corrections in `c30d3f7`, `9535451`
-and `c91d16a`; coordinator re-audit is required before source acceptance.
-Founder approval of the separate proposed `PRODUCT_CHANGE_BACKLOG.md` scope,
-adjustment-cost policy and expiry timing also precedes M5 delegation. No new
-product feature is approved by this audit.
+The single change record is docs/product/PRODUCT_CHANGE_BACKLOG.md. Founder
+approved expanded M5 blind-first owner stock checks, configurable default
+three/day, auditable replacements, local attention/snooze, changed-stock recount
+protection and conservative shortage/unexplained-surplus costing. Founder
+requires expiry alerts in the first real-shop pilot/MVP/prototype.
 
-## M4 independent audit
+Current stock is a product-level event ledger, with no lot/batch expiry balances.
+Specific expiry-aware lot capture, sale/adjustment allocation, unknown opening
+stock, coverage and warning behavior remain proposed. Choosing physical batches
+does not silently change moving-average accounting. No expiry feature or new
+reconciliation workflow is implemented by this review.
 
-Coordinator reviewed `db5a835..2bfa3ef` and independently passed `npm run validate`
-(356 tests / 28 suites, strict typecheck, zero-warning lint). Additional actual
-service/repository checks reproduced a fractional-quantity sale cost rejection,
-a conflicting explicit-date replay, and contradictory immutable cost snapshots.
-Native-stack draft prevention, focus/Quick Add recovery and truthful current-cost
-labels also required correction. See `M4_AUDIT_CORRECTIONS.md` (A1–A6).
-The same implementation task returned all six fixes in `457d9d9`, `08871db` and
-`cb0566e`; the coordinator must independently re-audit before source acceptance.
-M5 remains blocked. No physical or cloud action performed in this review.
+Next: coordinator prepares the concrete expiry-aware M5 contract and flows for
+founder review, then aligns approved PRD/decision/domain/design/build-plan
+sources and publishes rolling dependency-reviewed tickets and the M5 workflow.
+Do not delegate M5 before that gate. Live Home is proposed for M6, global Scan
+navigation for M8, real price signals M9/M10 and staff assignment/review M11.
+Do not treat those future proposals as released implementation scope.
 
-## M4 implementation handoff
+## Carried readiness gates
 
-Commit `3c4eef9` adds migration 4 and the offline purchase/costing path without
-editing migrations 1–3. Follow-up commit `b12ff0c` completes the multiline
-Restock cart, TOTAL/UNIT basis, supplier modes and ProductDetail purchase-price
-history. Commit `c810f5b` adds exact costing edge cases, full purchase/sale
-rollback matrices, conflicting sale replay rejection, populated-M3 upgrade
-retention, store/device/member/product/package/currency boundary coverage and
-the changed-price cold-reopen cross-flow. Commit `9ec9075` adds safe-total
-overflow UI coverage; `87e96a6` aligns the authorized Expo patch versions.
-Correction commit `457d9d9` covers exact fractional sale-cost preservation,
-snapshot invariants and explicit-date replay; `08871db` covers supported
-native-stack draft removal and focus/Quick Add recovery; `cb0566e` makes cost
-availability and receipt estimates merchant-readable. Re-audit return `c30d3f7`
-adds typed and SQLite parent-cost consistency with additive migration 6;
-`9535451` resumes pending contextual Quick Add selection after read retries;
-`c91d16a` removes raw receipt fractions and formats large exact estimates with
-BigInt/string arithmetic. Migrations 1–5 remain unchanged. Independent audit
-owns the final source decision.
+- Actual Galaxy M3/M4 offline sale/restock, force-stop/relaunch, history,
+  cost-availability, dirty header/hardware exits and large-text checks remain
+  unperformed. adb is available but was not used during this review.
+- M1/M2 evidence only: Galaxy A15 5G SM-A156E, Android 16, 1080×2340; preview
+  90c3fd47-e9be-49cb-bdbc-f9ab649f3c34, version 0.0.1/code 1, APK SHA-256
+  687F787730E437DEEE1CAC4353192C2B7A44313EF2EBE92FDFC41261A4FEDA7C.
+  Test store/product survived force-stop and airplane-mode relaunch and rendered
+  at 1.3 text scale. Connectivity and original scale were restored; no real
+  retailer/production data was used. This is not M3/M4 proof.
+- EAS development build 1110cf51-6cfb-4b11-99af-c63e356bf9e4 completed, but an
+  interrupted local APK download was corrupted and rejected before installation.
+  Development-client/Metro verification remains open.
+- Second-laptop clean reproduction is explicitly deferred, still required before
+  external beta. Existing dependency audit baseline remains recorded separately.
+- Professional accounting review precedes formal accounting claims. M7 must
+  review concurrent-device reconciliation, costing and proposed lot allocation.
+- First pilot requires the approved expiry capability; source acceptance does
+  not waive that new product requirement.
 
-## Verified validation evidence
-
-- Clean dependency installation completed with `npm ci` (development dependencies
-  included for workspace validation).
-- Corrective-pass `npm run validate`: passed — 143 domain tests in 4 suites and
-  186 mobile tests in 21 suites (329 tests / 25 suites total); strict typecheck
-  and zero-warning lint both passed.
-- `npm run mobile:doctor`: 21/21 checks passed.
-- `npx expo install --check` from `apps/mobile`: dependencies are up to date;
-  `expo` is intentionally excluded by the project configuration.
-- `npm run mobile:export`: Android export succeeded (1,341 modules; 3 MB Hermes
-  bundle). Generated `apps/mobile/dist` is ignored and is not part of the diff.
-- Corrective coverage includes every write position for new-credit, selected-
-  customer, and multiline aggregates; credit replay; cross-store client-read
-  denial; exact aggregate overflow; negative-stock detail label; local-read
-  retry; retained cart/customer failure; Quick Add refresh recovery; and focused
-  Android Back lifecycle. The focused correction suites passed 50 tests / 3
-  suites before the full run.
-- M3 workflow JSON Schema (including date-time formats) and gate dependencies
-  passed local validation, and the independent auditor repeated that validation
-  with AJV draft 2020 plus `ajv-formats`. `git diff --check 9476297 HEAD` and
-  clean Git status passed at the acceptance checkpoint; generated
-  `apps/mobile/dist` remains ignored.
-- The independent auditor reviewed the existing Expo Doctor, dependency-check,
-  and Android-export evidence rather than claiming a redundant rerun.
-
-### M4 implementation checks
-
-- `npm run validate`: passed — 150 domain tests in 5 suites and 214 mobile
-  tests in 23 suites (364 tests / 28 suites total); strict typecheck and
-  zero-warning lint passed.
-- `npm run mobile:doctor`: 21/21 checks passed after the authorized patch
-  updates (`expo-constants` ~57.0.19 and `expo-router` ~57.0.22).
-- `npx expo install --check` from `apps/mobile`: dependencies are up to date;
-  Expo itself remains intentionally excluded by project configuration.
-- `npm run mobile:export`: Android export passed (1,357 modules; 3.2 MB Hermes
-  bundle). Generated `apps/mobile/dist` is ignored.
-- Active M4 workflow JSON Schema, date-time, gate-dependency and artifact
-  validation passed. The historical M2 workflow retains its previously
-  recorded `tests-and-review` schema limitation.
-- `git diff --check` passed. No device,
-  cloud, push, merge or release action was performed.
-
-### M4 re-audit correction return
-
-- `npm run validate`: passed after the correction return — 150 domain tests in
-  5 suites and 217 mobile tests in 23 suites (367 tests / 28 suites total),
-  strict typecheck and zero-warning lint.
-- Focused A4-R/A3-R/A6-R suites passed: purchases 11, restock 12, products 24,
-  and exact money display 7 tests (54 total). Coverage includes migration 6 parent-cost
-  triggers, old-null preservation, raw SQLite mismatches, retry failure then
-  success with retained cart/editor state, no repeated Quick Add selection,
-  fractional/zero/unavailable states, and overflow-sized receipt display.
-- `npm run mobile:doctor`: 21/21 checks passed; `npx expo install --check`
-  reported dependencies up to date; `npm run mobile:export` passed with 1,357
-  Android modules and a 3.2 MB Hermes bundle.
-- Active M4 workflow JSON Schema/date-time/gate-dependency/artifact validation
-  and `git diff --check` passed. Coordinator re-audit and source acceptance are
-  not claimed; no device, cloud, push, merge or release action was performed.
-
-## Deferred evidence and risks
-
-- The Galaxy A15 5G (`SM-A156E`, Android 16, 1080×2340) evidence below is real
-  M1/M2 evidence only: EAS preview build
-  `90c3fd47-e9be-49cb-bdbc-f9ab649f3c34` (COSI Preview `0.0.1`/version code 1;
-  APK SHA-256 `687F787730E437DEEE1CAC4353192C2B7A44313EF2EBE92FDFC41261A4FEDA7C`)
-  successfully provisioned a local store and temporary product over authorized
-  USB Android Platform Tools 37.0.1; force-stop/relaunch and airplane-mode
-  force-stop/relaunch retained them without database error; and the same records
-  rendered at 1.3 text scale. Airplane mode and the original 1.0 scale were
-  restored. No production or retailer data was used.
-- No M3 physical-device session was performed by explicit scope instruction.
-  The current environment reports `adb` available, but it was intentionally not
-  used. M3 offline sale, history, dirty-cart, and large-text device evidence is
-  therefore deferred/blocked and required before an external beta/native-release
-  claim. The earlier standalone-preview evidence must not be treated as M3 proof.
-- No M4 physical restock/restart/history/cost-availability/dirty-exit or
-  large-text session was performed. Existing Galaxy evidence remains M1/M2 only
-  and must not be treated as M4 proof.
-- The development build `1110cf51-6cfb-4b11-99af-c63e356bf9e4` completed in EAS,
-  but its local transfer was corrupted after an interrupted download and Android
-  rejected it before installation. The development-client/Metro check remains
-  open.
-- Second-laptop clean reproduction remains deferred and is also required before
-  external beta. `npm audit` remains at the M0 baseline; M3 introduced no known
-  increase.
-
-## Next action
-
-Independent coordinator re-audit of the returned M4 A1–A6 and A4-R/A3-R/A6-R
-source/automated evidence is the next action. The implementation task must
-return structured completion via send_message_to_thread to coordinator task
-`01a098ef-d830-7531-bca7-2d66b0a5b587`, then stop; no M4 code acceptance or M5
-release has occurred. Accepted M3 tickets are archived in
-`docs/engineering/tickets/M3_SALES.md`. Complete the carried
-M3 physical-device/offline-sale, development-client/Metro, large-text, and
-second-laptop reproduction checks before any external beta or native-release
-readiness claim. Do not push, merge, deploy, or alter the carried device gate
-without applicable authorization.
+Source continuation is allowed under the existing waiver. These gates are not
+passed and external beta/native-release readiness is not approved.
 
 ## Continuity
 
-Read `AGENTS.md`, `.agents/contexts/project-context.md`,
-`.agents/workflows/index.json`, `.agents/workflows/m4-restocking-costing.json`,
-`tickets.md`, `docs/engineering/M4_RESTOCKING_COSTING_PLAN.md`,
-`docs/engineering/M3_SALES_PLAN.md`, `docs/engineering/M3_AUDIT_CORRECTIONS.md`,
-`docs/design/DESIGN.md`, the M4 section of `BUILD_PLAN.md`, D-013/D-027/D-028/
-D-034/D-036/D-037/D-038, and `MULTI_AGENT_WORKFLOW.md`. Inspect Git status, history, and diff
-before edits. Repository documents and Git history are the project memory.
+Read AGENTS.md, the workflow index and M4 record, project-context, tickets.md,
+M4_RESTOCKING_COSTING_PLAN.md, M4_AUDIT_CORRECTIONS.md, the product change
+record, BUILD_PLAN and relevant approved decisions before the next step.
+Accepted M3 tickets are archived in docs/engineering/tickets/M3_SALES.md.
+Inspect branch, HEAD, status and diff before editing. Git and repository records
+must remain sufficient without prior chat history.

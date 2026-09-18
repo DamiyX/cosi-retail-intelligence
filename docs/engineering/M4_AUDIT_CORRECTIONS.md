@@ -204,3 +204,47 @@ review before M5. `docs/product/PRODUCT_CHANGE_BACKLOG.md` is coordinator-owned,
 unapproved and excluded from implementation scope/commits. Founder scope and
 expiry-timing answers remain pending. Fix the three requests above, report and
 stop for re-audit; do not implement the new ideas or begin M5.
+
+## Final independent re-audit and source acceptance — 2026-09-18
+
+**Reviewed HEAD:** `9700ee32dc6fe6db05ddafed65a4ce170db54f31`. Final
+comparison `52a772a..9700ee3`; complete milestone review `db5a835..9700ee3`.
+The coordinator accepts M4 source/automated scope. A1–A6 and their three
+returned requests are resolved within that scope; no blocking source findings
+remain in this review. Earlier withheld decisions above are historical.
+
+- Independently ran `npm run validate`: PASS, strict typecheck, zero-warning
+  lint, 150 domain tests / 5 suites and 217 mobile tests / 23 suites (367 total).
+- Independently ran `npm run mobile:doctor`: PASS, 21/21.
+- Independently ran `npm run mobile:export`: PASS, 1,357 Android modules and
+  a 3.2 MB Hermes bundle; generated dist remains ignored.
+- A4-R: isolated real SQLite reproduction used historical M3 completion,
+  upgraded populated data through migration 6, and confirmed both typed and
+  raw SQL AVAILABLE snapshots against an old NULL parent cost are rejected.
+  The old receipt remains unchanged. Compared current migration registry
+  entries 1–5 with `52a772a`: identical; migration 6 is additive. New permanent
+  tests cover parent COGS/projection, fractional, unsafe integer and NULL cases.
+- A3-R: permanent real-client/routed regression verifies failure, repeated
+  retry failure, successful selection exactly once, retained cart and edited
+  quantity across focus. It covers the previously independently reproduced gap.
+- A6-R: independently checked BigInt/string formatting for 10^16 minor units
+  per base unit (NGN 100,000,000,000,000.00), half-kobo rounding and zero.
+  Product/receipt UI no longer displays raw stored fractions.
+
+Supported navigation guards are accepted for source scope; actual native
+header/hardware exits and offline restart still require device observations.
+No phone/cloud/push/merge/deploy action was performed. Existing M1/M2 Galaxy
+evidence is not M3/M4 proof; Metro/second-laptop and professional accounting
+gates remain carried. Source continuation is allowed under the existing waiver,
+not beta/native-release readiness.
+
+The separate product review is partially approved: founder approved expanded
+M5 stock checks/attention and conservative discrepancy costing, and requires
+expiry for the first pilot. `PRODUCT_CHANGE_BACKLOG.md` retains the specific
+lot/allocation design as proposed. Its review and M5 plan/design/ticket release
+must precede implementation delegation; no expiry feature is accepted here.
+
+Final documentation checks: active M4 JSON Schema with date-time formats,
+gate dependency graph, required source gates, artifact existence and workflow
+index identities PASS; git diff --check PASS. Generated export metadata is
+confirmed ignored. Historical M2 schema limitation remains recorded.

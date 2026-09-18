@@ -1,9 +1,10 @@
 # Tickets: M4 Offline Restocking + Provisional Costing
 
-**Status:** A4-R/A3-R/A6-R corrections returned in `c30d3f7`, `9535451` and
-`c91d16a`; coordinator re-audit and source acceptance remain withheld. Founder approved the M4 costing and
-screen/state contract on 2026-09-18; D-038 and DESIGN record the approved rules.
-Coordinator verified ticket granularity/dependencies under delegated judgment.
+**Status:** Coordinator accepted M4 source/automated scope at `9700ee3` on
+2026-09-18 after independent re-audit. Physical/release/accounting gates remain
+carried. Founder approved the M4 costing and screen/state contract; D-038 and
+DESIGN record the approved rules. Ticket granularity/dependencies were reviewed
+under delegated judgment. Historical returns below describe earlier audit stages.
 **Branch:** feat/m4-restocking-costing. **Accepted baseline:** 66cc64d.
 Accepted M3 tickets/evidence are archived in the engineering M3_SALES ledger.
 
@@ -275,3 +276,15 @@ restock with supplier, complete a sale, change the purchase price, reopen
 history after force-stop and airplane-mode relaunch, exercise Cancel/header/
 hardware-Back dirty guards, and repeat at 1.3 text scale. Restore airplane
 mode and the original text scale; record build/device IDs and observations.
+
+## Final independent source acceptance — 2026-09-18
+
+Coordinator reviewed `52a772a..9700ee3` and independently passed `npm run
+validate`: 150 domain and 217 mobile tests (367 / 28 suites), strict typecheck
+and zero-warning lint. Independent Expo Doctor: 21/21; Android export: 1,357
+modules / 3.2 MB. A4-R parent consistency, A3-R contextual retry and A6-R exact
+large-value display are resolved; the audit record contains the independent
+SQLite/formatting evidence. No blocking source findings remain in this review.
+This does not pass actual Galaxy M3/M4, Metro, second-laptop or accounting gates.
+M5 remains at the separate expiry-aware product/data/design and ticket gate;
+no implementation delegation is authorized by this acceptance.
