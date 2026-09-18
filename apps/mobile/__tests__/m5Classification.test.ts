@@ -216,6 +216,35 @@ describe('M5 physical batch classification', () => {
       roleFixture.fixture.closeAndDelete();
     }
 
+    const authFixture = seedUnknownStock();
+    try {
+      const projection = getBatchProjectionForStoreProduct(authFixture.fixture.adapter, authFixture.rice.storeProduct.id);
+      expect(() => classifyInventoryBatches(authFixture.fixture.adapter, {
+        operationId: testId(4078),
+        storeId: authFixture.fixture.context.store.id,
+        deviceId: testId(4079),
+        userId: authFixture.fixture.context.owner.id,
+        storeProductId: authFixture.rice.storeProduct.id,
+        expectedInventoryWatermark: projection.inventoryWatermark,
+        expectedBatchWatermark: projection.batchWatermark,
+        groups: [{ quantityBaseMicros: 10 * MICROS_PER_UNIT, datePrecision: 'DAY', dateValue: '2026-10-20', dateMeaning: 'EXPIRY' }],
+      })).toThrow('Device does not belong');
+      authFixture.fixture.adapter.run("UPDATE store_members SET status = 'INACTIVE' WHERE id = ?;", [authFixture.fixture.context.membership.id]);
+      expect(() => classifyInventoryBatches(authFixture.fixture.adapter, {
+        operationId: testId(4081),
+        storeId: authFixture.fixture.context.store.id,
+        deviceId: authFixture.fixture.context.device.id,
+        userId: authFixture.fixture.context.owner.id,
+        storeProductId: authFixture.rice.storeProduct.id,
+        expectedInventoryWatermark: projection.inventoryWatermark,
+        expectedBatchWatermark: projection.batchWatermark,
+        groups: [{ quantityBaseMicros: 10 * MICROS_PER_UNIT, datePrecision: 'DAY', dateValue: '2026-10-20', dateMeaning: 'EXPIRY' }],
+      })).toThrow('Only an active store owner');
+      expect(countRows(authFixture.fixture.adapter, 'inventory_batch_groups')).toBe(0);
+    } finally {
+      authFixture.fixture.closeAndDelete();
+    }
+
     const probe = seedUnknownStock();
     let writeCount = 0;
     try {
