@@ -25,9 +25,11 @@ Units are accepted. M3 Sales source/automated scope is accepted on
 `feat/m3-sales` after independent re-audit, under a carried physical-device
 waiver; native/release readiness is not yet approved.
 M4 Restocking + Costing source/automated scope is accepted at `9700ee3` after
-independent re-audit; physical/release gates remain carried. Network sync,
-expiry-aware lots, stock-check workflows, market network and recognition
-inference are not implemented.
+independent re-audit; physical/release gates remain carried. M5 implementation
+task `01a0b525-289e-7b40-8f4b-2701fe541ad9` is now active on
+`feat/m5-inventory-reconciliation`; coordinator task
+`01a098ef-d830-7531-bca7-2d66b0a5b587` retains independent acceptance. Network
+sync, stock-check and attention work remain within M5; no M6 work is authorized.
 
 ## Product Snapshot
 
@@ -78,14 +80,12 @@ partial measure, never full profit or P&L.
 
 ## Current Priorities
 
-1. M5 planning/design/tickets are prepared under approved D-039/D-040: minimal
-   pilot batch awareness, automatic assumed FEFO without normal batch selection,
-   first-class unknown stock, blind owner checks, conservative adjustment cost
-   and attention/snooze. Read M5_INVENTORY_RECONCILIATION_PLAN and the active M5
-   workflow/ledger before delegation. No M5 code or task assignment yet.
-   Coordinator owns plans/tickets/independent audit; separate implementation
-   tasks execute sequentially. Current approved default is Luna max; a different
-   implementation model requires the founder's explicit choice.
+1. M5 implementation is active under approved D-039/D-040: minimal pilot batch
+   awareness, automatic assumed FEFO without normal batch selection, first-class
+   unknown stock, blind owner checks, conservative adjustment cost and
+   attention/snooze. M5-01 through M5-07 execute sequentially in the assigned
+   implementation task. Coordinator owns plans/tickets/independent audit; the
+   implementation task must stop at the audit gate.
 2. Complete the explicitly deferred M3 physical-device/offline-sale,
    development-client/Metro, large-text, and second-laptop checks before any
    external beta/native-release claim; preserve the M1/M2 Galaxy evidence as

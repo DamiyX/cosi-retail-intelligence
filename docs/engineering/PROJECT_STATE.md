@@ -1,8 +1,8 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-18  
-Current milestone: M5 batch-aware inventory/reconciliation planning package
-prepared under D-039/D-040. M5 implementation and delegation have not started.  
+Current milestone: M5 batch-aware inventory/reconciliation implementation
+started under D-039/D-040; M5-01 through M5-07 remain pending independent audit.  
 Completed engineering milestones: M0; M1 (explicit device waiver); M2 after
 independent audit; M3 and M4 source/automated scope after independent audit,
 with physical/release readiness gates carried.
@@ -11,15 +11,15 @@ with physical/release readiness gates carried.
 
 - Checkout: C:\Users\doyew\Documents\DEV 2\COSI-m0
 - Canonical remote: https://github.com/DamiyX/cosi-retail-intelligence
-- Branch: feat/m4-restocking-costing. Reviewed source HEAD:
-  9700ee32dc6fe6db05ddafed65a4ce170db54f31. Later documentation-only audit
-  commits do not change this source checkpoint; inspect Git for current HEAD.
+- Branch: feat/m5-inventory-reconciliation. Implementation checkpoint HEAD:
+  646b3e6cf537e81fc2c6c11ad795eaa6dfdca95c before feature changes; working
+  tree was clean at task start.
 - Accepted M3 checkpoint: 66cc64d; approved M4 plan/contract checkpoint: db5a835.
 - Coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 owns product review,
-  plans, tickets, workflow registration and independent acceptance. Separate
-  Luna max task 01a0b1a5-4512-79f0-ae55-58d39559944d implemented M4 and
-  assigned fixes, then stopped. Implementation and independent audit run
-  sequentially. No M5 assignment has been issued. Active workflow is
+  plans, tickets, workflow registration and independent acceptance. M5
+  implementation task 01a0b525-289e-7b40-8f4b-2701fe541ad9 owns implementation
+  on this branch and must stop after M5-07 for audit. Implementation and
+  independent audit run sequentially. Active workflow is
   .agents/workflows/m5-inventory-reconciliation.json; M4 workflow is archived.
 - M0 PR #1 remains open; main is at a393498 and milestone branches are stacked.
   No push, merge, rebase, deployment, remote-service or cloud-build action was
@@ -67,22 +67,23 @@ three/day, auditable replacements, local attention/snooze, changed-stock recount
 protection and conservative shortage/unexplained-surplus costing. Founder
 requires expiry alerts in the first real-shop pilot/MVP/prototype.
 
-Current stock is a product-level event ledger, with no lot/batch expiry balances.
+Current stock is a product-level event ledger; M5 is adding rebuildable
+lot/expiry explanations without creating a second stock truth.
 Founder resolved minimal batch capture and automatic assumed FEFO without
 normal sale batch confirmation, with unknown stock and truthful coverage.
 D-039/D-040, PRD, domain/technical/offline sources and DESIGN now record approved
 behavior. Coordinator prepared M5_INVENTORY_RECONCILIATION_PLAN and seven
-unstarted rolling tickets; accepted M4 ledger is archived unchanged in
+rolling tickets; implementation has started at the documented checkpoint and
+the accepted M4 ledger is archived unchanged in
 engineering/tickets/M4_RESTOCKING_COSTING.md. Expected new migrations 7–11
-are a plan only; schema/source still ends at v6. No M4 reopening or M5 code.
+are still a plan until each ticket lands; schema/source starts at v6. No M4
+reopening or M6 work.
 
 Planning schema/dependency/artifact checks and unchanged M4 archive passed;
-no runtime/configuration diff. Planning documentation checkpoint is discoverable
-in Git history once committed. Next: create the task branch and a NEW separate
-implementation task after review. Current approved model
-default is Luna max; coordinator recommends Terra max for M5 complexity, but
-no model change or dispatch is assumed. Implementer stops after M5-07 for
-coordinator independent audit. No M6 yet. Live Home remains proposed M6,
+the documentation ownership checkpoint is committed separately before feature
+work. Next: implement M5-01 through M5-07 sequentially with truthful evidence;
+the implementation-evidence and independent-audit gates remain pending.
+Implementer stops after M5-07 for coordinator independent audit. No M6 yet. Live Home remains proposed M6,
 global Scan navigation M8, real price signals M9/M10 and staff review M11.
 
 ## Carried readiness gates
