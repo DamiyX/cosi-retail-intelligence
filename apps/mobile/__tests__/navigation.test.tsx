@@ -12,6 +12,9 @@ import EditPackageRoute from '../app/(tabs)/products/[id]/packages/[packageId]';
 import SellScreen from '../app/(tabs)/sell';
 import TabsLayout from '../app/(tabs)/_layout';
 import TodayScreen from '../app/(tabs)/today';
+import RestockRoute from '../app/restock';
+import PurchaseHistoryRoute from '../app/purchase-history';
+import PurchaseDetailRoute from '../app/purchases/[id]';
 import type { IsolatedDatabase } from '../src/db/testing';
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
 import { openIsolatedDatabase } from '../src/db/testing';
@@ -20,13 +23,14 @@ import { provisionStoreContext } from '../src/storeContext/provisionStoreContext
 import { deterministicIds } from './catalogueSupport';
 
 let mockDatabase: IsolatedDatabase | null = null;
+const mockSchemaVersion = 4;
 
 jest.mock('../src/db/initialize', () => ({
   initializeAppDatabase: () => {
     if (!mockDatabase) {
       throw new Error('Shell test database is not open.');
     }
-    return { state: 'ready', adapter: mockDatabase.adapter, schemaVersion: 3, path: mockDatabase.path };
+    return { state: 'ready', adapter: mockDatabase.adapter, schemaVersion: mockSchemaVersion, path: mockDatabase.path };
   },
 }));
 
@@ -42,6 +46,9 @@ const ROUTES = {
   '(tabs)/products/[id]/index': ProductDetailRoute,
   '(tabs)/products/[id]/packages/new': NewPackageRoute,
   '(tabs)/products/[id]/packages/[packageId]': EditPackageRoute,
+  restock: RestockRoute,
+  'purchase-history': PurchaseHistoryRoute,
+  'purchases/[id]': PurchaseDetailRoute,
 } as never;
 
 describe('M2 tab navigation', () => {
@@ -78,7 +85,7 @@ describe('M2 tab navigation', () => {
     expect(await screen.findByText(/arrives in a\s*later milestone/)).toBeTruthy();
 
     fireEvent.press(screen.getByLabelText(/More, tab/));
-    expect(await screen.findByText(/arrives with its milestone/)).toBeTruthy();
+    expect(await screen.findByText(/Keep purchases and receipts available/)).toBeTruthy();
 
     fireEvent.press(screen.getByLabelText(/Products, tab/));
     expect(await screen.findByText('No products yet')).toBeTruthy();

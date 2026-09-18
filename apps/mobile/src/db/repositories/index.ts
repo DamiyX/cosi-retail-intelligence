@@ -123,3 +123,35 @@ export {
 } from './receivables';
 export type { CreateReceivableInput, ReceivableRow, ReceivableStatus } from './receivables';
 export type { OutboxOperationType } from './outbox';
+export { createSupplier, getSupplierById, listSuppliersByStore, searchSuppliersByStore } from './suppliers';
+export type { CreateSupplierInput, SupplierRow, SupplierStatus } from './suppliers';
+export { createPurchase, getPurchaseById, listPurchasesByStore } from './purchases';
+export type { CreatePurchaseInput, PurchaseRow, PurchaseStatus, PurchaseSummaryRow } from './purchases';
+export { createPurchaseItem, getPurchaseItemById, listPurchaseItemsByPurchaseId } from './purchaseItems';
+export type { CreatePurchaseItemInput, PurchaseItemRow } from './purchaseItems';
+export {
+  createPriceObservation,
+  getPriceObservationById,
+  listPriceObservationsByPurchaseItemId,
+  listPriceObservationsByStoreProduct,
+} from './priceObservations';
+export type { CreatePriceObservationInput, PriceObservationRow } from './priceObservations';
+export {
+  applyPurchaseCostMovement,
+  applySaleCostMovement,
+  createCostMovement,
+  createSaleItemCostSnapshot,
+  getCostState,
+  getSaleItemCostSnapshot,
+  listCostMovementsByStoreProduct,
+  listCostMovementsBySource,
+  listSaleItemCostSnapshotsBySaleId,
+  rebuildCostStateFromMovements,
+} from './costing';
+export type {
+  CostMovementRow,
+  CostStateRow,
+  CreateCostMovementInput,
+  CreateSaleItemCostSnapshotInput,
+  SaleItemCostSnapshotRow,
+} from './costing';

@@ -2,6 +2,7 @@ import type { DatabaseAdapter } from '../db/adapter';
 import {
   findOutboxOperationForEntity,
   getCustomerAccountById,
+  listSaleItemCostSnapshotsBySaleId,
   getInventoryBalanceByStoreProduct,
   getReceivableBySaleId,
   getSaleById,
@@ -9,6 +10,7 @@ import {
   listSaleItemsBySaleId,
   listSalesByStore,
   type CustomerAccountRow,
+  type SaleItemCostSnapshotRow,
   type OutboxStatus,
   type PaymentRow,
   type ReceivableRow,
@@ -30,6 +32,7 @@ export type { SaleSummaryRow } from '../db/repositories';
 export interface SaleDetail {
   sale: SaleRow;
   items: SaleItemRow[];
+  costSnapshots: SaleItemCostSnapshotRow[];
   payment: PaymentRow;
   customerAccount: CustomerAccountRow | null;
   receivable: ReceivableRow | null;
@@ -63,6 +66,7 @@ export function getSaleDetail(
     return null;
   }
   const items = listSaleItemsBySaleId(adapter, sale.id);
+  const costSnapshots = listSaleItemCostSnapshotsBySaleId(adapter, sale.id);
   const payments = listPaymentsBySaleId(adapter, sale.id);
   if (payments.length === 0) {
     return null;
@@ -102,6 +106,7 @@ export function getSaleDetail(
   return {
     sale,
     items,
+    costSnapshots,
     payment,
     customerAccount,
     receivable,

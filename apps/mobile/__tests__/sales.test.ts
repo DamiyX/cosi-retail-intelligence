@@ -3,7 +3,7 @@ import { DomainError, MICROS_PER_UNIT } from '@retail/domain';
 import { createCatalogueClient } from '../src/catalogue/client';
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
 import { updateProductIdentity } from '../src/catalogue/updateProductIdentity';
-import { MIGRATIONS, openDatabase } from '../src/db';
+import { CURRENT_SCHEMA_VERSION, MIGRATIONS, openDatabase } from '../src/db';
 import type { DatabaseAdapter } from '../src/db/adapter';
 import {
   createCustomerAccount,
@@ -56,7 +56,7 @@ describe('M3 Sales milestone', () => {
     it('migrates a fresh database to version 3 with empty sales and inventory tables', () => {
       const isolated = openIsolatedDatabase(MIGRATIONS);
       try {
-        expect(isolated.report.schemaVersion).toBe(3);
+        expect(isolated.report.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
         for (const table of [
           'sales',
           'sale_items',
@@ -106,7 +106,7 @@ describe('M3 Sales milestone', () => {
         const reopened = reopenDatabase(isolated.path);
         try {
           const report = openDatabase(reopened, MIGRATIONS);
-          expect(report.schemaVersion).toBe(3);
+          expect(report.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
           expect(countRows(reopened, 'stores')).toBe(1);
           expect(countRows(reopened, 'store_products')).toBe(1);
           expect(countRows(reopened, 'outbox_operations')).toBe(1);
@@ -119,6 +119,7 @@ describe('M3 Sales milestone', () => {
             { version: 1, name: 'store_context' },
             { version: 2, name: 'catalogue' },
             { version: 3, name: 'sales_and_inventory' },
+            { version: 4, name: 'restocking_costing' },
           ]);
         } finally {
           reopened.close();

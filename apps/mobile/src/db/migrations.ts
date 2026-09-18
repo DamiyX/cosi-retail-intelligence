@@ -557,6 +557,334 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'inventory events are append-only'); END;`,
     ],
   },
+  {
+    version: 4,
+    name: 'restocking_costing',
+    statements: [
+      `CREATE TABLE suppliers (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        name TEXT NOT NULL CHECK (length(name) > 0 AND length(name) <= 200),
+        status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE')),
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );`,
+      'CREATE INDEX idx_suppliers_store_name ON suppliers(store_id, name);',
+      `CREATE TABLE purchases (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        supplier_id TEXT REFERENCES suppliers(id) ON DELETE RESTRICT,
+        supplier_name_snapshot TEXT CHECK (supplier_name_snapshot IS NULL OR length(supplier_name_snapshot) > 0),
+        created_by_store_member_id TEXT NOT NULL REFERENCES store_members(id) ON DELETE RESTRICT,
+        created_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        occurred_at TEXT NOT NULL,
+        currency_code TEXT NOT NULL CHECK (length(currency_code) = 3),
+        total_amount_minor INTEGER NOT NULL CHECK (total_amount_minor >= 0),
+        status TEXT NOT NULL DEFAULT 'COMPLETED' CHECK (status IN ('COMPLETED', 'VOIDED')),
+        created_at TEXT NOT NULL,
+        completed_at TEXT NOT NULL
+      );`,
+      'CREATE INDEX idx_purchases_store_occurred ON purchases(store_id, occurred_at DESC);',
+      'CREATE INDEX idx_purchases_supplier ON purchases(supplier_id, occurred_at DESC);',
+      `CREATE TRIGGER trg_purchases_device_store_insert
+        BEFORE INSERT ON purchases
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id AND d.store_id = NEW.store_id AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'purchase device does not belong to store'); END;`,
+      `CREATE TRIGGER trg_purchases_member_store_insert
+        BEFORE INSERT ON purchases
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.created_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.created_by_user_id
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'purchase creator is not an active store member'); END;`,
+      `CREATE TRIGGER trg_purchases_currency_store_insert
+        BEFORE INSERT ON purchases
+        WHEN NOT EXISTS (
+          SELECT 1 FROM stores s
+          WHERE s.id = NEW.store_id AND s.currency_code = NEW.currency_code
+        )
+        BEGIN SELECT RAISE(ABORT, 'purchase currency mismatch with store'); END;`,
+      `CREATE TRIGGER trg_purchases_supplier_store_insert
+        BEFORE INSERT ON purchases
+        WHEN NEW.supplier_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM suppliers su
+          WHERE su.id = NEW.supplier_id AND su.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'purchase supplier does not belong to store'); END;`,
+      `CREATE TABLE purchase_items (
+        id TEXT PRIMARY KEY,
+        purchase_id TEXT NOT NULL REFERENCES purchases(id) ON DELETE RESTRICT,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        product_variant_id TEXT NOT NULL REFERENCES product_variants(id) ON DELETE RESTRICT,
+        package_unit_id TEXT NOT NULL REFERENCES package_units(id) ON DELETE RESTRICT,
+        quantity_packages_micros INTEGER NOT NULL CHECK (quantity_packages_micros > 0),
+        conversion_to_base_snapshot_micros INTEGER NOT NULL CHECK (conversion_to_base_snapshot_micros > 0),
+        quantity_base_micros INTEGER NOT NULL CHECK (quantity_base_micros > 0),
+        cost_basis TEXT NOT NULL CHECK (cost_basis IN ('TOTAL', 'UNIT')),
+        entered_cost_minor INTEGER NOT NULL CHECK (entered_cost_minor >= 0),
+        total_purchase_cost_minor INTEGER NOT NULL CHECK (total_purchase_cost_minor >= 0),
+        package_cost_numerator TEXT NOT NULL,
+        package_cost_denominator TEXT NOT NULL CHECK (package_cost_denominator <> '0'),
+        base_unit_cost_numerator TEXT NOT NULL,
+        base_unit_cost_denominator TEXT NOT NULL CHECK (base_unit_cost_denominator <> '0'),
+        currency_code TEXT NOT NULL CHECK (length(currency_code) = 3),
+        product_name_snapshot TEXT NOT NULL CHECK (length(product_name_snapshot) > 0),
+        package_name_snapshot TEXT NOT NULL CHECK (length(package_name_snapshot) > 0),
+        created_at TEXT NOT NULL
+      );`,
+      'CREATE INDEX idx_purchase_items_purchase ON purchase_items(purchase_id);',
+      'CREATE INDEX idx_purchase_items_product ON purchase_items(store_product_id, created_at DESC);',
+      `CREATE TRIGGER trg_purchase_items_purchase_store_insert
+        BEFORE INSERT ON purchase_items
+        WHEN NOT EXISTS (
+          SELECT 1 FROM purchases p
+          WHERE p.id = NEW.purchase_id AND p.store_id = NEW.store_id AND p.currency_code = NEW.currency_code
+        )
+        BEGIN SELECT RAISE(ABORT, 'purchase item does not match purchase store or currency'); END;`,
+      `CREATE TRIGGER trg_purchase_items_product_store_insert
+        BEFORE INSERT ON purchase_items
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          WHERE sp.id = NEW.store_product_id AND sp.store_id = NEW.store_id AND sp.product_variant_id = NEW.product_variant_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'purchase item product does not belong to store'); END;`,
+      `CREATE TRIGGER trg_purchase_items_package_insert
+        BEFORE INSERT ON purchase_items
+        WHEN NOT EXISTS (
+          SELECT 1 FROM package_units pu
+          WHERE pu.id = NEW.package_unit_id
+            AND pu.product_variant_id = NEW.product_variant_id
+            AND pu.status = 'ACTIVE'
+            AND pu.is_purchasable = 1
+        )
+        BEGIN SELECT RAISE(ABORT, 'purchase item package is not active or purchasable'); END;`,
+      `CREATE TRIGGER trg_purchase_items_conversion_insert
+        BEFORE INSERT ON purchase_items
+        WHEN NOT EXISTS (
+          SELECT 1 FROM package_units pu
+          WHERE pu.id = NEW.package_unit_id AND pu.conversion_to_base_micros = NEW.conversion_to_base_snapshot_micros
+        )
+        BEGIN SELECT RAISE(ABORT, 'purchase item conversion snapshot does not match package'); END;`,
+      `CREATE TABLE price_observations (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        purchase_item_id TEXT NOT NULL REFERENCES purchase_items(id) ON DELETE RESTRICT,
+        product_variant_id TEXT NOT NULL REFERENCES product_variants(id) ON DELETE RESTRICT,
+        package_unit_id TEXT NOT NULL REFERENCES package_units(id) ON DELETE RESTRICT,
+        supplier_id TEXT REFERENCES suppliers(id) ON DELETE RESTRICT,
+        cost_basis TEXT NOT NULL CHECK (cost_basis IN ('TOTAL', 'UNIT')),
+        entered_cost_minor INTEGER NOT NULL CHECK (entered_cost_minor >= 0),
+        observed_price_minor INTEGER NOT NULL CHECK (observed_price_minor >= 0),
+        total_purchase_cost_minor INTEGER NOT NULL CHECK (total_purchase_cost_minor >= 0),
+        quantity_packages_micros INTEGER NOT NULL CHECK (quantity_packages_micros > 0),
+        conversion_to_base_snapshot_micros INTEGER NOT NULL CHECK (conversion_to_base_snapshot_micros > 0),
+        quantity_base_micros INTEGER NOT NULL CHECK (quantity_base_micros > 0),
+        package_cost_numerator TEXT NOT NULL,
+        package_cost_denominator TEXT NOT NULL CHECK (package_cost_denominator <> '0'),
+        base_unit_cost_numerator TEXT NOT NULL,
+        base_unit_cost_denominator TEXT NOT NULL CHECK (base_unit_cost_denominator <> '0'),
+        currency_code TEXT NOT NULL CHECK (length(currency_code) = 3),
+        source_type TEXT NOT NULL DEFAULT 'RETAILER_PURCHASE' CHECK (source_type = 'RETAILER_PURCHASE'),
+        source_id TEXT NOT NULL,
+        validation_status TEXT NOT NULL DEFAULT 'VALID' CHECK (validation_status IN ('VALID', 'ESTIMATED', 'UNAVAILABLE')),
+        contribution_consent INTEGER NOT NULL DEFAULT 0 CHECK (contribution_consent = 0),
+        observed_at TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );`,
+      'CREATE INDEX idx_price_observations_store_product ON price_observations(store_id, product_variant_id, observed_at DESC);',
+      `CREATE TRIGGER trg_price_observations_item_store_insert
+        BEFORE INSERT ON price_observations
+        WHEN NOT EXISTS (
+          SELECT 1 FROM purchase_items pi
+          JOIN purchases p ON p.id = pi.purchase_id
+          WHERE pi.id = NEW.purchase_item_id
+            AND pi.store_id = NEW.store_id
+            AND pi.product_variant_id = NEW.product_variant_id
+            AND pi.package_unit_id = NEW.package_unit_id
+            AND p.currency_code = NEW.currency_code
+        )
+        BEGIN SELECT RAISE(ABORT, 'price observation does not match purchase item'); END;`,
+      `CREATE TRIGGER trg_price_observations_supplier_store_insert
+        BEFORE INSERT ON price_observations
+        WHEN NEW.supplier_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM suppliers su WHERE su.id = NEW.supplier_id AND su.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'price observation supplier does not belong to store'); END;`,
+      `CREATE TABLE store_product_cost_states (
+        store_product_id TEXT PRIMARY KEY REFERENCES store_products(id) ON DELETE RESTRICT,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        method TEXT NOT NULL DEFAULT 'MOVING_WEIGHTED_AVERAGE' CHECK (method = 'MOVING_WEIGHTED_AVERAGE'),
+        method_version TEXT NOT NULL DEFAULT 'M4-MWA-1',
+        coverage_status TEXT NOT NULL CHECK (coverage_status IN ('KNOWN', 'UNKNOWN')),
+        quantity_costed_base_micros INTEGER NOT NULL CHECK (quantity_costed_base_micros >= 0),
+        average_unit_cost_numerator TEXT,
+        average_unit_cost_denominator TEXT,
+        remaining_value_numerator TEXT NOT NULL DEFAULT '0',
+        remaining_value_denominator TEXT NOT NULL DEFAULT '1' CHECK (remaining_value_denominator <> '0'),
+        updated_at TEXT NOT NULL,
+        last_movement_id TEXT
+      );`,
+      'CREATE INDEX idx_cost_states_store ON store_product_cost_states(store_id);',
+      `CREATE TRIGGER trg_cost_states_product_store_insert
+        BEFORE INSERT ON store_product_cost_states
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          WHERE sp.id = NEW.store_product_id AND sp.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'cost state product does not belong to store'); END;`,
+      `CREATE TRIGGER trg_cost_states_product_store_update
+        BEFORE UPDATE OF store_product_id, store_id ON store_product_cost_states
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          WHERE sp.id = NEW.store_product_id AND sp.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'cost state product does not belong to store'); END;`,
+      `CREATE TABLE cost_movements (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        movement_type TEXT NOT NULL CHECK (movement_type IN ('PURCHASE', 'SALE')),
+        source_id TEXT NOT NULL,
+        source_line_id TEXT NOT NULL,
+        application_order INTEGER NOT NULL CHECK (application_order > 0),
+        quantity_base_delta_micros INTEGER NOT NULL,
+        costed_quantity_delta_micros INTEGER NOT NULL,
+        value_numerator TEXT NOT NULL,
+        value_denominator TEXT NOT NULL CHECK (value_denominator <> '0'),
+        coverage_status TEXT NOT NULL CHECK (coverage_status IN ('KNOWN', 'UNKNOWN', 'UNAVAILABLE')),
+        unit_cost_numerator TEXT,
+        unit_cost_denominator TEXT,
+        method TEXT NOT NULL DEFAULT 'MOVING_WEIGHTED_AVERAGE',
+        method_version TEXT NOT NULL DEFAULT 'M4-MWA-1',
+        created_at TEXT NOT NULL,
+        UNIQUE (store_product_id, application_order),
+        UNIQUE (movement_type, source_line_id)
+      );`,
+      'CREATE INDEX idx_cost_movements_store_product_order ON cost_movements(store_product_id, application_order);',
+      'CREATE INDEX idx_cost_movements_source ON cost_movements(movement_type, source_id);',
+      `CREATE TRIGGER trg_cost_movements_product_store_insert
+        BEFORE INSERT ON cost_movements
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          WHERE sp.id = NEW.store_product_id AND sp.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'cost movement product does not belong to store'); END;`,
+      `CREATE TRIGGER trg_cost_movements_source_insert
+        BEFORE INSERT ON cost_movements
+        WHEN (NEW.movement_type = 'PURCHASE' AND NOT EXISTS (
+          SELECT 1 FROM purchase_items pi
+          JOIN purchases p ON p.id = pi.purchase_id
+          WHERE pi.id = NEW.source_line_id AND p.id = NEW.source_id AND pi.store_id = NEW.store_id AND pi.store_product_id = NEW.store_product_id
+        ))
+        OR (NEW.movement_type = 'SALE' AND NOT EXISTS (
+          SELECT 1 FROM sale_items si
+          JOIN sales s ON s.id = si.sale_id
+          WHERE si.id = NEW.source_line_id AND s.id = NEW.source_id AND si.store_product_id = NEW.store_product_id AND s.store_id = NEW.store_id
+        ))
+        BEGIN SELECT RAISE(ABORT, 'cost movement source does not match product and store'); END;`,
+      `CREATE TABLE sale_item_cost_snapshots (
+        sale_item_id TEXT PRIMARY KEY REFERENCES sale_items(id) ON DELETE RESTRICT,
+        sale_id TEXT NOT NULL REFERENCES sales(id) ON DELETE RESTRICT,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        quantity_base_micros INTEGER NOT NULL CHECK (quantity_base_micros > 0),
+        costed_quantity_base_micros INTEGER NOT NULL CHECK (costed_quantity_base_micros >= 0),
+        coverage_status TEXT NOT NULL CHECK (coverage_status IN ('AVAILABLE', 'UNAVAILABLE')),
+        method TEXT NOT NULL DEFAULT 'MOVING_WEIGHTED_AVERAGE',
+        method_version TEXT NOT NULL DEFAULT 'M4-MWA-1',
+        unit_cost_numerator TEXT,
+        unit_cost_denominator TEXT,
+        cogs_numerator TEXT,
+        cogs_denominator TEXT,
+        cogs_amount_minor INTEGER CHECK (cogs_amount_minor IS NULL OR cogs_amount_minor >= 0),
+        created_at TEXT NOT NULL
+      );`,
+      'CREATE INDEX idx_sale_item_cost_snapshots_sale ON sale_item_cost_snapshots(sale_id);',
+      `CREATE TRIGGER trg_sale_cost_snapshots_sale_store_insert
+        BEFORE INSERT ON sale_item_cost_snapshots
+        WHEN NOT EXISTS (
+          SELECT 1 FROM sale_items si
+          JOIN sales s ON s.id = si.sale_id
+          WHERE si.id = NEW.sale_item_id
+            AND s.id = NEW.sale_id
+            AND s.store_id = NEW.store_id
+            AND si.store_product_id = NEW.store_product_id
+            AND si.quantity_base_micros = NEW.quantity_base_micros
+        )
+        BEGIN SELECT RAISE(ABORT, 'sale cost snapshot does not match sale item'); END;`,
+      `CREATE TRIGGER trg_sale_cost_snapshots_coverage_insert
+        BEFORE INSERT ON sale_item_cost_snapshots
+        WHEN (NEW.coverage_status = 'AVAILABLE' AND (
+          NEW.cogs_amount_minor IS NULL OR NEW.cogs_numerator IS NULL OR NEW.cogs_denominator IS NULL
+        ))
+        OR (NEW.coverage_status = 'UNAVAILABLE' AND NEW.cogs_amount_minor IS NOT NULL)
+        BEGIN SELECT RAISE(ABORT, 'sale cost snapshot coverage and cogs do not match'); END;`,
+      `CREATE UNIQUE INDEX uq_outbox_completed_purchase_entity
+        ON outbox_operations(entity_type, entity_id)
+        WHERE operation_type = 'COMPLETED_PURCHASE_CREATED';`,
+      `CREATE TRIGGER trg_purchases_immutable_update
+        BEFORE UPDATE ON purchases
+        BEGIN SELECT RAISE(ABORT, 'completed purchases are immutable'); END;`,
+      `CREATE TRIGGER trg_purchases_immutable_delete
+        BEFORE DELETE ON purchases
+        BEGIN SELECT RAISE(ABORT, 'completed purchases are immutable'); END;`,
+      `CREATE TRIGGER trg_purchase_items_immutable_update
+        BEFORE UPDATE ON purchase_items
+        BEGIN SELECT RAISE(ABORT, 'purchase items are immutable'); END;`,
+      `CREATE TRIGGER trg_purchase_items_immutable_delete
+        BEFORE DELETE ON purchase_items
+        BEGIN SELECT RAISE(ABORT, 'purchase items are immutable'); END;`,
+      `CREATE TRIGGER trg_price_observations_immutable_update
+        BEFORE UPDATE ON price_observations
+        BEGIN SELECT RAISE(ABORT, 'price observations are immutable'); END;`,
+      `CREATE TRIGGER trg_price_observations_immutable_delete
+        BEFORE DELETE ON price_observations
+        BEGIN SELECT RAISE(ABORT, 'price observations are immutable'); END;`,
+      `CREATE TRIGGER trg_cost_movements_immutable_update
+        BEFORE UPDATE ON cost_movements
+        BEGIN SELECT RAISE(ABORT, 'cost movements are append-only'); END;`,
+      `CREATE TRIGGER trg_cost_movements_immutable_delete
+        BEFORE DELETE ON cost_movements
+        BEGIN SELECT RAISE(ABORT, 'cost movements are append-only'); END;`,
+      `CREATE TRIGGER trg_sale_cost_snapshots_immutable_update
+        BEFORE UPDATE ON sale_item_cost_snapshots
+        BEGIN SELECT RAISE(ABORT, 'sale cost snapshots are immutable'); END;`,
+      `CREATE TRIGGER trg_sale_cost_snapshots_immutable_delete
+        BEFORE DELETE ON sale_item_cost_snapshots
+        BEGIN SELECT RAISE(ABORT, 'sale cost snapshots are immutable'); END;`,
+      `CREATE TRIGGER trg_purchase_inventory_source_insert
+        BEFORE INSERT ON inventory_events
+        WHEN NEW.event_type = 'PURCHASE' AND (
+          NEW.source_type <> 'PURCHASE'
+          OR NEW.source_id IS NULL
+          OR NEW.quantity_base_delta_micros <= 0
+          OR NEW.package_unit_id IS NULL
+          OR NEW.quantity_package_snapshot_micros IS NULL
+          OR NEW.conversion_to_base_snapshot_micros IS NULL
+          OR NOT EXISTS (
+            SELECT 1 FROM purchases p
+            WHERE p.id = NEW.source_id AND p.store_id = NEW.store_id
+          )
+        )
+        BEGIN SELECT RAISE(ABORT, 'purchase inventory event must be a positive snapshot for its purchase'); END;`,
+      `CREATE TRIGGER trg_purchase_inventory_conversion_insert
+        BEFORE INSERT ON inventory_events
+        WHEN NEW.event_type = 'PURCHASE' AND NOT EXISTS (
+          SELECT 1 FROM package_units pu
+          WHERE pu.id = NEW.package_unit_id
+            AND pu.conversion_to_base_micros = NEW.conversion_to_base_snapshot_micros
+        )
+        BEGIN SELECT RAISE(ABORT, 'purchase inventory event conversion snapshot does not match package'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

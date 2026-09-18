@@ -77,6 +77,7 @@ export default function SaleDetailScreen({ client, saleId, onBack }: SaleDetailS
   const {
     sale,
     items,
+    costSnapshots,
     payment,
     customerAccount,
     receivable,
@@ -85,6 +86,7 @@ export default function SaleDetailScreen({ client, saleId, onBack }: SaleDetailS
     inventoryReadFailure,
   } = state.detail;
   const inventoryBySaleItemId = new Map(inventoryEffects.map((effect) => [effect.saleItemId, effect]));
+  const costBySaleItemId = new Map(costSnapshots.map((snapshot) => [snapshot.saleItemId, snapshot]));
   const totalDisplay = displayMoney(sale.totalMinor, sale.currencyCode) ?? '0.00';
   const subtotalDisplay = displayMoney(sale.subtotalMinor, sale.currencyCode) ?? '0.00';
   const discountDisplay =
@@ -163,6 +165,7 @@ export default function SaleDetailScreen({ client, saleId, onBack }: SaleDetailS
             item.discountAmountMinor > 0 ? displayMoney(item.discountAmountMinor, sale.currencyCode) : null;
           const qty = formatQuantityMicros(item.quantityPackagesMicros);
           const inventoryEffect = inventoryBySaleItemId.get(item.id);
+          const costSnapshot = costBySaleItemId.get(item.id);
           const currentBalance = inventoryEffect?.currentDerivedBalanceBaseMicros ?? null;
 
           return (
@@ -174,6 +177,13 @@ export default function SaleDetailScreen({ client, saleId, onBack }: SaleDetailS
                 </Text>
                 {itemDiscount ? (
                   <Text style={styles.discountValue}>Discount: - {itemDiscount}</Text>
+                ) : null}
+                {costSnapshot?.coverageStatus === 'AVAILABLE' ? (
+                  <Text style={styles.itemSub}>
+                    Estimated cost: {displayMoney(costSnapshot.cogsAmountMinor, sale.currencyCode)}
+                  </Text>
+                ) : costSnapshot ? (
+                  <Text style={styles.inventoryUnavailable}>Cost unavailable for this sale line</Text>
                 ) : null}
                 {inventoryEffect ? (
                   <View style={styles.inventoryEffect}>

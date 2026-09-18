@@ -3,6 +3,7 @@ import {
   calculateSaleTotals,
   type CalculatedSaleLine,
   DomainError,
+  applySaleCostState,
 } from '@retail/domain';
 
 import { generateMobileId } from '../crypto/mobileIds';
@@ -10,13 +11,18 @@ import type { DatabaseAdapter } from '../db/adapter';
 import {
   createCustomerAccount,
   createInventoryEvent,
+  applySaleCostMovement,
   createPayment,
   createReceivable,
   createSale,
   createSaleItem,
+  createSaleItemCostSnapshot,
   type CustomerAccountRow,
+  type CostMovementRow,
+  type CostStateRow,
   enqueueOutboxOperation,
   findExpectedOutboxReplay,
+  getCostState,
   getCustomerAccountById,
   getDeviceById,
   getPackageUnitById,
@@ -25,15 +31,19 @@ import {
   getSaleById,
   getStoreById,
   getStoreProductById,
+  getInventoryBalanceByStoreProduct,
   type InventoryEventRow,
+  listCostMovementsBySource,
   listInventoryEventsBySource,
   listPaymentsBySaleId,
+  listSaleItemCostSnapshotsBySaleId,
   listSaleItemsBySaleId,
   type OutboxOperationRow,
   type PaymentMethod,
   type PaymentRow,
   type ReceivableRow,
   type SaleItemRow,
+  type SaleItemCostSnapshotRow,
   type SaleRow,
 } from '../db/repositories';
 import { nowIso, requireId } from '../db/repositories/common';
@@ -77,6 +87,9 @@ export interface CompletedSaleGraph {
   items: SaleItemRow[];
   payment: PaymentRow;
   inventoryEvents: InventoryEventRow[];
+  costSnapshots: SaleItemCostSnapshotRow[];
+  costMovements: CostMovementRow[];
+  costStates: CostStateRow[];
   customerAccount: CustomerAccountRow | null;
   receivable: ReceivableRow | null;
   outbox: OutboxOperationRow;
@@ -269,9 +282,61 @@ export function completeSale(
       completedAt: occurredAt,
     });
 
-    // 6c. Create sale items
+    // 6c. Create sale items and resolve provisional cost in the same
+    // transaction. Legacy integer cost fields stay null for fractional
+    // rational unit costs; the immutable M4 snapshot carries the exact basis.
     const items: SaleItemRow[] = [];
+    const inventoryEvents: InventoryEventRow[] = [];
+    const costSnapshots: SaleItemCostSnapshotRow[] = [];
+    const costMovements: CostMovementRow[] = [];
+    const costStates: CostStateRow[] = [];
     for (const vLine of validatedLines) {
+      let priorBalance = 0;
+      try {
+        priorBalance = getInventoryBalanceByStoreProduct(adapter, vLine.storeProductId);
+      } catch (error) {
+        // M3 deliberately preserves an append-only sale even when a legacy
+        // derived stock projection is already outside the safe read range.
+        // Cost is honestly unavailable for that line; the immutable sale and
+        // inventory event still commit, and a later read reports the overflow.
+        if (!(error instanceof DomainError) || error.code !== 'INVALID_QUANTITY') {
+          throw error;
+        }
+      }
+      const currentCostState = getCostState(adapter, vLine.storeProductId);
+      const costStateInput = currentCostState
+        ? {
+            coverageStatus: currentCostState.coverageStatus,
+            quantityCostedBaseMicros: currentCostState.quantityCostedBaseMicros,
+            remainingValue: currentCostState.remainingValue,
+            averageUnitCost: currentCostState.averageUnitCost,
+          }
+        : {
+            coverageStatus: 'KNOWN' as const,
+            quantityCostedBaseMicros: 0,
+            remainingValue: { numerator: '0', denominator: '1' },
+            averageUnitCost: null,
+          };
+      let costTransition;
+      try {
+        costTransition = applySaleCostState(costStateInput, {
+          priorInventoryBalanceBaseMicros: priorBalance,
+          saleQuantityBaseMicros: vLine.calculated.quantityBaseMicros,
+        });
+      } catch (error) {
+        if (!(error instanceof DomainError) || error.code !== 'INVALID_QUANTITY') throw error;
+        // A pre-existing M3 inventory projection may be at the safe boundary;
+        // keep the sale append-only and mark this line's provisional cost as
+        // unavailable instead of making costing change M3 overflow behaviour.
+        priorBalance = 0;
+        costTransition = applySaleCostState(costStateInput, {
+          priorInventoryBalanceBaseMicros: priorBalance,
+          saleQuantityBaseMicros: vLine.calculated.quantityBaseMicros,
+        });
+      }
+      const legacyUnitCost = costTransition.available && currentCostState?.averageUnitCost?.denominator === '1'
+        ? Number(currentCostState.averageUnitCost.numerator)
+        : null;
       const item = createSaleItem(adapter, {
         id: generateId(),
         saleId: sale.id,
@@ -285,11 +350,57 @@ export function completeSale(
         grossTotalMinor: vLine.calculated.grossTotalMinor,
         discountAmountMinor: vLine.calculated.discountAmountMinor,
         netTotalMinor: vLine.calculated.netTotalMinor,
+        unitCostBaseSnapshotMinor: legacyUnitCost,
+        cogsAmountMinor: costTransition.cogsAmountMinor,
         productNameSnapshot: vLine.productNameSnapshot,
         packageNameSnapshot: vLine.packageNameSnapshot,
         createdAt: occurredAt,
       });
       items.push(item);
+
+      const event = createInventoryEvent(adapter, {
+        id: generateId(),
+        storeId,
+        storeProductId: item.storeProductId,
+        eventType: 'SALE',
+        quantityBaseDeltaMicros: -item.quantityBaseMicros,
+        packageUnitId: item.packageUnitId,
+        quantityPackageSnapshotMicros: item.quantityPackagesMicros,
+        conversionToBaseSnapshotMicros: item.conversionToBaseSnapshotMicros,
+        sourceType: 'SALE',
+        sourceId: sale.id,
+        occurredAt,
+        createdByUserId: userId,
+        deviceId,
+        createdAt: occurredAt,
+      });
+      inventoryEvents.push(event);
+
+      const applied = applySaleCostMovement(adapter, {
+        id: generateId(),
+        storeId,
+        storeProductId: item.storeProductId,
+        sourceId: sale.id,
+        sourceLineId: item.id,
+        quantityBaseMicros: item.quantityBaseMicros,
+        priorInventoryBalanceBaseMicros: priorBalance,
+        createdAt: occurredAt,
+      });
+      costMovements.push(applied.movement);
+      costStates.push(applied.state);
+      costSnapshots.push(createSaleItemCostSnapshot(adapter, {
+        saleItemId: item.id,
+        saleId: sale.id,
+        storeId,
+        storeProductId: item.storeProductId,
+        quantityBaseMicros: item.quantityBaseMicros,
+        costedQuantityBaseMicros: applied.transition.costedQuantityBaseMicros,
+        coverageStatus: applied.transition.available ? 'AVAILABLE' : 'UNAVAILABLE',
+        unitCost: applied.transition.available ? currentCostState?.averageUnitCost ?? null : null,
+        cogs: applied.transition.available ? applied.transition.valueConsumed : null,
+        cogsAmountMinor: applied.transition.cogsAmountMinor,
+        createdAt: occurredAt,
+      }));
     }
 
     // 6d. Create payment
@@ -323,29 +434,7 @@ export function completeSale(
       });
     }
 
-    // 6f. Create inventory events (one negative SALE event per line)
-    const inventoryEvents: InventoryEventRow[] = [];
-    for (const item of items) {
-      const event = createInventoryEvent(adapter, {
-        id: generateId(),
-        storeId,
-        storeProductId: item.storeProductId,
-        eventType: 'SALE',
-        quantityBaseDeltaMicros: -item.quantityBaseMicros,
-        packageUnitId: item.packageUnitId,
-        quantityPackageSnapshotMicros: item.quantityPackagesMicros,
-        conversionToBaseSnapshotMicros: item.conversionToBaseSnapshotMicros,
-        sourceType: 'SALE',
-        sourceId: sale.id,
-        occurredAt,
-        createdByUserId: userId,
-        deviceId,
-        createdAt: occurredAt,
-      });
-      inventoryEvents.push(event);
-    }
-
-    // 6g. Enqueue single outbox envelope
+    // 6f. Enqueue single outbox envelope
     const outbox = enqueueOutboxOperation(adapter, {
       operationType: 'COMPLETED_SALE_CREATED',
       operationId,
@@ -359,6 +448,9 @@ export function completeSale(
         items,
         payment,
         inventoryEvents,
+        costSnapshots,
+        costMovements,
+        costStates,
         customerAccount,
         receivable,
       },
@@ -369,6 +461,9 @@ export function completeSale(
       items,
       payment,
       inventoryEvents,
+      costSnapshots,
+      costMovements,
+      costStates,
       customerAccount,
       receivable,
       outbox,
@@ -406,12 +501,23 @@ function rehydrateCompletedSale(
   const customerAccount = receivable ? getCustomerAccountById(adapter, receivable.customerAccountId) : null;
 
   const inventoryEvents = listInventoryEventsBySource(adapter, 'SALE', sale.id);
+  const costSnapshots = listSaleItemCostSnapshotsBySaleId(adapter, sale.id);
+  const costMovements = listCostMovementsBySource(adapter, 'SALE', sale.id);
+  const envelope = JSON.parse(outbox.payload) as { entities?: { costStates?: CostStateRow[] } };
+  const costStates: CostStateRow[] = Array.isArray(envelope.entities?.costStates)
+    ? envelope.entities.costStates
+    : items
+        .map((item) => getCostState(adapter, item.storeProductId))
+        .filter((state): state is CostStateRow => state !== null);
 
   return {
     sale,
     items,
     payment,
     inventoryEvents,
+    costSnapshots,
+    costMovements,
+    costStates,
     customerAccount,
     receivable,
     outbox,

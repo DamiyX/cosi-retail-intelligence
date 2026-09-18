@@ -1,7 +1,7 @@
 import { DomainError, MICROS_PER_UNIT } from '@retail/domain';
 
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
-import { MIGRATIONS, openDatabase } from '../src/db';
+import { CURRENT_SCHEMA_VERSION, MIGRATIONS, openDatabase } from '../src/db';
 import {
   countPendingOutboxOperations,
   createPackageUnit,
@@ -286,7 +286,7 @@ describe('createTemporaryProduct application operation', () => {
       const reopened = reopenDatabase(fixture.path);
       try {
         const report = openDatabase(reopened, MIGRATIONS);
-        expect(report.schemaVersion).toBe(3);
+        expect(report.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
         const product = getStoreProductById(reopened, productId);
         if (!product) {
           throw new Error('Temporary product did not survive reopen.');

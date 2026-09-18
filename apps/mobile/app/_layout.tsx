@@ -27,6 +27,9 @@ export default function RootLayout() {
         <DatabaseProvider adapter={databaseStatus.adapter}>
           <Stack screenOptions={{ headerTintColor: '#174F46', contentStyle: { backgroundColor: '#F7F8F5' } }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="restock" options={{ title: 'Restock' }} />
+            <Stack.Screen name="purchase-history" options={{ title: 'Purchase history' }} />
+            <Stack.Screen name="purchases/[id]" options={{ title: 'Restock receipt' }} />
           </Stack>
         </DatabaseProvider>
       )}
