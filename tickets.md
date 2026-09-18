@@ -1,7 +1,7 @@
 # Tickets: M5 Inventory, Batch Awareness and Reconciliation
 
-**Status:** M5-01 through M5-05 are implemented on the implementation branch and
-await independent audit; M5-06 through M5-07 remain in sequential implementation.
+**Status:** M5-01 through M5-07 are implemented on the implementation branch and
+await independent audit. The implementation task is stopped at the audit gate.
 Batch direction was explicitly approved 2026-09-18. The acceptance boxes below
 are implementation evidence only and are not independent acceptance.
 **Baseline:** accepted M4 source 9700ee3; M5 planning authored from c1753b6 on
@@ -227,54 +227,97 @@ versioned selector, owner due-work/settings UI; no staff dispatch/auth UX.
 - `apps/mobile/__tests__/m5GuidedChecks.test.ts`: 6 passing SQLite tests;
   `m5GuidedChecksScreen.test.tsx`: 2 passing UI tests. M5 focused run: 9 suites,
   37 tests. Focused purchase/sales/restock regression: 3 suites, 49 tests.
-  Full `npm run validate` passed: domain 5 suites/150 tests and mobile 32
-  suites/255 tests; root typecheck, zero-warning lint and `git diff --check`
-  passed. Full navigation tests emit existing extraneous-screen warnings for
-  the new routes but still pass. Physical Android, development-build/Metro,
-  second-laptop, accounting and independent-audit evidence remain outstanding.
+  Full `npm run validate` passed at the M5-05 checkpoint: domain 5 suites/150
+  tests and mobile 32 suites/255 tests; root typecheck, zero-warning lint and
+  `git diff --check` passed. The later M5-07 route-map correction (`af475c2`)
+  removes the extraneous-screen warnings from the full navigation harness.
+  Physical Android, development-build/Metro, second-laptop, accounting and
+  independent-audit evidence remain outstanding.
 
 ## M5-06 — Local attention, remaining-stock expiry and snooze
 
-**Status:** Not started. **Blocked by:** M5-03, M5-04.
+**Status:** Implemented; awaiting independent audit. **Blocked by:** coordinator audit gate.
 **Delivers:** one calm Needs attention list supports real restock/review/removal
 and reminders from actual recorded remaining inventory.
 **Scope:** condition queries/reorder control, durable snooze/lead-time settings
 (expected migration 11), More attention/See All/detail/actions; Home waits M6.
 
-- [ ] Low/zero/negative/discrepancy/remaining expiry and unknown coverage states are
+- [x] Low/zero/negative/discrepancy/remaining expiry and unknown coverage states are
   store-scoped and truthful. Depleted/resolved groups disappear; DAY store-local
   countdown/lead boundaries, MONTH labels, printed meaning and estimated quantity
   tests pass. Current elapsed dates warn without automatic stock removal.
-- [ ] Restock routes to actual purchase, Reconcile to checks and Mark expired/removed
+- [x] Restock routes to actual purchase, Reconcile to checks and Mark expired/removed
   to real adjustment. Later today/Tomorrow/Choose time snooze persists separately
   from inventory, expires when due, and worsening low->zero/negative or date
   severity resurfaces despite earlier suppression. No simulated price alerts.
-- [ ] Complete range/projection queries avoid paged-history totals; reads refresh
+- [x] Complete range/projection queries avoid paged-history totals; reads refresh
   after durable writes/focus/resume/date rollover. Settings/snooze action history,
   same/conflicting replay, role/store isolation, rollback/restart and loading/
   empty/error/large-text component paths pass without new financial Home cards.
 
+**Implementation evidence (awaiting independent audit):**
+
+- Commit: `f8d63d7` (`feat(M5-06): add local attention and snooze`). Added
+  migration 11 attention settings/snooze history with store/device/member and
+  immutable-history guards; current-truth attention derivation for stock,
+  discrepancy, unknown coverage and DAY/MONTH expiry; owner settings/snooze
+  writes with one canonical outbox envelope, replay/conflict protection and
+  durable local-time due handling; More -> Needs attention with accessible
+  loading/empty/error/retry, retained settings input and actions into existing
+  purchase/check/adjustment flows.
+- `apps/mobile/__tests__/m5Attention.test.ts`: 3 SQLite tests covering all
+  condition kinds, store-local date rollover, no automatic expiry removal,
+  snooze due/worsening behavior, settings/snooze replay/conflict, owner/store
+  isolation, rollback, restart and migration v11 persistence.
+  `m5AttentionScreen.test.tsx`: 2 component tests covering real low-stock
+  action routing, snooze feedback and retained settings input after failure.
+  M5 focused run: 11 suites, 42 tests; navigation route tests: 12 tests.
+- Physical Android, development-build/Metro, second-laptop, accounting and
+  independent-audit evidence remain outstanding; no Home/M6 cards were added.
+
 ## M5-07 — Complete evidence and stop for independent audit
 
-**Status:** Not started. **Blocked by:** M5-02, M5-03, M5-04, M5-05, M5-06.
+**Status:** Implemented; awaiting independent audit. **Blocked by:** coordinator audit gate.
 **Delivers:** another agent/laptop can recover the implemented milestone and
 review what actually passed. No feature scope expansion.
 
-- [ ] Complete documented validation, Expo Doctor/dependency compatibility and
+- [x] Complete documented validation, Expo Doctor/dependency compatibility and
   Android export pass; fresh/populated-v6 upgrade, migration rollback/row retention,
   rebuilt projections and existing M1–M4 regression suite have recorded commands
   and results. Active workflow schema/date-time/dependencies/artifacts and diff
   checks pass; no secrets/generated builds are committed.
-- [ ] Ledger, PROJECT_STATE and M5 workflow record ticket commits, migrations,
+- [x] Ledger, PROJECT_STATE and M5 workflow record ticket commits, migrations,
   evidence and unresolved risks accurately; physical Galaxy/offline/restart/text/
   native exits, Metro, second-laptop and accounting gates are either actually
   performed with evidence or explicitly carried, never claimed from mocks.
-- [ ] Return clean task branch/HEAD/status and structured handoff to coordinator,
+- [x] Return clean task branch/HEAD/status and structured handoff to coordinator,
   then stop editing. Independent-audit gate remains pending until coordinator
   reviews and accepts; do not start M6, push/merge/deploy or self-accept.
 
+**Implementation evidence (awaiting independent audit):**
+
+- Validation commits: `f8d63d7` (M5-06) and `af475c2` (M5-07 route/schema
+  harness correction). Migration history is additive through v11: v7 receipt
+  groups, v8 adjustments, v9 reconciliation, v10 guided checks, v11 attention.
+- `npm run validate` PASS: environment pinned Node 24.21.0/npm 11.19.0/git
+  2.55.0 with adb available; domain 5 suites/150 tests; mobile 34 suites/260
+  tests; strict typecheck and zero-warning lint. Focused M1-M4 purchase/sales/
+  restock regression PASS: 3 suites/49 tests. M5 focused run PASS: 11 suites/
+  42 tests. Populated-v6/v7 migration retention, rollback, reopen and rebuilt
+  projection/cost evidence is included in the M5 batch/adjustment suites.
+- `npm run mobile:doctor` PASS 21/21; `npm exec --workspace @retail/mobile --
+  expo install --check` PASS with dependencies up to date; `npm run mobile:export`
+  PASS with 1,381 Android modules and a 3.5 MB Hermes bundle. Generated
+  `apps/mobile/dist` remains ignored and untracked. Active workflow/index JSON
+  validation PASS: schema/date-time, 7-gate dependency graph, 13 registered
+  artifacts and contiguous migration registry 1..11; `git diff --check` PASS.
+- Physical Galaxy/offline/restart/text-scale/native-exit, development-client/
+  Metro, second-laptop, cloud, deployment, push/merge and professional
+  accounting checks were not performed and remain carried. Independent audit
+  is pending; no M6 work started.
+
 ## Evidence log
 
-M5-01 through M5-05 implementation evidence is recorded above. M5-06 and M5-07
-remain to be implemented; physical/device and independent-audit evidence must
-not be inferred from local tests.
+M5-01 through M5-07 implementation and validation evidence is recorded above.
+Physical/device, release, accounting and independent-audit evidence must not be
+inferred from local tests.

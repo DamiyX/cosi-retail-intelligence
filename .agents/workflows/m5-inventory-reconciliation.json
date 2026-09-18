@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m5-05-implemented",
+  "current_state": "m5-07-implemented",
   "completed_states": [
     "m4-independent-source-automated-acceptance",
     "m5-founder-batch-fefo-approval",
@@ -15,7 +15,9 @@
     "m5-02-implemented",
     "m5-03-implemented",
     "m5-04-implemented",
-    "m5-05-implemented"
+    "m5-05-implemented",
+    "m5-06-implemented",
+    "m5-07-implemented"
   ],
   "owner": {
     "agent": "m5-implementation-engineer",
@@ -162,6 +164,41 @@
         "M5-06 and M5-07 are not implemented yet."
       ],
       "observed_at": "2026-09-18T19:20:00+01:00"
+    },
+    {
+      "kind": "validation",
+      "path": "apps/mobile/__tests__/m5Attention.test.ts; apps/mobile/__tests__/m5AttentionScreen.test.tsx",
+      "claim": "M5-06 implementation commit f8d63d7 adds migration v11 local attention settings and immutable snooze history, current-truth stock/discrepancy/unknown/expiry conditions, owner-safe settings/snooze writes, replay/conflict handling, existing-flow actions and accessible Needs attention UI.",
+      "checks": [
+        "M5 focused suites PASS: 11 suites, 42 tests",
+        "Attention/navigation focused run PASS: 12 tests with no extraneous-route warnings",
+        "npm run typecheck --workspace @retail/mobile PASS",
+        "npm run lint --workspace @retail/mobile PASS with zero warnings",
+        "git diff --check PASS"
+      ],
+      "limitations": [
+        "Independent audit, physical Android verification, development-build/Metro verification, second-laptop verification and accounting review remain outstanding.",
+        "M6 Home/dashboard work remains deferred."
+      ],
+      "observed_at": "2026-09-18T19:53:00+01:00"
+    },
+    {
+      "kind": "validation",
+      "path": "tickets.md; docs/engineering/PROJECT_STATE.md; .agents/workflows/m5-inventory-reconciliation.json",
+      "claim": "M5-07 completion evidence is recorded after the full M5 implementation; af475c2 registers all M5 routes in both router harnesses and aligns mocked schema version with CURRENT_SCHEMA_VERSION.",
+      "checks": [
+        "npm run validate PASS: domain 5 suites/150 tests; mobile 34 suites/260 tests; strict typecheck and zero-warning lint",
+        "Focused purchases/sales/restock regression PASS: 3 suites/49 tests",
+        "npm run mobile:doctor PASS: 21/21",
+        "expo install --check PASS: dependencies up to date",
+        "npm run mobile:export PASS: 1,381 Android modules and 3.5 MB Hermes bundle",
+        "Workflow/index AJV schema/date-time, gate dependency, artifact and migration-registry checks PASS; git diff --check PASS"
+      ],
+      "limitations": [
+        "Physical Galaxy/offline/restart/text-scale/native-exit, development-client/Metro, second-laptop, cloud/deployment and professional accounting checks remain unperformed.",
+        "Coordinator independent audit remains pending; implementation gate is not self-accepted."
+      ],
+      "observed_at": "2026-09-18T19:53:00+01:00"
     }
   ],
   "acceptance_gates": [
@@ -350,8 +387,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Stop implementation on feat/m5-inventory-reconciliation and hand off the clean M5-05 slice for coordinator independent audit. M5-06 and M5-07 remain unimplemented; keep implementation-evidence and independent-audit gates pending; no M6, push, merge or deployment.",
+  "next_action": "Stop implementation on feat/m5-inventory-reconciliation and hand off the clean M5-01 through M5-07 branch for coordinator independent audit. Keep implementation-evidence and independent-audit gates pending; no M6, push, merge or deployment.",
   "created_at": "2026-09-18T12:55:50.482Z",
-  "updated_at": "2026-09-18T19:20:00+01:00",
+  "updated_at": "2026-09-18T19:53:00+01:00",
   "archived": false
 }

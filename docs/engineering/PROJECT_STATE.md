@@ -2,8 +2,8 @@
 
 Last updated: 2026-09-18  
 Current milestone: M5 batch-aware inventory/reconciliation implementation
-under D-039/D-040; M5-01 through M5-05 are implemented and awaiting independent
-audit, with M5-06 and M5-07 still in sequence.  
+under D-039/D-040; M5-01 through M5-07 are implemented and awaiting independent
+audit. The implementation task is stopped at the audit gate.
 Completed engineering milestones: M0; M1 (explicit device waiver); M2 after
 independent audit; M3 and M4 source/automated scope after independent audit,
 with physical/release readiness gates carried.
@@ -16,7 +16,9 @@ with physical/release readiness gates carried.
   527a035. M5-01 implementation commit: f453b0a. M5-02 implementation commits:
   ea8bfbd, 79a9c23, 5bd7b2d and ca3cc99. M5-03 implementation commits:
   1fe9f91 and 8f35238. M5-04 implementation commit: f347d99. M5-05
-  implementation commit: 8142700. M5-06 and M5-07 remain in sequence.
+  implementation commit: 8142700. M5-06 implementation commit: f8d63d7.
+  M5-07 route/schema harness correction: af475c2. Final ledger/workflow
+  evidence is recorded in the current handoff documentation commit.
 - Accepted M3 checkpoint: 66cc64d; approved M4 plan/contract checkpoint: db5a835.
 - Coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 owns product review,
   plans, tickets, workflow registration and independent acceptance. M5
@@ -86,8 +88,10 @@ landed migration 9, blind first/recount evidence, dual-watermark finalization,
 complete group counts and sourced reconciliation corrections. M5-05 landed
 migration 10, owner-only guided-check settings/assignments/attempts/replacements,
 deterministic due work, auditable replacement history and atomic reconciliation
-completion. Migration 11 remains a plan until M5-06 lands. No M4 reopening or
-M6 work.
+completion. M5-06 landed migration 11, store-scoped attention conditions,
+remaining DAY/MONTH expiry warnings, owner settings and immutable snooze history
+with durable local-time replay/outbox behavior; More -> Needs attention routes
+to existing purchase, check and adjustment flows. No M4 reopening or M6 work.
 
 Planning schema/dependency/artifact checks and unchanged M4 archive passed;
 the documentation ownership checkpoint is committed separately before feature
@@ -98,18 +102,22 @@ adjustment, cost, batch, outbox, migration-retention, multi-product and UI
 evidence. M5-04 now has blind UI, first/recount, dual-watermark, group-count,
 reconciliation-cost, replay and rollback evidence. M5-05 now has guided-check
 settings/assignment/replacement, reconciliation handoff, replay and rollback
-evidence. Independent acceptance is still pending. Next: coordinator audit of
-the completed M5-05 slice before any further M5 implementation; M5-06 and M5-07
-remain unimplemented in this checkout. The implementation-evidence and
-independent-audit gates remain pending.
+evidence. M5-06 now has attention derivation, expiry precision, snooze/settings
+replay, ownership, rollback/restart, accessible action routing and retained
+input evidence. M5-07 completed full validation, Expo Doctor, dependency
+compatibility, Android export, workflow/schema/artifact checks and the route-map
+warning correction. Independent acceptance is still pending. Next: coordinator
+independent audit of the complete M5-01 through M5-07 implementation; the
+implementation-evidence and independent-audit gates remain pending.
 Implementer stops after M5-07 for coordinator independent audit. No M6 yet. Live Home remains proposed M6,
 global Scan navigation M8, real price signals M9/M10 and staff review M11.
 
 ## Carried readiness gates
 
-- Actual Galaxy M3/M4 offline sale/restock, force-stop/relaunch, history,
-  cost-availability, dirty header/hardware exits and large-text checks remain
-  unperformed. adb is available but was not used during this review.
+- Actual Galaxy M3/M4/M5 offline sale/restock, attention/expiry, force-stop/
+  relaunch, history, cost-availability, dirty header/hardware exits and
+  large-text checks remain unperformed. adb is available but was not used during
+  this implementation handoff.
 - M1/M2 evidence only: Galaxy A15 5G SM-A156E, Android 16, 1080×2340; preview
   90c3fd47-e9be-49cb-bdbc-f9ab649f3c34, version 0.0.1/code 1, APK SHA-256
   687F787730E437DEEE1CAC4353192C2B7A44313EF2EBE92FDFC41261A4FEDA7C.
