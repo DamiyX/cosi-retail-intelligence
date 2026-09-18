@@ -908,6 +908,50 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'sale cost snapshot fields do not match coverage'); END;`,
     ],
   },
+  {
+    version: 6,
+    name: 'sale_cost_snapshot_parent_invariants',
+    statements: [
+      `CREATE TRIGGER trg_sale_cost_snapshots_parent_insert
+        BEFORE INSERT ON sale_item_cost_snapshots
+        WHEN (NEW.coverage_status = 'AVAILABLE' AND (
+          (SELECT cogs_amount_minor FROM sale_items WHERE id = NEW.sale_item_id) IS NOT NEW.cogs_amount_minor
+          OR (
+            NEW.unit_cost_denominator = '1'
+            AND (
+              (
+                (
+                  length(CAST(NEW.unit_cost_numerator AS TEXT)) < 16
+                  OR (
+                    length(CAST(NEW.unit_cost_numerator AS TEXT)) = 16
+                    AND CAST(NEW.unit_cost_numerator AS TEXT) <= '9007199254740991'
+                  )
+                )
+                AND (SELECT unit_cost_base_snapshot_minor FROM sale_items WHERE id = NEW.sale_item_id) IS NOT CAST(NEW.unit_cost_numerator AS INTEGER)
+              )
+              OR (
+                NOT (
+                  length(CAST(NEW.unit_cost_numerator AS TEXT)) < 16
+                  OR (
+                    length(CAST(NEW.unit_cost_numerator AS TEXT)) = 16
+                    AND CAST(NEW.unit_cost_numerator AS TEXT) <= '9007199254740991'
+                  )
+                )
+                AND (SELECT unit_cost_base_snapshot_minor FROM sale_items WHERE id = NEW.sale_item_id) IS NOT NULL
+              )
+            )
+            OR (
+              NEW.unit_cost_denominator <> '1'
+              AND (SELECT unit_cost_base_snapshot_minor FROM sale_items WHERE id = NEW.sale_item_id) IS NOT NULL
+            )
+          )
+        ))
+        OR (NEW.coverage_status = 'UNAVAILABLE' AND
+          (SELECT cogs_amount_minor FROM sale_items WHERE id = NEW.sale_item_id) IS NOT NULL
+        )
+        BEGIN SELECT RAISE(ABORT, 'sale cost snapshot does not match immutable sale item cost parent'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

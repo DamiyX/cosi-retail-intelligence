@@ -172,22 +172,79 @@ describe('M4 restocking and costing', () => {
         createdAt: occurredAt,
         completedAt: occurredAt,
       });
-      const makeSaleItem = (id: string) => createSaleItem(fixture.adapter, {
-        id,
-        saleId: sale.id,
-        storeProductId: product.storeProduct.id,
-        productVariantId: product.variant.id,
-        packageUnitId: base.id,
-        quantityPackagesMicros: MICROS_PER_UNIT,
-        conversionToBaseSnapshotMicros: MICROS_PER_UNIT,
-        quantityBaseMicros: MICROS_PER_UNIT,
-        unitPriceMinor: 100,
-        grossTotalMinor: 100,
-        netTotalMinor: 100,
-        productNameSnapshot: 'Snapshot validation item',
-        packageNameSnapshot: 'piece',
-        createdAt: occurredAt,
-      });
+      const makeSaleItem = (
+        id: string,
+        options: {
+          quantityPackagesMicros?: number;
+          quantityBaseMicros?: number;
+          unitPriceMinor?: number;
+          grossTotalMinor?: number;
+          netTotalMinor?: number;
+          unitCostBaseSnapshotMinor?: number | null;
+          cogsAmountMinor?: number | null;
+        } = {
+          unitCostBaseSnapshotMinor: null,
+          cogsAmountMinor: 33,
+        },
+      ) => {
+        const quantityPackagesMicros = options.quantityPackagesMicros ?? MICROS_PER_UNIT;
+        const quantityBaseMicros = options.quantityBaseMicros ?? MICROS_PER_UNIT;
+        const unitPriceMinor = options.unitPriceMinor ?? 100;
+        const grossTotalMinor = options.grossTotalMinor ?? 100;
+        const netTotalMinor = options.netTotalMinor ?? grossTotalMinor;
+        return createSaleItem(fixture.adapter, {
+          id,
+          saleId: sale.id,
+          storeProductId: product.storeProduct.id,
+          productVariantId: product.variant.id,
+          packageUnitId: base.id,
+          quantityPackagesMicros,
+          conversionToBaseSnapshotMicros: MICROS_PER_UNIT,
+          quantityBaseMicros,
+          unitPriceMinor,
+          grossTotalMinor,
+          netTotalMinor,
+          unitCostBaseSnapshotMinor: options.unitCostBaseSnapshotMinor,
+          cogsAmountMinor: options.cogsAmountMinor,
+          productNameSnapshot: 'Snapshot validation item',
+          packageNameSnapshot: 'piece',
+          createdAt: occurredAt,
+        });
+      };
+      const insertRawSnapshot = (input: {
+        saleItemId: string;
+        coverageStatus: 'AVAILABLE' | 'UNAVAILABLE';
+        costedQuantityBaseMicros: number;
+        unitCostNumerator: string | null;
+        unitCostDenominator: string | null;
+        cogsNumerator: string | null;
+        cogsDenominator: string | null;
+        cogsAmountMinor: number | null;
+      }): void => {
+        fixture.adapter.run(
+          `INSERT INTO sale_item_cost_snapshots
+            (sale_item_id, sale_id, store_id, store_product_id, quantity_base_micros,
+             costed_quantity_base_micros, coverage_status, method, method_version,
+             unit_cost_numerator, unit_cost_denominator, cogs_numerator, cogs_denominator,
+             cogs_amount_minor, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'MOVING_WEIGHTED_AVERAGE', 'M4-MWA-1', ?, ?, ?, ?, ?, ?);`,
+          [
+            input.saleItemId,
+            sale.id,
+            fixture.context.store.id,
+            product.storeProduct.id,
+            MICROS_PER_UNIT,
+            input.costedQuantityBaseMicros,
+            input.coverageStatus,
+            input.unitCostNumerator,
+            input.unitCostDenominator,
+            input.cogsNumerator,
+            input.cogsDenominator,
+            input.cogsAmountMinor,
+            occurredAt,
+          ],
+        );
+      };
       const item = makeSaleItem(testId(492));
       const snapshotInput = {
         saleItemId: item.id,
@@ -233,7 +290,72 @@ describe('M4 restocking and costing', () => {
       });
       expect(valid.cogsAmountMinor).toBe(33);
 
-      const unavailableItem = makeSaleItem(testId(493));
+      const unsafeIntegralItem = makeSaleItem(testId(493), {
+        quantityPackagesMicros: 1,
+        quantityBaseMicros: 1,
+        unitPriceMinor: 1_000_000,
+        grossTotalMinor: 1,
+        netTotalMinor: 1,
+        cogsAmountMinor: 10_000_000_000,
+      });
+      const unsafeIntegral = createSaleItemCostSnapshot(fixture.adapter, {
+        ...snapshotInput,
+        saleItemId: unsafeIntegralItem.id,
+        quantityBaseMicros: 1,
+        costedQuantityBaseMicros: 1,
+        coverageStatus: 'AVAILABLE',
+        unitCost: { numerator: '10000000000000000', denominator: '1' },
+        cogs: { numerator: '10000000000', denominator: '1' },
+        cogsAmountMinor: 10_000_000_000,
+      });
+      expect(unsafeIntegral.cogsAmountMinor).toBe(10_000_000_000);
+
+      const oldNullParent = makeSaleItem(testId(494), { cogsAmountMinor: null });
+      expect(() => createSaleItemCostSnapshot(fixture.adapter, {
+        ...snapshotInput,
+        saleItemId: oldNullParent.id,
+        costedQuantityBaseMicros: MICROS_PER_UNIT,
+        coverageStatus: 'AVAILABLE',
+        unitCost: { numerator: '100', denominator: '3' },
+        cogs: { numerator: '100', denominator: '3' },
+        cogsAmountMinor: 33,
+      })).toThrow(DomainError);
+      expect(() => insertRawSnapshot({
+        saleItemId: oldNullParent.id,
+        coverageStatus: 'AVAILABLE',
+        costedQuantityBaseMicros: MICROS_PER_UNIT,
+        unitCostNumerator: '100',
+        unitCostDenominator: '3',
+        cogsNumerator: '100',
+        cogsDenominator: '3',
+        cogsAmountMinor: 33,
+      })).toThrow();
+
+      const rawLegacyMismatch = makeSaleItem(testId(495), { unitCostBaseSnapshotMinor: 5, cogsAmountMinor: 33 });
+      expect(() => insertRawSnapshot({
+        saleItemId: rawLegacyMismatch.id,
+        coverageStatus: 'AVAILABLE',
+        costedQuantityBaseMicros: MICROS_PER_UNIT,
+        unitCostNumerator: '100',
+        unitCostDenominator: '3',
+        cogsNumerator: '100',
+        cogsDenominator: '3',
+        cogsAmountMinor: 33,
+      })).toThrow();
+
+      const unavailableParentWithCost = makeSaleItem(testId(496), { cogsAmountMinor: 33 });
+      expect(() => insertRawSnapshot({
+        saleItemId: unavailableParentWithCost.id,
+        coverageStatus: 'UNAVAILABLE',
+        costedQuantityBaseMicros: 1,
+        unitCostNumerator: null,
+        unitCostDenominator: null,
+        cogsNumerator: null,
+        cogsDenominator: null,
+        cogsAmountMinor: null,
+      })).toThrow();
+
+      const unavailableItem = makeSaleItem(testId(497), { cogsAmountMinor: null });
       const unavailable = createSaleItemCostSnapshot(fixture.adapter, {
         ...snapshotInput,
         saleItemId: unavailableItem.id,

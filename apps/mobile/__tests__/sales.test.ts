@@ -121,6 +121,7 @@ describe('M3 Sales milestone', () => {
             { version: 3, name: 'sales_and_inventory' },
             { version: 4, name: 'restocking_costing' },
             { version: 5, name: 'sale_cost_snapshot_invariants' },
+            { version: 6, name: 'sale_cost_snapshot_parent_invariants' },
           ]);
         } finally {
           reopened.close();

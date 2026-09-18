@@ -101,6 +101,23 @@ export interface CreateSaleItemCostSnapshotInput {
 type CostStateRecord = Record<string, string | number | null>;
 type CostMovementRecord = Record<string, string | number | null>;
 type SnapshotRecord = Record<string, string | number | null>;
+type SaleItemCostParentRecord = {
+  sale_id: string;
+  sale_store_id: string;
+  store_product_id: string;
+  quantity_base_micros: number;
+  unit_cost_base_snapshot_minor: number | null;
+  cogs_amount_minor: number | null;
+};
+
+function safeLegacyUnitCostProjection(value: Rational): number | null {
+  const parsed = parseRational(value, 'unitCost');
+  if (parsed.denominator !== '1') {
+    return null;
+  }
+  const numerator = BigInt(parsed.numerator);
+  return numerator <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(numerator) : null;
+}
 
 function parseStoredRational(numerator: string | number | null, denominator: string | number | null, field: string): Rational {
   if (numerator === null || denominator === null) {
@@ -439,6 +456,24 @@ export function createSaleItemCostSnapshot(
   }
   const parsedUnitCost = unitCost ? parseRational(unitCost, 'unitCost') : null;
   const parsedCogs = cogs ? parseRational(cogs, 'cogs') : null;
+  if (input.cogsAmountMinor !== null && input.cogsAmountMinor !== undefined && (!Number.isSafeInteger(input.cogsAmountMinor) || input.cogsAmountMinor < 0)) {
+    throw new DomainError('INVALID_MONEY', 'Sale COGS must be a non-negative safe integer.');
+  }
+  const parent = adapter.getFirstRow<SaleItemCostParentRecord>(
+    `SELECT si.sale_id, s.store_id AS sale_store_id, si.store_product_id,
+            si.quantity_base_micros, si.unit_cost_base_snapshot_minor,
+            si.cogs_amount_minor
+     FROM sale_items si
+     JOIN sales s ON s.id = si.sale_id
+     WHERE si.id = ?;`,
+    [saleItemId],
+  );
+  if (!parent) {
+    throw new DomainError('INVALID_VALUE', 'Sale cost snapshot requires an existing sale item parent.');
+  }
+  if (parent.sale_id !== saleId || parent.sale_store_id !== storeId || parent.store_product_id !== storeProductId || parent.quantity_base_micros !== input.quantityBaseMicros) {
+    throw new DomainError('INVALID_VALUE', 'Sale cost snapshot parent does not match the sale, store, product, or quantity.');
+  }
   if (input.coverageStatus === 'AVAILABLE') {
     if (input.costedQuantityBaseMicros !== input.quantityBaseMicros || !parsedUnitCost || !parsedCogs) {
       throw new DomainError('INVALID_VALUE', 'Available sale cost snapshots require full quantity coverage.');
@@ -450,11 +485,16 @@ export function createSaleItemCostSnapshot(
     if (roundRationalHalfUp(expectedCogs) !== input.cogsAmountMinor) {
       throw new DomainError('INVALID_MONEY', 'Sale COGS must use the exact half-up rounded amount.');
     }
+    if (parent.cogs_amount_minor !== input.cogsAmountMinor) {
+      throw new DomainError('INVALID_VALUE', 'Available sale cost COGS must match the immutable sale item parent.');
+    }
+    if ((parent.unit_cost_base_snapshot_minor ?? null) !== safeLegacyUnitCostProjection(parsedUnitCost)) {
+      throw new DomainError('INVALID_VALUE', 'Available sale cost legacy unit cost must match the exact stored basis.');
+    }
+  } else if (parent.cogs_amount_minor !== null) {
+    throw new DomainError('INVALID_VALUE', 'Unavailable sale cost snapshots require a null sale item COGS parent.');
   }
   const methodVersion = requireText(input.methodVersion ?? 'M4-MWA-1', 'methodVersion', 32);
-  if (input.cogsAmountMinor !== null && input.cogsAmountMinor !== undefined && (!Number.isSafeInteger(input.cogsAmountMinor) || input.cogsAmountMinor < 0)) {
-    throw new DomainError('INVALID_MONEY', 'Sale COGS must be a non-negative safe integer.');
-  }
   const createdAt = input.createdAt ?? nowIso();
   adapter.run(
     `INSERT INTO sale_item_cost_snapshots
