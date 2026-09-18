@@ -239,6 +239,9 @@ export function classifyInventoryBatches(
   options: { generateId?: () => string } = {},
 ): BatchClassificationGraph {
   const request = normalizeInput(input);
+  // A replayed operation is still a management read; an operation ID cannot
+  // bypass the owner boundary.
+  assertOwner(adapter, request);
   const replayed = findExpectedOutboxReplay(adapter, {
     operationId: request.operationId,
     storeId: request.storeId,

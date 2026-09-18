@@ -202,6 +202,16 @@ describe('M5 physical batch classification', () => {
       const staffUser = createUser(roleFixture.fixture.adapter, { id: testId(4075), displayName: 'Staff user' });
       createStoreMember(roleFixture.fixture.adapter, { id: testId(4076), storeId: roleFixture.fixture.context.store.id, userId: staffUser.id, role: 'STAFF' });
       const projection = getBatchProjectionForStoreProduct(roleFixture.fixture.adapter, roleFixture.rice.storeProduct.id);
+      classifyInventoryBatches(roleFixture.fixture.adapter, {
+        operationId: testId(4077),
+        storeId: roleFixture.fixture.context.store.id,
+        deviceId: roleFixture.fixture.context.device.id,
+        userId: roleFixture.fixture.context.owner.id,
+        storeProductId: roleFixture.rice.storeProduct.id,
+        expectedInventoryWatermark: projection.inventoryWatermark,
+        expectedBatchWatermark: projection.batchWatermark,
+        groups: [{ quantityBaseMicros: 10 * MICROS_PER_UNIT, datePrecision: 'DAY', dateValue: '2026-10-20', dateMeaning: 'EXPIRY' }],
+      });
       expect(() => classifyInventoryBatches(roleFixture.fixture.adapter, {
         operationId: testId(4077),
         storeId: roleFixture.fixture.context.store.id,
