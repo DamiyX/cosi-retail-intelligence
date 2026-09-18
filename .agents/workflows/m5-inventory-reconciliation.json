@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m5-03-implemented",
+  "current_state": "m5-04-implemented",
   "completed_states": [
     "m4-independent-source-automated-acceptance",
     "m5-founder-batch-fefo-approval",
@@ -13,7 +13,8 @@
     "m5-implementation-assigned",
     "m5-01-implemented",
     "m5-02-implemented",
-    "m5-03-implemented"
+    "m5-03-implemented",
+    "m5-04-implemented"
   ],
   "owner": {
     "agent": "m5-implementation-engineer",
@@ -124,6 +125,23 @@
         "M5-04 through M5-07 are not implemented yet."
       ],
       "observed_at": "2026-09-18T18:09:58.6243329+01:00"
+    },
+    {
+      "kind": "validation",
+      "path": "apps/mobile/__tests__/m5Reconciliation.test.ts; apps/mobile/__tests__/m5ReconciliationScreen.test.tsx",
+      "claim": "M5-04 implementation commit f347d99 adds schema v9 blind reconciliation sessions/submissions/group counts, dual-watermark finalization, complete group correction, total-only unknown fallback, sourced reconciliation correction costing/batch effects, replay and blind retained-input UI.",
+      "checks": [
+        "npm run typecheck --workspace @retail/mobile PASS",
+        "npm run lint --workspace @retail/mobile PASS with zero warnings",
+        "M5 focused suites PASS: 7 suites, 29 tests",
+        "Focused purchases/sales/restock regression PASS: 3 suites, 49 tests",
+        "git diff --check PASS"
+      ],
+      "limitations": [
+        "Independent audit, physical Android, development-build/Metro, second-laptop, accounting and full-repository validation remain outstanding.",
+        "M5-05 through M5-07 are not implemented yet."
+      ],
+      "observed_at": "2026-09-18T19:04:00+01:00"
     }
   ],
   "acceptance_gates": [
@@ -312,8 +330,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Implement M5-04 through M5-07 sequentially on feat/m5-inventory-reconciliation, record truthful ticket evidence and commits, then stop for coordinator independent audit. Keep implementation-evidence and independent-audit gates pending; no M6, push, merge or deployment.",
+  "next_action": "Implement M5-05 through M5-07 sequentially on feat/m5-inventory-reconciliation, record truthful ticket evidence and commits, then stop for coordinator independent audit. Keep implementation-evidence and independent-audit gates pending; no M6, push, merge or deployment.",
   "created_at": "2026-09-18T12:55:50.482Z",
-  "updated_at": "2026-09-18T18:09:58.6243329+01:00",
+  "updated_at": "2026-09-18T19:04:00+01:00",
   "archived": false
 }

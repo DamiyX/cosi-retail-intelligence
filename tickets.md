@@ -1,7 +1,7 @@
 # Tickets: M5 Inventory, Batch Awareness and Reconciliation
 
-**Status:** M5-01 through M5-03 are implemented on the implementation branch and
-await independent audit; M5-04 through M5-07 remain in sequential implementation.
+**Status:** M5-01 through M5-04 are implemented on the implementation branch and
+await independent audit; M5-05 through M5-07 remain in sequential implementation.
 Batch direction was explicitly approved 2026-09-18. The acceptance boxes below
 are implementation evidence only and are not independent acceptance.
 **Baseline:** accepted M4 source 9700ee3; M5 planning authored from c1753b6 on
@@ -150,24 +150,45 @@ adjustment/group removal UI; historical dates/costs remain immutable.
 
 ## M5-04 — Blind count and reconcile recorded differences
 
-**Status:** Not started. **Blocked by:** M5-02, M5-03.
+**Status:** Implemented; awaiting independent audit. **Blocked by:** coordinator audit gate.
 **Delivers:** a truthful physical count can match or correct stock, retaining
 first/recount evidence instead of forcing agreement with the database.
 **Scope:** durable check/submission migration (expected 9), blind UI, compare/
 recount/reason/finalization and complete group-count or unknown-breakdown handling.
 
-- [ ] First expected quantity is hidden from text/accessibility/prefill; first
+- [x] First expected quantity is hidden from text/accessibility/prefill; first
   and recount submissions persist. Match creates a check with no zero event;
   positive/negative discrepancies create real sourced corrections. Total-only
   discrepancy leaves unresolved group composition unknown; complete group count
   can correct groups without FEFO shrinkage guessing.
-- [ ] Finalization transaction revalidates event AND batch watermarks; intervening
+- [x] Finalization transaction revalidates event AND batch watermarks; intervening
   sale/restock, offsetting moves or net-zero classification requires refresh/recount,
   retaining prior input/evidence and never blocking genuine sales.
-- [ ] Check finalization, adjustment, batch/cost effects and one envelope succeed
+- [x] Check finalization, adjustment, batch/cost effects and one envelope succeed
   or roll back together at every write. Same/conflicting op replay, store/actor/
   role isolation, package exactness, restart, dirty header/hardware/Cancel and
   recoverable UI failures pass; no full-report accuracy claim or history rewrite.
+
+**Implementation evidence (awaiting independent audit):**
+
+- Commit: `f347d99` (`feat(M5-04): add blind reconciliation checks`).
+- Added schema v9 sessions, immutable first/recount submissions and group-count
+  evidence, hidden expected snapshots, event/batch watermarks, reconciliation
+  finalization references and raw relationship/immutability guards.
+- Added owner-only start/count/recount/finalization/cancel services. Matching
+  counts complete with no zero event; total-only discrepancies create sourced
+  `RECONCILIATION` corrections and move named composition to unknown; complete
+  group counts correct recorded groups directly without FEFO shrinkage guessing.
+  Finalization revalidates both watermarks, applies exact adjustment cost/batch
+  effects and one `RECONCILIATION_FINALIZED` envelope atomically, with replay and
+  conflict protection.
+- Added More -> Check stock blind UI and route with no expected-quantity render or
+  prefill, retained failure input, focus refresh, cancel and dirty navigation
+  handling. `apps/mobile/__tests__/m5Reconciliation.test.ts`: 6 passing SQLite
+  tests; `m5ReconciliationScreen.test.tsx`: 2 passing UI tests. M5 focused run:
+  7 suites, 29 tests. Focused purchase/sales/restock regression: 3 suites, 49
+  tests. Typecheck, zero-warning lint and `git diff --check` pass. Physical
+  Android, independent audit and full-repository validation remain outstanding.
 
 ## M5-05 — Guided owner stock checks and auditable replacements
 
