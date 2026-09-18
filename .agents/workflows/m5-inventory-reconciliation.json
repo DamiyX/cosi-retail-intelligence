@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m5-independent-audit-corrections-required",
+  "current_state": "m5-independent-audit-reaudit-pending",
   "completed_states": [
     "m4-independent-source-automated-acceptance",
     "m5-founder-batch-fefo-approval",
@@ -17,7 +17,8 @@
     "m5-04-implemented",
     "m5-05-implemented",
     "m5-06-implemented",
-    "m5-07-implemented"
+    "m5-07-implemented",
+    "m5-audit-corrections-implemented"
   ],
   "owner": {
     "agent": "m5-implementation-engineer",
@@ -205,6 +206,24 @@
       "path": "docs/engineering/M5_AUDIT_CORRECTIONS.md",
       "claim": "Coordinator independently reviewed stopped HEAD 0a0ea9477acbc158e48d2648d2bbf0b8a77b634e: 410 tests, strict typecheck, zero-warning lint, Doctor 21/21, dependency check, Android export, original migrations 1-6 and active schema checks pass; targeted SQLite probes and user-path review find A01-A11 requiring correction. No M5 acceptance or physical/release evidence.",
       "observed_at": "2026-09-18T19:03:40.321Z"
+    },
+    {
+      "kind": "validation",
+      "path": "docs/engineering/M5_AUDIT_CORRECTIONS.md; apps/mobile/__tests__/m5ReconciliationCorrections.test.tsx; apps/mobile/__tests__/m5ReorderThreshold.test.tsx; commits 0d76093..4e8e81c",
+      "claim": "A01-A11 correction implementation is complete on the same branch. Documentation checkpoint ff7cc33 precedes the correction commits; A01 receipt snapshot follow-up 629b027 repairs the reviewed multiline-purchase regression, and A11 4e8e81c adds the owner/store-scoped reorder-threshold control. No M6, push, merge or deployment action was performed.",
+      "checks": [
+        "npm run validate PASS: strict typecheck, zero-warning lint, domain 5 suites/150 tests and mobile 37 suites/287 tests (437 tests / 42 suites)",
+        "npm run mobile:doctor PASS: 21/21",
+        "npm exec --workspace @retail/mobile -- expo install --check PASS: dependencies up to date",
+        "npm run mobile:export PASS: 1,382 Android modules and 3.5 MB Hermes bundle",
+        "Active workflow/index AJV draft-2020/date-time, gate dependency, artifact/index and contiguous migration registry v1-v14 checks PASS",
+        "git diff --check PASS; clean status at HEAD 4e8e81c1f8d6a19ecd313c19abdfeded85d677cb"
+      ],
+      "limitations": [
+        "Coordinator must independently re-audit A01-A11; implementation evidence is not self-accepted.",
+        "Physical Galaxy/offline/restart/text-scale/native-exit, development-client/Metro, second-laptop, cloud/deployment and professional accounting checks remain unperformed."
+      ],
+      "observed_at": "2026-09-18T22:24:53.1361867Z"
     }
   ],
   "acceptance_gates": [
@@ -319,8 +338,16 @@
         "procedure": "Implement M5-01 through M5-07 sequentially with focused/full validation.",
         "success_condition": "Truthful evidence and clean recoverable branch; no M6 or self-acceptance."
       },
-      "evidence": [],
-      "limitations": [],
+      "evidence": [
+        {
+          "source": "docs/engineering/PROJECT_STATE.md; commits 0d76093..4e8e81c",
+          "result": "A01-A11 correction commits are complete with focused regressions and full local validation: 437 tests / 42 suites, strict typecheck, zero-warning lint, Doctor 21/21, Expo dependency check, Android export, active workflow/index/migration checks and clean status. The implementation task stops here for coordinator re-audit."
+        }
+      ],
+      "limitations": [
+        "This evidence is implementer-reported and does not satisfy the coordinator-owned independent-audit gate.",
+        "Physical/device, development-client/Metro, second-laptop, cloud/deployment and professional accounting checks remain outstanding."
+      ],
       "blocker": null,
       "waiver": null
     },
@@ -344,8 +371,10 @@
           "result": "Changes required at 0a0ea94; automation passes but batch finalization, FEFO unknown order, count recovery/comparison and expiry/attention/replay/control contracts require correction."
         }
       ],
-      "limitations": [],
-      "blocker": "Independent audit A01-A11 require corrections and coordinator re-audit.",
+      "limitations": [
+        "Correction evidence is available, but coordinator source re-audit has not yet occurred."
+      ],
+      "blocker": "Coordinator re-audit of A01-A11 remains required; implementation evidence is not self-accepted.",
       "waiver": null
     },
     {
@@ -399,8 +428,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Return A01-A11 to the same M5 implementation task 01a0b525-289e-7b40-8f4b-2701fe541ad9 and branch. Commit audit checkpoint separately, implement corrections with failing-before regression evidence, return a clean full handoff and stop for coordinator re-audit. No M6/push/merge/deployment.",
+  "next_action": "Coordinator re-audits A01-A11 on the same M5 implementation task 01a0b525-289e-7b40-8f4b-2701fe541ad9 and branch. No M6, push, merge or deployment.",
   "created_at": "2026-09-18T12:55:50.482Z",
-  "updated_at": "2026-09-18T19:03:40.322Z",
+  "updated_at": "2026-09-18T22:24:53.1361867Z",
   "archived": false
 }

@@ -2,9 +2,10 @@
 
 Last updated: 2026-09-18  
 Current milestone: M5 batch-aware inventory/reconciliation implementation
-under D-039/D-040; M5-01 through M5-07 are implemented and awaiting independent
-audit. The coordinator completed the first independent pass at 0a0ea94 and
-requires A01-A11 corrections before acceptance. See M5_AUDIT_CORRECTIONS.md.
+under D-039/D-040; M5-01 through M5-07 and the requested A01-A11 correction set
+are implemented on the same branch. The coordinator completed the first
+independent pass at 0a0ea94; coordinator re-audit is still required before any
+acceptance claim. See M5_AUDIT_CORRECTIONS.md.
 Completed engineering milestones: M0; M1 (explicit device waiver); M2 after
 independent audit; M3 and M4 source/automated scope after independent audit,
 with physical/release readiness gates carried.
@@ -13,19 +14,23 @@ with physical/release readiness gates carried.
 
 - Checkout: C:\Users\doyew\Documents\DEV 2\COSI-m0
 - Canonical remote: https://github.com/DamiyX/cosi-retail-intelligence
-- Branch: feat/m5-inventory-reconciliation. Documentation ownership checkpoint:
-  527a035. M5-01 implementation commit: f453b0a. M5-02 implementation commits:
+- Branch: feat/m5-inventory-reconciliation. Documentation checkpoint before
+  corrections: ff7cc33. M5-01 implementation commit: f453b0a. M5-02 implementation commits:
   ea8bfbd, 79a9c23, 5bd7b2d and ca3cc99. M5-03 implementation commits:
   1fe9f91 and 8f35238. M5-04 implementation commit: f347d99. M5-05
   implementation commit: 8142700. M5-06 implementation commit: f8d63d7.
-  M5-07 route/schema harness correction: af475c2. Final ledger/workflow
-  evidence is recorded in the current handoff documentation commit.
+  M5-07 route/schema harness correction: af475c2. Audit correction commits:
+  A01 0d76093, A02 272b144, A03 0665504, A04 d326ec4, A05 86c8644, A06
+  b9a12fa, A07 3c81bc9, A08 9dd032d, A09 0db8846, A10 86de529, A01 receipt
+  snapshot follow-up 629b027, and A11 4e8e81c. Final ledger/workflow
+  evidence is recorded in the correction handoff documentation commit.
 - Accepted M3 checkpoint: 66cc64d; approved M4 plan/contract checkpoint: db5a835.
 - Coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 owns product review,
   plans, tickets, workflow registration and independent acceptance. M5
   implementation task 01a0b525-289e-7b40-8f4b-2701fe541ad9 owns implementation
-  on this branch and must stop after M5-07 for audit. Implementation and
-  independent audit run sequentially. Active workflow is
+  and assigned audit corrections on this branch and must stop now for
+  coordinator re-audit. Implementation and independent audit run sequentially.
+  Active workflow is
   .agents/workflows/m5-inventory-reconciliation.json; M4 workflow is archived.
 - M0 PR #1 remains open; main is at a393498 and milestone branches are stacked.
   No push, merge, rebase, deployment, remote-service or cloud-build action was
@@ -92,11 +97,17 @@ deterministic due work, auditable replacement history and atomic reconciliation
 completion. M5-06 landed migration 11, store-scoped attention conditions,
 remaining DAY/MONTH expiry warnings, owner settings and immutable snooze history
 with durable local-time replay/outbox behavior; More -> Needs attention routes
-to existing purchase, check and adjustment flows. No M4 reopening or M6 work.
+to existing purchase, check and adjustment flows. The A01-A10 correction set
+then sealed completed batch graphs, corrected FEFO/unknown allocation and
+reclassification, completed reconciliation review/resume and expiry/attention/
+replay refresh contracts; 629b027 binds multiline receipt validation to package
+snapshots; and 4e8e81c adds migration 14 plus the owner/store-scoped exact-unit
+reorder-threshold set/clear path with atomic versioned outbox handling. No M4
+reopening or M6 work.
 
 Planning schema/dependency/artifact checks and unchanged M4 archive passed;
-the documentation ownership checkpoint is committed separately before feature
-work. M5-01 now has schema, service, UI, restart/replay and focused SQLite
+the documentation checkpoint is committed separately before correction work.
+M5-01 now has schema, service, UI, restart/replay and focused SQLite
 evidence; M5-02 now has classification/correction service, UI, replay,
 watermark, authorization and write-boundary evidence. M5-03 now has sourced
 adjustment, cost, batch, outbox, migration-retention, multi-product and UI
@@ -109,9 +120,14 @@ input evidence. M5-07 completed full validation, Expo Doctor, dependency
 compatibility, Android export, workflow/schema/artifact checks and the route-map
 warning correction. Coordinator independent audit at 0a0ea94 reproduced material
 contract failures despite 410 passing tests, Doctor 21/21 and Android export.
-See M5_AUDIT_CORRECTIONS.md for A01-A11 and required regressions. Independent
-acceptance is blocked; implementation-evidence remains pending. Next: the same
-implementation task corrects these findings, then stops for coordinator re-audit.
+The A01-A11 correction handoff now has passing focused regressions and full
+validation: 5 domain suites/150 tests and 37 mobile suites/287 tests, strict
+typecheck, zero-warning lint, Doctor 21/21, dependency compatibility, Android
+export, active workflow/index/migration checks and clean diff/status. See
+M5_AUDIT_CORRECTIONS.md for the original findings and correction boundary.
+Independent acceptance remains blocked and implementation evidence remains
+pending coordinator review; this task does not self-accept. Next: coordinator
+re-audit A01-A11 on this same task/branch.
 No M6 yet. Live Home remains proposed M6,
 global Scan navigation M8, real price signals M9/M10 and staff review M11.
 
