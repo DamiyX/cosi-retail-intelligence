@@ -22,3 +22,4 @@ export {
 export type { CalculatedSaleLine, CalculatedSaleTotals, SaleLineCalculationInput } from './sales';
 export { calculateSaleLine, calculateSaleTotals } from './sales';
 export * from './costing';
+export * from './batches';

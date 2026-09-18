@@ -71,6 +71,14 @@ export default function PurchaseDetailScreen({ client, purchaseId, onBack, isFoc
             <View key={item.id} style={styles.item}>
               <Text style={styles.itemTitle}>{item.productNameSnapshot}</Text>
               <Text style={styles.meta}>{formatQuantityMicros(item.quantityPackagesMicros)} {item.packageNameSnapshot} · {formatQuantityMicros(item.quantityBaseMicros)} base units</Text>
+              {(() => {
+                const batchGroup = detail.batchGroups.find((group) => group.purchaseItemId === item.id);
+                if (!batchGroup) return null;
+                const date = batchGroup.datePrecision === 'UNKNOWN' ? 'Unknown date' : `${batchGroup.dateValue} (${batchGroup.datePrecision.toLowerCase()})`;
+                const meaning = batchGroup.dateMeaning === 'UNSPECIFIED' ? '' : ` · ${batchGroup.dateMeaning === 'EXPIRY' ? 'expiry' : 'best before'}`;
+                const printed = batchGroup.printedBatchNumber ? ` · batch ${batchGroup.printedBatchNumber}` : '';
+                return <Text style={styles.meta}>Batch facts: {date}{meaning}{printed}</Text>;
+              })()}
               <Text style={styles.meta}>Entered {item.costBasis.toLowerCase()} cost: {displayMoney(item.enteredCostMinor, item.currencyCode)}</Text>
               <Text style={styles.meta}>Receipt cost estimate: {receiptCostDisplay ?? 'Unavailable'} per base unit (display rounded to the nearest {currencyMinorUnitLabel(item.currencyCode)})</Text>
               <Text style={styles.meta}>Current cost availability: {isUsableCurrentCost(currentCost ?? {

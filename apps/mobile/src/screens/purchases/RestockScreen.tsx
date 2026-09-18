@@ -1,8 +1,12 @@
 import {
   convertPackagesToBase,
   formatQuantityMicros,
+  normalizeBatchDate,
   normalizePurchaseCost,
   parseQuantityDecimal,
+  type BatchDateMeaning,
+  type BatchDatePrecision,
+  type NormalizedBatchDate,
   type NormalizedPurchaseCost,
   type PurchaseCostBasis,
 } from '@retail/domain';
@@ -46,18 +50,24 @@ interface RestockLineDraft {
   quantityText: string;
   costText: string;
   basis: PurchaseCostBasis;
+  expiryPrecision: BatchDatePrecision;
+  expiryValue: string;
+  expiryMeaning: BatchDateMeaning;
+  printedBatchNumber: string;
 }
 
 interface LineValidation {
   quantityPackagesMicros: number;
   enteredCostMinor: number;
   normalized: NormalizedPurchaseCost;
+  batchDate: NormalizedBatchDate;
 }
 
 type FieldErrors = {
   product?: string;
   quantity?: string;
   cost?: string;
+  expiry?: string;
   supplier?: string;
   general?: string;
 };
@@ -79,10 +89,21 @@ function readSuppliers(client: PurchasesClient): SupplierState {
 }
 
 function validateLineDraft(
-  line: Pick<RestockLineDraft, 'package' | 'quantityText' | 'costText' | 'basis'>,
+  line: Pick<RestockLineDraft, 'package' | 'quantityText' | 'costText' | 'basis' | 'expiryPrecision' | 'expiryValue' | 'expiryMeaning' | 'printedBatchNumber'>,
   currencyCode: string,
-): { value: LineValidation | null; errors: Pick<FieldErrors, 'quantity' | 'cost'> } {
-  const errors: Pick<FieldErrors, 'quantity' | 'cost'> = {};
+): { value: LineValidation | null; errors: Pick<FieldErrors, 'quantity' | 'cost' | 'expiry'> } {
+  const errors: Pick<FieldErrors, 'quantity' | 'cost' | 'expiry'> = {};
+  let batchDate: NormalizedBatchDate | null = null;
+  try {
+    batchDate = normalizeBatchDate({
+      precision: line.expiryPrecision,
+      value: line.expiryValue,
+      meaning: line.expiryMeaning,
+      printedBatchNumber: line.printedBatchNumber,
+    });
+  } catch (error) {
+    errors.expiry = error instanceof Error ? error.message : 'Enter valid batch date facts.';
+  }
   let quantityPackagesMicros: number | null = null;
   try {
     quantityPackagesMicros = parseQuantityDecimal(line.quantityText);
@@ -98,7 +119,7 @@ function validateLineDraft(
   } catch (error) {
     errors.cost = error instanceof Error ? error.message : 'Enter a valid cost.';
   }
-  if (quantityPackagesMicros === null || enteredCostMinor === null) {
+  if (quantityPackagesMicros === null || enteredCostMinor === null || batchDate === null) {
     return { value: null, errors };
   }
   try {
@@ -112,7 +133,7 @@ function validateLineDraft(
       quantityPackagesMicros,
       quantityBaseMicros,
     });
-    return { value: { quantityPackagesMicros, enteredCostMinor, normalized }, errors };
+    return { value: { quantityPackagesMicros, enteredCostMinor, normalized, batchDate }, errors };
   } catch (error) {
     errors.cost = error instanceof Error ? error.message : 'This cost cannot be represented exactly.';
     return { value: null, errors };
@@ -126,7 +147,18 @@ function toPurchaseLine(line: RestockLineDraft, validation: LineValidation): Rec
     quantityPackagesMicros: validation.quantityPackagesMicros,
     costBasis: line.basis,
     enteredCostMinor: validation.enteredCostMinor,
+    expiryPrecision: validation.batchDate.precision,
+    expiryValue: validation.batchDate.value,
+    expiryMeaning: validation.batchDate.meaning,
+    printedBatchNumber: validation.batchDate.printedBatchNumber,
   };
+}
+
+function batchDateLabel(group: Pick<NormalizedBatchDate, 'precision' | 'value' | 'meaning' | 'printedBatchNumber'>): string {
+  const date = group.precision === 'UNKNOWN' ? 'Unknown date' : `${group.value} (${group.precision.toLowerCase()})`;
+  const meaning = group.meaning === 'UNSPECIFIED' ? '' : ` · ${group.meaning === 'EXPIRY' ? 'expiry' : 'best before'}`;
+  const printed = group.printedBatchNumber ? ` · batch ${group.printedBatchNumber}` : '';
+  return `${date}${meaning}${printed}`;
 }
 
 export default function RestockScreen({
@@ -146,6 +178,10 @@ export default function RestockScreen({
   const [quantityText, setQuantityText] = useState('1');
   const [costText, setCostText] = useState('');
   const [basis, setBasis] = useState<PurchaseCostBasis>('TOTAL');
+  const [expiryPrecision, setExpiryPrecision] = useState<BatchDatePrecision>('UNKNOWN');
+  const [expiryValue, setExpiryValue] = useState('');
+  const [expiryMeaning, setExpiryMeaning] = useState<BatchDateMeaning>('UNSPECIFIED');
+  const [printedBatchNumber, setPrintedBatchNumber] = useState('');
   const [editingLineId, setEditingLineId] = useState<string | null>(null);
   const [lines, setLines] = useState<RestockLineDraft[]>([]);
   const [supplierMode, setSupplierMode] = useState<'NONE' | 'EXISTING' | 'NEW'>('NONE');
@@ -186,6 +222,10 @@ export default function RestockScreen({
     selectedPackage !== null ||
     quantityText !== '1' ||
     costText.trim().length > 0 ||
+    expiryPrecision !== 'UNKNOWN' ||
+    expiryValue.trim().length > 0 ||
+    expiryMeaning !== 'UNSPECIFIED' ||
+    printedBatchNumber.trim().length > 0 ||
     lines.length > 0 ||
     supplierMode !== 'NONE' ||
     newSupplierName.trim().length > 0
@@ -200,6 +240,10 @@ export default function RestockScreen({
     setQuantityText('1');
     setCostText('');
     setBasis('TOTAL');
+    setExpiryPrecision('UNKNOWN');
+    setExpiryValue('');
+    setExpiryMeaning('UNSPECIFIED');
+    setPrintedBatchNumber('');
     setEditingLineId(null);
     setLines([]);
     setSupplierMode('NONE');
@@ -242,10 +286,10 @@ export default function RestockScreen({
 
   const editorValidation = useMemo(() => {
     if (!selectedPackage) {
-      return { value: null, errors: {} as Pick<FieldErrors, 'quantity' | 'cost'> };
+      return { value: null, errors: {} as Pick<FieldErrors, 'quantity' | 'cost' | 'expiry'> };
     }
-    return validateLineDraft({ package: selectedPackage, quantityText, costText, basis }, client.storeCurrencyCode);
-  }, [basis, client.storeCurrencyCode, costText, quantityText, selectedPackage]);
+    return validateLineDraft({ package: selectedPackage, quantityText, costText, basis, expiryPrecision, expiryValue, expiryMeaning, printedBatchNumber }, client.storeCurrencyCode);
+  }, [basis, client.storeCurrencyCode, costText, expiryMeaning, expiryPrecision, expiryValue, printedBatchNumber, quantityText, selectedPackage]);
 
   const cartTotalMinor = useMemo<number | null>(() => {
     let total = 0n;
@@ -263,8 +307,12 @@ export default function RestockScreen({
     setQuantityText('1');
     setCostText('');
     setBasis('TOTAL');
+    setExpiryPrecision('UNKNOWN');
+    setExpiryValue('');
+    setExpiryMeaning('UNSPECIFIED');
+    setPrintedBatchNumber('');
     setEditingLineId(null);
-    setErrors((current) => ({ ...current, product: undefined, quantity: undefined, cost: undefined, general: undefined }));
+    setErrors((current) => ({ ...current, product: undefined, quantity: undefined, cost: undefined, expiry: undefined, general: undefined }));
   };
 
   const changeQuery = (text: string): void => {
@@ -285,7 +333,7 @@ export default function RestockScreen({
       setErrors((current) => ({ ...current, product: 'Choose a product and package.' }));
       return;
     }
-    const validation = validateLineDraft({ package: selectedPackage, quantityText, costText, basis }, client.storeCurrencyCode);
+    const validation = validateLineDraft({ package: selectedPackage, quantityText, costText, basis, expiryPrecision, expiryValue, expiryMeaning, printedBatchNumber }, client.storeCurrencyCode);
     if (!validation.value) {
       setErrors((current) => ({ ...current, ...validation.errors }));
       return;
@@ -297,6 +345,10 @@ export default function RestockScreen({
       quantityText,
       costText,
       basis,
+      expiryPrecision: validation.value.batchDate.precision,
+      expiryValue: validation.value.batchDate.value ?? '',
+      expiryMeaning: validation.value.batchDate.meaning,
+      printedBatchNumber: validation.value.batchDate.printedBatchNumber ?? '',
     };
     setLines((current) => editingLineId
       ? current.map((line) => (line.id === editingLineId ? nextLine : line))
@@ -312,6 +364,10 @@ export default function RestockScreen({
     setQuantityText(line.quantityText);
     setCostText(line.costText);
     setBasis(line.basis);
+    setExpiryPrecision(line.expiryPrecision);
+    setExpiryValue(line.expiryValue);
+    setExpiryMeaning(line.expiryMeaning);
+    setPrintedBatchNumber(line.printedBatchNumber);
     setEditingLineId(line.id);
     setErrors({});
   };
@@ -380,6 +436,10 @@ export default function RestockScreen({
               <Text style={styles.meta}>{formatQuantityMicros(item.quantityPackagesMicros)} {item.packageNameSnapshot} · {formatQuantityMicros(item.quantityBaseMicros)} base units</Text>
               <Text style={styles.meta}>{item.costBasis === 'UNIT' ? 'Unit cost' : 'Total cost'}: {displayMoney(item.enteredCostMinor, item.currencyCode)}</Text>
               <Text style={styles.meta}>Line total: {displayMoney(item.totalPurchaseCostMinor, item.currencyCode)}</Text>
+              {(() => {
+                const batchGroup = saved.batchGroups.find((group) => group.purchaseItemId === item.id);
+                return batchGroup ? <Text style={styles.meta}>Batch facts: {batchDateLabel({ precision: batchGroup.datePrecision, value: batchGroup.dateValue, meaning: batchGroup.dateMeaning, printedBatchNumber: batchGroup.printedBatchNumber })}</Text> : null;
+              })()}
             </View>
           ))}
           <Text style={styles.total}>{displayMoney(saved.purchase.totalAmountMinor, saved.purchase.currencyCode)}</Text>
@@ -452,6 +512,48 @@ export default function RestockScreen({
           </View>
           <Field label="Quantity" value={quantityText} onChangeText={(text) => { setQuantityText(text); setErrors((current) => ({ ...current, quantity: undefined, general: undefined })); }} keyboardType="decimal-pad" error={errors.quantity} hint="Use up to six decimal places." testID="restock-quantity" />
           <Field label={`${basis === 'TOTAL' ? 'Total' : 'Unit'} cost (${client.storeCurrencyCode})`} value={costText} onChangeText={(text) => { setCostText(text); setErrors((current) => ({ ...current, cost: undefined, general: undefined })); }} keyboardType="decimal-pad" error={errors.cost} testID={basis === 'TOTAL' ? 'restock-total-cost' : 'restock-unit-cost'} />
+          <Text style={styles.sectionLabel}>Printed batch date</Text>
+          <View style={styles.packageList} accessibilityRole="radiogroup">
+            {([
+              ['UNKNOWN', 'Unknown'],
+              ['MONTH', 'Month'],
+              ['DAY', 'Date'],
+            ] as const).map(([option, label]) => {
+              const selected = expiryPrecision === option;
+              return (
+                <Pressable key={option} accessibilityRole="radio" accessibilityLabel={`Batch date ${label.toLowerCase()}`} accessibilityState={{ checked: selected }} onPress={() => { setExpiryPrecision(option); setErrors((current) => ({ ...current, expiry: undefined, general: undefined })); }} style={[styles.packageChip, selected && styles.packageChipSelected]}>
+                  <Text style={[styles.packageText, selected && styles.packageTextSelected]}>{label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          {expiryPrecision !== 'UNKNOWN' ? (
+            <Field
+              label={expiryPrecision === 'MONTH' ? 'Printed month (YYYY-MM)' : 'Printed date (YYYY-MM-DD)'}
+              placeholder={expiryPrecision === 'MONTH' ? 'YYYY-MM' : 'YYYY-MM-DD'}
+              value={expiryValue}
+              onChangeText={(text) => { setExpiryValue(text); setErrors((current) => ({ ...current, expiry: undefined, general: undefined })); }}
+              error={errors.expiry}
+              hint="The precision printed on the pack is preserved; no day is invented for a month-only date."
+              testID="restock-expiry-value"
+            />
+          ) : null}
+          <Text style={styles.sectionLabel}>Date meaning</Text>
+          <View style={styles.packageList} accessibilityRole="radiogroup">
+            {([
+              ['UNSPECIFIED', 'Unspecified'],
+              ['EXPIRY', 'Expiry'],
+              ['BEST_BEFORE', 'Best before'],
+            ] as const).map(([option, label]) => {
+              const selected = expiryMeaning === option;
+              return (
+                <Pressable key={option} accessibilityRole="radio" accessibilityLabel={`Batch meaning ${label.toLowerCase()}`} accessibilityState={{ checked: selected }} onPress={() => { setExpiryMeaning(option); setErrors((current) => ({ ...current, expiry: undefined, general: undefined })); }} style={[styles.packageChip, selected && styles.packageChipSelected]}>
+                  <Text style={[styles.packageText, selected && styles.packageTextSelected]}>{label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          <Field label="Printed batch number (optional)" value={printedBatchNumber} onChangeText={(text) => { setPrintedBatchNumber(text); setErrors((current) => ({ ...current, expiry: undefined, general: undefined })); }} maxLength={128} error={errors.expiry} testID="restock-printed-batch" />
           {editorValidation.value ? (
             <View style={styles.preview}>
               <Text style={styles.meta}>Converted base quantity: {formatQuantityMicros(convertPackagesToBase(editorValidation.value.quantityPackagesMicros, selectedPackage!.conversionToBaseMicros))}</Text>
@@ -478,6 +580,7 @@ export default function RestockScreen({
                   </View>
                 </View>
                 <Text style={styles.meta}>{line.quantityText} {line.package.name} · {line.basis === 'UNIT' ? 'unit' : 'total'} cost {line.costText || '—'}</Text>
+                <Text style={styles.meta}>Batch facts: {batchDateLabel({ precision: line.expiryPrecision, value: line.expiryPrecision === 'UNKNOWN' ? null : line.expiryValue, meaning: line.expiryMeaning, printedBatchNumber: line.printedBatchNumber || null })}</Text>
                 {validation ? <Text style={styles.meta}>Line total: {displayMoney(validation.normalized.totalCostMinor, client.storeCurrencyCode)}</Text> : <Text style={styles.generalError}>Review this line before saving.</Text>}
               </View>
             );

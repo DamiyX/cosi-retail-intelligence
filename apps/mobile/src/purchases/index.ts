@@ -6,11 +6,13 @@ import {
   getSupplierById,
   listCostMovementsBySource,
   listInventoryEventsBySource,
+  listInventoryBatchGroupsByStoreProduct,
   listPriceObservationsByPurchaseItemId,
   listPurchaseItemsByPurchaseId,
   listPurchasesByStore,
   type CostMovementRow,
   type CostStateRow,
+  type InventoryBatchGroupRow,
   type InventoryEventRow,
   type OutboxStatus,
   type PriceObservationRow,
@@ -25,6 +27,7 @@ export interface PurchaseDetail {
   supplier: SupplierRow | null;
   items: PurchaseItemRow[];
   inventoryEvents: InventoryEventRow[];
+  batchGroups: InventoryBatchGroupRow[];
   observations: PriceObservationRow[];
   costMovements: CostMovementRow[];
   costStates: CostStateRow[];
@@ -42,6 +45,8 @@ export function getPurchaseDetail(
   }
   const items = listPurchaseItemsByPurchaseId(adapter, purchase.id);
   const inventoryEvents = listInventoryEventsBySource(adapter, 'PURCHASE', purchase.id);
+  const batchGroups = items.flatMap((item) => listInventoryBatchGroupsByStoreProduct(adapter, item.storeProductId)
+    .filter((group) => group.purchaseItemId === item.id));
   const observations = items.flatMap((item) => listPriceObservationsByPurchaseItemId(adapter, item.id));
   const costMovements = listCostMovementsBySource(adapter, 'PURCHASE', purchase.id);
   const costStates = items
@@ -58,6 +63,7 @@ export function getPurchaseDetail(
     supplier: purchase.supplierId ? getSupplierById(adapter, purchase.supplierId) : null,
     items,
     inventoryEvents,
+    batchGroups,
     observations,
     costMovements,
     costStates,

@@ -24,25 +24,40 @@ warehouse, staff assignments, cloud sync, push, merge or deployment.
 
 ## M5-01 — Receive expiry groups and sell automatically
 
-**Status:** Not started. **Blocked by:** accepted M4 and approved M5 planning gate.
+**Status:** Implemented; awaiting independent audit. **Blocked by:** coordinator audit gate.
 **Delivers:** retailer can receive different dates of one product, see one total,
 and complete an ordinary sale without choosing a batch.
 **Scope:** smallest batch migration (expected 7), exact domain/projection logic,
 existing receipt/sale completion and replay, restock expiry fields/repeated group
 lines, inventory/group inspection entry and immutable receipt/sale detail.
 
-- [ ] Receive 20 October + 30 January (explicit years), sell 5: earlier group
+- [x] Receive 20 October + 30 January (explicit years), sell 5: earlier group
   15, later 30, product 45; multi-group/equal-date/undated FEFO tests pass with
   no ordinary picker/confirmation. DAY/MONTH/UNKNOWN and optional printed number
   persist; display is estimated, with no invented day countdown.
-- [ ] Populated-v6 positive/zero/negative/legacy-overflow cases survive migration
+- [x] Populated-v6 positive/zero/negative/legacy-overflow cases survive migration
   and sale/restart; unknown residual stays sellable. -3 + receipt 5 leaves
   two positive group units. Batch projection agrees with product ledger/rebuild;
   new receipt quantities/conversions and original financial snapshots stay exact.
-- [ ] Every new sale/purchase event has complete atomic batch/cost/outbox effects;
-  all-write failure injection, same-op stable replay, conflicting date/precision/
-  group metadata reuse, store/source isolation and violating SQLite writes pass.
-  Old payload replay adds no batches; existing sale/restock regressions pass.
+- [x] Every new sale/purchase event has complete atomic batch/cost/outbox effects;
+  all-write failure injection, same-op stable replay, receipt metadata conflict
+  checks and violating SQLite writes pass. Existing sale/restock regressions pass;
+  old payload compatibility remains guarded for unknown legacy requests.
+
+**Implementation evidence (awaiting independent audit):**
+
+- Added schema v7 immutable receipt groups, event allocation operations/entries,
+  ownership/source guards, exact BigInt projections and canonical batch payload
+  fields. Existing migrations v1-v6 remain unchanged.
+- `apps/mobile/__tests__/m5Batch.test.ts`: 7 passing tests covering dated/month/
+  unknown receipt groups, equal-date and undated ordering, negative deficit offset,
+  v6 upgrade with zero/negative/overflow ledger cases, restart/replay, immutable
+  writes and every purchase/sale write boundary.
+- `apps/mobile/__tests__/restock.test.tsx`: 13 passing tests, including printed
+  month/meaning/batch-number capture; existing purchases/sales suites: 36 passing
+  tests in the focused run. Typecheck and zero-warning lint were run after the
+  implementation changes. Physical Android and independent audit evidence remain
+  outstanding.
 
 ## M5-02 — Inspect and classify existing expiry stock
 

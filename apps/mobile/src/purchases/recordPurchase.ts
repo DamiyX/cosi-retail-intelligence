@@ -2,6 +2,9 @@ import {
   convertPackagesToBase,
   DomainError,
   normalizePurchaseCost,
+  normalizeBatchDate,
+  type BatchDateMeaning,
+  type BatchDatePrecision,
   type NormalizedPurchaseCost,
 } from '@retail/domain';
 
@@ -19,6 +22,7 @@ import {
   getCostState,
   getDeviceById,
   getInventoryBalanceByStoreProduct,
+  getInventoryBalanceBigIntByStoreProduct,
   getPackageUnitById,
   getProductVariantById,
   getPurchaseById,
@@ -39,6 +43,7 @@ import {
 } from '../db/repositories';
 import { getStoreProductById } from '../db/repositories/storeProducts';
 import { nowIso, requireId, requireText } from '../db/repositories/common';
+import { recordReceiptBatchAllocation } from '../inventory/batchAllocation';
 
 export interface RecordPurchaseLineInput {
   storeProductId: string;
@@ -49,6 +54,11 @@ export interface RecordPurchaseLineInput {
   costBasis?: 'TOTAL' | 'UNIT';
   /** Total line cost or per-package unit cost, in integer minor units. */
   enteredCostMinor: number;
+  /** Optional printed expiry/best-before facts; omitted means UNKNOWN. */
+  expiryPrecision?: BatchDatePrecision;
+  expiryValue?: string | null;
+  expiryMeaning?: BatchDateMeaning;
+  printedBatchNumber?: string | null;
 }
 
 export interface RecordPurchaseInput {
@@ -74,6 +84,9 @@ export interface CompletedPurchaseGraph {
   observations: PriceObservationRow[];
   costMovements: CostMovementRow[];
   costStates: CostStateRow[];
+  batchGroups: import('../db/repositories').InventoryBatchGroupRow[];
+  batchOperations: import('../db/repositories').BatchInventoryOperationRow[];
+  batchEntries: import('../db/repositories').BatchInventoryEntryRow[];
   outbox: OutboxOperationRow;
 }
 
@@ -87,6 +100,10 @@ interface ValidatedPurchaseLine {
   conversionToBaseSnapshotMicros: number;
   quantityBaseMicros: number;
   normalized: NormalizedPurchaseCost;
+  expiryPrecision: BatchDatePrecision;
+  expiryValue: string | null;
+  expiryMeaning: BatchDateMeaning;
+  printedBatchNumber: string | null;
 }
 
 function checkedTotal(values: readonly number[]): number {
@@ -155,6 +172,12 @@ function validateLines(adapter: DatabaseAdapter, storeId: string, lines: readonl
       quantityPackagesMicros: line.quantityPackagesMicros,
       quantityBaseMicros,
     });
+    const batchDate = normalizeBatchDate({
+      precision: line.expiryPrecision,
+      value: line.expiryValue,
+      meaning: line.expiryMeaning,
+      printedBatchNumber: line.printedBatchNumber,
+    });
     return {
       storeProductId,
       productVariantId: variant.id,
@@ -165,6 +188,10 @@ function validateLines(adapter: DatabaseAdapter, storeId: string, lines: readonl
       conversionToBaseSnapshotMicros: packageUnit.conversionToBaseMicros,
       quantityBaseMicros,
       normalized,
+      expiryPrecision: batchDate.precision,
+      expiryValue: batchDate.value,
+      expiryMeaning: batchDate.meaning,
+      printedBatchNumber: batchDate.printedBatchNumber,
     };
   });
 }
@@ -271,6 +298,9 @@ export function recordPurchase(
     const observations: PriceObservationRow[] = [];
     const costMovements: CostMovementRow[] = [];
     const costStates: CostStateRow[] = [];
+    const batchGroups: import('../db/repositories').InventoryBatchGroupRow[] = [];
+    const batchOperations: import('../db/repositories').BatchInventoryOperationRow[] = [];
+    const batchEntries: import('../db/repositories').BatchInventoryEntryRow[] = [];
 
     for (const line of transactionalLines) {
       const item = createPurchaseItem(adapter, {
@@ -297,7 +327,16 @@ export function recordPurchase(
       });
       items.push(item);
 
-      const priorBalance = getInventoryBalanceByStoreProduct(adapter, line.storeProductId);
+      const priorBalanceBigInt = getInventoryBalanceBigIntByStoreProduct(adapter, line.storeProductId);
+      let priorBalance: number;
+      let costOverflowed = false;
+      try {
+        priorBalance = getInventoryBalanceByStoreProduct(adapter, line.storeProductId);
+      } catch (error) {
+        if (!(error instanceof DomainError) || error.code !== 'INVALID_QUANTITY') throw error;
+        priorBalance = 0;
+        costOverflowed = true;
+      }
       const inventoryEvent = createInventoryEvent(adapter, {
         id: generateId(),
         storeId,
@@ -325,10 +364,33 @@ export function recordPurchase(
         quantityBaseMicros: line.quantityBaseMicros,
         baseUnitCost: line.normalized.baseUnitCost,
         priorInventoryBalanceBaseMicros: priorBalance,
+        forceUnknown: costOverflowed,
         createdAt: occurredAt,
       });
       costMovements.push(applied.movement);
       costStates.push(applied.state);
+
+      const batchAllocation = recordReceiptBatchAllocation(adapter, {
+        id: generateId(),
+        storeId,
+        storeProductId: line.storeProductId,
+        purchaseItemId: item.id,
+        inventoryEventId: inventoryEvent.id,
+        quantityBaseMicros: line.quantityBaseMicros,
+        priorInventoryBalanceBaseMicros: priorBalanceBigInt,
+        printedBatchNumber: line.printedBatchNumber,
+        datePrecision: line.expiryPrecision,
+        dateValue: line.expiryValue,
+        dateMeaning: line.expiryMeaning,
+        recordedByStoreMemberId: member.id,
+        recordedByUserId: userId,
+        deviceId,
+        generateId,
+        createdAt: occurredAt,
+      });
+      batchGroups.push(batchAllocation.group!);
+      batchOperations.push(batchAllocation.operation);
+      batchEntries.push(...batchAllocation.entries);
 
       observations.push(createPriceObservation(adapter, {
         id: generateId(),
@@ -371,9 +433,13 @@ export function recordPurchase(
         observations,
         costMovements,
         costStates,
+        batchTrackingVersion: 1,
+        batchGroups,
+        batchOperations,
+        batchEntries,
       },
     });
-    return { purchase, supplier, items, inventoryEvents, observations, costMovements, costStates, outbox };
+    return { purchase, supplier, items, inventoryEvents, observations, costMovements, costStates, batchGroups, batchOperations, batchEntries, outbox };
   });
 }
 
@@ -381,11 +447,19 @@ function assertReplayMatchesRequest(outbox: OutboxOperationRow, input: RecordPur
   let entities: {
     purchase?: { occurredAt?: string };
     items?: {
+      id?: string;
       storeProductId?: string;
       packageUnitId?: string;
       quantityPackagesMicros?: number;
       costBasis?: string;
       enteredCostMinor?: number;
+    }[];
+    batchGroups?: {
+      purchaseItemId?: string | null;
+      datePrecision?: BatchDatePrecision;
+      dateValue?: string | null;
+      dateMeaning?: BatchDateMeaning;
+      printedBatchNumber?: string | null;
     }[];
     supplier?: { id?: string; name?: string } | null;
   };
@@ -411,6 +485,30 @@ function assertReplayMatchesRequest(outbox: OutboxOperationRow, input: RecordPur
       stored.enteredCostMinor !== line.enteredCostMinor
     ) {
       throw new DomainError('INVALID_VALUE', 'This operation ID already belongs to a different purchase request.');
+    }
+  });
+  const storedGroups = entities.batchGroups ?? [];
+  input.lines.forEach((line, index) => {
+    const requestedDate = normalizeBatchDate({
+      precision: line.expiryPrecision,
+      value: line.expiryValue,
+      meaning: line.expiryMeaning,
+      printedBatchNumber: line.printedBatchNumber,
+    });
+    const storedGroup = storedGroups.find((group) => group.purchaseItemId === storedLines[index]?.id) ?? storedGroups[index];
+    if (!storedGroup) {
+      if (requestedDate.precision !== 'UNKNOWN' || requestedDate.printedBatchNumber !== null) {
+        throw new DomainError('INVALID_VALUE', 'This operation ID already belongs to a purchase with different expiry facts.');
+      }
+      return;
+    }
+    if (
+      storedGroup.datePrecision !== requestedDate.precision ||
+      storedGroup.dateValue !== requestedDate.value ||
+      storedGroup.dateMeaning !== requestedDate.meaning ||
+      (storedGroup.printedBatchNumber ?? null) !== requestedDate.printedBatchNumber
+    ) {
+      throw new DomainError('INVALID_VALUE', 'This operation ID already belongs to a purchase with different expiry facts.');
     }
   });
   const requestedSupplierId = input.supplierId ?? null;
@@ -450,5 +548,71 @@ function rehydrateCompletedPurchase(
   const costStates = Array.isArray(envelope.entities?.costStates)
     ? envelope.entities.costStates
     : items.map((item) => getCostState(adapter, item.storeProductId)).filter((row): row is CostStateRow => row !== null);
-  return { purchase, supplier, items, inventoryEvents, observations, costMovements, costStates, outbox };
+  const batchGroups = items.flatMap((item) => adapter.getAllRows<Record<string, string | number | null>>(
+    `SELECT id, store_id, store_product_id, origin, purchase_item_id, quantity_received_base_micros,
+            printed_batch_number, date_precision, date_value, date_meaning, evidence_source,
+            recorded_by_store_member_id, recorded_by_user_id, device_id, origin_order, created_at
+     FROM inventory_batch_groups WHERE purchase_item_id = ? ORDER BY origin_order ASC;`,
+    [item.id],
+  )).map((row) => ({
+    id: row.id as string,
+    storeId: row.store_id as string,
+    storeProductId: row.store_product_id as string,
+    origin: row.origin as 'RECEIPT' | 'PHYSICAL_INSPECTION',
+    purchaseItemId: row.purchase_item_id as string | null,
+    quantityReceivedBaseMicros: row.quantity_received_base_micros as number | null,
+    printedBatchNumber: row.printed_batch_number as string | null,
+    datePrecision: row.date_precision as BatchDatePrecision,
+    dateValue: row.date_value as string | null,
+    dateMeaning: row.date_meaning as BatchDateMeaning,
+    evidenceSource: row.evidence_source as 'RECEIPT' | 'PHYSICAL_INSPECTION',
+    recordedByStoreMemberId: row.recorded_by_store_member_id as string,
+    recordedByUserId: row.recorded_by_user_id as string,
+    deviceId: row.device_id as string,
+    originOrder: row.origin_order as number,
+    createdAt: row.created_at as string,
+  }));
+  const batchOperations = inventoryEvents.flatMap((event) => {
+    const operationRows = adapter.getAllRows<Record<string, string | number | null>>(
+      `SELECT id, store_id, store_product_id, kind, inventory_event_id, source_type, source_id,
+              policy_version, evidence_version, inventory_watermark, batch_watermark,
+              recorded_by_store_member_id, recorded_by_user_id, device_id, local_application_order, created_at
+       FROM batch_inventory_operations WHERE inventory_event_id = ? ORDER BY local_application_order ASC;`,
+      [event.id],
+    );
+    return operationRows.map((row) => ({
+      id: row.id as string,
+      storeId: row.store_id as string,
+      storeProductId: row.store_product_id as string,
+      kind: row.kind as import('../db/repositories').BatchOperationKind,
+      inventoryEventId: row.inventory_event_id as string | null,
+      sourceType: row.source_type as import('../db/repositories').BatchSourceType,
+      sourceId: row.source_id as string | null,
+      policyVersion: row.policy_version as string,
+      evidenceVersion: row.evidence_version as string,
+      inventoryWatermark: row.inventory_watermark as string | null,
+      batchWatermark: row.batch_watermark as string | null,
+      recordedByStoreMemberId: row.recorded_by_store_member_id as string,
+      recordedByUserId: row.recorded_by_user_id as string,
+      deviceId: row.device_id as string,
+      localApplicationOrder: row.local_application_order as number,
+      createdAt: row.created_at as string,
+    }));
+  });
+  const batchEntries = batchOperations.flatMap((operation) => adapter.getAllRows<Record<string, string | number | null>>(
+    `SELECT id, operation_id, store_id, store_product_id, group_id, entry_type, delta_base_micros, entry_order, created_at
+     FROM batch_inventory_entries WHERE operation_id = ? ORDER BY entry_order ASC;`,
+    [operation.id],
+  ).map((row) => ({
+    id: row.id as string,
+    operationId: row.operation_id as string,
+    storeId: row.store_id as string,
+    storeProductId: row.store_product_id as string,
+    groupId: row.group_id as string | null,
+    entryType: row.entry_type as import('../db/repositories').BatchEntryType,
+    deltaBaseMicros: row.delta_base_micros as number,
+    entryOrder: row.entry_order as number,
+    createdAt: row.created_at as string,
+  })));
+  return { purchase, supplier, items, inventoryEvents, observations, costMovements, costStates, batchGroups, batchOperations, batchEntries, outbox };
 }

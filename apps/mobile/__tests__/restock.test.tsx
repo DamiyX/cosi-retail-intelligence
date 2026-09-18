@@ -98,6 +98,39 @@ describe('RestockScreen', () => {
     }
   });
 
+  it('captures printed month meaning and batch number without inventing a day', () => {
+    const { fixture, client: realClient } = seedClient();
+    try {
+      const submitted: Parameters<PurchasesClient['recordPurchase']>[0][] = [];
+      const client: PurchasesClient = {
+        ...realClient,
+        recordPurchase(input) {
+          submitted.push(input);
+          return realClient.recordPurchase(input);
+        },
+      };
+      render(<RestockScreen client={client} onBack={() => undefined} />);
+      fireEvent.changeText(screen.getByTestId('restock-product-search'), 'Rice');
+      fireEvent.press(screen.getByLabelText('Restock Rice'));
+      fireEvent.press(screen.getByLabelText('Batch date month'));
+      fireEvent.changeText(screen.getByTestId('restock-expiry-value'), '2026-12');
+      fireEvent.press(screen.getByLabelText('Batch meaning best before'));
+      fireEvent.changeText(screen.getByTestId('restock-printed-batch'), 'DEC-26');
+      fireEvent.changeText(screen.getByTestId('restock-total-cost'), '7.50');
+      fireEvent.press(screen.getByText('Add line'));
+      fireEvent.press(screen.getByText('Record restock'));
+      expect(submitted[0]?.lines[0]).toMatchObject({
+        expiryPrecision: 'MONTH',
+        expiryValue: '2026-12',
+        expiryMeaning: 'BEST_BEFORE',
+        printedBatchNumber: 'DEC-26',
+      });
+      expect(screen.getByText('Batch facts: 2026-12 (month) · best before · batch DEC-26')).toBeTruthy();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
   it('retains the draft and operation ID across a failed save and retry', () => {
     const { fixture, client: realClient } = seedClient();
     try {

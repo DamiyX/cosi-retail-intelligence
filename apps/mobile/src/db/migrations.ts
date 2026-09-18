@@ -952,6 +952,188 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'sale cost snapshot does not match immutable sale item cost parent'); END;`,
     ],
   },
+  {
+    version: 7,
+    name: 'batch_inventory_tracking',
+    statements: [
+      `CREATE TABLE inventory_batch_groups (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        origin TEXT NOT NULL CHECK (origin IN ('RECEIPT', 'PHYSICAL_INSPECTION')),
+        purchase_item_id TEXT REFERENCES purchase_items(id) ON DELETE RESTRICT,
+        quantity_received_base_micros INTEGER,
+        printed_batch_number TEXT CHECK (printed_batch_number IS NULL OR length(printed_batch_number) <= 128),
+        date_precision TEXT NOT NULL CHECK (date_precision IN ('UNKNOWN', 'MONTH', 'DAY')),
+        date_value TEXT,
+        date_meaning TEXT NOT NULL CHECK (date_meaning IN ('EXPIRY', 'BEST_BEFORE', 'UNSPECIFIED')),
+        evidence_source TEXT NOT NULL CHECK (evidence_source IN ('RECEIPT', 'PHYSICAL_INSPECTION')),
+        recorded_by_store_member_id TEXT NOT NULL REFERENCES store_members(id) ON DELETE RESTRICT,
+        recorded_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        origin_order INTEGER NOT NULL CHECK (origin_order > 0),
+        created_at TEXT NOT NULL,
+        CHECK (
+          (origin = 'RECEIPT'
+            AND purchase_item_id IS NOT NULL
+            AND quantity_received_base_micros IS NOT NULL
+            AND quantity_received_base_micros > 0
+            AND evidence_source = 'RECEIPT')
+          OR
+          (origin = 'PHYSICAL_INSPECTION'
+            AND purchase_item_id IS NULL
+            AND quantity_received_base_micros IS NULL
+            AND evidence_source = 'PHYSICAL_INSPECTION')
+        ),
+        CHECK (
+          (date_precision = 'UNKNOWN' AND date_value IS NULL)
+          OR (date_precision = 'MONTH' AND date_value IS NOT NULL AND length(date_value) = 7 AND date_value LIKE '____-__')
+          OR (date_precision = 'DAY' AND date_value IS NOT NULL AND length(date_value) = 10 AND date_value LIKE '____-__-__')
+        )
+      );`,
+      'CREATE UNIQUE INDEX uq_batch_groups_purchase_item ON inventory_batch_groups(purchase_item_id) WHERE purchase_item_id IS NOT NULL;',
+      'CREATE INDEX idx_batch_groups_store_product ON inventory_batch_groups(store_id, store_product_id, origin_order);',
+      'CREATE INDEX idx_batch_groups_date ON inventory_batch_groups(store_product_id, date_precision, date_value, origin_order);',
+      `CREATE TRIGGER trg_batch_groups_store_product_insert
+        BEFORE INSERT ON inventory_batch_groups
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          WHERE sp.id = NEW.store_product_id AND sp.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch group store product does not belong to store'); END;`,
+      `CREATE TRIGGER trg_batch_groups_purchase_item_insert
+        BEFORE INSERT ON inventory_batch_groups
+        WHEN NEW.purchase_item_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM purchase_items pi
+          WHERE pi.id = NEW.purchase_item_id
+            AND pi.store_id = NEW.store_id
+            AND pi.store_product_id = NEW.store_product_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch group purchase item does not match store product'); END;`,
+      `CREATE TRIGGER trg_batch_groups_member_store_insert
+        BEFORE INSERT ON inventory_batch_groups
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.recorded_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.recorded_by_user_id
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch group actor is not an active store member'); END;`,
+      `CREATE TRIGGER trg_batch_groups_device_store_insert
+        BEFORE INSERT ON inventory_batch_groups
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id AND d.store_id = NEW.store_id AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch group device does not belong to store'); END;`,
+      `CREATE TABLE batch_inventory_operations (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        kind TEXT NOT NULL CHECK (kind IN ('EVENT_ALLOCATION', 'CLASSIFICATION', 'ADJUSTMENT', 'RECONCILIATION')),
+        inventory_event_id TEXT REFERENCES inventory_events(id) ON DELETE RESTRICT,
+        source_type TEXT NOT NULL CHECK (source_type IN ('SALE', 'PURCHASE', 'MANUAL_ADJUSTMENT', 'RECONCILIATION', 'PHYSICAL_INSPECTION')),
+        source_id TEXT,
+        policy_version TEXT NOT NULL,
+        evidence_version TEXT NOT NULL,
+        inventory_watermark TEXT,
+        batch_watermark TEXT,
+        recorded_by_store_member_id TEXT NOT NULL REFERENCES store_members(id) ON DELETE RESTRICT,
+        recorded_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        local_application_order INTEGER NOT NULL CHECK (local_application_order > 0),
+        created_at TEXT NOT NULL,
+        CHECK ((kind = 'EVENT_ALLOCATION' AND inventory_event_id IS NOT NULL) OR (kind <> 'EVENT_ALLOCATION' AND inventory_event_id IS NULL))
+      );`,
+      'CREATE UNIQUE INDEX uq_batch_operations_inventory_event ON batch_inventory_operations(inventory_event_id) WHERE inventory_event_id IS NOT NULL;',
+      'CREATE UNIQUE INDEX uq_batch_operations_source ON batch_inventory_operations(kind, source_type, source_id) WHERE source_id IS NOT NULL;',
+      'CREATE INDEX idx_batch_operations_store_product ON batch_inventory_operations(store_id, store_product_id, local_application_order);',
+      `CREATE TRIGGER trg_batch_operations_store_product_insert
+        BEFORE INSERT ON batch_inventory_operations
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          WHERE sp.id = NEW.store_product_id AND sp.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch operation store product does not belong to store'); END;`,
+      `CREATE TRIGGER trg_batch_operations_event_insert
+        BEFORE INSERT ON batch_inventory_operations
+        WHEN NEW.inventory_event_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM inventory_events ie
+          WHERE ie.id = NEW.inventory_event_id
+            AND ie.store_id = NEW.store_id
+            AND ie.store_product_id = NEW.store_product_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch operation inventory event does not match store product'); END;`,
+      `CREATE TRIGGER trg_batch_operations_member_store_insert
+        BEFORE INSERT ON batch_inventory_operations
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.recorded_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.recorded_by_user_id
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch operation actor is not an active store member'); END;`,
+      `CREATE TRIGGER trg_batch_operations_device_store_insert
+        BEFORE INSERT ON batch_inventory_operations
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id AND d.store_id = NEW.store_id AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch operation device does not belong to store'); END;`,
+      `CREATE TABLE batch_inventory_entries (
+        id TEXT PRIMARY KEY,
+        operation_id TEXT NOT NULL REFERENCES batch_inventory_operations(id) ON DELETE RESTRICT,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        group_id TEXT REFERENCES inventory_batch_groups(id) ON DELETE RESTRICT,
+        entry_type TEXT NOT NULL CHECK (entry_type IN ('RECEIPT', 'DEFICIT_OFFSET', 'ASSUMED_FEFO', 'UNKNOWN_RESIDUAL', 'CLASSIFICATION', 'ADJUSTMENT')),
+        delta_base_micros INTEGER NOT NULL CHECK (delta_base_micros <> 0),
+        entry_order INTEGER NOT NULL CHECK (entry_order > 0),
+        created_at TEXT NOT NULL,
+        UNIQUE (operation_id, entry_order)
+      );`,
+      'CREATE INDEX idx_batch_entries_operation ON batch_inventory_entries(operation_id, entry_order);',
+      'CREATE INDEX idx_batch_entries_group ON batch_inventory_entries(group_id, created_at);',
+      `CREATE TRIGGER trg_batch_entries_operation_insert
+        BEFORE INSERT ON batch_inventory_entries
+        WHEN NOT EXISTS (
+          SELECT 1 FROM batch_inventory_operations bo
+          WHERE bo.id = NEW.operation_id
+            AND bo.store_id = NEW.store_id
+            AND bo.store_product_id = NEW.store_product_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch entry operation does not match store product'); END;`,
+      `CREATE TRIGGER trg_batch_entries_group_insert
+        BEFORE INSERT ON batch_inventory_entries
+        WHEN NEW.group_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM inventory_batch_groups bg
+          WHERE bg.id = NEW.group_id
+            AND bg.store_id = NEW.store_id
+            AND bg.store_product_id = NEW.store_product_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch entry group does not match store product'); END;`,
+      `CREATE TRIGGER trg_batch_groups_immutable_update
+        BEFORE UPDATE ON inventory_batch_groups
+        BEGIN SELECT RAISE(ABORT, 'inventory batch groups are immutable'); END;`,
+      `CREATE TRIGGER trg_batch_groups_immutable_delete
+        BEFORE DELETE ON inventory_batch_groups
+        BEGIN SELECT RAISE(ABORT, 'inventory batch groups are immutable'); END;`,
+      `CREATE TRIGGER trg_batch_operations_immutable_update
+        BEFORE UPDATE ON batch_inventory_operations
+        BEGIN SELECT RAISE(ABORT, 'batch inventory operations are immutable'); END;`,
+      `CREATE TRIGGER trg_batch_operations_immutable_delete
+        BEFORE DELETE ON batch_inventory_operations
+        BEGIN SELECT RAISE(ABORT, 'batch inventory operations are immutable'); END;`,
+      `CREATE TRIGGER trg_batch_entries_immutable_update
+        BEFORE UPDATE ON batch_inventory_entries
+        BEGIN SELECT RAISE(ABORT, 'batch inventory entries are immutable'); END;`,
+      `CREATE TRIGGER trg_batch_entries_immutable_delete
+        BEFORE DELETE ON batch_inventory_entries
+        BEGIN SELECT RAISE(ABORT, 'batch inventory entries are immutable'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

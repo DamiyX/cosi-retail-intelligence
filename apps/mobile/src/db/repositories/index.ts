@@ -98,6 +98,7 @@ export {
 export type { CreatePaymentInput, PaymentMethod, PaymentRow } from './payments';
 export {
   createInventoryEvent,
+  getInventoryBalanceBigIntByStoreProduct,
   getInventoryBalanceByStoreProduct,
   listInventoryEventsBySource,
   listInventoryEventsByStoreProduct,
@@ -160,3 +161,29 @@ export type {
   CreateSaleItemCostSnapshotInput,
   SaleItemCostSnapshotRow,
 } from './costing';
+export {
+  createBatchInventoryEntry,
+  createBatchInventoryOperation,
+  createInventoryBatchGroup,
+  getBatchInventoryOperationById,
+  getBatchInventoryWatermark,
+  getInventoryBatchGroupBalanceBigInt,
+  getInventoryBatchGroupById,
+  getUnknownBatchResidualBigInt,
+  listBatchInventoryEntriesByOperation,
+  listBatchInventoryEntriesByStoreProduct,
+  listBatchInventoryOperationsByEvent,
+  listBatchInventoryOperationsByStoreProduct,
+  listInventoryBatchGroupsByStoreProduct,
+} from './batchTracking';
+export type {
+  BatchEntryType,
+  BatchInventoryEntryRow,
+  BatchInventoryOperationRow,
+  BatchOperationKind,
+  BatchSourceType,
+  CreateBatchEntryInput,
+  CreateBatchGroupInput,
+  CreateBatchOperationInput,
+  InventoryBatchGroupRow,
+} from './batchTracking';

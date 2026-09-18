@@ -47,6 +47,7 @@ import {
   type SaleRow,
 } from '../db/repositories';
 import { nowIso, requireId } from '../db/repositories/common';
+import { recordSaleBatchAllocation } from '../inventory/batchAllocation';
 
 export interface CompleteSaleLineInput {
   storeProductId: string;
@@ -90,6 +91,8 @@ export interface CompletedSaleGraph {
   costSnapshots: SaleItemCostSnapshotRow[];
   costMovements: CostMovementRow[];
   costStates: CostStateRow[];
+  batchOperations: import('../db/repositories').BatchInventoryOperationRow[];
+  batchEntries: import('../db/repositories').BatchInventoryEntryRow[];
   customerAccount: CustomerAccountRow | null;
   receivable: ReceivableRow | null;
   outbox: OutboxOperationRow;
@@ -291,6 +294,8 @@ export function completeSale(
     const costSnapshots: SaleItemCostSnapshotRow[] = [];
     const costMovements: CostMovementRow[] = [];
     const costStates: CostStateRow[] = [];
+    const batchOperations: import('../db/repositories').BatchInventoryOperationRow[] = [];
+    const batchEntries: import('../db/repositories').BatchInventoryEntryRow[] = [];
     for (const vLine of validatedLines) {
       let priorBalance = 0;
       try {
@@ -411,6 +416,22 @@ export function completeSale(
         cogsAmountMinor: applied.transition.cogsAmountMinor,
         createdAt: occurredAt,
       }));
+
+      const batchAllocation = recordSaleBatchAllocation(adapter, {
+        operationId: generateId(),
+        storeId,
+        storeProductId: item.storeProductId,
+        inventoryEventId: event.id,
+        saleId: sale.id,
+        quantityBaseMicros: item.quantityBaseMicros,
+        recordedByStoreMemberId: memberRow.id,
+        recordedByUserId: userId,
+        deviceId,
+        generateId,
+        createdAt: occurredAt,
+      });
+      batchOperations.push(batchAllocation.operation);
+      batchEntries.push(...batchAllocation.entries);
     }
 
     // 6d. Create payment
@@ -461,6 +482,9 @@ export function completeSale(
         costSnapshots,
         costMovements,
         costStates,
+        batchTrackingVersion: 1,
+        batchOperations,
+        batchEntries,
         customerAccount,
         receivable,
       },
@@ -474,6 +498,8 @@ export function completeSale(
       costSnapshots,
       costMovements,
       costStates,
+      batchOperations,
+      batchEntries,
       customerAccount,
       receivable,
       outbox,
@@ -588,6 +614,46 @@ function rehydrateCompletedSale(
         .map((item) => getCostState(adapter, item.storeProductId))
         .filter((state): state is CostStateRow => state !== null);
 
+  const batchOperations = inventoryEvents.flatMap((event) => adapter.getAllRows<Record<string, string | number | null>>(
+    `SELECT id, store_id, store_product_id, kind, inventory_event_id, source_type, source_id,
+            policy_version, evidence_version, inventory_watermark, batch_watermark,
+            recorded_by_store_member_id, recorded_by_user_id, device_id, local_application_order, created_at
+     FROM batch_inventory_operations WHERE inventory_event_id = ? ORDER BY local_application_order ASC;`,
+    [event.id],
+  ).map((row) => ({
+    id: row.id as string,
+    storeId: row.store_id as string,
+    storeProductId: row.store_product_id as string,
+    kind: row.kind as import('../db/repositories').BatchOperationKind,
+    inventoryEventId: row.inventory_event_id as string | null,
+    sourceType: row.source_type as import('../db/repositories').BatchSourceType,
+    sourceId: row.source_id as string | null,
+    policyVersion: row.policy_version as string,
+    evidenceVersion: row.evidence_version as string,
+    inventoryWatermark: row.inventory_watermark as string | null,
+    batchWatermark: row.batch_watermark as string | null,
+    recordedByStoreMemberId: row.recorded_by_store_member_id as string,
+    recordedByUserId: row.recorded_by_user_id as string,
+    deviceId: row.device_id as string,
+    localApplicationOrder: row.local_application_order as number,
+    createdAt: row.created_at as string,
+  })));
+  const batchEntries = batchOperations.flatMap((operation) => adapter.getAllRows<Record<string, string | number | null>>(
+    `SELECT id, operation_id, store_id, store_product_id, group_id, entry_type, delta_base_micros, entry_order, created_at
+     FROM batch_inventory_entries WHERE operation_id = ? ORDER BY entry_order ASC;`,
+    [operation.id],
+  ).map((row) => ({
+    id: row.id as string,
+    operationId: row.operation_id as string,
+    storeId: row.store_id as string,
+    storeProductId: row.store_product_id as string,
+    groupId: row.group_id as string | null,
+    entryType: row.entry_type as import('../db/repositories').BatchEntryType,
+    deltaBaseMicros: row.delta_base_micros as number,
+    entryOrder: row.entry_order as number,
+    createdAt: row.created_at as string,
+  })));
+
   return {
     sale,
     items,
@@ -596,6 +662,8 @@ function rehydrateCompletedSale(
     costSnapshots,
     costMovements,
     costStates,
+    batchOperations,
+    batchEntries,
     customerAccount,
     receivable,
     outbox,

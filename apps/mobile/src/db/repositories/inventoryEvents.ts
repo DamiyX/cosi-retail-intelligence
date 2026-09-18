@@ -265,3 +265,23 @@ export function getInventoryBalanceByStoreProduct(
     'INVALID_QUANTITY',
   );
 }
+
+/**
+ * Internal M5 projection arithmetic. Each persisted event is safe to cross
+ * SQLite/JS, but a legacy event ledger can aggregate beyond that boundary.
+ * Keep the aggregate as BigInt until a caller has a bounded allocation to
+ * persist; never serialize this value directly into an outbox payload.
+ */
+export function getInventoryBalanceBigIntByStoreProduct(
+  adapter: DatabaseAdapter,
+  storeProductId: string,
+): bigint {
+  const rows = adapter.getAllRows<{ quantity_base_delta_micros: string }>(
+    `SELECT CAST(quantity_base_delta_micros AS TEXT) AS quantity_base_delta_micros
+     FROM inventory_events
+     WHERE store_product_id = ?
+     ORDER BY rowid ASC;`,
+    [requireId(storeProductId)],
+  );
+  return rows.reduce((total, row) => total + BigInt(String(row.quantity_base_delta_micros)), 0n);
+}

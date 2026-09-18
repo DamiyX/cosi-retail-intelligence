@@ -348,15 +348,27 @@ export function applyPurchaseCostMovement(
     quantityBaseMicros: number;
     baseUnitCost: Rational;
     priorInventoryBalanceBaseMicros?: number;
+    forceUnknown?: boolean;
     createdAt?: string;
   },
 ): { movement: CostMovementRow; state: CostStateRow } {
   const priorBalance = input.priorInventoryBalanceBaseMicros ?? getInventoryBalanceByStoreProduct(adapter, input.storeProductId);
-  const transition = applyPurchaseCostState(toCostState(getCostState(adapter, input.storeProductId)), {
-    priorInventoryBalanceBaseMicros: priorBalance,
-    receiptQuantityBaseMicros: input.quantityBaseMicros,
-    receiptBaseUnitCost: input.baseUnitCost,
-  });
+  const transition = input.forceUnknown
+    ? {
+        state: {
+          coverageStatus: 'UNKNOWN' as const,
+          quantityCostedBaseMicros: 0,
+          remainingValue: makeRational(0),
+          averageUnitCost: null,
+        },
+        costedQuantityBaseMicros: 0,
+        valueAdded: makeRational(0),
+      }
+    : applyPurchaseCostState(toCostState(getCostState(adapter, input.storeProductId)), {
+        priorInventoryBalanceBaseMicros: priorBalance,
+        receiptQuantityBaseMicros: input.quantityBaseMicros,
+        receiptBaseUnitCost: input.baseUnitCost,
+      });
   const createdAt = input.createdAt ?? nowIso();
   const movement = createCostMovement(adapter, {
     id: input.id,
