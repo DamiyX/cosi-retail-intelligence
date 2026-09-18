@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m5-04-implemented",
+  "current_state": "m5-05-implemented",
   "completed_states": [
     "m4-independent-source-automated-acceptance",
     "m5-founder-batch-fefo-approval",
@@ -14,7 +14,8 @@
     "m5-01-implemented",
     "m5-02-implemented",
     "m5-03-implemented",
-    "m5-04-implemented"
+    "m5-04-implemented",
+    "m5-05-implemented"
   ],
   "owner": {
     "agent": "m5-implementation-engineer",
@@ -142,6 +143,25 @@
         "M5-05 through M5-07 are not implemented yet."
       ],
       "observed_at": "2026-09-18T19:04:00+01:00"
+    },
+    {
+      "kind": "validation",
+      "path": "apps/mobile/__tests__/m5GuidedChecks.test.ts; apps/mobile/__tests__/m5GuidedChecksScreen.test.tsx",
+      "claim": "M5-05 implementation commit 8142700 adds schema v10 guided owner-check settings, deterministic due assignments, auditable replacement attempts, reconciliation linkage and owner/store/device-safe atomic operations without accuracy or theft claims.",
+      "checks": [
+        "npm run validate PASS: domain 5 suites, 150 tests; mobile 32 suites, 255 tests",
+        "npm run typecheck --workspace @retail/mobile PASS",
+        "npm run lint --workspace @retail/mobile PASS with zero warnings",
+        "M5 focused suites PASS: 9 suites, 37 tests",
+        "Focused purchases/sales/restock regression PASS: 3 suites, 49 tests",
+        "git diff --check PASS"
+      ],
+      "limitations": [
+        "Full navigation tests emit existing extraneous-screen warnings for the added routes but pass; lint remains zero-warning.",
+        "Independent audit, physical Android, development-build/Metro, second-laptop and accounting review remain outstanding.",
+        "M5-06 and M5-07 are not implemented yet."
+      ],
+      "observed_at": "2026-09-18T19:20:00+01:00"
     }
   ],
   "acceptance_gates": [
@@ -330,8 +350,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Implement M5-05 through M5-07 sequentially on feat/m5-inventory-reconciliation, record truthful ticket evidence and commits, then stop for coordinator independent audit. Keep implementation-evidence and independent-audit gates pending; no M6, push, merge or deployment.",
+  "next_action": "Stop implementation on feat/m5-inventory-reconciliation and hand off the clean M5-05 slice for coordinator independent audit. M5-06 and M5-07 remain unimplemented; keep implementation-evidence and independent-audit gates pending; no M6, push, merge or deployment.",
   "created_at": "2026-09-18T12:55:50.482Z",
-  "updated_at": "2026-09-18T19:04:00+01:00",
+  "updated_at": "2026-09-18T19:20:00+01:00",
   "archived": false
 }

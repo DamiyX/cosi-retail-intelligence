@@ -2,8 +2,8 @@
 
 Last updated: 2026-09-18  
 Current milestone: M5 batch-aware inventory/reconciliation implementation
-under D-039/D-040; M5-01 through M5-04 are implemented and awaiting independent
-audit, with M5-05 through M5-07 still in sequence.  
+under D-039/D-040; M5-01 through M5-05 are implemented and awaiting independent
+audit, with M5-06 and M5-07 still in sequence.  
 Completed engineering milestones: M0; M1 (explicit device waiver); M2 after
 independent audit; M3 and M4 source/automated scope after independent audit,
 with physical/release readiness gates carried.
@@ -15,8 +15,8 @@ with physical/release readiness gates carried.
 - Branch: feat/m5-inventory-reconciliation. Documentation ownership checkpoint:
   527a035. M5-01 implementation commit: f453b0a. M5-02 implementation commits:
   ea8bfbd, 79a9c23, 5bd7b2d and ca3cc99. M5-03 implementation commits:
-  1fe9f91 and 8f35238. M5-04 implementation commit: f347d99. M5-05 is now
-  the active implementation slice.
+  1fe9f91 and 8f35238. M5-04 implementation commit: f347d99. M5-05
+  implementation commit: 8142700. M5-06 and M5-07 remain in sequence.
 - Accepted M3 checkpoint: 66cc64d; approved M4 plan/contract checkpoint: db5a835.
 - Coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 owns product review,
   plans, tickets, workflow registration and independent acceptance. M5
@@ -83,8 +83,11 @@ protection and the retained-input review route without inventory or cost
 mutation. M5-03 landed migration 8, sourced adjustments, exact cost/batch/outbox
 effects, multi-product atomicity and populated-v7 cost-row retention. M5-04
 landed migration 9, blind first/recount evidence, dual-watermark finalization,
-complete group counts and sourced reconciliation corrections; migrations 10–11
-remain a plan until their tickets land. No M4 reopening or M6 work.
+complete group counts and sourced reconciliation corrections. M5-05 landed
+migration 10, owner-only guided-check settings/assignments/attempts/replacements,
+deterministic due work, auditable replacement history and atomic reconciliation
+completion. Migration 11 remains a plan until M5-06 lands. No M4 reopening or
+M6 work.
 
 Planning schema/dependency/artifact checks and unchanged M4 archive passed;
 the documentation ownership checkpoint is committed separately before feature
@@ -93,9 +96,12 @@ evidence; M5-02 now has classification/correction service, UI, replay,
 watermark, authorization and write-boundary evidence. M5-03 now has sourced
 adjustment, cost, batch, outbox, migration-retention, multi-product and UI
 evidence. M5-04 now has blind UI, first/recount, dual-watermark, group-count,
-reconciliation-cost, replay and rollback evidence. Independent acceptance is
-still pending. Next: implement M5-05 through M5-07 sequentially with truthful evidence;
-the implementation-evidence and independent-audit gates remain pending.
+reconciliation-cost, replay and rollback evidence. M5-05 now has guided-check
+settings/assignment/replacement, reconciliation handoff, replay and rollback
+evidence. Independent acceptance is still pending. Next: coordinator audit of
+the completed M5-05 slice before any further M5 implementation; M5-06 and M5-07
+remain unimplemented in this checkout. The implementation-evidence and
+independent-audit gates remain pending.
 Implementer stops after M5-07 for coordinator independent audit. No M6 yet. Live Home remains proposed M6,
 global Scan navigation M8, real price signals M9/M10 and staff review M11.
 

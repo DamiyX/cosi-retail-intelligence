@@ -1,7 +1,7 @@
 # Tickets: M5 Inventory, Batch Awareness and Reconciliation
 
-**Status:** M5-01 through M5-04 are implemented on the implementation branch and
-await independent audit; M5-05 through M5-07 remain in sequential implementation.
+**Status:** M5-01 through M5-05 are implemented on the implementation branch and
+await independent audit; M5-06 through M5-07 remain in sequential implementation.
 Batch direction was explicitly approved 2026-09-18. The acceptance boxes below
 are implementation evidence only and are not independent acceptance.
 **Baseline:** accepted M4 source 9700ee3; M5 planning authored from c1753b6 on
@@ -192,22 +192,46 @@ recount/reason/finalization and complete group-count or unknown-breakdown handli
 
 ## M5-05 — Guided owner stock checks and auditable replacements
 
-**Status:** Not started. **Blocked by:** M5-04.
+**Status:** Implemented; awaiting independent audit. **Blocked by:** coordinator audit gate.
 **Delivers:** configurable due checks encourage a manageable daily stock routine.
 **Scope:** settings/assignment/attempt/replacement migration (expected 10),
 versioned selector, owner due-work/settings UI; no staff dispatch/auth UX.
 
-- [ ] Default target 3 is configurable/pausable with store-local foreground windows;
+- [x] Default target 3 is configurable/pausable with store-local foreground windows;
   due/unfinished work survives restart/day rollover. Selector rotates using
   quick-count/activity/last-check inputs, excludes ordinary nonpositive/inactive/
   non-countable candidates and handles no candidates without fake assignments.
-- [ ] Replacement needs a reason, retains original assignment/attempt history and
+- [x] Replacement needs a reason, retains original assignment/attempt history and
   avoids immediate repetition; exhausted pool is truthful. Physical zero for
   recorded-positive stock follows discrepancy flow. Repeated replacements do not
   allege theft or imply all inventory is verified.
-- [ ] Settings/assignment/replacement operations preserve owner authorization,
+- [x] Settings/assignment/replacement operations preserve owner authorization,
   actual actor/device, atomic outbox/replay and store isolation; deterministic
   time/selection, rollback, cold-reopen and accessible retained-error UI tests pass.
+
+**Implementation evidence (awaiting independent audit):**
+
+- Commit: `8142700` (`feat(M5-05): add guided owner stock checks`).
+- Added schema v10 settings, assignments, attempts and auditable replacement
+  history, plus reconciliation linkage and raw relationship/immutability guards.
+  The owner-only guided-check service implements deterministic store-local
+  selection, default target three, pause/window settings, pending-work rollover,
+  replacement reasons, exhausted pools, replay/conflict protection and one
+  outbox envelope per durable operation. Physical zero continues through the
+  existing blind reconciliation discrepancy path and finalization closes the
+  guided assignment/attempt atomically.
+- Added More -> Guided checks settings/due-work/replacement UI and the
+  reconciliation handoff, with retained settings/replacement failure input,
+  dirty-navigation protection and accessible controls. No accuracy or theft
+  claim is presented.
+- `apps/mobile/__tests__/m5GuidedChecks.test.ts`: 6 passing SQLite tests;
+  `m5GuidedChecksScreen.test.tsx`: 2 passing UI tests. M5 focused run: 9 suites,
+  37 tests. Focused purchase/sales/restock regression: 3 suites, 49 tests.
+  Full `npm run validate` passed: domain 5 suites/150 tests and mobile 32
+  suites/255 tests; root typecheck, zero-warning lint and `git diff --check`
+  passed. Full navigation tests emit existing extraneous-screen warnings for
+  the new routes but still pass. Physical Android, development-build/Metro,
+  second-laptop, accounting and independent-audit evidence remain outstanding.
 
 ## M5-06 — Local attention, remaining-stock expiry and snooze
 
@@ -251,6 +275,6 @@ review what actually passed. No feature scope expansion.
 
 ## Evidence log
 
-M5-01 and M5-02 implementation evidence is recorded above. M5-03 through M5-07
+M5-01 through M5-05 implementation evidence is recorded above. M5-06 and M5-07
 remain to be implemented; physical/device and independent-audit evidence must
 not be inferred from local tests.
