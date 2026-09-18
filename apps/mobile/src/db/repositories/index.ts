@@ -33,6 +33,33 @@ export type {
   OutboxStatus,
 } from './outbox';
 export {
+  closeInventoryCheckAssignment,
+  closeInventoryCheckAttempt,
+  completeInventoryCheckAssignmentForReconciliation,
+  createInventoryCheckAssignment,
+  createInventoryCheckAttempt,
+  getInventoryCheckAssignmentById,
+  getInventoryCheckAttemptById,
+  getInventoryCheckSettings,
+  getLatestCompletedInventoryCheckAt,
+  listInventoryCheckAssignmentsByProduct,
+  listInventoryCheckAssignmentsByStore,
+  listInventoryCheckAttemptsByAssignment,
+  saveInventoryCheckSettings,
+  GUIDED_CHECK_POLICY_VERSION,
+} from './inventoryChecks';
+export type {
+  CreateInventoryCheckAssignmentInput,
+  CreateInventoryCheckAttemptInput,
+  InventoryCheckAssignmentKind,
+  InventoryCheckAssignmentRow,
+  InventoryCheckAssignmentStatus,
+  InventoryCheckAttemptRow,
+  InventoryCheckAttemptStatus,
+  InventoryCheckSettingsRow,
+  SaveInventoryCheckSettingsInput,
+} from './inventoryChecks';
+export {
   createPackageUnit,
   deactivatePackageUnit,
   getActiveBasePackageUnit,

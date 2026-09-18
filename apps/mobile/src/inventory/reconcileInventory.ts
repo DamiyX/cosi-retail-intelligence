@@ -5,6 +5,7 @@ import type { DatabaseAdapter } from '../db/adapter';
 import {
   applyAdjustmentCostMovement,
   cancelInventoryReconciliation as cancelReconciliationRow,
+  completeInventoryCheckAssignmentForReconciliation,
   completeInventoryReconciliation,
   createBatchInventoryEntry,
   createBatchInventoryOperation,
@@ -27,12 +28,14 @@ import {
   getLatestInventoryReconciliationSubmission,
   getPackageUnitById,
   getInventoryAdjustmentById,
+  getInventoryCheckAssignmentById,
   getStoreById,
   getStoreProductById,
   listBatchInventoryEntriesByOperation,
   listBatchInventoryOperationsByEvent,
   listBatchInventoryOperationsByStoreProduct,
   listInventoryBatchGroupsByStoreProduct,
+  listInventoryCheckAttemptsByAssignment,
   listInventoryReconciliationGroupCountsBySubmission,
   listInventoryReconciliationLinesByReconciliation,
   listInventoryReconciliationSubmissionsByLine,
@@ -47,6 +50,8 @@ import {
   type InventoryAdjustmentReason,
   type InventoryAdjustmentRow,
   type InventoryEventRow,
+  type InventoryCheckAssignmentRow,
+  type InventoryCheckAttemptRow,
   type InventoryReconciliationGroupCountRow,
   type InventoryReconciliationLineRow,
   type InventoryReconciliationRow,
@@ -68,6 +73,7 @@ export interface StartInventoryReconciliationInput {
   deviceId: string;
   userId: string;
   storeProductId: string;
+  checkAssignmentId?: string | null;
 }
 
 export interface SubmitInventoryReconciliationInput {
@@ -98,6 +104,7 @@ export interface ReconciliationDraft {
   reconciliationId: string;
   lineId: string;
   storeProductId: string;
+  checkAssignmentId: string | null;
   status: InventoryReconciliationRow['status'];
   hasSubmission: boolean;
   /** Opaque concurrency tokens. The UI must not render them as business quantities. */
@@ -117,6 +124,8 @@ export interface ReconciliationGraph {
   costStates: CostStateRow[];
   batchOperations: BatchInventoryOperationRow[];
   batchEntries: BatchInventoryEntryRow[];
+  guidedAssignment: InventoryCheckAssignmentRow | null;
+  guidedAttempt: InventoryCheckAttemptRow | null;
   outbox: OutboxOperationRow;
 }
 
@@ -224,6 +233,7 @@ function draftFromSession(adapter: DatabaseAdapter, reconciliation: InventoryRec
     reconciliationId: reconciliation.id,
     lineId: line.id,
     storeProductId: line.storeProductId,
+    checkAssignmentId: reconciliation.checkAssignmentId,
     status: reconciliation.status,
     hasSubmission: latest !== null,
     inventoryWatermark: projection.inventoryWatermark,
@@ -372,6 +382,12 @@ function replayGraph(adapter: DatabaseAdapter, outbox: OutboxOperationRow, reque
   const eventOperations = inventoryEvents.flatMap((event) => listBatchInventoryOperationsByEvent(adapter, event.id));
   const batchOperations = [...reconciliationOperations, ...eventOperations];
   const batchEntries = batchOperations.flatMap((operation) => listBatchInventoryEntriesByOperation(adapter, operation.id));
+  const guidedAssignment = reconciliation.checkAssignmentId
+    ? getInventoryCheckAssignmentById(adapter, reconciliation.checkAssignmentId)
+    : null;
+  const guidedAttempt = guidedAssignment
+    ? listInventoryCheckAttemptsByAssignment(adapter, guidedAssignment.id).find((attempt) => attempt.reconciliationId === reconciliation.id) ?? null
+    : null;
   return {
     reconciliation,
     line,
@@ -384,6 +400,8 @@ function replayGraph(adapter: DatabaseAdapter, outbox: OutboxOperationRow, reque
     costStates,
     batchOperations,
     batchEntries,
+    guidedAssignment,
+    guidedAttempt,
     outbox,
   };
 }
@@ -400,6 +418,13 @@ export function startInventoryReconciliation(
   const { memberId } = assertOwner(adapter, storeId, deviceId, userId);
   const product = getStoreProductById(adapter, storeProductId);
   if (!product || product.storeId !== storeId || product.status !== 'ACTIVE') throw new DomainError('INVALID_VALUE', 'Product does not belong to this store or is not active.');
+  const checkAssignmentId = input.checkAssignmentId ?? null;
+  if (checkAssignmentId) {
+    const assignment = getInventoryCheckAssignmentById(adapter, checkAssignmentId);
+    if (!assignment || assignment.storeId !== storeId || assignment.storeProductId !== storeProductId || assignment.status !== 'PENDING') {
+      throw new DomainError('INVALID_VALUE', 'Guided check assignment does not belong to this product or is no longer pending.');
+    }
+  }
   const generateId = options.generateId ?? generateMobileId;
   return adapter.transaction(() => {
     const projection = getBatchProjectionForStoreProduct(adapter, storeProductId);
@@ -411,6 +436,7 @@ export function startInventoryReconciliation(
       createdByUserId: userId,
       deviceId,
       startedAt,
+      checkAssignmentId,
       createdAt: startedAt,
     });
     const line = createInventoryReconciliationLine(adapter, {
@@ -730,6 +756,20 @@ export function finalizeInventoryReconciliation(
       line.reasonCode = finalizedLine.reasonCode;
       line.note = finalizedLine.note;
     }
+    let guidedAssignment: InventoryCheckAssignmentRow | null = null;
+    let guidedAttempt: InventoryCheckAttemptRow | null = null;
+    if (reconciliation.checkAssignmentId) {
+      const completedGuided = completeInventoryCheckAssignmentForReconciliation(adapter, {
+        assignmentId: reconciliation.checkAssignmentId,
+        reconciliationId: reconciliation.id,
+        completedAt: generateAt,
+        closedByStoreMemberId: memberId,
+        closedByUserId: input.userId,
+        closedByDeviceId: input.deviceId,
+      });
+      guidedAssignment = completedGuided.assignment;
+      guidedAttempt = completedGuided.attempt;
+    }
     const completed = completeInventoryReconciliation(adapter, {
       id: reconciliation.id,
       finalizationOperationId: input.operationId,
@@ -757,6 +797,8 @@ export function finalizeInventoryReconciliation(
         costStates,
         batchOperations,
         batchEntries,
+        guidedAssignment,
+        guidedAttempt,
       },
     });
     return {
@@ -771,6 +813,8 @@ export function finalizeInventoryReconciliation(
       costStates,
       batchOperations,
       batchEntries,
+      guidedAssignment,
+      guidedAttempt,
       outbox,
     };
   });

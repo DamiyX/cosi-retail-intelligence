@@ -29,7 +29,11 @@ export default function MoreScreen() {
         <Text style={styles.actionTitle}>Check stock</Text>
         <Text style={styles.actionBody}>Count stock without seeing the recorded quantity first</Text>
       </Pressable>
-      <Text style={styles.comingSoon}>Guided checks, staff, and settings will appear as their milestones are delivered.</Text>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/guided-checks')} style={styles.action}>
+        <Text style={styles.actionTitle}>Guided stock checks</Text>
+        <Text style={styles.actionBody}>Set a calm owner routine and work through due shelf counts</Text>
+      </Pressable>
+      <Text style={styles.comingSoon}>Staff dispatch and supervisor review are intentionally deferred.</Text>
     </View>
   );
 }

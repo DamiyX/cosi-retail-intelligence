@@ -14,6 +14,7 @@ export interface InventoryReconciliationRow {
   createdByUserId: string;
   deviceId: string;
   startedAt: string;
+  checkAssignmentId: string | null;
   completedAt: string | null;
   finalizationOperationId: string | null;
   createdAt: string;
@@ -74,6 +75,7 @@ export interface CreateInventoryReconciliationInput {
   createdByUserId: string;
   deviceId: string;
   startedAt: string;
+  checkAssignmentId?: string | null;
   createdAt?: string;
 }
 
@@ -123,7 +125,7 @@ type Row = Record<string, string | number | null>;
 
 const RECONCILIATION_COLUMNS =
   'id, store_id, status, created_by_store_member_id, created_by_user_id, device_id, ' +
-  'started_at, completed_at, finalization_operation_id, created_at';
+  'started_at, check_assignment_id, completed_at, finalization_operation_id, created_at';
 const LINE_COLUMNS =
   'id, reconciliation_id, store_id, store_product_id, recorded_base_units_snapshot, ' +
   'initial_inventory_watermark, initial_batch_watermark, physical_base_units, difference_base_units, ' +
@@ -158,6 +160,7 @@ function mapReconciliation(row: Row): InventoryReconciliationRow {
     createdByUserId: row.created_by_user_id as string,
     deviceId: row.device_id as string,
     startedAt: row.started_at as string,
+    checkAssignmentId: (row.check_assignment_id as string | null) ?? null,
     completedAt: (row.completed_at as string | null) ?? null,
     finalizationOperationId: (row.finalization_operation_id as string | null) ?? null,
     createdAt: row.created_at as string,
@@ -226,9 +229,9 @@ export function createInventoryReconciliation(
   const createdAt = input.createdAt ?? nowIso();
   adapter.run(
     `INSERT INTO inventory_reconciliations
-      (id, store_id, status, created_by_store_member_id, created_by_user_id, device_id, started_at, created_at)
-     VALUES (?, ?, 'IN_PROGRESS', ?, ?, ?, ?, ?);`,
-    [requireId(input.id), requireId(input.storeId), requireId(input.createdByStoreMemberId), requireId(input.createdByUserId), requireId(input.deviceId), startedAt, createdAt],
+      (id, store_id, status, created_by_store_member_id, created_by_user_id, device_id, started_at, check_assignment_id, created_at)
+     VALUES (?, ?, 'IN_PROGRESS', ?, ?, ?, ?, ?, ?);`,
+    [requireId(input.id), requireId(input.storeId), requireId(input.createdByStoreMemberId), requireId(input.createdByUserId), requireId(input.deviceId), startedAt, optionalId(input.checkAssignmentId), createdAt],
   );
   const row = getInventoryReconciliationById(adapter, input.id);
   if (!row) throw new Error('Inventory reconciliation insert did not persist.');

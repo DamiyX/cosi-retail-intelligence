@@ -30,6 +30,16 @@ import {
   type ReconciliationGraph,
   type ReconciliationGroupCountInput,
 } from './reconcileInventory';
+import {
+  generateGuidedChecks,
+  getGuidedCheckOverview,
+  replaceGuidedCheck,
+  saveGuidedCheckSettings,
+  type GuidedCheckGenerationResult,
+  type GuidedCheckOverview,
+  type GuidedCheckReplacementResult,
+  type SaveGuidedCheckSettingsInput,
+} from './guidedChecks';
 
 export interface InventoryReviewProduct {
   storeProductId: string;
@@ -74,7 +84,7 @@ export interface InventoryClient {
     note?: string | null;
     operationId?: string;
   }): InventoryAdjustmentGraph;
-  startReconciliation(storeProductId: string): ReconciliationDraft;
+  startReconciliation(storeProductId: string, checkAssignmentId?: string | null): ReconciliationDraft;
   getReconciliationDraft(reconciliationId: string): ReconciliationDraft;
   submitReconciliation(input: {
     reconciliationId: string;
@@ -96,6 +106,10 @@ export interface InventoryClient {
     operationId?: string;
   }): ReconciliationGraph;
   cancelReconciliation(reconciliationId: string): ReconciliationDraft;
+  getGuidedCheckOverview(now?: string): GuidedCheckOverview;
+  saveGuidedCheckSettings(input: Omit<SaveGuidedCheckSettingsInput, 'storeId' | 'deviceId' | 'userId' | 'operationId'> & { operationId?: string }): ReturnType<typeof saveGuidedCheckSettings>;
+  generateGuidedChecks(input?: { operationId?: string; now?: string }): GuidedCheckGenerationResult;
+  replaceGuidedCheck(input: { operationId?: string; assignmentId: string; reasonCode: string; note?: string | null; now?: string }): GuidedCheckReplacementResult;
 }
 
 export interface CreateInventoryClientOptions {
@@ -209,13 +223,14 @@ export function createDatabaseInventoryClient(
         }],
       }, { generateId });
     },
-    startReconciliation(storeProductId: string): ReconciliationDraft {
+    startReconciliation(storeProductId: string, checkAssignmentId?: string | null): ReconciliationDraft {
       activeProduct(adapter, store, storeProductId);
       return startInventoryReconciliation(adapter, {
         storeId: store.id,
         deviceId: device.id,
         userId,
         storeProductId,
+        checkAssignmentId,
       }, { generateId });
     },
     getReconciliationDraft(reconciliationId: string): ReconciliationDraft {
@@ -250,6 +265,36 @@ export function createDatabaseInventoryClient(
         deviceId: device.id,
         userId,
       });
+    },
+    getGuidedCheckOverview(now?: string): GuidedCheckOverview {
+      return getGuidedCheckOverview(adapter, { storeId: store.id, deviceId: device.id, userId, now });
+    },
+    saveGuidedCheckSettings(input) {
+      return saveGuidedCheckSettings(adapter, {
+        ...input,
+        operationId: input.operationId ?? generateId(),
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+      });
+    },
+    generateGuidedChecks(input = {}) {
+      return generateGuidedChecks(adapter, {
+        operationId: input.operationId ?? generateId(),
+        now: input.now,
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+      }, { generateId });
+    },
+    replaceGuidedCheck(input) {
+      return replaceGuidedCheck(adapter, {
+        ...input,
+        operationId: input.operationId ?? generateId(),
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+      }, { generateId });
     },
   };
 }

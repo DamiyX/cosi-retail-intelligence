@@ -1578,6 +1578,325 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'reconciliation group counts are immutable'); END;`,
     ],
   },
+  {
+    version: 10,
+    name: 'guided_inventory_checks',
+    statements: [
+      `CREATE TABLE inventory_check_settings (
+        store_id TEXT PRIMARY KEY REFERENCES stores(id) ON DELETE RESTRICT,
+        daily_target INTEGER NOT NULL DEFAULT 3 CHECK (daily_target >= 0 AND daily_target <= 100),
+        paused INTEGER NOT NULL DEFAULT 0 CHECK (paused IN (0, 1)),
+        window_start_minute INTEGER NOT NULL DEFAULT 0 CHECK (window_start_minute >= 0 AND window_start_minute <= 1439),
+        window_end_minute INTEGER NOT NULL DEFAULT 1439 CHECK (window_end_minute >= 0 AND window_end_minute <= 1439),
+        policy_version TEXT NOT NULL,
+        version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0),
+        updated_by_store_member_id TEXT NOT NULL REFERENCES store_members(id) ON DELETE RESTRICT,
+        updated_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        updated_by_device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        updated_at TEXT NOT NULL,
+        CHECK (window_start_minute <= window_end_minute)
+      );`,
+      `CREATE TABLE inventory_check_assignments (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        local_date TEXT NOT NULL CHECK (length(local_date) = 10),
+        status TEXT NOT NULL CHECK (status IN ('PENDING', 'COMPLETED', 'REPLACED', 'EXHAUSTED')),
+        assignment_kind TEXT NOT NULL CHECK (assignment_kind IN ('INITIAL', 'REPLACEMENT')),
+        replaces_assignment_id TEXT REFERENCES inventory_check_assignments(id) ON DELETE RESTRICT,
+        root_assignment_id TEXT NOT NULL REFERENCES inventory_check_assignments(id) ON DELETE RESTRICT,
+        policy_version TEXT NOT NULL,
+        created_by_store_member_id TEXT NOT NULL REFERENCES store_members(id) ON DELETE RESTRICT,
+        created_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        created_at TEXT NOT NULL,
+        closed_at TEXT,
+        closed_by_store_member_id TEXT REFERENCES store_members(id) ON DELETE RESTRICT,
+        closed_by_user_id TEXT REFERENCES users(id) ON DELETE RESTRICT,
+        closed_by_device_id TEXT REFERENCES devices(id) ON DELETE RESTRICT,
+        UNIQUE (store_id, local_date, store_product_id),
+        CHECK ((assignment_kind = 'INITIAL' AND replaces_assignment_id IS NULL AND root_assignment_id = id)
+          OR (assignment_kind = 'REPLACEMENT' AND replaces_assignment_id IS NOT NULL AND root_assignment_id <> id)),
+        CHECK ((status = 'PENDING' AND closed_at IS NULL AND closed_by_store_member_id IS NULL AND closed_by_user_id IS NULL AND closed_by_device_id IS NULL)
+          OR (status <> 'PENDING' AND closed_at IS NOT NULL AND closed_by_store_member_id IS NOT NULL AND closed_by_user_id IS NOT NULL AND closed_by_device_id IS NOT NULL))
+      );`,
+      'CREATE INDEX idx_inventory_check_assignments_store_date ON inventory_check_assignments(store_id, local_date, status, created_at);',
+      'CREATE INDEX idx_inventory_check_assignments_product ON inventory_check_assignments(store_product_id, status, created_at DESC);',
+      `CREATE TABLE inventory_check_attempts (
+        id TEXT PRIMARY KEY,
+        assignment_id TEXT NOT NULL REFERENCES inventory_check_assignments(id) ON DELETE RESTRICT,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        attempt_kind TEXT NOT NULL CHECK (attempt_kind IN ('INITIAL', 'REPLACEMENT')),
+        status TEXT NOT NULL CHECK (status IN ('OPEN', 'COMPLETED', 'CANCELLED')),
+        reason_code TEXT,
+        note TEXT,
+        created_by_store_member_id TEXT NOT NULL REFERENCES store_members(id) ON DELETE RESTRICT,
+        created_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        reconciliation_id TEXT REFERENCES inventory_reconciliations(id) ON DELETE RESTRICT,
+        created_at TEXT NOT NULL,
+        closed_at TEXT,
+        closed_by_store_member_id TEXT REFERENCES store_members(id) ON DELETE RESTRICT,
+        closed_by_user_id TEXT REFERENCES users(id) ON DELETE RESTRICT,
+        closed_by_device_id TEXT REFERENCES devices(id) ON DELETE RESTRICT,
+        CHECK ((status = 'OPEN' AND closed_at IS NULL AND closed_by_store_member_id IS NULL AND closed_by_user_id IS NULL AND closed_by_device_id IS NULL)
+          OR (status <> 'OPEN' AND closed_at IS NOT NULL AND closed_by_store_member_id IS NOT NULL AND closed_by_user_id IS NOT NULL AND closed_by_device_id IS NOT NULL)),
+        CHECK (status <> 'COMPLETED' OR reconciliation_id IS NOT NULL)
+      );`,
+      'CREATE INDEX idx_inventory_check_attempts_assignment ON inventory_check_attempts(assignment_id, created_at ASC, id ASC);',
+      'CREATE INDEX idx_inventory_check_attempts_product ON inventory_check_attempts(store_product_id, status, closed_at DESC);',
+      'CREATE INDEX idx_inventory_check_attempts_reconciliation ON inventory_check_attempts(reconciliation_id);',
+      'ALTER TABLE inventory_reconciliations ADD COLUMN check_assignment_id TEXT REFERENCES inventory_check_assignments(id) ON DELETE RESTRICT;',
+      'CREATE INDEX idx_inventory_reconciliations_assignment ON inventory_reconciliations(check_assignment_id);',
+      `CREATE TRIGGER trg_inventory_check_settings_member_store_insert
+        BEFORE INSERT ON inventory_check_settings
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.updated_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.updated_by_user_id
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'check settings actor is not an active store member'); END;`,
+      `CREATE TRIGGER trg_inventory_check_settings_device_store_insert
+        BEFORE INSERT ON inventory_check_settings
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.updated_by_device_id AND d.store_id = NEW.store_id AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'check settings device does not belong to store'); END;`,
+      `CREATE TRIGGER trg_inventory_check_settings_member_store_update
+        BEFORE UPDATE ON inventory_check_settings
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.updated_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.updated_by_user_id
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'check settings actor is not an active store member'); END;`,
+      `CREATE TRIGGER trg_inventory_check_settings_device_store_update
+        BEFORE UPDATE ON inventory_check_settings
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.updated_by_device_id AND d.store_id = NEW.store_id AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'check settings device does not belong to store'); END;`,
+      `CREATE TRIGGER trg_inventory_check_assignments_member_store_insert
+        BEFORE INSERT ON inventory_check_assignments
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.created_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.created_by_user_id
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'check assignment actor is not an active store member'); END;`,
+      `CREATE TRIGGER trg_inventory_check_assignments_device_store_insert
+        BEFORE INSERT ON inventory_check_assignments
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id AND d.store_id = NEW.store_id AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'check assignment device does not belong to store'); END;`,
+      `CREATE TRIGGER trg_inventory_check_assignments_product_store_insert
+        BEFORE INSERT ON inventory_check_assignments
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          WHERE sp.id = NEW.store_product_id AND sp.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'check assignment product does not belong to store'); END;`,
+      `CREATE TRIGGER trg_inventory_check_assignments_replacement_insert
+        BEFORE INSERT ON inventory_check_assignments
+        WHEN (NEW.assignment_kind = 'REPLACEMENT' AND NOT EXISTS (
+          SELECT 1 FROM inventory_check_assignments parent
+          WHERE parent.id = NEW.replaces_assignment_id
+            AND parent.store_id = NEW.store_id
+            AND parent.local_date = NEW.local_date
+            AND parent.root_assignment_id = NEW.root_assignment_id
+        ))
+        BEGIN SELECT RAISE(ABORT, 'check replacement parent does not match assignment'); END;`,
+      `CREATE TRIGGER trg_inventory_check_assignments_update
+        BEFORE UPDATE ON inventory_check_assignments
+        WHEN OLD.status <> 'PENDING'
+          OR NEW.id <> OLD.id
+          OR NEW.store_id <> OLD.store_id
+          OR NEW.store_product_id <> OLD.store_product_id
+          OR NEW.local_date <> OLD.local_date
+          OR NEW.assignment_kind <> OLD.assignment_kind
+          OR COALESCE(NEW.replaces_assignment_id, '') <> COALESCE(OLD.replaces_assignment_id, '')
+          OR NEW.root_assignment_id <> OLD.root_assignment_id
+          OR NEW.policy_version <> OLD.policy_version
+          OR NEW.created_by_store_member_id <> OLD.created_by_store_member_id
+          OR NEW.created_by_user_id <> OLD.created_by_user_id
+          OR NEW.device_id <> OLD.device_id
+          OR NEW.created_at <> OLD.created_at
+          OR NEW.status NOT IN ('PENDING', 'COMPLETED', 'REPLACED', 'EXHAUSTED')
+          OR (NEW.status = 'PENDING' AND (NEW.closed_at IS NOT NULL OR NEW.closed_by_store_member_id IS NOT NULL OR NEW.closed_by_user_id IS NOT NULL OR NEW.closed_by_device_id IS NOT NULL))
+          OR (NEW.status <> 'PENDING' AND (NEW.closed_at IS NULL OR NEW.closed_by_store_member_id IS NULL OR NEW.closed_by_user_id IS NULL OR NEW.closed_by_device_id IS NULL))
+          OR (NEW.status = 'COMPLETED' AND NOT EXISTS (
+            SELECT 1 FROM inventory_check_attempts ia
+            WHERE ia.assignment_id = NEW.id AND ia.status = 'COMPLETED'
+          ))
+          OR (NEW.status IN ('REPLACED', 'EXHAUSTED') AND NOT EXISTS (
+            SELECT 1 FROM inventory_check_attempts ia
+            WHERE ia.assignment_id = NEW.id AND ia.status = 'CANCELLED'
+          ))
+        BEGIN SELECT RAISE(ABORT, 'check assignments preserve immutable history'); END;`,
+      `CREATE TRIGGER trg_inventory_check_assignments_immutable_delete
+        BEFORE DELETE ON inventory_check_assignments
+        BEGIN SELECT RAISE(ABORT, 'check assignments are immutable'); END;`,
+      `CREATE TRIGGER trg_inventory_check_assignments_close_actor_update
+        BEFORE UPDATE ON inventory_check_assignments
+        WHEN NEW.status <> 'PENDING' AND (
+          NOT EXISTS (
+            SELECT 1 FROM store_members sm
+            WHERE sm.id = NEW.closed_by_store_member_id
+              AND sm.store_id = NEW.store_id
+              AND sm.user_id = NEW.closed_by_user_id
+              AND sm.status = 'ACTIVE'
+          )
+          OR NOT EXISTS (
+            SELECT 1 FROM devices d
+            WHERE d.id = NEW.closed_by_device_id AND d.store_id = NEW.store_id AND d.status = 'ACTIVE'
+          )
+        )
+        BEGIN SELECT RAISE(ABORT, 'check assignment close actor does not belong to store'); END;`,
+      `CREATE TRIGGER trg_inventory_check_attempts_parent_insert
+        BEFORE INSERT ON inventory_check_attempts
+        WHEN NOT EXISTS (
+          SELECT 1 FROM inventory_check_assignments a
+          WHERE a.id = NEW.assignment_id
+            AND a.store_id = NEW.store_id
+            AND a.store_product_id = NEW.store_product_id
+            AND a.assignment_kind = NEW.attempt_kind
+        )
+        BEGIN SELECT RAISE(ABORT, 'check attempt parent does not match assignment'); END;`,
+      `CREATE TRIGGER trg_inventory_check_attempts_member_store_insert
+        BEFORE INSERT ON inventory_check_attempts
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.created_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.created_by_user_id
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'check attempt actor is not an active store member'); END;`,
+      `CREATE TRIGGER trg_inventory_check_attempts_device_store_insert
+        BEFORE INSERT ON inventory_check_attempts
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id AND d.store_id = NEW.store_id AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'check attempt device does not belong to store'); END;`,
+      `CREATE TRIGGER trg_inventory_check_attempts_reconciliation_insert
+        BEFORE INSERT ON inventory_check_attempts
+        WHEN NEW.reconciliation_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1
+          FROM inventory_reconciliations r
+          JOIN inventory_reconciliation_lines rl ON rl.reconciliation_id = r.id
+          WHERE r.id = NEW.reconciliation_id
+            AND r.store_id = NEW.store_id
+            AND rl.store_product_id = NEW.store_product_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'check attempt reconciliation does not match product'); END;`,
+      `CREATE TRIGGER trg_inventory_check_attempts_update
+        BEFORE UPDATE ON inventory_check_attempts
+        WHEN OLD.status <> 'OPEN'
+          OR NEW.id <> OLD.id
+          OR NEW.assignment_id <> OLD.assignment_id
+          OR NEW.store_id <> OLD.store_id
+          OR NEW.store_product_id <> OLD.store_product_id
+          OR NEW.attempt_kind <> OLD.attempt_kind
+          OR NEW.created_by_store_member_id <> OLD.created_by_store_member_id
+          OR NEW.created_by_user_id <> OLD.created_by_user_id
+          OR NEW.device_id <> OLD.device_id
+          OR NEW.created_at <> OLD.created_at
+          OR NEW.status NOT IN ('OPEN', 'COMPLETED', 'CANCELLED')
+          OR (NEW.status = 'OPEN' AND (NEW.closed_at IS NOT NULL OR NEW.closed_by_store_member_id IS NOT NULL OR NEW.closed_by_user_id IS NOT NULL OR NEW.closed_by_device_id IS NOT NULL))
+          OR (NEW.status <> 'OPEN' AND (NEW.closed_at IS NULL OR NEW.closed_by_store_member_id IS NULL OR NEW.closed_by_user_id IS NULL OR NEW.closed_by_device_id IS NULL))
+          OR (NEW.status = 'COMPLETED' AND NEW.reconciliation_id IS NULL)
+        BEGIN SELECT RAISE(ABORT, 'check attempts preserve immutable history'); END;`,
+      `CREATE TRIGGER trg_inventory_check_attempts_immutable_delete
+        BEFORE DELETE ON inventory_check_attempts
+        BEGIN SELECT RAISE(ABORT, 'check attempts are immutable'); END;`,
+      `CREATE TRIGGER trg_inventory_check_attempts_close_actor_update
+        BEFORE UPDATE ON inventory_check_attempts
+        WHEN NEW.status <> 'OPEN' AND (
+          NOT EXISTS (
+            SELECT 1 FROM store_members sm
+            WHERE sm.id = NEW.closed_by_store_member_id
+              AND sm.store_id = NEW.store_id
+              AND sm.user_id = NEW.closed_by_user_id
+              AND sm.status = 'ACTIVE'
+          )
+          OR NOT EXISTS (
+            SELECT 1 FROM devices d
+            WHERE d.id = NEW.closed_by_device_id AND d.store_id = NEW.store_id AND d.status = 'ACTIVE'
+          )
+        )
+        BEGIN SELECT RAISE(ABORT, 'check attempt close actor does not belong to store'); END;`,
+      `CREATE TRIGGER trg_inventory_check_attempts_reconciliation_update
+        BEFORE UPDATE ON inventory_check_attempts
+        WHEN NEW.reconciliation_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1
+          FROM inventory_reconciliations r
+          JOIN inventory_reconciliation_lines rl ON rl.reconciliation_id = r.id
+          WHERE r.id = NEW.reconciliation_id
+            AND r.store_id = NEW.store_id
+            AND rl.store_product_id = NEW.store_product_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'check attempt reconciliation does not match product'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliations_assignment_insert
+        BEFORE INSERT ON inventory_reconciliations
+        WHEN NEW.check_assignment_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM inventory_check_assignments a
+          WHERE a.id = NEW.check_assignment_id AND a.store_id = NEW.store_id AND a.status = 'PENDING'
+        )
+        BEGIN SELECT RAISE(ABORT, 'reconciliation check assignment does not belong to store'); END;`,
+      `CREATE TRIGGER trg_inventory_reconciliation_lines_assignment_insert
+        BEFORE INSERT ON inventory_reconciliation_lines
+        WHEN EXISTS (
+          SELECT 1 FROM inventory_reconciliations r
+          WHERE r.id = NEW.reconciliation_id AND r.check_assignment_id IS NOT NULL
+            AND NOT EXISTS (
+              SELECT 1 FROM inventory_check_assignments a
+              WHERE a.id = r.check_assignment_id AND a.store_product_id = NEW.store_product_id
+            )
+        )
+        BEGIN SELECT RAISE(ABORT, 'reconciliation check assignment does not match product'); END;`,
+      `DROP TRIGGER trg_inventory_reconciliations_finalized_update;`,
+      `CREATE TRIGGER trg_inventory_reconciliations_finalized_update
+        BEFORE UPDATE ON inventory_reconciliations
+        WHEN OLD.status <> 'IN_PROGRESS'
+          OR NEW.id <> OLD.id
+          OR NEW.store_id <> OLD.store_id
+          OR NEW.created_by_store_member_id <> OLD.created_by_store_member_id
+          OR NEW.created_by_user_id <> OLD.created_by_user_id
+          OR NEW.device_id <> OLD.device_id
+          OR NEW.started_at <> OLD.started_at
+          OR NEW.check_assignment_id IS NOT OLD.check_assignment_id
+          OR NEW.created_at <> OLD.created_at
+          OR (NEW.status = 'IN_PROGRESS' AND (NEW.completed_at IS NOT NULL OR NEW.finalization_operation_id IS NOT NULL))
+          OR (NEW.status = 'COMPLETED' AND (
+            NEW.completed_at IS NULL
+            OR NEW.finalization_operation_id IS NULL
+            OR NOT EXISTS (
+              SELECT 1 FROM inventory_reconciliation_lines rl
+              WHERE rl.reconciliation_id = NEW.id
+                AND rl.physical_base_units IS NOT NULL
+                AND rl.difference_base_units IS NOT NULL
+            )
+            OR NOT EXISTS (
+              SELECT 1 FROM inventory_reconciliation_submissions rs
+              JOIN inventory_reconciliation_lines rl ON rl.id = rs.reconciliation_line_id
+              WHERE rl.reconciliation_id = NEW.id
+            )
+          ))
+        BEGIN SELECT RAISE(ABORT, 'finalized reconciliations are immutable'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

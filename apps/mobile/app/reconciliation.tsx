@@ -11,7 +11,7 @@ function ReconciliationRouteContent() {
   const router = useRouter();
   const navigation = useNavigation();
   const focused = useIsFocused();
-  const params = useLocalSearchParams<{ storeProductId?: string }>();
+  const params = useLocalSearchParams<{ storeProductId?: string; assignmentId?: string }>();
   const { client, failure } = useInventory();
   const discardRef = useRef<() => void>(() => undefined);
   const [dirty, setDirty] = useState(false);
@@ -34,7 +34,7 @@ function ReconciliationRouteContent() {
     ]);
   });
   if (!client) return <View style={styles.fill}>{failure ? <ErrorPanel title="Stock checks unavailable" message={failure} onDismiss={() => router.back()} /> : null}</View>;
-  return <ReconciliationScreen client={client} isFocused={focused} storeProductId={typeof params.storeProductId === 'string' ? params.storeProductId : undefined} onBack={() => router.back()} onDirtyDraftChange={(value, discard) => { setDirty(value); discardRef.current = discard; }} />;
+  return <ReconciliationScreen client={client} isFocused={focused} storeProductId={typeof params.storeProductId === 'string' ? params.storeProductId : undefined} assignmentId={typeof params.assignmentId === 'string' ? params.assignmentId : undefined} onBack={() => router.back()} onDirtyDraftChange={(value, discard) => { setDirty(value); discardRef.current = discard; }} />;
 }
 
 export default function ReconciliationRoute() {

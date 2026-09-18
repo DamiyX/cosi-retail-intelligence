@@ -13,6 +13,7 @@ interface ReconciliationScreenProps {
   onDirtyDraftChange?: (dirty: boolean, discard: () => void) => void;
   isFocused?: boolean;
   storeProductId?: string;
+  assignmentId?: string;
 }
 
 interface ScreenState {
@@ -28,9 +29,10 @@ function read(client: InventoryClient): ScreenState {
   }
 }
 
-export default function ReconciliationScreen({ client, onBack, onDirtyDraftChange, isFocused = true, storeProductId }: ReconciliationScreenProps) {
+export default function ReconciliationScreen({ client, onBack, onDirtyDraftChange, isFocused = true, storeProductId, assignmentId }: ReconciliationScreenProps) {
   const [state, setState] = useState(() => read(client));
   const [selectedProductId, setSelectedProductId] = useState(storeProductId ?? '');
+  const [activeAssignmentId, setActiveAssignmentId] = useState(assignmentId ?? null);
   const [draft, setDraft] = useState<ReconciliationDraft | null>(null);
   const [physicalText, setPhysicalText] = useState('');
   const [note, setNote] = useState('');
@@ -84,7 +86,7 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
     }
     try {
       setError(null);
-      setDraft(client.startReconciliation(selectedProduct.storeProductId));
+      setDraft(client.startReconciliation(selectedProduct.storeProductId, activeAssignmentId));
       setPhysicalText('');
       setNote('');
       setSaved(false);
@@ -125,6 +127,7 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
       setError(null);
       client.finalizeReconciliation({ reconciliationId: draft.reconciliationId, note });
       setSaved(true);
+      setActiveAssignmentId(null);
       setDraft({ ...draft, status: 'COMPLETED' });
       onDirtyDraftChange?.(false, () => undefined);
     } catch (caught) {
@@ -139,6 +142,7 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
     try {
       client.cancelReconciliation(draft.reconciliationId);
       setDraft(null);
+      setActiveAssignmentId(null);
       setPhysicalText('');
       setNote('');
       setError(null);
@@ -181,7 +185,7 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
           <SecondaryButton title="Cancel stock check" onPress={cancel} />
         </View>
       ) : null}
-      {saved ? <View style={styles.card}><Text style={styles.cardTitle}>Stock check finalized</Text><Text style={styles.meta}>The physical evidence and any stock correction were saved together.</Text><SecondaryButton title="Check another product" onPress={() => { setDraft(null); setSaved(false); setPhysicalText(''); setNote(''); refresh(); }} /></View> : null}
+      {saved ? <View style={styles.card}><Text style={styles.cardTitle}>Stock check finalized</Text><Text style={styles.meta}>The physical evidence and any stock correction were saved together.</Text><SecondaryButton title="Check another product" onPress={() => { setDraft(null); setActiveAssignmentId(null); setSaved(false); setPhysicalText(''); setNote(''); refresh(); }} /></View> : null}
       {error ? <Text accessibilityRole="alert" style={styles.generalError}>{error}</Text> : null}
       <SecondaryButton title="Back" onPress={onBack} />
     </ScrollView>
