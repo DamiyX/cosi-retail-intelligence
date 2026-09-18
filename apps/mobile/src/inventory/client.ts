@@ -2,6 +2,7 @@ import { generateMobileId } from '../crypto/mobileIds';
 import type { DatabaseAdapter } from '../db/adapter';
 import {
   getDeviceById,
+  getPackageUnitById,
   getStoreById,
   getStoreProductById,
   listDevicesByStore,
@@ -9,6 +10,7 @@ import {
   listStores,
   type DeviceRow,
   type InventoryAdjustmentReason,
+  type PackageUnitRow,
   type StoreProductRow,
   type StoreRow,
 } from '../db/repositories';
@@ -24,11 +26,13 @@ import {
   cancelInventoryReconciliation,
   finalizeInventoryReconciliation,
   getInventoryReconciliationDraft,
+  listOpenInventoryReconciliations,
   startInventoryReconciliation,
   submitInventoryReconciliation,
   type ReconciliationDraft,
   type ReconciliationGraph,
   type ReconciliationGroupCountInput,
+  type OpenReconciliationSummary,
 } from './reconcileInventory';
 import {
   generateGuidedChecks,
@@ -57,6 +61,7 @@ export interface InventoryReviewProduct {
   inventoryBalanceBaseMicros: string;
   unknownResidualBaseMicros: string;
   groupCount: number;
+  preferredPackage: Pick<PackageUnitRow, 'id' | 'name' | 'conversionToBaseMicros'> | null;
 }
 
 export interface InventoryClient {
@@ -66,6 +71,7 @@ export interface InventoryClient {
   readonly userId: string;
   listReviewProducts(): InventoryReviewProduct[];
   getBatchProjection(storeProductId: string): BatchProjection;
+  listOpenReconciliations(): OpenReconciliationSummary[];
   classifyBatches(input: {
     storeProductId: string;
     expectedInventoryWatermark: string;
@@ -191,12 +197,21 @@ export function createDatabaseInventoryClient(
           inventoryBalanceBaseMicros: projection.inventoryBalanceBaseMicros,
           unknownResidualBaseMicros: projection.unknownResidualBaseMicros,
           groupCount: projection.groups.length,
+          preferredPackage: hit.product.preferredPackageUnitId
+            ? (() => {
+              const packageUnit = getPackageUnitById(adapter, hit.product.preferredPackageUnitId!);
+              return packageUnit ? { id: packageUnit.id, name: packageUnit.name, conversionToBaseMicros: packageUnit.conversionToBaseMicros } : null;
+            })()
+            : null,
         }];
       });
     },
     getBatchProjection(storeProductId: string): BatchProjection {
       const product = activeProduct(adapter, store, storeProductId);
       return getBatchProjectionForStoreProduct(adapter, product.id);
+    },
+    listOpenReconciliations(): OpenReconciliationSummary[] {
+      return listOpenInventoryReconciliations(adapter, { storeId: store.id, deviceId: device.id, userId });
     },
     classifyBatches(input): BatchClassificationGraph {
       activeProduct(adapter, store, input.storeProductId);

@@ -111,6 +111,22 @@ export interface ReconciliationDraft {
   /** Opaque concurrency tokens. The UI must not render them as business quantities. */
   inventoryWatermark: string;
   batchWatermark: string;
+  recordedBaseUnitsSnapshot: string | null;
+  physicalBaseUnits: string | null;
+  differenceBaseUnits: string | null;
+  submissionType: 'FIRST' | 'RECOUNT' | null;
+  reasonCode: string | null;
+  note: string | null;
+  completeGroupCount: boolean;
+  groupCounts: { groupId: string | null; physicalBaseUnits: string }[];
+}
+
+export interface OpenReconciliationSummary {
+  reconciliationId: string;
+  storeProductId: string;
+  checkAssignmentId: string | null;
+  startedAt: string;
+  draft: ReconciliationDraft;
 }
 
 export interface ReconciliationGraph {
@@ -229,6 +245,7 @@ function getSessionLine(adapter: DatabaseAdapter, reconciliationId: string, stor
 
 function draftFromSession(adapter: DatabaseAdapter, reconciliation: InventoryReconciliationRow, line: InventoryReconciliationLineRow): ReconciliationDraft {
   const latest = getLatestInventoryReconciliationSubmission(adapter, line.id);
+  const groupCounts = latest ? listInventoryReconciliationGroupCountsBySubmission(adapter, latest.id) : [];
   const projection = getBatchProjectionForStoreProduct(adapter, line.storeProductId);
   return {
     reconciliationId: reconciliation.id,
@@ -239,6 +256,14 @@ function draftFromSession(adapter: DatabaseAdapter, reconciliation: InventoryRec
     hasSubmission: latest !== null,
     inventoryWatermark: projection.inventoryWatermark,
     batchWatermark: projection.batchWatermark,
+    recordedBaseUnitsSnapshot: latest?.recordedBaseUnitsSnapshot ?? null,
+    physicalBaseUnits: latest?.physicalBaseUnits ?? null,
+    differenceBaseUnits: latest?.differenceBaseUnits ?? null,
+    submissionType: latest?.submissionType ?? null,
+    reasonCode: latest?.reasonCode ?? line.reasonCode ?? null,
+    note: latest?.note ?? line.note ?? null,
+    completeGroupCount: latest?.completeGroupCount ?? false,
+    groupCounts: groupCounts.map((count) => ({ groupId: count.groupId, physicalBaseUnits: count.physicalBaseUnits })),
   };
 }
 
@@ -425,6 +450,19 @@ export function startInventoryReconciliation(
       throw new DomainError('INVALID_VALUE', 'Guided check assignment does not belong to this product or is no longer pending.');
     }
   }
+  const existing = adapter.getFirstRow<{ id: string }>(
+    `SELECT r.id
+     FROM inventory_reconciliations r
+     JOIN inventory_reconciliation_lines rl ON rl.reconciliation_id = r.id
+     WHERE r.store_id = ? AND r.status = 'IN_PROGRESS' AND rl.store_product_id = ?
+       AND (? IS NULL OR r.check_assignment_id = ?)
+     ORDER BY r.started_at ASC, r.id ASC LIMIT 1;`,
+    [storeId, storeProductId, checkAssignmentId, checkAssignmentId],
+  );
+  if (existing) {
+    const session = getSessionLine(adapter, existing.id, storeId);
+    return draftFromSession(adapter, session.reconciliation, session.line);
+  }
   const generateId = options.generateId ?? generateMobileId;
   return adapter.transaction(() => {
     const projection = getBatchProjectionForStoreProduct(adapter, storeProductId);
@@ -460,6 +498,31 @@ export function getInventoryReconciliationDraft(
   assertOwner(adapter, input.storeId, input.deviceId, input.userId);
   const { reconciliation, line } = getSessionLine(adapter, input.reconciliationId, input.storeId);
   return draftFromSession(adapter, reconciliation, line);
+}
+
+export function listOpenInventoryReconciliations(
+  adapter: DatabaseAdapter,
+  input: { storeId: string; deviceId: string; userId: string },
+): OpenReconciliationSummary[] {
+  assertOwner(adapter, input.storeId, input.deviceId, input.userId);
+  const rows = adapter.getAllRows<{ id: string; started_at: string; store_product_id: string; check_assignment_id: string | null }>(
+    `SELECT r.id, r.started_at, rl.store_product_id, r.check_assignment_id
+     FROM inventory_reconciliations r
+     JOIN inventory_reconciliation_lines rl ON rl.reconciliation_id = r.id
+     WHERE r.store_id = ? AND r.status = 'IN_PROGRESS'
+     ORDER BY r.started_at ASC, r.id ASC;`,
+    [requireId(input.storeId)],
+  );
+  return rows.map((row) => {
+    const session = getSessionLine(adapter, row.id, input.storeId);
+    return {
+      reconciliationId: row.id,
+      storeProductId: row.store_product_id,
+      checkAssignmentId: row.check_assignment_id,
+      startedAt: row.started_at,
+      draft: draftFromSession(adapter, session.reconciliation, session.line),
+    };
+  });
 }
 
 export function cancelInventoryReconciliation(

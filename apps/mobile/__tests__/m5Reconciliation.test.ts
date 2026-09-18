@@ -50,7 +50,8 @@ describe('M5 blind reconciliation checks', () => {
       const beforeEvents = countRows(fixture.adapter, 'inventory_events');
       const beforeOutbox = countRows(fixture.adapter, 'outbox_operations');
       const draft = client.startReconciliation(rice.storeProduct.id);
-      expect(draft).not.toHaveProperty('recordedBaseUnitsSnapshot');
+      expect(draft.recordedBaseUnitsSnapshot).toBeNull();
+      expect(draft.physicalBaseUnits).toBeNull();
       const submitted = client.submitReconciliation({
         reconciliationId: draft.reconciliationId,
         expectedInventoryWatermark: draft.inventoryWatermark,
