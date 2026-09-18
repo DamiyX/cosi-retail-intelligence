@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m4-audit-corrections-required",
+  "current_state": "m4-audit-corrections-returned",
   "completed_states": [
     "m3-independent-source-automated-acceptance",
     "m4-intake",
@@ -44,6 +44,13 @@
       "kind": "completeness-review",
       "path": "docs/engineering/M4_IMPLEMENTATION_HANDOFF.md",
       "claim": "Coordinator collected truthful partial handoff at 376a918 and independently confirmed missing UI scope and dedicated M4 evidence. Full code audit/acceptance not performed; findings returned to same implementation task."
+    },
+    {
+      "kind": "validation",
+      "path": "457d9d9; 08871db; cb0566e",
+      "claim": "Implementation returned A1–A6 corrections: exact fractional sale-cost preservation, immutable sale-cost snapshot invariants with additive migration 5, explicit-date replay rejection, supported native-stack restock removal prevention, focus-safe Quick Add/history/detail recovery, and merchant-readable current-cost labels. npm run validate passed 150 domain and 214 mobile tests (364 tests / 28 suites), strict typecheck and zero-warning lint; Doctor 21/21, Expo dependency check, Android export, active M4 workflow validation and git diff --check passed. Source acceptance remains withheld; physical/device/cloud/release checks remain unperformed.",
+      "source": "457d9d9; 08871db; cb0566e; tickets.md; docs/engineering/PROJECT_STATE.md",
+      "observed_at": "2026-09-18T11:54:43Z"
     }
   ],
   "acceptance_gates": [
@@ -138,6 +145,11 @@
           "result": "Commits b12ff0c, c810f5b and 9ec9075 complete the M4 source scope. npm run validate passed (150 domain tests and 206 mobile tests; 356 tests / 28 suites), strict typecheck and zero-warning lint; npm run mobile:doctor passed 21/21; Expo install compatibility passed after the authorized patch updates; Android export passed (1,357 modules; 3.2 MB Hermes); workflow schema/date-time/dependency/artifact validation and git diff --check passed.",
           "source": "b12ff0c; c810f5b; 87e96a6; 9ec9075; tickets.md; docs/engineering/PROJECT_STATE.md",
           "observed_at": "2026-09-18T11:01:14Z"
+        },
+        {
+          "result": "Correction commits 457d9d9, 08871db and cb0566e return A1–A6 without changing the approved M4 scope. npm run validate passed 150 domain and 214 mobile tests (364 tests / 28 suites), strict typecheck and zero-warning lint; Doctor 21/21; Expo dependency check clean; Android export passed with 1,357 modules and a 3.2 MB Hermes bundle; active M4 workflow validation and git diff --check passed.",
+          "source": "457d9d9; 08871db; cb0566e; tickets.md; docs/engineering/PROJECT_STATE.md",
+          "observed_at": "2026-09-18T11:54:43Z"
         }
       ],
       "limitations": [
@@ -167,10 +179,15 @@
           "result": "Coordinator independently reran validation: 356 tests / 28 suites, strict typecheck and zero-warning lint passed; service/repository reproductions and source review identified six correction requests. Source acceptance withheld.",
           "source": "docs/engineering/M4_AUDIT_CORRECTIONS.md",
           "observed_at": "2026-09-18T11:10:17.545Z"
+        },
+        {
+          "result": "Implementation returned A1–A6 correction commits 457d9d9, 08871db and cb0566e with focused and full automated evidence. Coordinator re-audit is still required; source acceptance is not claimed.",
+          "source": "457d9d9; 08871db; cb0566e; docs/engineering/M4_AUDIT_CORRECTIONS.md",
+          "observed_at": "2026-09-18T11:54:43Z"
         }
       ],
       "limitations": [],
-      "blocker": "Coordinator findings A1–A6 require implementation corrections and independent re-audit.",
+      "blocker": "A1–A6 implementation corrections are returned in 457d9d9, 08871db and cb0566e; coordinator independent re-audit is pending.",
       "waiver": null
     },
     {
@@ -222,8 +239,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Same Luna max implementation task repairs M4 audit findings A1–A6, reports evidence via send_message_to_thread and stops for coordinator re-audit. No M5.",
+  "next_action": "Coordinator independently re-audits returned A1–A6 correction commits and records source acceptance or further findings. No M5.",
   "created_at": "2026-09-17T23:22:42Z",
-  "updated_at": "2026-09-18T11:10:17.545Z",
+  "updated_at": "2026-09-18T11:54:43Z",
   "archived": false
 }

@@ -1,6 +1,7 @@
 # Tickets: M4 Offline Restocking + Provisional Costing
 
-**Status:** Implementation returned; independent audit requires corrections A1–A6. Source acceptance withheld. Founder approved the M4 costing and
+**Status:** A1–A6 implementation corrections returned; independent audit
+pending and source acceptance withheld. Founder approved the M4 costing and
 screen/state contract on 2026-09-18; D-038 and DESIGN record the approved rules.
 Coordinator verified ticket granularity/dependencies under delegated judgment.
 **Branch:** feat/m4-restocking-costing. **Accepted baseline:** 66cc64d.
@@ -11,7 +12,30 @@ Accepted M3 tickets/evidence are archived in the engineering M3_SALES ledger.
 Coordinator independently passed 356 tests / 28 suites, typecheck and lint at
 `2bfa3ef`; further checks found A1–A6 in `docs/engineering/M4_AUDIT_CORRECTIONS.md`.
 Completion checkboxes below are implementation evidence, not audit acceptance.
-Luna max repairs those findings and returns evidence for re-audit; no M5.
+The same implementation task repairs those findings and returns evidence for
+re-audit; no M5.
+
+## Correction handoff
+
+The same implementation task returned all six requested corrections without
+changing the approved M4 scope:
+
+- `457d9d9` (`M4-A1,A4,A5`) preserves exact fractional sale costs when the
+  legacy integer projection is unsafe, validates immutable sale-cost coverage /
+  arithmetic at the repository boundary, appends migration 5 for SQLite
+  coverage/field invariants, and rejects conflicting explicit purchase dates on
+  replay.
+- `08871db` (`M4-A2,A3`) replaces the native-stack draft listener with
+  `usePreventRemove`, preserves discard/Cancel/header/route behavior, refreshes
+  focus-bound reads without clearing drafts, and returns contextual Quick Add
+  selections to the existing restock route.
+- `cb0566e` (`M4-A6`) centralizes readable rational cost estimates and derives
+  current availability from positive covered stock plus a valid average while
+  retaining exact stored bases.
+
+Focused regressions and the full workspace checks passed after these commits.
+This is implementation evidence only; the coordinator must independently
+re-audit A1–A6 before source acceptance. No M5 work is authorized.
 
 ## Execution contract
 
@@ -60,10 +84,12 @@ Node/component tests do not provide physical evidence.
 purchase aggregate, additive migration 4, atomic inventory/cost/observation/
 outbox writes, receipt/history routes, replay protection, conflict rejection,
 per-write rollback matrices, populated-M3 upgrade retention, exact costing edge
-cases and cold-reopen projection evidence. `npm run validate` passed with 150
-domain tests in 5 suites and 206 mobile tests in 23 suites (356 tests / 28
-suites), strict typecheck and zero-warning lint. Physical offline/restart,
-large-text and independent source acceptance remain pending.
+cases and cold-reopen projection evidence. The final `npm run validate` passed
+with 150 domain tests in 5 suites and 214 mobile tests in 23 suites (364 tests
+/ 28 suites), strict typecheck and zero-warning lint. Correction commit `08871db`
+adds supported restock route-removal protection and focus-safe draft return.
+Physical offline/restart, large-text and independent source acceptance remain
+pending.
 
 ## M4-02 — Restock multiple packages and optionally identify a supplier
 
@@ -97,9 +123,11 @@ store-private and duplicate names remain separate rows.
 cart, edit/remove flow, TOTAL/UNIT choice, exact running totals, supplier
 selection/creation, retained failed drafts, retry and Quick Add states. Commit
 `c810f5b` covers repeated-product/mixed-package rollback and store isolation;
-`9ec9075` covers the safe-total overflow state. Focused Restock component
-tests pass (8 tests). Physical keyboard/large-text/dirty-exit checks remain
-deferred to the carried device gate; independent audit is pending.
+`9ec9075` covers the safe-total overflow state. Correction commit `08871db`
+covers supported native-stack dirty exits, focus refresh and contextual Quick
+Add return; focused Restock/navigation regressions pass. Physical
+keyboard/large-text/dirty-exit checks remain deferred to the carried device
+gate; independent audit is pending.
 
 ## M4-03 — Snapshot available provisional cost on subsequent sales
 
@@ -133,9 +161,11 @@ weighted-average transitions, immutable sale cost companions, unavailable-cost
 handling, conflicting replay rejection, full sale-cost rollback coverage,
 rebuild coverage and sale-detail labels. Domain costing tests cover fractional
 averages, half-up rounding, zero cost, unknown coverage, overselling,
-replenishment and overflow. The full workspace validation passed; M3
-historical sale costs remain unchanged/null. Accounting review and independent
-audit are still pending.
+replenishment and overflow. The full workspace validation passed; M3 historical
+sale costs remain unchanged/null. Correction commits `457d9d9` and `cb0566e`
+cover fractional legacy-column overflow, immutable snapshot invariants, exact
+rounding and merchant-readable current-cost states.
+Accounting review and independent audit are still pending.
 
 ## M4-04 — Inspect private purchase and original price history offline
 
@@ -162,8 +192,10 @@ purchase-price history into ProductDetail with saved package/conversion,
 supplier, basis, normalized cost, current cost-availability and contribution
 state; error/retry and detail refresh paths are covered by ProductDetail tests.
 Commit `c810f5b` proves cold-reopen history/projection preservation and store
-isolation. Physical offline/history/text-scale proof and independent audit
-remain pending.
+isolation. Correction commits `08871db` and `cb0566e` add focus refresh,
+contextual Quick Add selection and readable current-versus-historical cost
+labels. Physical offline/history/text-scale proof and independent audit remain
+pending.
 
 ## M4-05 — Demonstrate the restock-to-sale workflow and return for audit
 
@@ -188,14 +220,17 @@ and execution ledgers. No new feature scope or readiness waiver.
 
 **Risks/manual checks:** Source acceptance and external release readiness are
 separate. Only coordinator records independent acceptance.
-**Completion evidence:** Commits `b12ff0c`, `c810f5b` and `9ec9075` complete
-the source scope. `npm run validate` passed (150 domain tests / 206 mobile
-tests; 356 tests / 28 suites), `npm run mobile:doctor` passed 21/21,
-`npx expo install --check` passed after the authorized patch updates,
-`npm run mobile:export` passed (1,357 Android modules; 3.2 MB Hermes bundle),
-the active M3/M4 workflow JSON Schema/date-time/dependency/artifact check
-passed, and `git diff --check` passed. The Galaxy M4 offline/restart/history/
-large-text/dirty-exit session, development-client/Metro check and second-laptop
+**Completion evidence:** Baseline commits `b12ff0c`, `c810f5b` and `9ec9075`
+complete the source scope; correction commits `457d9d9`, `08871db` and
+`cb0566e` return A1–A6 for re-audit. `npm run validate` passed (150 domain
+tests / 214 mobile tests; 364 tests / 28 suites), strict typecheck and
+zero-warning lint. `npm run mobile:doctor` passed 21/21, `npx expo install
+--check` reported dependencies up to date, and `npm run mobile:export` passed
+(1,357 Android modules; 3.2 MB Hermes bundle). The active M4 workflow
+JSON Schema/date-time/dependency/artifact check passed; the historical M2
+record retains its previously recorded `tests-and-review` schema limitation.
+`git diff --check` passed. The Galaxy M4 offline/restart/history/large-text/
+dirty-exit session, development-client/Metro check and second-laptop
 reproduction remain unperformed; no device, cloud, push, merge or release
 action was performed. The independent audit remains pending; do not self-accept
 M4 or begin M5.

@@ -1,8 +1,9 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-18  
-Current milestone: M4 Restocking + Costing — independent audit requires
-corrections A1–A6; source acceptance withheld. Physical/release gates remain pending.  
+Current milestone: M4 Restocking + Costing — A1–A6 implementation corrections
+returned for independent re-audit; source acceptance withheld. Physical/release
+gates remain pending.  
 Completed engineering milestones: M0 Project Foundation; M1 Domain + Local
 Database (accepted with an explicit device waiver); M2 Catalogue + Package Units
 (accepted after independent audit); M3 source/automated scope (accepted after
@@ -13,7 +14,8 @@ independent audit with physical/release gates carried).
 - Canonical remote: https://github.com/DamiyX/cosi-retail-intelligence
 - Current branch: `feat/m4-restocking-costing`, from accepted M3 checkpoint
   `66cc64d`. M4 implementation is committed in `3c4eef9`, with follow-up
-  commits `b12ff0c`, `c810f5b`, `87e96a6` and `9ec9075`.
+  commits `b12ff0c`, `c810f5b`, `87e96a6`, `9ec9075` and correction commits
+  `457d9d9`, `08871db`, `cb0566e`.
 - Coordinator-created M4 plan, published tickets, D-038, cost/design sources and
   workflow registration were recorded in checkpoint `db5a835`; implementation
   evidence is now recorded separately for coordinator audit.
@@ -76,9 +78,10 @@ Coordinator reviewed `db5a835..2bfa3ef` and independently passed `npm run valida
 service/repository checks reproduced a fractional-quantity sale cost rejection,
 a conflicting explicit-date replay, and contradictory immutable cost snapshots.
 Native-stack draft prevention, focus/Quick Add recovery and truthful current-cost
-labels also require correction. See `M4_AUDIT_CORRECTIONS.md` (A1–A6).
-Same Luna max task owns fixes; coordinator re-audits after it stops. M5 remains
-blocked. No physical or cloud action performed in this review.
+labels also required correction. See `M4_AUDIT_CORRECTIONS.md` (A1–A6).
+The same implementation task returned all six fixes in `457d9d9`, `08871db` and
+`cb0566e`; the coordinator must independently re-audit before source acceptance.
+M5 remains blocked. No physical or cloud action performed in this review.
 
 ## M4 implementation handoff
 
@@ -90,6 +93,11 @@ rollback matrices, conflicting sale replay rejection, populated-M3 upgrade
 retention, store/device/member/product/package/currency boundary coverage and
 the changed-price cold-reopen cross-flow. Commit `9ec9075` adds safe-total
 overflow UI coverage; `87e96a6` aligns the authorized Expo patch versions.
+Correction commit `457d9d9` covers exact fractional sale-cost preservation,
+snapshot invariants and explicit-date replay; `08871db` covers supported
+native-stack draft removal and focus/Quick Add recovery; `cb0566e` makes cost
+availability and receipt estimates merchant-readable. Migration 5 is additive
+and only adds sale-cost coverage/field triggers; migrations 1–4 remain unchanged.
 Independent audit owns the final source decision.
 
 ## Verified validation evidence
@@ -120,8 +128,8 @@ Independent audit owns the final source decision.
 
 ### M4 implementation checks
 
-- `npm run validate`: passed — 150 domain tests in 5 suites and 206 mobile
-  tests in 23 suites (356 tests / 28 suites total); strict typecheck and
+- `npm run validate`: passed — 150 domain tests in 5 suites and 214 mobile
+  tests in 23 suites (364 tests / 28 suites total); strict typecheck and
   zero-warning lint passed.
 - `npm run mobile:doctor`: 21/21 checks passed after the authorized patch
   updates (`expo-constants` ~57.0.19 and `expo-router` ~57.0.22).
@@ -129,7 +137,7 @@ Independent audit owns the final source decision.
   Expo itself remains intentionally excluded by project configuration.
 - `npm run mobile:export`: Android export passed (1,357 modules; 3.2 MB Hermes
   bundle). Generated `apps/mobile/dist` is ignored.
-- Active M3/M4 workflow JSON Schema, date-time, gate-dependency and artifact
+- Active M4 workflow JSON Schema, date-time, gate-dependency and artifact
   validation passed. The historical M2 workflow retains its previously
   recorded `tests-and-review` schema limitation.
 - `git diff --check` passed. No device,
@@ -164,9 +172,9 @@ Independent audit owns the final source decision.
 
 ## Next action
 
-Independent coordinator audit of the completed M4 source/automated evidence is
-the next action. The implementation task must return structured completion via
-send_message_to_thread to coordinator task
+Independent coordinator re-audit of the returned M4 A1–A6 source/automated
+evidence is the next action. The implementation task must return structured
+completion via send_message_to_thread to coordinator task
 `01a098ef-d830-7531-bca7-2d66b0a5b587`, then stop; no M4 code acceptance or M5
 release has occurred. Accepted M3 tickets are archived in
 `docs/engineering/tickets/M3_SALES.md`. Complete the carried
