@@ -29,7 +29,8 @@ export type OutboxEntityType =
   | 'SALE'
   | 'CUSTOMER_ACCOUNT'
   | 'RECEIVABLE'
-  | 'PURCHASE';
+  | 'PURCHASE'
+  | 'BATCH_OPERATION';
 
 export type OutboxOperationType =
   | 'PRODUCT_CREATED'
@@ -41,7 +42,8 @@ export type OutboxOperationType =
   | 'STORE_PACKAGE_SETTING_SAVED'
   | 'PRODUCT_LIFECYCLE_CHANGED'
   | 'COMPLETED_SALE_CREATED'
-  | 'COMPLETED_PURCHASE_CREATED';
+  | 'COMPLETED_PURCHASE_CREATED'
+  | 'BATCH_CLASSIFICATION_CREATED';
 
 export type CatalogueOperationType = OutboxOperationType;
 

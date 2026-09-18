@@ -30,6 +30,7 @@ export default function RootLayout() {
             <Stack.Screen name="restock" options={{ title: 'Restock' }} />
             <Stack.Screen name="purchase-history" options={{ title: 'Purchase history' }} />
             <Stack.Screen name="purchases/[id]" options={{ title: 'Restock receipt' }} />
+            <Stack.Screen name="batch-review" options={{ title: 'Review expiry stock' }} />
           </Stack>
         </DatabaseProvider>
       )}

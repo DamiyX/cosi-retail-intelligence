@@ -17,7 +17,11 @@ export default function MoreScreen() {
         <Text style={styles.actionTitle}>Purchase history</Text>
         <Text style={styles.actionBody}>Reopen saved receipts and original prices</Text>
       </Pressable>
-      <Text style={styles.comingSoon}>Inventory reconciliation, expenses, staff, and settings will appear as their milestones are delivered.</Text>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/batch-review')} style={styles.action}>
+        <Text style={styles.actionTitle}>Review expiry stock</Text>
+        <Text style={styles.actionBody}>Classify unknown stock by the dates you can verify</Text>
+      </Pressable>
+      <Text style={styles.comingSoon}>Adjustments, reconciliation counts, staff, and settings will appear as their milestones are delivered.</Text>
     </View>
   );
 }

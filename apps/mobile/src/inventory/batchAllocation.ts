@@ -6,6 +6,8 @@ import {
   createBatchInventoryOperation,
   createInventoryBatchGroup,
   getInventoryBatchGroupBalanceBigInt,
+  getBatchInventoryWatermark,
+  getInventoryLedgerWatermark,
   listInventoryBatchGroupsByStoreProduct,
   type BatchInventoryEntryRow,
   type BatchInventoryOperationRow,
@@ -206,11 +208,15 @@ export function recordSaleBatchAllocation(
   return { operation, entries };
 }
 
-export function getBatchProjectionForStoreProduct(adapter: DatabaseAdapter, storeProductId: string): {
+export interface BatchProjection {
   groups: (InventoryBatchGroupRow & { balanceBaseMicros: string })[];
   unknownResidualBaseMicros: string;
   inventoryBalanceBaseMicros: string;
-} {
+  inventoryWatermark: string;
+  batchWatermark: string;
+}
+
+export function getBatchProjectionForStoreProduct(adapter: DatabaseAdapter, storeProductId: string): BatchProjection {
   const groups = listInventoryBatchGroupsByStoreProduct(adapter, storeProductId).map((group) => ({
     ...group,
     balanceBaseMicros: getInventoryBatchGroupBalanceBigInt(adapter, group.id).toString(),
@@ -221,5 +227,7 @@ export function getBatchProjectionForStoreProduct(adapter: DatabaseAdapter, stor
     groups,
     unknownResidualBaseMicros: (inventoryBalance - named).toString(),
     inventoryBalanceBaseMicros: inventoryBalance.toString(),
+    inventoryWatermark: getInventoryLedgerWatermark(adapter, storeProductId),
+    batchWatermark: getBatchInventoryWatermark(adapter, storeProductId),
   };
 }

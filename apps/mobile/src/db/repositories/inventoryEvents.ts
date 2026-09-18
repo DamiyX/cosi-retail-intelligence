@@ -285,3 +285,13 @@ export function getInventoryBalanceBigIntByStoreProduct(
   );
   return rows.reduce((total, row) => total + BigInt(String(row.quantity_base_delta_micros)), 0n);
 }
+
+/** Stable local event watermark used to reject stale physical classifications/checks. */
+export function getInventoryLedgerWatermark(adapter: DatabaseAdapter, storeProductId: string): string {
+  const row = adapter.getFirstRow<{ rowid: number; id: string }>(
+    `SELECT rowid, id FROM inventory_events
+     WHERE store_product_id = ? ORDER BY rowid DESC LIMIT 1;`,
+    [requireId(storeProductId)],
+  );
+  return row ? `${row.rowid}:${row.id}` : '0:';
+}
