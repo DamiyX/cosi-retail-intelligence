@@ -1,6 +1,19 @@
 export { createDevice, getDeviceById, listDevicesByStore } from './devices';
 export type { CreateDeviceInput, DevicePlatform, DeviceRow } from './devices';
 export {
+  createInventoryAdjustment,
+  createInventoryAdjustmentLine,
+  getInventoryAdjustmentById,
+  listInventoryAdjustmentLinesByAdjustment,
+} from './adjustments';
+export type {
+  CreateInventoryAdjustmentInput,
+  CreateInventoryAdjustmentLineInput,
+  InventoryAdjustmentLineRow,
+  InventoryAdjustmentReason,
+  InventoryAdjustmentRow,
+} from './adjustments';
+export {
   buildOutboxEnvelope,
   countPendingOutboxOperations,
   enqueueOutboxOperation,
@@ -100,6 +113,7 @@ export {
   createInventoryEvent,
   getInventoryBalanceBigIntByStoreProduct,
   getInventoryBalanceByStoreProduct,
+  getInventoryLedgerWatermark,
   listInventoryEventsBySource,
   listInventoryEventsByStoreProduct,
 } from './inventoryEvents';
@@ -144,6 +158,7 @@ export type {
 } from './priceObservations';
 export {
   applyPurchaseCostMovement,
+  applyAdjustmentCostMovement,
   applySaleCostMovement,
   createCostMovement,
   createSaleItemCostSnapshot,

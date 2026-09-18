@@ -36,7 +36,7 @@ export interface CostMovementRow {
   id: string;
   storeId: string;
   storeProductId: string;
-  movementType: 'PURCHASE' | 'SALE';
+  movementType: 'PURCHASE' | 'SALE' | 'ADJUSTMENT';
   sourceId: string;
   sourceLineId: string;
   applicationOrder: number;
@@ -54,7 +54,7 @@ export interface CreateCostMovementInput {
   id: string;
   storeId: string;
   storeProductId: string;
-  movementType: 'PURCHASE' | 'SALE';
+  movementType: 'PURCHASE' | 'SALE' | 'ADJUSTMENT';
   sourceId: string;
   sourceLineId: string;
   quantityBaseDeltaMicros: number;
@@ -236,7 +236,7 @@ export function createCostMovement(adapter: DatabaseAdapter, input: CreateCostMo
   const storeProductId = requireId(input.storeProductId);
   const sourceId = requireId(input.sourceId);
   const sourceLineId = requireId(input.sourceLineId);
-  if (input.movementType !== 'PURCHASE' && input.movementType !== 'SALE') {
+  if (input.movementType !== 'PURCHASE' && input.movementType !== 'SALE' && input.movementType !== 'ADJUSTMENT') {
     throw new DomainError('INVALID_VALUE', 'Unsupported cost movement type.');
   }
   if (!Number.isSafeInteger(input.quantityBaseDeltaMicros) || input.quantityBaseDeltaMicros === 0) {
@@ -443,6 +443,84 @@ export function applySaleCostMovement(
   return { movement, state, transition };
 }
 
+/** Apply a sourced stock adjustment without assigning guessed value to additions. */
+export function applyAdjustmentCostMovement(
+  adapter: DatabaseAdapter,
+  input: {
+    id: string;
+    storeId: string;
+    storeProductId: string;
+    sourceId: string;
+    sourceLineId: string;
+    quantityBaseDeltaMicros: number;
+    priorInventoryBalanceBaseMicros: number;
+    forceUnknown?: boolean;
+    createdAt?: string;
+  },
+): { movement: CostMovementRow; state: CostStateRow } {
+  if (!Number.isSafeInteger(input.quantityBaseDeltaMicros) || input.quantityBaseDeltaMicros === 0) {
+    throw new DomainError('INVALID_QUANTITY', 'Adjustment quantity must be a non-zero safe integer.');
+  }
+  const currentState = getCostState(adapter, input.storeProductId);
+  const unknownState = {
+    coverageStatus: 'UNKNOWN' as const,
+    quantityCostedBaseMicros: 0,
+    remainingValue: makeRational(0),
+    averageUnitCost: null,
+  };
+  const transition = input.forceUnknown
+    ? {
+        state: unknownState,
+        costedQuantityBaseMicros: 0,
+        valueConsumed: makeRational(0),
+        available: false,
+      }
+    : input.quantityBaseDeltaMicros < 0
+    ? applySaleCostState(toCostState(currentState), {
+        priorInventoryBalanceBaseMicros: input.priorInventoryBalanceBaseMicros,
+        saleQuantityBaseMicros: -input.quantityBaseDeltaMicros,
+      })
+    : {
+        state: unknownState,
+        costedQuantityBaseMicros: 0,
+        valueConsumed: makeRational(0),
+        available: false,
+      };
+  const consumed = 'valueConsumed' in transition ? transition.valueConsumed : makeRational(0);
+  const valueNumerator = consumed.numerator === '0' ? '0' : `-${consumed.numerator}`;
+  const movement = createCostMovement(adapter, {
+    id: input.id,
+    storeId: input.storeId,
+    storeProductId: input.storeProductId,
+    movementType: 'ADJUSTMENT',
+    sourceId: input.sourceId,
+    sourceLineId: input.sourceLineId,
+    quantityBaseDeltaMicros: input.quantityBaseDeltaMicros,
+    costedQuantityDeltaMicros: input.quantityBaseDeltaMicros < 0 ? -transition.costedQuantityBaseMicros : 0,
+    value: { numerator: valueNumerator, denominator: consumed.denominator },
+    coverageStatus: input.quantityBaseDeltaMicros < 0
+      ? input.forceUnknown
+        ? 'UNKNOWN'
+        : transition.available
+          ? 'KNOWN'
+          : currentState?.coverageStatus === 'UNKNOWN' || !currentState
+            ? 'UNKNOWN'
+            : 'UNAVAILABLE'
+      : 'UNKNOWN',
+    unitCost: input.quantityBaseDeltaMicros < 0 && transition.available ? currentState?.averageUnitCost ?? null : null,
+    methodVersion: 'M5-MWA-ADJUSTMENT-1',
+    createdAt: input.createdAt,
+  });
+  const state = upsertCostState(adapter, {
+    storeProductId: input.storeProductId,
+    storeId: input.storeId,
+    state: transition.state,
+    movementId: movement.id,
+    updatedAt: input.createdAt ?? nowIso(),
+  });
+  return { movement, state };
+}
+
 export function createSaleItemCostSnapshot(
   adapter: DatabaseAdapter,
   input: CreateSaleItemCostSnapshotInput,
@@ -607,7 +685,7 @@ export function listCostMovementsByStoreProduct(adapter: DatabaseAdapter, storeP
 
 export function listCostMovementsBySource(
   adapter: DatabaseAdapter,
-  movementType: 'PURCHASE' | 'SALE',
+  movementType: 'PURCHASE' | 'SALE' | 'ADJUSTMENT',
   sourceId: string,
 ): CostMovementRow[] {
   return adapter
@@ -644,7 +722,7 @@ export function rebuildCostStateFromMovements(adapter: DatabaseAdapter, storePro
             ),
           }
         : initialCostState();
-    } else if (movement.movementType === 'SALE') {
+    } else if (movement.movementType === 'SALE' || movement.movementType === 'ADJUSTMENT') {
       const nextQuantity = Math.max(0, state.quantityCostedBaseMicros + movement.costedQuantityDeltaMicros);
       if (state.coverageStatus === 'UNKNOWN' || movement.coverageStatus === 'UNKNOWN') {
         state = {

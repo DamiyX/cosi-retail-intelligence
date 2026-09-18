@@ -8,6 +8,7 @@ import {
   listStoreProducts,
   listStores,
   type DeviceRow,
+  type InventoryAdjustmentReason,
   type StoreProductRow,
   type StoreRow,
 } from '../db/repositories';
@@ -18,6 +19,7 @@ import {
   type BatchClassificationGraph,
   type BatchClassificationMode,
 } from './classifyBatches';
+import { recordInventoryAdjustment, type InventoryAdjustmentGraph } from './adjustInventory';
 
 export interface InventoryReviewProduct {
   storeProductId: string;
@@ -49,6 +51,19 @@ export interface InventoryClient {
     groups: BatchClassificationLineInput[];
     operationId?: string;
   }): BatchClassificationGraph;
+  recordAdjustment(input: {
+    storeProductId: string;
+    expectedInventoryWatermark: string;
+    expectedBatchWatermark: string;
+    quantityBaseDeltaMicros: number;
+    groupId?: string | null;
+    packageUnitId?: string | null;
+    quantityPackageSnapshotMicros?: number | null;
+    conversionToBaseSnapshotMicros?: number | null;
+    reasonCode: InventoryAdjustmentReason;
+    note?: string | null;
+    operationId?: string;
+  }): InventoryAdjustmentGraph;
 }
 
 export interface CreateInventoryClientOptions {
@@ -140,6 +155,27 @@ export function createDatabaseInventoryClient(
     },
     classifyUnknown(input): BatchClassificationGraph {
       return this.classifyBatches({ ...input, mode: 'UNKNOWN' });
+    },
+    recordAdjustment(input): InventoryAdjustmentGraph {
+      activeProduct(adapter, store, input.storeProductId);
+      return recordInventoryAdjustment(adapter, {
+        operationId: input.operationId ?? generateId(),
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+        reasonCode: input.reasonCode,
+        note: input.note,
+        lines: [{
+          storeProductId: input.storeProductId,
+          expectedInventoryWatermark: input.expectedInventoryWatermark,
+          expectedBatchWatermark: input.expectedBatchWatermark,
+          quantityBaseDeltaMicros: input.quantityBaseDeltaMicros,
+          groupId: input.groupId,
+          packageUnitId: input.packageUnitId,
+          quantityPackageSnapshotMicros: input.quantityPackageSnapshotMicros,
+          conversionToBaseSnapshotMicros: input.conversionToBaseSnapshotMicros,
+        }],
+      }, { generateId });
     },
   };
 }

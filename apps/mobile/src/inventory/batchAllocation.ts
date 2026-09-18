@@ -48,6 +48,21 @@ export interface SaleBatchAllocationInput {
   createdAt: string;
 }
 
+export interface AdjustmentBatchAllocationInput {
+  operationId: string;
+  storeId: string;
+  storeProductId: string;
+  inventoryEventId: string;
+  sourceId: string;
+  groupId?: string | null;
+  quantityBaseDeltaMicros: number;
+  recordedByStoreMemberId: string;
+  recordedByUserId: string;
+  deviceId: string;
+  generateId: () => string;
+  createdAt: string;
+}
+
 export interface BatchAllocationResult {
   group?: InventoryBatchGroupRow;
   operation: BatchInventoryOperationRow;
@@ -206,6 +221,43 @@ export function recordSaleBatchAllocation(
   }));
   assertEntryTotal(entries, -BigInt(input.quantityBaseMicros));
   return { operation, entries };
+}
+
+export function recordAdjustmentBatchAllocation(
+  adapter: DatabaseAdapter,
+  input: AdjustmentBatchAllocationInput,
+): BatchAllocationResult {
+  if (!Number.isSafeInteger(input.quantityBaseDeltaMicros) || input.quantityBaseDeltaMicros === 0) {
+    throw new DomainError('INVALID_QUANTITY', 'Adjustment batch allocation must be a non-zero safe integer.');
+  }
+  const operation = createBatchInventoryOperation(adapter, {
+    id: input.operationId,
+    storeId: input.storeId,
+    storeProductId: input.storeProductId,
+    kind: 'EVENT_ALLOCATION',
+    inventoryEventId: input.inventoryEventId,
+    sourceType: 'MANUAL_ADJUSTMENT',
+    sourceId: input.sourceId,
+    policyVersion: 'ADJUSTMENT_ALLOCATION_V1',
+    evidenceVersion: BATCH_POLICY_VERSION,
+    recordedByStoreMemberId: input.recordedByStoreMemberId,
+    recordedByUserId: input.recordedByUserId,
+    deviceId: input.deviceId,
+    createdAt: input.createdAt,
+  });
+  const entry = createBatchInventoryEntry(adapter, {
+    id: input.generateId(),
+    operationId: operation.id,
+    storeId: input.storeId,
+    storeProductId: input.storeProductId,
+    groupId: input.groupId ?? null,
+    entryType: input.groupId ? 'ADJUSTMENT' : 'UNKNOWN_RESIDUAL',
+    deltaBaseMicros: input.quantityBaseDeltaMicros,
+    entryOrder: 1,
+    createdAt: input.createdAt,
+  });
+  assertEntryTotal([entry], BigInt(input.quantityBaseDeltaMicros));
+  return { operation, entries: [entry] };
 }
 
 export interface BatchProjection {

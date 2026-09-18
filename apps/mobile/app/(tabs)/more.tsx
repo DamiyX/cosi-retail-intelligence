@@ -21,7 +21,11 @@ export default function MoreScreen() {
         <Text style={styles.actionTitle}>Review expiry stock</Text>
         <Text style={styles.actionBody}>Classify unknown stock by the dates you can verify</Text>
       </Pressable>
-      <Text style={styles.comingSoon}>Adjustments, reconciliation counts, staff, and settings will appear as their milestones are delivered.</Text>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/adjustment')} style={styles.action}>
+        <Text style={styles.actionTitle}>Record adjustment</Text>
+        <Text style={styles.actionBody}>Remove expired, damaged, or missing stock with a reason</Text>
+      </Pressable>
+      <Text style={styles.comingSoon}>Reconciliation counts, guided checks, staff, and settings will appear as their milestones are delivered.</Text>
     </View>
   );
 }
