@@ -3,7 +3,8 @@
 Last updated: 2026-09-18  
 Current milestone: M5 batch-aware inventory/reconciliation implementation
 under D-039/D-040; M5-01 through M5-07 are implemented and awaiting independent
-audit. The implementation task is stopped at the audit gate.
+audit. The coordinator completed the first independent pass at 0a0ea94 and
+requires A01-A11 corrections before acceptance. See M5_AUDIT_CORRECTIONS.md.
 Completed engineering milestones: M0; M1 (explicit device waiver); M2 after
 independent audit; M3 and M4 source/automated scope after independent audit,
 with physical/release readiness gates carried.
@@ -106,10 +107,12 @@ evidence. M5-06 now has attention derivation, expiry precision, snooze/settings
 replay, ownership, rollback/restart, accessible action routing and retained
 input evidence. M5-07 completed full validation, Expo Doctor, dependency
 compatibility, Android export, workflow/schema/artifact checks and the route-map
-warning correction. Independent acceptance is still pending. Next: coordinator
-independent audit of the complete M5-01 through M5-07 implementation; the
-implementation-evidence and independent-audit gates remain pending.
-Implementer stops after M5-07 for coordinator independent audit. No M6 yet. Live Home remains proposed M6,
+warning correction. Coordinator independent audit at 0a0ea94 reproduced material
+contract failures despite 410 passing tests, Doctor 21/21 and Android export.
+See M5_AUDIT_CORRECTIONS.md for A01-A11 and required regressions. Independent
+acceptance is blocked; implementation-evidence remains pending. Next: the same
+implementation task corrects these findings, then stops for coordinator re-audit.
+No M6 yet. Live Home remains proposed M6,
 global Scan navigation M8, real price signals M9/M10 and staff review M11.
 
 ## Carried readiness gates

@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m5-07-implemented",
+  "current_state": "m5-independent-audit-corrections-required",
   "completed_states": [
     "m4-independent-source-automated-acceptance",
     "m5-founder-batch-fefo-approval",
@@ -199,6 +199,12 @@
         "Coordinator independent audit remains pending; implementation gate is not self-accepted."
       ],
       "observed_at": "2026-09-18T19:53:00+01:00"
+    },
+    {
+      "kind": "independent-audit",
+      "path": "docs/engineering/M5_AUDIT_CORRECTIONS.md",
+      "claim": "Coordinator independently reviewed stopped HEAD 0a0ea9477acbc158e48d2648d2bbf0b8a77b634e: 410 tests, strict typecheck, zero-warning lint, Doctor 21/21, dependency check, Android export, original migrations 1-6 and active schema checks pass; targeted SQLite probes and user-path review find A01-A11 requiring correction. No M5 acceptance or physical/release evidence.",
+      "observed_at": "2026-09-18T19:03:40.321Z"
     }
   ],
   "acceptance_gates": [
@@ -323,7 +329,7 @@
       "claim": "Coordinator independently reviews source/evidence and accepted corrections.",
       "owner": "coordinator",
       "required": true,
-      "status": "pending",
+      "status": "blocked",
       "depends_on": [
         "m5-implementation-evidence"
       ],
@@ -332,9 +338,14 @@
         "procedure": "Audit only after implementation stops; return corrections to same task and re-audit.",
         "success_condition": "No blocking findings for declared scope; carried readiness explicit."
       },
-      "evidence": [],
+      "evidence": [
+        {
+          "source": "docs/engineering/M5_AUDIT_CORRECTIONS.md",
+          "result": "Changes required at 0a0ea94; automation passes but batch finalization, FEFO unknown order, count recovery/comparison and expiry/attention/replay/control contracts require correction."
+        }
+      ],
       "limitations": [],
-      "blocker": null,
+      "blocker": "Independent audit A01-A11 require corrections and coordinator re-audit.",
       "waiver": null
     },
     {
@@ -374,7 +385,8 @@
     "docs/architecture/OFFLINE_SYNC.md",
     "docs/decisions/DECISION_LOG.md",
     "docs/design/DESIGN.md",
-    ".agents/contexts/app-flow.md"
+    ".agents/contexts/app-flow.md",
+    "docs/engineering/M5_AUDIT_CORRECTIONS.md"
   ],
   "approvals": [
     {
@@ -387,8 +399,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Stop implementation on feat/m5-inventory-reconciliation and hand off the clean M5-01 through M5-07 branch for coordinator independent audit. Keep implementation-evidence and independent-audit gates pending; no M6, push, merge or deployment.",
+  "next_action": "Return A01-A11 to the same M5 implementation task 01a0b525-289e-7b40-8f4b-2701fe541ad9 and branch. Commit audit checkpoint separately, implement corrections with failing-before regression evidence, return a clean full handoff and stop for coordinator re-audit. No M6/push/merge/deployment.",
   "created_at": "2026-09-18T12:55:50.482Z",
-  "updated_at": "2026-09-18T19:53:00+01:00",
+  "updated_at": "2026-09-18T19:03:40.322Z",
   "archived": false
 }
