@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { AppState, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { AttentionItem, AttentionOverview } from '../../inventory/attention';
 import type { InventoryClient } from '../../inventory/client';
@@ -49,7 +49,6 @@ export default function AttentionScreen({ client, onBack, onRestock, onReconcile
   const [chooseText, setChooseText] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const initialFocusHandledRef = useRef(false);
 
   const refresh = useCallback((): void => {
     const next = read(client);
@@ -60,15 +59,15 @@ export default function AttentionScreen({ client, onBack, onRestock, onReconcile
 
   useEffect(() => {
     if (!isFocused) return undefined;
-    if (!initialFocusHandledRef.current) {
-      initialFocusHandledRef.current = true;
-      return undefined;
-    }
     const frame = requestAnimationFrame(refresh);
     const interval = setInterval(refresh, 60_000);
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') refresh();
+    });
     return () => {
       cancelAnimationFrame(frame);
       clearInterval(interval);
+      subscription.remove();
     };
   }, [isFocused, refresh]);
 

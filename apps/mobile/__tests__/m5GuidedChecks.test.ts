@@ -68,6 +68,7 @@ describe('M5 guided owner checks', () => {
       const beforeOutbox = countRows(fixture.adapter, 'outbox_operations');
       const generated = client.generateGuidedChecks({ operationId: testId(7400), now: at });
       expect(generated.assignments).toHaveLength(3);
+      expect(generated.overview).toMatchObject({ generatedInitialCount: 3, pendingAssignmentCount: 3, completedInitialCount: 0, replacedAssignmentCount: 0, exhaustedAssignmentCount: 0, reason: 'PENDING_WORK' });
       expect(generated.assignments.every((assignment) => BigInt(assignment.inventoryBalanceBaseMicros) > 0n)).toBe(true);
       expect(countRows(fixture.adapter, 'outbox_operations')).toBe(beforeOutbox + 1);
       const replay = client.generateGuidedChecks({ operationId: testId(7400), now: at });
@@ -172,6 +173,7 @@ describe('M5 guided owner checks', () => {
         expect(exhausted.exhausted).toBe(true);
         expect(exhausted.replacementAssignment).toBeNull();
         expect(exhausted.replacedAssignment.status).toBe('EXHAUSTED');
+        expect(exhausted.overview).toMatchObject({ completedInitialCount: 0, remainingTarget: 1, reason: 'NO_ELIGIBLE_CANDIDATE', exhaustedAssignmentCount: 1 });
         expect(listInventoryCheckAssignmentsByStore(solo.fixture.adapter, solo.fixture.context.store.id)).toHaveLength(1);
       } finally {
         solo.fixture.closeAndDelete();

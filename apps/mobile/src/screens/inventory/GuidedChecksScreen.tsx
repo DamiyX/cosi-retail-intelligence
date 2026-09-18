@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { AppState, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { GuidedCheckOverview, GuidedCheckAssignmentView } from '../../inventory/guidedChecks';
 import type { InventoryClient } from '../../inventory/client';
@@ -49,7 +49,6 @@ export default function GuidedChecksScreen({ client, onBack, onStartCheck, isFoc
   const [reasonByAssignment, setReasonByAssignment] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const initialFocusHandledRef = useRef(false);
 
   const refresh = useCallback((): void => {
     const next = read(client);
@@ -59,13 +58,15 @@ export default function GuidedChecksScreen({ client, onBack, onStartCheck, isFoc
   }, [client]);
 
   useEffect(() => {
-    if (!isFocused) return;
-    if (!initialFocusHandledRef.current) {
-      initialFocusHandledRef.current = true;
-      return;
-    }
+    if (!isFocused) return undefined;
     const frame = requestAnimationFrame(refresh);
-    return () => cancelAnimationFrame(frame);
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') refresh();
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      subscription.remove();
+    };
   }, [isFocused, refresh]);
 
   const saveSettings = (): void => {
@@ -142,7 +143,8 @@ export default function GuidedChecksScreen({ client, onBack, onStartCheck, isFoc
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Today · {overview.completedInitialCount}/{overview.settings.dailyTarget} initial checks</Text>
-        <Text style={styles.meta}>{overview.reason === 'PAUSED' ? 'Routine paused.' : overview.reason === 'OUTSIDE_WINDOW' ? 'Outside the store-local check window.' : overview.reason === 'NO_ELIGIBLE_CANDIDATE' ? 'No active product with positive recorded stock is eligible right now.' : overview.reason === 'TARGET_MET' ? 'Today’s target is complete.' : 'Use the generated list as a short shelf walk.'}</Text>
+        <Text style={styles.meta}>Generated {overview.generatedInitialCount} · pending {overview.pendingAssignmentCount} · replaced {overview.replacedAssignmentCount} · exhausted {overview.exhaustedAssignmentCount}</Text>
+        <Text style={styles.meta}>{overview.reason === 'PAUSED' ? 'Routine paused.' : overview.reason === 'OUTSIDE_WINDOW' ? 'Outside the store-local check window.' : overview.reason === 'PENDING_WORK' ? `${overview.pendingAssignmentCount} pending check${overview.pendingAssignmentCount === 1 ? '' : 's'} must be completed or replaced before another list is generated.` : overview.reason === 'NO_ELIGIBLE_CANDIDATE' ? `No eligible product is available. ${overview.completedInitialCount}/${overview.settings.dailyTarget} initial checks completed; no further assignment was made.` : overview.reason === 'TARGET_MET' ? `Target complete: ${overview.completedInitialCount} initial check${overview.completedInitialCount === 1 ? '' : 's'} completed.` : 'Use the generated list as a short shelf walk.'}</Text>
         <PrimaryButton title={saving ? 'Working…' : 'Generate today’s checks'} onPress={generate} disabled={saving || overview.reason === 'PAUSED' || overview.reason === 'OUTSIDE_WINDOW' || overview.reason === 'PENDING_WORK' || overview.reason === 'TARGET_MET'} />
       </View>
 

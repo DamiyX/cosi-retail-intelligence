@@ -27,7 +27,33 @@ function seed() {
 }
 
 describe('GuidedChecksScreen', () => {
-  it('shows the owner routine and preserves settings after a durable save failure', () => {
+  it('refreshes when a first focused mount reveals a newly assigned check', async () => {
+    const { fixture, client: realClient } = seed();
+    try {
+      realClient.generateGuidedChecks({ operationId: testId(7840), now: '2026-09-18T10:00:00.000Z' });
+      const current = realClient.getGuidedCheckOverview('2026-09-18T10:00:00.000Z');
+      const stale = { ...current, pending: [], today: [], reason: 'READY' as const, generatedInitialCount: 0, pendingAssignmentCount: 0, completedInitialCount: 0, replacedAssignmentCount: 0, exhaustedAssignmentCount: 0, remainingTarget: 3 };
+      let firstRead = true;
+      const client: InventoryClient = {
+        ...realClient,
+        getGuidedCheckOverview: () => {
+          if (firstRead) {
+            firstRead = false;
+            return stale;
+          }
+          return current;
+        },
+      };
+      const view = render(<GuidedChecksScreen client={client} onBack={() => undefined} onStartCheck={() => undefined} isFocused={false} />);
+      expect(screen.queryByText('Rice')).toBeNull();
+      view.rerender(<GuidedChecksScreen client={client} onBack={() => undefined} onStartCheck={() => undefined} isFocused />);
+      await waitFor(() => expect(screen.getByText('Rice')).toBeTruthy());
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('shows the owner routine and preserves settings after a durable save failure', async () => {
     const { fixture, client: realClient } = seed();
     try {
       const client: InventoryClient = {
@@ -37,7 +63,7 @@ describe('GuidedChecksScreen', () => {
         },
       };
       render(<GuidedChecksScreen client={client} onBack={() => undefined} onStartCheck={() => undefined} />);
-      expect(screen.getByText('Guided stock checks')).toBeTruthy();
+      await waitFor(() => expect(screen.getByText('Guided stock checks')).toBeTruthy());
       fireEvent.changeText(screen.getByTestId('guided-daily-target'), '5');
       fireEvent.press(screen.getByText('Save routine settings'));
       expect(screen.getByText('Storage unavailable.')).toBeTruthy();

@@ -67,7 +67,11 @@ export interface GuidedCheckOverview {
   withinWindow: boolean;
   settings: GuidedCheckSettings;
   reason: GuidedCheckOverviewReason;
+  generatedInitialCount: number;
+  pendingAssignmentCount: number;
   completedInitialCount: number;
+  replacedAssignmentCount: number;
+  exhaustedAssignmentCount: number;
   remainingTarget: number;
   eligibleCandidateCount: number;
   pending: GuidedCheckAssignmentView[];
@@ -309,7 +313,13 @@ function overviewFor(adapter: DatabaseAdapter, actor: GuidedCheckActor, atIso: s
   const today = todayRows.map((assignment) => assignmentView(adapter, assignment));
   const excluded = new Set(todayRows.map((assignment) => assignment.storeProductId));
   const candidates = selectionCandidates(adapter, store.id, excluded);
-  const completedInitialCount = todayRows.filter((assignment) => assignment.assignmentKind === 'INITIAL').length;
+  const generatedInitialCount = todayRows.filter((assignment) => assignment.assignmentKind === 'INITIAL').length;
+  const initialRootIds = new Set(todayRows.filter((assignment) => assignment.assignmentKind === 'INITIAL').map((assignment) => assignment.rootAssignmentId));
+  const completedRootIds = new Set(todayRows.filter((assignment) => assignment.status === 'COMPLETED').map((assignment) => assignment.rootAssignmentId));
+  const completedInitialCount = [...initialRootIds].filter((rootId) => completedRootIds.has(rootId)).length;
+  const pendingAssignmentCount = pending.length;
+  const replacedAssignmentCount = todayRows.filter((assignment) => assignment.status === 'REPLACED').length;
+  const exhaustedAssignmentCount = todayRows.filter((assignment) => assignment.status === 'EXHAUSTED').length;
   const remainingTarget = Math.max(0, settings.dailyTarget - completedInitialCount);
   let reason: GuidedCheckOverviewReason = 'READY';
   if (settings.paused) reason = 'PAUSED';
@@ -323,7 +333,11 @@ function overviewFor(adapter: DatabaseAdapter, actor: GuidedCheckActor, atIso: s
     withinWindow: withinWindow(settings, time.minute),
     settings,
     reason,
+    generatedInitialCount,
+    pendingAssignmentCount,
     completedInitialCount,
+    replacedAssignmentCount,
+    exhaustedAssignmentCount,
     remainingTarget,
     eligibleCandidateCount: candidates.length,
     pending,
