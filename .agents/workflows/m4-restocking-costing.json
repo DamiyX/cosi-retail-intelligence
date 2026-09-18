@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "implementation-complete-awaiting-independent-audit",
+  "current_state": "partial-implementation-returned-for-completion",
   "completed_states": [
     "m3-independent-source-automated-acceptance",
     "m4-intake",
@@ -38,6 +38,11 @@
       "kind": "validation",
       "path": "3c4eef9",
       "claim": "Implementation handoff passed full workspace validation: 148 domain tests in 5 suites, 189 mobile tests in 22 suites, strict typecheck and zero-warning lint; Android export passed. Expo Doctor and Expo install check report the same two patch-version mismatches, and physical/device/cloud checks were not performed."
+    },
+    {
+      "kind": "completeness-review",
+      "path": "docs/engineering/M4_IMPLEMENTATION_HANDOFF.md",
+      "claim": "Coordinator collected truthful partial handoff at 376a918 and independently confirmed missing UI scope and dedicated M4 evidence. Full code audit/acceptance not performed; findings returned to same implementation task."
     }
   ],
   "acceptance_gates": [
@@ -118,7 +123,7 @@
       "claim": "M4 tickets have actual passing checks and recoverable commits.",
       "owner": "implementation-task-01a0b1a5-4512-79f0-ae55-58d39559944d",
       "required": true,
-      "status": "met",
+      "status": "pending",
       "depends_on": [
         "m4-tickets-released"
       ],
@@ -139,7 +144,7 @@
         "Expo Doctor and Expo install check report expo-constants and expo-router patch-version drift; no dependency update was authorized.",
         "Physical/device/cloud/release checks remain unperformed and are not source acceptance evidence."
       ],
-      "blocker": null,
+      "blocker": "Published required scope and compatibility/evidence gaps must be completed before this gate is met.",
       "waiver": null
     },
     {
@@ -195,7 +200,8 @@
     "docs/architecture/DOMAIN_DATA_MODEL.md",
     "docs/architecture/TECHNICAL_ARCHITECTURE.md",
     "docs/design/DESIGN.md",
-    ".agents/contexts/app-flow.md"
+    ".agents/contexts/app-flow.md",
+    "docs/engineering/M4_IMPLEMENTATION_HANDOFF.md"
   ],
   "approvals": [
     {
@@ -207,9 +213,13 @@
       "scope": "Founder explicitly approved proposed M4 cost/design rules and instructed coordinator to send M4 implementation to the separate AI task; D-038 and DESIGN record the approved contract."
     }
   ],
-  "blockers": [],
-  "next_action": "Coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 independently audits commit 3c4eef9 against M4 tickets and D-038, returns any corrections to this same task, and records source acceptance separately. Do not begin M5.",
+  "blockers": [
+    "M4-02 cart/unit-cost/supplier UI incomplete.",
+    "M4-04 product purchase-price history incomplete.",
+    "Required new-boundary test/cross-flow evidence incomplete; Expo compatibility checks fail."
+  ],
+  "next_action": "Same Luna max task completes published M4 scope and evidence according to M4_IMPLEMENTATION_HANDOFF.md, applies authorized compatible patches, then sends structured handoff via send_message_to_thread to coordinator 01a098ef-d830-7531-bca7-2d66b0a5b587 and stops. Full independent audit follows; do not begin M5.",
   "created_at": "2026-09-17T23:22:42Z",
-  "updated_at": "2026-09-18T09:54:27Z",
+  "updated_at": "2026-09-18T10:03:43Z",
   "archived": false
 }

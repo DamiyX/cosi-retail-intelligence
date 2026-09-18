@@ -1,9 +1,9 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-18  
-Current milestone: M4 Restocking + Costing — implementation evidence handed
-back at `3c4eef9`; independent audit and physical/release evidence remain
-pending.  
+Current milestone: M4 Restocking + Costing — PARTIAL implementation; completion
+required before independent audit. Existing source evidence and physical/release
+gates remain pending.  
 Completed engineering milestones: M0 Project Foundation; M1 Domain + Local
 Database (accepted with an explicit device waiver); M2 Catalogue + Package Units
 (accepted after independent audit); M3 source/automated scope (accepted after
@@ -160,10 +160,14 @@ handoff. Independent audit owns the final source decision.
 
 ## Next action
 
-The implementation task has returned commit `3c4eef9` and evidence to the
-coordinating task. The next action is independent audit against the approved
-M4_RESTOCKING_COSTING_PLAN, D-038, DESIGN and ticket criteria; do not self-accept
-or start M5. Accepted M3 tickets are archived in
+Complete outstanding M4 scope and evidence in the same Luna max task/branch,
+following `M4_IMPLEMENTATION_HANDOFF.md` findings S1/S2/T1/T2/T3 and the approved
+plan/tickets. Compatible expo-constants/expo-router patch corrections are
+specifically authorized; no SDK/major dependency change. Return structured
+completion via send_message_to_thread to coordinator task
+`01a098ef-d830-7531-bca7-2d66b0a5b587`, then stop for full independent audit.
+The coordinator collected the partial report and performed a completeness
+review only; no M4 code acceptance or M5 release has occurred. Accepted M3 tickets are archived in
 `docs/engineering/tickets/M3_SALES.md`. Complete the carried
 M3 physical-device/offline-sale, development-client/Metro, large-text, and
 second-laptop reproduction checks before any external beta or native-release

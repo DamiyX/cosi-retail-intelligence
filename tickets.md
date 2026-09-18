@@ -1,6 +1,6 @@
 # Tickets: M4 Offline Restocking + Provisional Costing
 
-**Status:** IMPLEMENTATION HANDOFF; independent audit pending. Founder approved the M4 costing and
+**Status:** PARTIAL implementation; coordinator completeness review requires completion before full independent audit. Founder approved the M4 costing and
 screen/state contract on 2026-09-18; D-038 and DESIGN record the approved rules.
 Coordinator verified ticket granularity/dependencies under delegated judgment.
 **Branch:** feat/m4-restocking-costing. **Accepted baseline:** 66cc64d.
