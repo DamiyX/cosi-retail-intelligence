@@ -505,10 +505,15 @@ function validateEventAllocationGraph(
     store_product_id: string;
     event_type: string;
     quantity_base_delta_micros: string | number;
+    package_unit_id: string | null;
+    quantity_package_snapshot_micros: string | number | null;
+    conversion_to_base_snapshot_micros: string | number | null;
     source_type: string;
     source_id: string | null;
   }>(
-    `SELECT store_id, store_product_id, event_type, quantity_base_delta_micros, source_type, source_id
+    `SELECT store_id, store_product_id, event_type, quantity_base_delta_micros,
+            package_unit_id, quantity_package_snapshot_micros,
+            conversion_to_base_snapshot_micros, source_type, source_id
      FROM inventory_events WHERE id = ?;`,
     [operation.inventoryEventId],
   );
@@ -526,14 +531,32 @@ function validateEventAllocationGraph(
     if (event.event_type !== 'PURCHASE' || !event.source_id || total <= 0n) {
       throw new DomainError('INVALID_VALUE', 'Purchase batch allocation has an invalid event source or direction.');
     }
-    const parent = adapter.getFirstRow<{ id: string; quantity_base_micros: string | number }>(
+    const parent = adapter.getFirstRow<{
+      id: string;
+      quantity_base_micros: string | number;
+      package_unit_id: string;
+      quantity_packages_micros: string | number;
+      conversion_to_base_snapshot_micros: string | number;
+    }>(
       `SELECT pi.id, pi.quantity_base_micros
        FROM purchase_items pi
        JOIN purchases p ON p.id = pi.purchase_id
        WHERE pi.purchase_id = ? AND pi.store_id = ? AND pi.store_product_id = ?
          AND p.store_id = ? AND pi.quantity_base_micros = ?
+         AND pi.package_unit_id IS ?
+         AND pi.quantity_packages_micros IS ?
+         AND pi.conversion_to_base_snapshot_micros IS ?
        ORDER BY pi.id ASC LIMIT 1;`,
-      [event.source_id, operation.storeId, operation.storeProductId, operation.storeId, Number(total)],
+      [
+        event.source_id,
+        operation.storeId,
+        operation.storeProductId,
+        operation.storeId,
+        Number(total),
+        event.package_unit_id,
+        event.quantity_package_snapshot_micros,
+        event.conversion_to_base_snapshot_micros,
+      ],
     );
     if (!parent) throw new DomainError('INVALID_VALUE', 'Purchase batch allocation is missing its immutable purchase item.');
     const group = adapter.getFirstRow<{ id: string; quantity_received_base_micros: string | number }>(
