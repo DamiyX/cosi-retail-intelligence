@@ -93,7 +93,7 @@
     {
       "kind": "validation",
       "path": "apps/mobile/__tests__/m5Classification.test.ts; apps/mobile/__tests__/m5InventoryReview.test.tsx",
-      "claim": "M5-02 implementation commits ea8bfbd, 79a9c23 and 5bd7b2d add owner-only unknown-stock classification, immutable net-zero breakdown correction, actual inventory/batch watermarks, replay/conflict handling, retained-input review UI and all-write rollback coverage without product inventory or cost mutation.",
+      "claim": "M5-02 implementation commits ea8bfbd, 79a9c23, 5bd7b2d and ca3cc99 add owner-only unknown-stock classification, immutable net-zero breakdown correction, actual inventory/batch watermarks, replay/conflict authorization, retained-input review UI and all-write rollback coverage without product inventory or cost mutation.",
       "checks": [
         "npm run typecheck --workspace @retail/mobile PASS",
         "npm run lint --workspace @retail/mobile PASS with zero warnings",

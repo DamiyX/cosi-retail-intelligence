@@ -14,8 +14,8 @@ with physical/release readiness gates carried.
 - Canonical remote: https://github.com/DamiyX/cosi-retail-intelligence
 - Branch: feat/m5-inventory-reconciliation. Documentation ownership checkpoint:
   527a035. M5-01 implementation commit: f453b0a. M5-02 implementation commits:
-  ea8bfbd, 79a9c23 and 5bd7b2d. Working tree was clean at task start; M5-03 is
-  now the active uncommitted implementation slice.
+  ea8bfbd, 79a9c23, 5bd7b2d and ca3cc99. Working tree was clean at task start;
+  M5-03 is now the active uncommitted implementation slice.
 - Accepted M3 checkpoint: 66cc64d; approved M4 plan/contract checkpoint: db5a835.
 - Coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 owns product review,
   plans, tickets, workflow registration and independent acceptance. M5

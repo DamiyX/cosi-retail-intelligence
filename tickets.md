@@ -82,8 +82,9 @@ history, product group-review UI with retained input/retry and actual watermark.
 **Implementation evidence (awaiting independent audit):**
 
 - Commits: `ea8bfbd` (`feat(M5-02): add owner batch classification`),
-  `79a9c23` (`fix(M5-02): support classification corrections`) and `5bd7b2d`
-  (`test(M5-02): cover classification authorization boundaries`).
+  `79a9c23` (`fix(M5-02): support classification corrections`), `5bd7b2d`
+  (`test(M5-02): cover classification authorization boundaries`) and `ca3cc99`
+  (`fix(M5-02): authorize classification replays`).
 - Added owner-only physical classification and correction commands using schema
   v7 net-zero batch operations. Unknown residual classification and complete
   named-breakdown replacement create immutable inspected groups and signed
