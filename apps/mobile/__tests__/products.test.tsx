@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Alert, BackHandler } from 'react-native';
+import { MICROS_PER_UNIT } from '@retail/domain';
 
 import {
   createCatalogueClient,
@@ -12,7 +13,8 @@ import {
   type QuickAddInput,
   type TemporaryProductGraph,
 } from '../src/catalogue/client';
-import type { ProductLifecycleFilter, ProductSearchHit } from '../src/db/repositories';
+import { createDatabasePurchasesClient } from '../src/purchases/client';
+import { getActiveBasePackageUnit, type ProductLifecycleFilter, type ProductSearchHit } from '../src/db/repositories';
 import ProductDetailScreen from '../src/screens/products/ProductDetailScreen';
 import PackageFormScreen from '../src/screens/products/PackageFormScreen';
 import ProductsListScreen from '../src/screens/products/ProductsListScreen';
@@ -29,6 +31,7 @@ function stubClient(overrides: Partial<CatalogueClient> = {}): CatalogueClient {
       throw new Error('Stub catalogue cannot save.');
     },
     getProductDetail: (_productId: string): ProductDetail | null => null,
+    getPurchasePriceHistory: () => [],
     updateProductIdentity: (): ProductIdentityResult => {
       throw new Error('Stub catalogue cannot save.');
     },
@@ -299,6 +302,92 @@ describe('ProductDetailScreen', () => {
       expect(screen.getByText('Local SKU: ML-400')).toBeTruthy();
       expect(screen.getByText('Status: Active')).toBeTruthy();
       expect(screen.getByText('piece (Base unit)')).toBeTruthy();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('shows store-private original purchase price history with saved package facts', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(
+        fixture.adapter,
+        fixture.context.store,
+        fixture.context.device,
+        deterministicIds(8050),
+      );
+      const graph = catalogue.createTemporaryProduct({ name: 'History rice' });
+      const base = getActiveBasePackageUnit(fixture.adapter, graph.variant.id);
+      if (!base) throw new Error('Base package fixture missing.');
+      const purchases = createDatabasePurchasesClient(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        generateId: deterministicIds(8060),
+      });
+      purchases.recordPurchase({
+        lines: [{
+          storeProductId: graph.storeProduct.id,
+          packageUnitId: base.id,
+          quantityPackagesMicros: 2 * MICROS_PER_UNIT,
+          enteredCostMinor: 750,
+        }],
+        supplierName: 'History supplier',
+        operationId: '00000000-0000-4000-8000-000000008061',
+      });
+      render(
+        <ProductDetailScreen
+          client={catalogue}
+          productId={graph.storeProduct.id}
+          onBack={() => undefined}
+          onAddPackage={() => undefined}
+          onEditPackage={() => undefined}
+        />,
+      );
+      expect(screen.getByText('Purchase price history')).toBeTruthy();
+      expect(screen.getByText('Entered total cost: ₦7.50')).toBeTruthy();
+      expect(screen.getByText('Purchase total: ₦7.50')).toBeTruthy();
+      expect(screen.getByText('Normalized base cost: 375/1 minor units per base unit')).toBeTruthy();
+      expect(screen.getByText('Current cost availability: Estimated cost available')).toBeTruthy();
+      expect(screen.getByText('Supplier: History supplier')).toBeTruthy();
+      expect(screen.getByText(/Contribution: off/)).toBeTruthy();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('recovers from a purchase-price history read failure without losing the product detail', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(
+        fixture.adapter,
+        fixture.context.store,
+        fixture.context.device,
+        deterministicIds(8070),
+      );
+      const graph = catalogue.createTemporaryProduct({ name: 'Retry history' });
+      let historyReads = 0;
+      const failingClient: CatalogueClient = {
+        ...catalogue,
+        getPurchasePriceHistory: () => {
+          historyReads += 1;
+          if (historyReads === 1) throw new Error('History read failed in test.');
+          return [];
+        },
+      };
+      render(
+        <ProductDetailScreen
+          client={failingClient}
+          productId={graph.storeProduct.id}
+          onBack={() => undefined}
+          onAddPackage={() => undefined}
+          onEditPackage={() => undefined}
+        />,
+      );
+      expect(screen.getByText('Purchase price history unavailable')).toBeTruthy();
+      fireEvent.press(screen.getByText('Try again'));
+      expect(screen.getByText('No purchase price history yet.')).toBeTruthy();
+      expect(historyReads).toBe(2);
     } finally {
       fixture.closeAndDelete();
     }

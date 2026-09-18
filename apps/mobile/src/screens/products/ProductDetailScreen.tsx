@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { CatalogueClient, ProductDetail } from '../../catalogue/client';
-import type { IdentifierType } from '../../db/repositories';
+import type { IdentifierType, PurchasePriceHistoryRow } from '../../db/repositories';
 import { ErrorPanel, Field, PrimaryButton, SecondaryButton, StatusNote } from '../../ui/components';
 import { displayMoney } from '../../ui/money';
 import { theme } from '../../ui/theme';
@@ -22,6 +22,16 @@ interface DetailState {
   failure: string | null;
 }
 
+interface PriceHistoryState {
+  rows: PurchasePriceHistoryRow[];
+  failure: string | null;
+}
+
+interface ScreenState {
+  detail: DetailState;
+  priceHistory: PriceHistoryState;
+}
+
 const IDENTIFIER_TYPES: readonly { type: IdentifierType; label: string }[] = [
   { type: 'EAN', label: 'EAN barcode' },
   { type: 'UPC', label: 'UPC barcode' },
@@ -37,6 +47,27 @@ function load(client: CatalogueClient, productId: string): DetailState {
   }
 }
 
+function loadPriceHistory(client: CatalogueClient, productId: string): PriceHistoryState {
+  try {
+    return { rows: client.getPurchasePriceHistory(productId), failure: null };
+  } catch (error) {
+    return {
+      rows: [],
+      failure: error instanceof Error ? error.message : 'Purchase price history could not be read.',
+    };
+  }
+}
+
+function loadScreen(client: CatalogueClient, productId: string): ScreenState {
+  const detail = load(client, productId);
+  return {
+    detail,
+    priceHistory: detail.detail
+      ? loadPriceHistory(client, detail.detail.product.id)
+      : { rows: [], failure: null },
+  };
+}
+
 /**
  * M2-02 product detail: identity display plus rename, local-SKU edit, and
  * identifier management. Package management lands in M2-03 and lifecycle
@@ -50,7 +81,7 @@ export default function ProductDetailScreen({
   onAddPackage,
   onEditPackage,
 }: ProductDetailScreenProps) {
-  const [state, setState] = useState<DetailState>(() => load(client, productId));
+  const [screen, setScreen] = useState<ScreenState>(() => loadScreen(client, productId));
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [localSku, setLocalSku] = useState('');
@@ -63,7 +94,21 @@ export default function ProductDetailScreen({
   const [saving, setSaving] = useState(false);
   const [confirmingDeactivate, setConfirmingDeactivate] = useState(false);
 
+  const state = screen.detail;
   const detail = state.detail;
+  const priceHistory = screen.priceHistory;
+  const refresh = useCallback((): void => {
+    setScreen(loadScreen(client, productId));
+  }, [client, productId]);
+  const retryPriceHistory = useCallback((): void => {
+    if (!detail) {
+      return;
+    }
+    setScreen((current) => ({
+      ...current,
+      priceHistory: loadPriceHistory(client, detail.product.id),
+    }));
+  }, [client, detail]);
   const identityDirty = Boolean(
     editing && detail && (name !== detail.variant.name || localSku !== (detail.product.localSku ?? '')),
   );
@@ -130,7 +175,7 @@ export default function ProductDetailScreen({
         name: name.trim(),
         localSku: localSku.trim().length === 0 ? null : localSku.trim(),
       });
-      setState(load(client, productId));
+      refresh();
       setEditing(false);
     } catch (error) {
       if (error instanceof DomainError && error.message.toLowerCase().includes('sku')) {
@@ -153,7 +198,7 @@ export default function ProductDetailScreen({
     setFailure(null);
     try {
       client.markProductEnriched({ storeProductId: detail.product.id });
-      setState(load(client, productId));
+      refresh();
     } catch {
       setFailure('This product could not be marked enriched. Nothing was changed.');
     } finally {
@@ -174,7 +219,7 @@ export default function ProductDetailScreen({
     try {
       client.setProductActive({ storeProductId: detail.product.id }, active);
       setConfirmingDeactivate(false);
-      setState(load(client, productId));
+      refresh();
     } catch {
       setFailure('This product status could not be changed. Nothing was changed.');
     } finally {
@@ -200,7 +245,7 @@ export default function ProductDetailScreen({
       });
       setIdentifierValue('');
       setIdentifierError(null);
-      setState(load(client, productId));
+      refresh();
     } catch (error) {
       if (error instanceof DomainError) {
         setIdentifierError(error.message);
@@ -218,7 +263,7 @@ export default function ProductDetailScreen({
         <ErrorPanel
           title="Product unavailable"
           message="This product could not be read from the device."
-          onRetry={() => setState(load(client, productId))}
+          onRetry={refresh}
           onDismiss={requestBack}
         />
       ) : (
@@ -373,6 +418,36 @@ export default function ProductDetailScreen({
             <SecondaryButton title="Add package" onPress={onAddPackage} />
           </View>
           <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Purchase price history</Text>
+            <Text style={styles.line}>Store-private original purchase prices. Later product or package edits do not rewrite these facts.</Text>
+            {priceHistory.failure !== null ? (
+              <ErrorPanel
+                title="Purchase price history unavailable"
+                message="The saved purchase prices could not be read from this device."
+                onRetry={retryPriceHistory}
+              />
+            ) : priceHistory.rows.length === 0 ? (
+              <Text style={styles.line}>No purchase price history yet.</Text>
+            ) : (
+              priceHistory.rows.map((entry) => (
+                <View key={entry.id} style={styles.historyRow}>
+                  <Text style={styles.line}>{entry.productNameSnapshot}</Text>
+                  <Text style={styles.line}>
+                    {formatQuantityMicros(entry.quantityPackagesMicros)} {entry.packageNameSnapshot} · 1 package = {formatQuantityMicros(entry.conversionToBaseSnapshotMicros)} base units
+                  </Text>
+                  <Text style={styles.line}>Entered {entry.costBasis.toLowerCase()} cost: {displayMoney(entry.enteredCostMinor, entry.currencyCode)}</Text>
+                  <Text style={styles.line}>Purchase total: {displayMoney(entry.totalPurchaseCostMinor, entry.currencyCode)}</Text>
+                  <Text style={styles.line}>Normalized base cost: {entry.baseUnitCostNumerator}/{entry.baseUnitCostDenominator} minor units per base unit</Text>
+                  <Text style={styles.line}>
+                    Current cost availability: {entry.currentCostCoverageStatus === 'KNOWN' ? 'Estimated cost available' : 'Unavailable; do not infer profit'}
+                  </Text>
+                  <Text style={styles.line}>Supplier: {entry.supplierNameSnapshot ?? 'Not recorded'}</Text>
+                  <Text style={styles.line}>Observed: {new Date(entry.occurredAt).toLocaleString()} · Contribution: off</Text>
+                </View>
+              ))
+            )}
+          </View>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Product status</Text>
             {detail.product.isTemporary ? (
               <Text style={styles.line}>
@@ -419,6 +494,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: { color: theme.color.textPrimary, fontSize: theme.fontSize.body, fontWeight: '700' },
   line: { color: theme.color.textSecondary, fontSize: theme.fontSize.body, lineHeight: 26 },
+  historyRow: { borderTopColor: theme.color.border, borderTopWidth: 1, paddingTop: theme.spacing(2), gap: theme.spacing(1) },
   packageRow: {
     borderColor: theme.color.border,
     borderWidth: 1,

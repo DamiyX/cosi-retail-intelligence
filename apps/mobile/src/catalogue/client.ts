@@ -37,12 +37,14 @@ import {
   listStores,
   listStorePackageSettings,
   listStoreProducts,
+  listPurchasePriceHistoryByStoreProduct,
   type DeviceRow,
   type PackageUnitRow,
   type ProductIdentifierRow,
   type ProductLifecycleFilter,
   type ProductSearchHit,
   type ProductVariantRow,
+  type PurchasePriceHistoryRow,
   type StorePackageSettingRow,
   type StoreProductRow,
   type StoreRow,
@@ -85,6 +87,7 @@ export interface CatalogueClient {
   listProducts(query: string, filter?: ProductLifecycleFilter): ProductSearchHit[];
   createTemporaryProduct(input: QuickAddInput): TemporaryProductGraph;
   getProductDetail(productId: string): ProductDetail | null;
+  getPurchasePriceHistory(storeProductId: string): PurchasePriceHistoryRow[];
   updateProductIdentity(
     input: Omit<UpdateProductIdentityInput, 'storeId' | 'deviceId'> & { storeProductId: string },
   ): ProductIdentityResult;
@@ -148,6 +151,13 @@ export function createCatalogueClient(
         identifiers: listProductIdentifiers(adapter, variant.id),
         settings: listStorePackageSettings(adapter, product.id),
       };
+    },
+    getPurchasePriceHistory(storeProductId: string): PurchasePriceHistoryRow[] {
+      const product = getStoreProductById(adapter, storeProductId);
+      if (!product || product.storeId !== store.id) {
+        return [];
+      }
+      return listPurchasePriceHistoryByStoreProduct(adapter, store.id, product.id);
     },
     updateProductIdentity(
       input: Omit<UpdateProductIdentityInput, 'storeId' | 'deviceId'> & { storeProductId: string },

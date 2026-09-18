@@ -132,10 +132,15 @@ export type { CreatePurchaseItemInput, PurchaseItemRow } from './purchaseItems';
 export {
   createPriceObservation,
   getPriceObservationById,
+  listPurchasePriceHistoryByStoreProduct,
   listPriceObservationsByPurchaseItemId,
   listPriceObservationsByStoreProduct,
 } from './priceObservations';
-export type { CreatePriceObservationInput, PriceObservationRow } from './priceObservations';
+export type {
+  CreatePriceObservationInput,
+  PriceObservationRow,
+  PurchasePriceHistoryRow,
+} from './priceObservations';
 export {
   applyPurchaseCostMovement,
   applySaleCostMovement,

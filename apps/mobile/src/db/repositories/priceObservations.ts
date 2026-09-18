@@ -1,4 +1,4 @@
-import { DomainError, type PurchaseCostBasis } from '@retail/domain';
+import { DomainError, type CostCoverageStatus, type PurchaseCostBasis } from '@retail/domain';
 
 import type { DatabaseAdapter } from '../adapter';
 import { fromBoolean, nowIso, optionalId, requireId, requirePositiveMicros, requireText, toBoolean } from './common';
@@ -30,6 +30,15 @@ export interface PriceObservationRow {
   createdAt: string;
 }
 
+export interface PurchasePriceHistoryRow extends PriceObservationRow {
+  purchaseId: string;
+  occurredAt: string;
+  productNameSnapshot: string;
+  packageNameSnapshot: string;
+  supplierNameSnapshot: string | null;
+  currentCostCoverageStatus: CostCoverageStatus;
+}
+
 export interface CreatePriceObservationInput {
   id: string;
   storeId: string;
@@ -57,6 +66,14 @@ export interface CreatePriceObservationInput {
 }
 
 type PriceObservationRecord = Record<string, string | number | null>;
+type PurchasePriceHistoryRecord = PriceObservationRecord & {
+  purchase_id: string;
+  occurred_at: string;
+  product_name_snapshot: string;
+  package_name_snapshot: string;
+  supplier_name_snapshot: string | null;
+  current_cost_coverage_status: string | null;
+};
 
 const COLUMNS =
   'id, store_id, purchase_item_id, product_variant_id, package_unit_id, supplier_id, cost_basis, ' +
@@ -64,6 +81,15 @@ const COLUMNS =
   'conversion_to_base_snapshot_micros, quantity_base_micros, package_cost_numerator, package_cost_denominator, ' +
   'base_unit_cost_numerator, base_unit_cost_denominator, currency_code, source_type, source_id, ' +
   'validation_status, contribution_consent, observed_at, created_at';
+
+const HISTORY_COLUMNS =
+  'po.id, po.store_id, po.purchase_item_id, po.product_variant_id, po.package_unit_id, po.supplier_id, po.cost_basis, ' +
+  'po.entered_cost_minor, po.observed_price_minor, po.total_purchase_cost_minor, po.quantity_packages_micros, ' +
+  'po.conversion_to_base_snapshot_micros, po.quantity_base_micros, po.package_cost_numerator, po.package_cost_denominator, ' +
+  'po.base_unit_cost_numerator, po.base_unit_cost_denominator, po.currency_code, po.source_type, po.source_id, ' +
+  'po.validation_status, po.contribution_consent, po.observed_at, po.created_at, p.id AS purchase_id, ' +
+  'p.occurred_at, pi.product_name_snapshot, pi.package_name_snapshot, p.supplier_name_snapshot, ' +
+  'cs.coverage_status AS current_cost_coverage_status';
 
 function mapRow(row: PriceObservationRecord): PriceObservationRow {
   return {
@@ -91,6 +117,18 @@ function mapRow(row: PriceObservationRecord): PriceObservationRow {
     contributionConsent: toBoolean(row.contribution_consent as number),
     observedAt: row.observed_at as string,
     createdAt: row.created_at as string,
+  };
+}
+
+function mapHistoryRow(row: PurchasePriceHistoryRecord): PurchasePriceHistoryRow {
+  return {
+    ...mapRow(row),
+    purchaseId: row.purchase_id,
+    occurredAt: row.occurred_at,
+    productNameSnapshot: row.product_name_snapshot,
+    packageNameSnapshot: row.package_name_snapshot,
+    supplierNameSnapshot: row.supplier_name_snapshot ?? null,
+    currentCostCoverageStatus: row.current_cost_coverage_status === 'KNOWN' ? 'KNOWN' : 'UNKNOWN',
   };
 }
 
@@ -206,4 +244,24 @@ export function listPriceObservationsByStoreProduct(
       [requireId(storeId), requireId(productVariantId)],
     )
     .map(mapRow);
+}
+
+export function listPurchasePriceHistoryByStoreProduct(
+  adapter: DatabaseAdapter,
+  storeId: string,
+  storeProductId: string,
+): PurchasePriceHistoryRow[] {
+  return adapter
+    .getAllRows<PurchasePriceHistoryRecord>(
+      `SELECT ${HISTORY_COLUMNS}
+       FROM price_observations po
+       JOIN purchase_items pi ON pi.id = po.purchase_item_id
+       JOIN purchases p ON p.id = pi.purchase_id
+       LEFT JOIN store_product_cost_states cs
+         ON cs.store_product_id = pi.store_product_id AND cs.store_id = po.store_id
+       WHERE po.store_id = ? AND pi.store_id = ? AND pi.store_product_id = ?
+       ORDER BY p.occurred_at DESC, p.created_at DESC, po.id DESC;`,
+      [requireId(storeId), requireId(storeId), requireId(storeProductId)],
+    )
+    .map(mapHistoryRow);
 }
