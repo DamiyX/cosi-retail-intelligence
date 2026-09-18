@@ -252,7 +252,7 @@ export function recordInventoryAdjustment(
       costStates.push(applied.state);
       const allocation = recordAdjustmentBatchAllocation(adapter, {
         operationId: generateId(), storeId: input.storeId, storeProductId: line.storeProductId,
-        inventoryEventId: inventoryEvent.id, sourceId: adjustment.id, groupId: line.groupId,
+        inventoryEventId: inventoryEvent.id, sourceId: inventoryEvent.id, groupId: line.groupId,
         quantityBaseDeltaMicros: line.quantityBaseDeltaMicros, recordedByStoreMemberId: memberId,
         recordedByUserId: input.userId, deviceId: input.deviceId, generateId, createdAt: occurredAt,
       });

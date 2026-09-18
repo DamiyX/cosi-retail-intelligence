@@ -173,6 +173,59 @@ describe('M5 inventory adjustments', () => {
     }
   });
 
+  it('supports multiple products in one adjustment with one outbox envelope and distinct batch event allocations', () => {
+    const { fixture, rice } = openKnownAdjustmentFixture();
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(5060));
+      const beans = catalogue.createTemporaryProduct({ name: 'Beans' });
+      createInventoryEvent(fixture.adapter, {
+        id: testId(5061),
+        storeId: fixture.context.store.id,
+        storeProductId: beans.storeProduct.id,
+        eventType: 'OPENING_BALANCE',
+        quantityBaseDeltaMicros: 2 * MICROS_PER_UNIT,
+        sourceType: 'OPENING_BALANCE',
+        sourceId: testId(5062),
+        occurredAt: '2026-09-18T10:00:00.000Z',
+        createdByUserId: fixture.context.owner.id,
+        deviceId: fixture.context.device.id,
+      });
+      const riceProjection = getBatchProjectionForStoreProduct(fixture.adapter, rice.storeProduct.id);
+      const beansProjection = getBatchProjectionForStoreProduct(fixture.adapter, beans.storeProduct.id);
+      const beforeOutbox = countRows(fixture.adapter, 'outbox_operations');
+      const graph = recordInventoryAdjustment(fixture.adapter, {
+        operationId: testId(5063),
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        reasonCode: 'CORRECTION',
+        lines: [
+          {
+            storeProductId: rice.storeProduct.id,
+            quantityBaseDeltaMicros: -MICROS_PER_UNIT,
+            groupId: riceProjection.groups[0].id,
+            expectedInventoryWatermark: riceProjection.inventoryWatermark,
+            expectedBatchWatermark: riceProjection.batchWatermark,
+          },
+          {
+            storeProductId: beans.storeProduct.id,
+            quantityBaseDeltaMicros: MICROS_PER_UNIT,
+            expectedInventoryWatermark: beansProjection.inventoryWatermark,
+            expectedBatchWatermark: beansProjection.batchWatermark,
+          },
+        ],
+      }, { generateId: deterministicIds(5070) });
+      expect(graph.lines).toHaveLength(2);
+      expect(graph.batchOperations).toHaveLength(2);
+      expect(graph.outbox.operationType).toBe('INVENTORY_ADJUSTMENT_CREATED');
+      expect(countRows(fixture.adapter, 'outbox_operations')).toBe(beforeOutbox + 1);
+      expect(getInventoryBalanceBigIntByStoreProduct(fixture.adapter, rice.storeProduct.id)).toBe(39n * BigInt(MICROS_PER_UNIT));
+      expect(getInventoryBalanceBigIntByStoreProduct(fixture.adapter, beans.storeProduct.id)).toBe(3n * BigInt(MICROS_PER_UNIT));
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
   it('enforces owner replay authorization, stale selected-group protection, raw immutability, and atomic rollback', () => {
     const roleFixture = openKnownAdjustmentFixture();
     try {
