@@ -57,12 +57,46 @@ describe('BatchReviewScreen', () => {
     }
   });
 
+  it('lets the owner correct the named breakdown while retaining the prior groups', () => {
+    const { fixture, rice, client } = seed();
+    try {
+      const projection = client.getBatchProjection(rice.storeProduct.id);
+      client.classifyUnknown({
+        storeProductId: rice.storeProduct.id,
+        expectedInventoryWatermark: projection.inventoryWatermark,
+        expectedBatchWatermark: projection.batchWatermark,
+        groups: [{ quantityBaseMicros: 40 * MICROS_PER_UNIT, datePrecision: 'DAY', dateValue: '2026-10-20', dateMeaning: 'EXPIRY' }],
+      });
+      render(<BatchReviewScreen client={client} storeProductId={rice.storeProduct.id} onBack={() => undefined} />);
+      fireEvent.press(screen.getByLabelText('Correct recorded breakdown'));
+      fireEvent.changeText(screen.getByTestId('batch-review-quantity'), '25');
+      fireEvent.press(screen.getByLabelText('Review date date'));
+      fireEvent.changeText(screen.getByTestId('batch-review-date'), '2026-11-01');
+      fireEvent.press(screen.getByLabelText('Review meaning expiry'));
+      fireEvent.press(screen.getByText('Add inspected group'));
+      fireEvent.changeText(screen.getByTestId('batch-review-quantity'), '15');
+      fireEvent.press(screen.getByLabelText('Review date month'));
+      fireEvent.changeText(screen.getByTestId('batch-review-date'), '2027-02');
+      fireEvent.press(screen.getByLabelText('Review meaning best before'));
+      fireEvent.press(screen.getByText('Add inspected group'));
+      fireEvent.press(screen.getByText('Save corrected breakdown'));
+      expect(screen.getByText('Classification saved')).toBeTruthy();
+      expect(client.getBatchProjection(rice.storeProduct.id).groups.map((group) => group.balanceBaseMicros)).toEqual([
+        '0',
+        String(25 * MICROS_PER_UNIT),
+        String(15 * MICROS_PER_UNIT),
+      ]);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
   it('keeps pending entries when the durable classification write fails', () => {
     const { fixture, rice, client: realClient } = seed();
     try {
       const client: InventoryClient = {
         ...realClient,
-        classifyUnknown() {
+        classifyBatches() {
           throw new Error('Storage unavailable.');
         },
       };

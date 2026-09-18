@@ -119,6 +119,83 @@ describe('M5 physical batch classification', () => {
     }
   });
 
+  it('corrects a recorded breakdown by appending net-zero history and preserving old group facts', () => {
+    const { fixture, rice } = seedUnknownStock();
+    try {
+      const initialProjection = getBatchProjectionForStoreProduct(fixture.adapter, rice.storeProduct.id);
+      const first = classifyInventoryBatches(fixture.adapter, {
+        operationId: testId(4120),
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: rice.storeProduct.id,
+        expectedInventoryWatermark: initialProjection.inventoryWatermark,
+        expectedBatchWatermark: initialProjection.batchWatermark,
+        groups: [
+          { quantityBaseMicros: 10 * MICROS_PER_UNIT, datePrecision: 'DAY', dateValue: '2026-10-20', dateMeaning: 'EXPIRY' },
+          { quantityBaseMicros: 30 * MICROS_PER_UNIT, datePrecision: 'MONTH', dateValue: '2027-01', dateMeaning: 'BEST_BEFORE' },
+        ],
+      }, { generateId: deterministicIds(4130) });
+      const before = getBatchProjectionForStoreProduct(fixture.adapter, rice.storeProduct.id);
+      const corrected = classifyInventoryBatches(fixture.adapter, {
+        operationId: testId(4140),
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: rice.storeProduct.id,
+        expectedInventoryWatermark: before.inventoryWatermark,
+        expectedBatchWatermark: before.batchWatermark,
+        mode: 'CORRECTION',
+        groups: [
+          { quantityBaseMicros: 25 * MICROS_PER_UNIT, datePrecision: 'DAY', dateValue: '2026-11-01', dateMeaning: 'EXPIRY' },
+          { quantityBaseMicros: 15 * MICROS_PER_UNIT, datePrecision: 'MONTH', dateValue: '2027-02', dateMeaning: 'BEST_BEFORE' },
+        ],
+      }, { generateId: deterministicIds(4150) });
+      expect(first.groups[0]).toMatchObject({ dateValue: '2026-10-20', datePrecision: 'DAY' });
+      expect(corrected.entries.reduce((total, entry) => total + entry.deltaBaseMicros, 0)).toBe(0);
+      expect(countRows(fixture.adapter, 'inventory_events')).toBe(1);
+      expect(countRows(fixture.adapter, 'cost_movements')).toBe(0);
+      expect(getBatchProjectionForStoreProduct(fixture.adapter, rice.storeProduct.id)).toMatchObject({
+        inventoryBalanceBaseMicros: String(40 * MICROS_PER_UNIT),
+        unknownResidualBaseMicros: '0',
+      });
+      expect(getBatchProjectionForStoreProduct(fixture.adapter, rice.storeProduct.id).groups.map((group) => group.balanceBaseMicros)).toEqual([
+        '0',
+        '0',
+        String(25 * MICROS_PER_UNIT),
+        String(15 * MICROS_PER_UNIT),
+      ]);
+      const replay = classifyInventoryBatches(fixture.adapter, {
+        operationId: testId(4140),
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: rice.storeProduct.id,
+        expectedInventoryWatermark: before.inventoryWatermark,
+        expectedBatchWatermark: before.batchWatermark,
+        mode: 'CORRECTION',
+        groups: [
+          { quantityBaseMicros: 25 * MICROS_PER_UNIT, datePrecision: 'DAY', dateValue: '2026-11-01', dateMeaning: 'EXPIRY' },
+          { quantityBaseMicros: 15 * MICROS_PER_UNIT, datePrecision: 'MONTH', dateValue: '2027-02', dateMeaning: 'BEST_BEFORE' },
+        ],
+      });
+      expect(replay.operation.id).toBe(corrected.operation.id);
+      expect(() => classifyInventoryBatches(fixture.adapter, {
+        operationId: testId(4140),
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: rice.storeProduct.id,
+        expectedInventoryWatermark: before.inventoryWatermark,
+        expectedBatchWatermark: before.batchWatermark,
+        mode: 'CORRECTION',
+        groups: [{ quantityBaseMicros: 40 * MICROS_PER_UNIT, datePrecision: 'DAY', dateValue: '2026-12-01', dateMeaning: 'EXPIRY' }],
+      })).toThrow('different batch classification');
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
   it('requires the owner and rolls back every classification write boundary', () => {
     const roleFixture = seedUnknownStock();
     try {

@@ -15,12 +15,14 @@ import {
   findExpectedOutboxReplay,
   getBatchInventoryOperationById,
   getBatchInventoryWatermark,
+  getInventoryBatchGroupBalanceBigInt,
   getInventoryLedgerWatermark,
   getStoreById,
   getStoreProductById,
   getDeviceById,
   getUnknownBatchResidualBigInt,
   listBatchInventoryEntriesByOperation,
+  listInventoryBatchGroupsByStoreProduct,
   type BatchInventoryEntryRow,
   type BatchInventoryOperationRow,
   type InventoryBatchGroupRow,
@@ -44,8 +46,11 @@ export interface ClassifyBatchInput {
   storeProductId: string;
   expectedInventoryWatermark: string;
   expectedBatchWatermark: string;
+  mode?: BatchClassificationMode;
   groups: BatchClassificationLineInput[];
 }
+
+export type BatchClassificationMode = 'UNKNOWN' | 'CORRECTION';
 
 export interface BatchClassificationGraph {
   operation: BatchInventoryOperationRow;
@@ -66,6 +71,7 @@ interface ClassificationRequestFingerprint {
   storeProductId: string;
   expectedInventoryWatermark: string;
   expectedBatchWatermark: string;
+  mode: BatchClassificationMode;
   groups: NormalizedClassificationLine[];
 }
 
@@ -77,13 +83,22 @@ function normalizeInput(input: ClassifyBatchInput): {
   storeProductId: string;
   expectedInventoryWatermark: string;
   expectedBatchWatermark: string;
+  mode: BatchClassificationMode;
   groups: NormalizedClassificationLine[];
 } {
+  if (input.mode !== undefined && input.mode !== 'UNKNOWN' && input.mode !== 'CORRECTION') {
+    throw new DomainError('INVALID_VALUE', 'Batch classification mode is invalid.');
+  }
   const groups = input.groups.map((group) => {
     if (!Number.isSafeInteger(group.quantityBaseMicros) || group.quantityBaseMicros <= 0) {
       throw new DomainError('INVALID_QUANTITY', 'Classification quantities must be positive safe integers.');
     }
-    const date = normalizeBatchDate(group);
+    const date = normalizeBatchDate({
+      precision: group.datePrecision,
+      value: group.dateValue,
+      meaning: group.dateMeaning,
+      printedBatchNumber: group.printedBatchNumber,
+    });
     return {
       quantityBaseMicros: group.quantityBaseMicros,
       datePrecision: date.precision,
@@ -103,6 +118,7 @@ function normalizeInput(input: ClassifyBatchInput): {
     storeProductId: requireId(input.storeProductId),
     expectedInventoryWatermark: input.expectedInventoryWatermark,
     expectedBatchWatermark: input.expectedBatchWatermark,
+    mode: input.mode ?? 'UNKNOWN',
     groups,
   };
 }
@@ -112,6 +128,7 @@ function fingerprint(input: ReturnType<typeof normalizeInput>): ClassificationRe
     storeProductId: input.storeProductId,
     expectedInventoryWatermark: input.expectedInventoryWatermark,
     expectedBatchWatermark: input.expectedBatchWatermark,
+    mode: input.mode,
     groups: input.groups,
   };
 }
@@ -182,7 +199,40 @@ function assertOwner(adapter: DatabaseAdapter, input: ReturnType<typeof normaliz
   return { memberId: member.id };
 }
 
-/** Classify current unknown stock into inspected groups without changing product stock or cost. */
+function appendSignedEntries(
+  adapter: DatabaseAdapter,
+  entries: BatchInventoryEntryRow[],
+  input: {
+    operationId: string;
+    storeId: string;
+    storeProductId: string;
+    groupId: string | null;
+    entryType: BatchInventoryEntryRow['entryType'];
+    deltaBaseMicros: bigint;
+    generateId: () => string;
+    createdAt: string;
+  },
+): void {
+  const maxSafe = BigInt(Number.MAX_SAFE_INTEGER);
+  let remaining = input.deltaBaseMicros;
+  while (remaining !== 0n) {
+    const chunk = remaining > maxSafe ? maxSafe : remaining < -maxSafe ? -maxSafe : remaining;
+    entries.push(createBatchInventoryEntry(adapter, {
+      id: input.generateId(),
+      operationId: input.operationId,
+      storeId: input.storeId,
+      storeProductId: input.storeProductId,
+      groupId: input.groupId,
+      entryType: input.entryType,
+      deltaBaseMicros: Number(chunk),
+      entryOrder: entries.length + 1,
+      createdAt: input.createdAt,
+    }));
+    remaining -= chunk;
+  }
+}
+
+/** Classify unknown stock or replace the named breakdown without changing product stock or cost. */
 export function classifyInventoryBatches(
   adapter: DatabaseAdapter,
   input: ClassifyBatchInput,
@@ -206,10 +256,22 @@ export function classifyInventoryBatches(
     if (currentInventoryWatermark !== request.expectedInventoryWatermark || currentBatchWatermark !== request.expectedBatchWatermark) {
       throw new DomainError('INVALID_VALUE', 'Inventory changed while this inspection was open. Refresh before saving.');
     }
-    const unknownResidual = getUnknownBatchResidualBigInt(adapter, request.storeProductId);
+    const currentGroups = listInventoryBatchGroupsByStoreProduct(adapter, request.storeProductId);
+    const currentGroupBalances = currentGroups.map((group) => ({
+      group,
+      balance: getInventoryBatchGroupBalanceBigInt(adapter, group.id),
+    })).filter(({ balance }) => balance > 0n);
     const requested = request.groups.reduce((total, group) => total + BigInt(group.quantityBaseMicros), 0n);
-    if (unknownResidual <= 0n || requested > unknownResidual || requested > BigInt(Number.MAX_SAFE_INTEGER)) {
-      throw new DomainError('INVALID_QUANTITY', 'Inspected groups cannot exceed current unknown stock.');
+    if (request.mode === 'CORRECTION') {
+      const namedTotal = currentGroupBalances.reduce((total, row) => total + row.balance, 0n);
+      if (namedTotal <= 0n || requested !== namedTotal) {
+        throw new DomainError('INVALID_QUANTITY', 'Correction groups must exactly replace the current named stock breakdown.');
+      }
+    } else {
+      const unknownResidual = getUnknownBatchResidualBigInt(adapter, request.storeProductId);
+      if (unknownResidual <= 0n || requested > unknownResidual) {
+        throw new DomainError('INVALID_QUANTITY', 'Inspected groups cannot exceed current unknown stock.');
+      }
     }
 
     const occurredAt = nowIso();
@@ -247,30 +309,39 @@ export function classifyInventoryBatches(
       createdAt: occurredAt,
     });
     const entries: BatchInventoryEntryRow[] = [];
-    entries.push(createBatchInventoryEntry(adapter, {
-      id: generateId(),
-      operationId: operation.id,
-      storeId: request.storeId,
-      storeProductId: request.storeProductId,
-      groupId: null,
-      entryType: 'UNKNOWN_RESIDUAL',
-      deltaBaseMicros: Number(-requested),
-      entryOrder: 1,
-      createdAt: occurredAt,
-    }));
-    groups.forEach((group, index) => {
-      entries.push(createBatchInventoryEntry(adapter, {
-        id: generateId(),
+    if (request.mode === 'CORRECTION') {
+      currentGroupBalances.forEach(({ group, balance }) => appendSignedEntries(adapter, entries, {
         operationId: operation.id,
         storeId: request.storeId,
         storeProductId: request.storeProductId,
         groupId: group.id,
         entryType: 'CLASSIFICATION',
-        deltaBaseMicros: request.groups[index].quantityBaseMicros,
-        entryOrder: index + 2,
+        deltaBaseMicros: -balance,
+        generateId,
         createdAt: occurredAt,
       }));
-    });
+    } else {
+      appendSignedEntries(adapter, entries, {
+        operationId: operation.id,
+        storeId: request.storeId,
+        storeProductId: request.storeProductId,
+        groupId: null,
+        entryType: 'UNKNOWN_RESIDUAL',
+        deltaBaseMicros: -requested,
+        generateId,
+        createdAt: occurredAt,
+      });
+    }
+    groups.forEach((group, index) => appendSignedEntries(adapter, entries, {
+      operationId: operation.id,
+      storeId: request.storeId,
+      storeProductId: request.storeProductId,
+      groupId: group.id,
+      entryType: 'CLASSIFICATION',
+      deltaBaseMicros: BigInt(request.groups[index].quantityBaseMicros),
+      generateId,
+      createdAt: occurredAt,
+    }));
     const entryTotal = entries.reduce((total, entry) => total + BigInt(entry.deltaBaseMicros), 0n);
     if (entryTotal !== 0n) throw new DomainError('INVALID_QUANTITY', 'Classification entries must be net zero.');
     const outbox = enqueueOutboxOperation(adapter, {
@@ -282,7 +353,8 @@ export function classifyInventoryBatches(
       entityId: operation.id,
       occurredAt,
       entities: {
-        classificationVersion: 1,
+        classificationVersion: 2,
+        classificationMode: request.mode,
         request: fingerprint(request),
         operation,
         groups,

@@ -12,7 +12,12 @@ import {
   type StoreRow,
 } from '../db/repositories';
 import { getBatchProjectionForStoreProduct, type BatchProjection } from './batchAllocation';
-import { classifyInventoryBatches, type BatchClassificationLineInput, type BatchClassificationGraph } from './classifyBatches';
+import {
+  classifyInventoryBatches,
+  type BatchClassificationLineInput,
+  type BatchClassificationGraph,
+  type BatchClassificationMode,
+} from './classifyBatches';
 
 export interface InventoryReviewProduct {
   storeProductId: string;
@@ -29,6 +34,14 @@ export interface InventoryClient {
   readonly userId: string;
   listReviewProducts(): InventoryReviewProduct[];
   getBatchProjection(storeProductId: string): BatchProjection;
+  classifyBatches(input: {
+    storeProductId: string;
+    expectedInventoryWatermark: string;
+    expectedBatchWatermark: string;
+    groups: BatchClassificationLineInput[];
+    mode?: BatchClassificationMode;
+    operationId?: string;
+  }): BatchClassificationGraph;
   classifyUnknown(input: {
     storeProductId: string;
     expectedInventoryWatermark: string;
@@ -111,7 +124,7 @@ export function createDatabaseInventoryClient(
       const product = activeProduct(adapter, store, storeProductId);
       return getBatchProjectionForStoreProduct(adapter, product.id);
     },
-    classifyUnknown(input): BatchClassificationGraph {
+    classifyBatches(input): BatchClassificationGraph {
       activeProduct(adapter, store, input.storeProductId);
       return classifyInventoryBatches(adapter, {
         operationId: input.operationId ?? generateId(),
@@ -121,8 +134,12 @@ export function createDatabaseInventoryClient(
         storeProductId: input.storeProductId,
         expectedInventoryWatermark: input.expectedInventoryWatermark,
         expectedBatchWatermark: input.expectedBatchWatermark,
+        mode: input.mode,
         groups: input.groups,
       }, { generateId });
+    },
+    classifyUnknown(input): BatchClassificationGraph {
+      return this.classifyBatches({ ...input, mode: 'UNKNOWN' });
     },
   };
 }

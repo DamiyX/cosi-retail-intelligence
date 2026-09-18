@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { InventoryClient, InventoryReviewProduct } from '../../inventory/client';
 import type { BatchProjection } from '../../inventory/batchAllocation';
+import type { BatchClassificationMode } from '../../inventory/classifyBatches';
 import { generateMobileId } from '../../crypto/mobileIds';
 import { ErrorPanel, Field, PrimaryButton, SecondaryButton, StatusNote } from '../../ui/components';
 import { theme } from '../../ui/theme';
@@ -69,6 +70,7 @@ export default function BatchReviewScreen({ client, onBack, onDirtyDraftChange, 
   const [dateValue, setDateValue] = useState('');
   const [dateMeaning, setDateMeaning] = useState<BatchDateMeaning>('UNSPECIFIED');
   const [printedBatchNumber, setPrintedBatchNumber] = useState('');
+  const [mode, setMode] = useState<BatchClassificationMode>(() => state.projection && BigInt(state.projection.unknownResidualBaseMicros) > 0n ? 'UNKNOWN' : 'CORRECTION');
   const [lines, setLines] = useState<DraftLine[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -76,6 +78,11 @@ export default function BatchReviewScreen({ client, onBack, onDirtyDraftChange, 
   const initialFocusHandledRef = useRef(false);
 
   const selectedProduct = state.products.find((product) => product.storeProductId === selectedProductId) ?? state.products[0] ?? null;
+  const namedGroups = state.projection?.groups.filter((group) => BigInt(group.balanceBaseMicros) > 0n) ?? [];
+  const unknownRemaining = state.projection ? BigInt(state.projection.unknownResidualBaseMicros) : 0n;
+  const namedTotal = namedGroups.reduce((total, group) => total + BigInt(group.balanceBaseMicros), 0n);
+  const canClassifyUnknown = unknownRemaining > 0n;
+  const canCorrectGroups = namedGroups.length > 0;
   const dirty = !saved && lines.length > 0;
   const refresh = useCallback(() => {
     const refreshed = read(client, selectedProductId || storeProductId);
@@ -138,17 +145,22 @@ export default function BatchReviewScreen({ client, onBack, onDirtyDraftChange, 
       return;
     }
     const requested = lines.reduce((total, line) => total + BigInt(line.quantityText), 0n);
-    if (requested > BigInt(state.projection.unknownResidualBaseMicros)) {
+    if (mode === 'UNKNOWN' && (!canClassifyUnknown || requested > unknownRemaining)) {
       setError('Inspected groups cannot exceed the unknown stock remaining.');
+      return;
+    }
+    if (mode === 'CORRECTION' && (!canCorrectGroups || requested !== namedTotal)) {
+      setError('A corrected breakdown must exactly replace the current named stock.');
       return;
     }
     setSubmitting(true);
     setError(null);
     try {
-      client.classifyUnknown({
+      client.classifyBatches({
         storeProductId: selectedProduct.storeProductId,
         expectedInventoryWatermark: state.projection.inventoryWatermark,
         expectedBatchWatermark: state.projection.batchWatermark,
+        mode,
         groups: lines.map((line) => ({
           quantityBaseMicros: Number(line.quantityText),
           datePrecision: line.datePrecision,
@@ -168,7 +180,7 @@ export default function BatchReviewScreen({ client, onBack, onDirtyDraftChange, 
     }
   };
 
-  const canReview = useMemo(() => selectedProduct !== null && state.projection !== null, [selectedProduct, state.projection]);
+  const canReview = useMemo(() => selectedProduct !== null && state.projection !== null && (canClassifyUnknown || canCorrectGroups), [canClassifyUnknown, canCorrectGroups, selectedProduct, state.projection]);
 
   if (state.failure) {
     return <View style={styles.container}><ErrorPanel title="Inventory review unavailable" message={state.failure} onRetry={refresh} onDismiss={onBack} /></View>;
@@ -185,20 +197,26 @@ export default function BatchReviewScreen({ client, onBack, onDirtyDraftChange, 
           <View style={styles.packageList} accessibilityRole="radiogroup">
             {state.products.map((product) => {
               const selected = product.storeProductId === selectedProduct?.storeProductId;
-              return <Pressable key={product.storeProductId} accessibilityRole="radio" accessibilityLabel={`Review ${product.productName}`} accessibilityState={{ checked: selected }} onPress={() => { setSelectedProductId(product.storeProductId); setLines([]); setSaved(false); setError(null); }} style={[styles.packageChip, selected && styles.packageChipSelected]}><Text style={[styles.packageText, selected && styles.packageTextSelected]}>{product.productName}</Text></Pressable>;
+              return <Pressable key={product.storeProductId} accessibilityRole="radio" accessibilityLabel={`Review ${product.productName}`} accessibilityState={{ checked: selected }} onPress={() => { setSelectedProductId(product.storeProductId); setMode(BigInt(product.unknownResidualBaseMicros) > 0n ? 'UNKNOWN' : 'CORRECTION'); setLines([]); setSaved(false); setError(null); }} style={[styles.packageChip, selected && styles.packageChipSelected]}><Text style={[styles.packageText, selected && styles.packageTextSelected]}>{product.productName}</Text></Pressable>;
             })}
           </View>
           {selectedProduct && state.projection ? (
             <>
               <Text style={styles.meta}>Recorded stock: {quantityLabel(state.projection.inventoryBalanceBaseMicros)}</Text>
               <Text style={styles.meta}>Unknown remaining: {quantityLabel(state.projection.unknownResidualBaseMicros)}</Text>
-              {state.projection.groups.filter((group) => BigInt(group.balanceBaseMicros) > 0n).map((group) => <Text key={group.id} style={styles.meta}>Existing group: {quantityLabel(group.balanceBaseMicros)} · {group.datePrecision === 'UNKNOWN' ? 'unknown date' : `${group.dateValue} (${group.datePrecision.toLowerCase()})`}</Text>)}
+              {namedGroups.map((group) => <Text key={group.id} style={styles.meta}>Existing group: {quantityLabel(group.balanceBaseMicros)} · {group.datePrecision === 'UNKNOWN' ? 'unknown date' : `${group.dateValue} (${group.datePrecision.toLowerCase()})`}</Text>)}
             </>
           ) : null}
         </View>
       ) : null}
       {canReview && !saved ? (
         <View style={styles.card}>
+          <Text style={styles.sectionLabel}>Review mode</Text>
+          <View style={styles.packageList} accessibilityRole="radiogroup">
+            {canClassifyUnknown ? <Pressable accessibilityRole="radio" accessibilityLabel="Classify unknown stock" accessibilityState={{ checked: mode === 'UNKNOWN' }} onPress={() => setMode('UNKNOWN')} style={[styles.packageChip, mode === 'UNKNOWN' && styles.packageChipSelected]}><Text style={[styles.packageText, mode === 'UNKNOWN' && styles.packageTextSelected]}>Classify unknown</Text></Pressable> : null}
+            {canCorrectGroups ? <Pressable accessibilityRole="radio" accessibilityLabel="Correct recorded breakdown" accessibilityState={{ checked: mode === 'CORRECTION' }} onPress={() => setMode('CORRECTION')} style={[styles.packageChip, mode === 'CORRECTION' && styles.packageChipSelected]}><Text style={[styles.packageText, mode === 'CORRECTION' && styles.packageTextSelected]}>Correct breakdown</Text></Pressable> : null}
+          </View>
+          <Text style={styles.meta}>{mode === 'CORRECTION' ? `Enter the complete replacement for ${quantityLabel(namedTotal.toString())} named stock. Previous groups stay in history.` : 'Assign part or all of the unknown stock; any remainder stays unknown.'}</Text>
           <Text style={styles.sectionLabel}>Inspected group</Text>
           <Field label="Observed base quantity" value={quantityText} onChangeText={setQuantityText} keyboardType="decimal-pad" testID="batch-review-quantity" />
           <Text style={styles.sectionLabel}>Printed date precision</Text>
@@ -214,7 +232,7 @@ export default function BatchReviewScreen({ client, onBack, onDirtyDraftChange, 
           <PrimaryButton title="Add inspected group" onPress={addLine} disabled={submitting} />
         </View>
       ) : null}
-      {lines.length > 0 ? <View style={styles.card}><Text style={styles.sectionLabel}>Pending classification ({lines.length})</Text>{lines.map((line) => <View key={line.id} style={styles.historyRow}><View style={styles.rowBetween}><Text style={styles.cardTitle}>{quantityLabel(line.quantityText)} · {dateLabel(line)}</Text><SecondaryButton title="Remove" onPress={() => removeLine(line.id)} /></View></View>)}<PrimaryButton title={submitting ? 'Saving…' : 'Classify inspected stock'} onPress={submit} disabled={submitting} /></View> : null}
+      {lines.length > 0 ? <View style={styles.card}><Text style={styles.sectionLabel}>Pending classification ({lines.length})</Text>{lines.map((line) => <View key={line.id} style={styles.historyRow}><View style={styles.rowBetween}><Text style={styles.cardTitle}>{quantityLabel(line.quantityText)} · {dateLabel(line)}</Text><SecondaryButton title="Remove" onPress={() => removeLine(line.id)} /></View></View>)}<PrimaryButton title={submitting ? 'Saving…' : mode === 'CORRECTION' ? 'Save corrected breakdown' : 'Classify inspected stock'} onPress={submit} disabled={submitting} /></View> : null}
       {saved ? <View style={styles.card}><Text style={styles.cardTitle}>Classification saved</Text><Text style={styles.meta}>The product total and cost were not changed. Reopen review to inspect the remaining unknown stock.</Text><SecondaryButton title="Review another product" onPress={() => { setSaved(false); refresh(); }} /></View> : null}
       {error ? <Text accessibilityRole="alert" style={styles.generalError}>{error}</Text> : null}
       <SecondaryButton title="Back" onPress={onBack} />
