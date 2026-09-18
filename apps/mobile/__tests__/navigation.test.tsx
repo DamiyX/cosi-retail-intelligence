@@ -23,12 +23,12 @@ import AttentionRoute from '../app/attention';
 import type { IsolatedDatabase } from '../src/db/testing';
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
 import { openIsolatedDatabase } from '../src/db/testing';
-import { MIGRATIONS } from '../src/db';
+import { CURRENT_SCHEMA_VERSION, MIGRATIONS } from '../src/db';
 import { provisionStoreContext } from '../src/storeContext/provisionStoreContext';
 import { deterministicIds } from './catalogueSupport';
 
 let mockDatabase: IsolatedDatabase | null = null;
-const mockSchemaVersion = 6;
+const mockSchemaVersion = CURRENT_SCHEMA_VERSION;
 
 jest.mock('../src/db/initialize', () => ({
   initializeAppDatabase: () => {

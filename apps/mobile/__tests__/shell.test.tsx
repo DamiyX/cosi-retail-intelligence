@@ -14,14 +14,19 @@ import TodayScreen from '../app/(tabs)/today';
 import RestockRoute from '../app/restock';
 import PurchaseHistoryRoute from '../app/purchase-history';
 import PurchaseDetailRoute from '../app/purchases/[id]';
+import BatchReviewRoute from '../app/batch-review';
+import AdjustmentRoute from '../app/adjustment';
+import ReconciliationRoute from '../app/reconciliation';
+import GuidedChecksRoute from '../app/guided-checks';
+import AttentionRoute from '../app/attention';
 import type { IsolatedDatabase } from '../src/db/testing';
 import { openIsolatedDatabase } from '../src/db/testing';
-import { MIGRATIONS } from '../src/db';
+import { CURRENT_SCHEMA_VERSION, MIGRATIONS } from '../src/db';
 import { provisionStoreContext } from '../src/storeContext/provisionStoreContext';
 import { deterministicIds } from './catalogueSupport';
 
 let mockDatabase: IsolatedDatabase | null = null;
-const mockSchemaVersion = 6;
+const mockSchemaVersion = CURRENT_SCHEMA_VERSION;
 
 jest.mock('../src/db/initialize', () => ({
   initializeAppDatabase: () => {
@@ -47,6 +52,11 @@ const ROUTES = {
   restock: RestockRoute,
   'purchase-history': PurchaseHistoryRoute,
   'purchases/[id]': PurchaseDetailRoute,
+  'batch-review': BatchReviewRoute,
+  adjustment: AdjustmentRoute,
+  reconciliation: ReconciliationRoute,
+  'guided-checks': GuidedChecksRoute,
+  attention: AttentionRoute,
 } as never;
 
 function openStoreDatabase(): IsolatedDatabase {
