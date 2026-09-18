@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m4-audit-corrections-returned",
+  "current_state": "m4-reaudit-three-corrections-required",
   "completed_states": [
     "m3-independent-source-automated-acceptance",
     "m4-intake",
@@ -184,10 +184,15 @@
           "result": "Implementation returned A1–A6 correction commits 457d9d9, 08871db and cb0566e with focused and full automated evidence. Coordinator re-audit is still required; source acceptance is not claimed.",
           "source": "457d9d9; 08871db; cb0566e; docs/engineering/M4_AUDIT_CORRECTIONS.md",
           "observed_at": "2026-09-18T11:54:43Z"
+        },
+        {
+          "result": "Coordinator independently passed npm run validate (364 tests / 28 suites, strict typecheck, zero-warning lint), confirmed A1/A5 service fixes and routed guard evidence, but reproduced remaining A4-R and A3-R gaps; A6-R source display remains incomplete. Acceptance withheld.",
+          "source": "docs/engineering/M4_AUDIT_CORRECTIONS.md",
+          "observed_at": "2026-09-18T12:01:29.559Z"
         }
       ],
       "limitations": [],
-      "blocker": "A1–A6 implementation corrections are returned in 457d9d9, 08871db and cb0566e; coordinator independent re-audit is pending.",
+      "blocker": "Re-audit at 52a772a requires A4-R parent cost consistency, A3-R return-read retry selection and A6-R merchant cost display.",
       "waiver": null
     },
     {
@@ -239,8 +244,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Coordinator independently re-audits returned A1–A6 correction commits and records source acceptance or further findings. No M5.",
+  "next_action": "Same Luna max task repairs A4-R, A3-R and A6-R, reports and stops for independent re-audit. M5 also waits for founder approval of the product-change review; do not implement new ideas.",
   "created_at": "2026-09-17T23:22:42Z",
-  "updated_at": "2026-09-18T11:54:43Z",
+  "updated_at": "2026-09-18T12:01:29.559Z",
   "archived": false
 }

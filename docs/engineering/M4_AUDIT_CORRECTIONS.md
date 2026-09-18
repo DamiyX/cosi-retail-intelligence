@@ -124,3 +124,83 @@ PROJECT_STATE and the M4 workflow with truthful evidence. Do not self-accept the
 audit or start M5. Send a structured report via `send_message_to_thread` to the
 coordinator task listed above, including commit hashes, migration changes,
 checks/results and carried limitations, then stop editing for re-audit.
+
+## Independent re-audit at 52a772a — 2026-09-18
+
+**Comparison:** `2bfa3ef..52a772a`, including the separate correction commits
+`457d9d9`, `08871db` and `cb0566e`. The coordinator independently reran
+`npm run validate`: PASS, strict typecheck, zero-warning lint, 150 domain tests
+and 214 mobile tests (364 / 28 suites). Migration 5 is additive. Builder Expo
+Doctor/export/compatibility results remain reviewed builder evidence, not new
+coordinator runs. No device/release/accounting gates are passed here.
+
+**Specification:** A1 and A5 are resolved for source/automated scope. Independent
+real SQLite service checks confirmed the exact 1-micro sale succeeds, retains
+10,000,000,000 COGS and exact 10,000,000,000,000,000/1 basis with null legacy
+unit cost, and replays without changing its sale ID. Changed explicit purchase
+date is rejected; an omitted date retries the original purchase. A2 uses the
+supported usePreventRemove hook and routed guard/Quick Add tests pass; native
+behavior remains part of the carried physical gate. Focus refresh and happy-path
+Quick Add return improve A3. Usable-current-stock detection improves A6.
+
+**Standards / remaining correction requests:** source acceptance is withheld
+until the following bounded gaps are repaired. Do not reopen resolved work.
+
+### A4-R — Parent sale-item cost consistency / old null costs (P2)
+
+The exact arithmetic/canonicality/full-coverage validation now rejects the
+original impossible snapshot, but it does not check the immutable parent cost
+columns. An independent populated-M3 upgrade reproduction still accepted an
+AVAILABLE snapshot with exact unit cost 100/3, COGS 100/3 and rounded COGS 33
+for an old completed sale item whose `cogs_amount_minor` is null. The snapshot
+and original immutable receipt then disagree; this also permits invented cost
+backfill forbidden by D-038. The new purportedly valid repository test likewise
+creates a parent with null COGS before adding an AVAILABLE companion.
+
+At the typed and enforceable SQLite boundaries, require AVAILABLE companion
+COGS to equal the existing parent COGS; UNAVAILABLE requires null parent COGS.
+Check the safe integral legacy unit-cost projection against the exact basis;
+fractional/too-large bases legitimately have null legacy unit cost. Preserve
+existing old null rows without adding invented AVAILABLE facts. Adjust valid
+fixtures to create matching parent cost columns, and test rejection/no writes,
+valid fractional/unsafe-integral companions, raw SQLite mismatches and populated
+upgrade preservation. Append migration 6 if new persisted triggers are needed;
+do not edit committed migrations 1–5.
+
+### A3-R — Retry does not resume pending contextual selection (P2)
+
+A coordinator-only temporary RNTL probe used the real SQLite catalogue/client
+with an injected product-read failure: add a 7.50 line, leave for Quick Add,
+create a product, return with quickAddProductId while reads fail, restore reads,
+press the actual **Try again** action. The cart and list recover, but the created
+product is not selected (`Purchase package` is absent). The probe failed at
+that behavioral assertion; it was then removed and is not committed evidence.
+An earlier probe invocation used the wrong Retry label and is not defect proof.
+
+The return effect is not retriggered by Retry because its dependencies exclude
+the retry result/revision. Unify retry with pending contextual resolution or
+use an explicit retry signal; ensure the returned product is selected once and
+all cart/editor/supplier facts survive. Add the described failing-path regression
+to the permanent restock suite, plus retry failure then success and prevention
+of reselecting an already handled return. No new navigation/layout redesign.
+
+### A6-R — Internal fractions remain in product/receipt UI (P2)
+
+Both screens still render `Exact stored receipt basis: numerator/denominator
+minor units per base unit`. That exposes implementation detail without a
+merchant decision and leaves A6 incomplete despite the added readable estimate.
+Keep exact values in persistence/outbox; remove the raw internal fraction from
+normal merchant screens and update assertions accordingly. Explain rounding in
+currency language (for NGN, nearest kobo) rather than internal “minor units”.
+The formatter also returns null for a valid normalized basis whose rounded
+per-unit value exceeds MAX_SAFE_INTEGER (the A1 receipt has this property).
+Use BigInt/string-only display formatting or an honest bounded display message
+instead of implying the valid receipt cost is unavailable; never convert an
+unsafe integer to Number or alter stored authoritative amounts. Test this
+boundary alongside fractional/zero/unknown-current-stock UI cases.
+
+**Product planning hold:** the founder has additionally requested a planning
+review before M5. `docs/product/PRODUCT_CHANGE_BACKLOG.md` is coordinator-owned,
+unapproved and excluded from implementation scope/commits. Founder scope and
+expiry-timing answers remain pending. Fix the three requests above, report and
+stop for re-audit; do not implement the new ideas or begin M5.

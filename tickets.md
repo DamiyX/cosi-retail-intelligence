@@ -1,7 +1,7 @@
 # Tickets: M4 Offline Restocking + Provisional Costing
 
-**Status:** A1–A6 implementation corrections returned; independent audit
-pending and source acceptance withheld. Founder approved the M4 costing and
+**Status:** Re-audit at 52a772a requires A4-R/A3-R/A6-R; source acceptance
+withheld. Founder approved the M4 costing and
 screen/state contract on 2026-09-18; D-038 and DESIGN record the approved rules.
 Coordinator verified ticket granularity/dependencies under delegated judgment.
 **Branch:** feat/m4-restocking-costing. **Accepted baseline:** 66cc64d.
@@ -36,6 +36,14 @@ changing the approved M4 scope:
 Focused regressions and the full workspace checks passed after these commits.
 This is implementation evidence only; the coordinator must independently
 re-audit A1–A6 before source acceptance. No M5 work is authorized.
+
+## Re-audit return
+
+Coordinator independently passed 364 tests / 28 suites, typecheck and lint at
+`52a772a`. A1/A5 are independently reproduced resolved and A2 source/routed
+evidence is accepted; A4-R/A3-R/A6-R remain in M4_AUDIT_CORRECTIONS.md. Luna
+repairs only those gaps and returns. M5 also waits for founder approval of the
+separate product-change review.
 
 ## Execution contract
 

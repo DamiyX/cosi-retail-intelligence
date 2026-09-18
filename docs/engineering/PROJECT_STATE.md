@@ -1,9 +1,8 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-18  
-Current milestone: M4 Restocking + Costing — A1–A6 implementation corrections
-returned for independent re-audit; source acceptance withheld. Physical/release
-gates remain pending.  
+Current milestone: M4 Restocking + Costing — re-audit at `52a772a` requires
+A4-R, A3-R and A6-R. Source acceptance withheld; physical/release gates carried.  
 Completed engineering milestones: M0 Project Foundation; M1 Domain + Local
 Database (accepted with an explicit device waiver); M2 Catalogue + Package Units
 (accepted after independent audit); M3 source/automated scope (accepted after
@@ -70,6 +69,17 @@ therefore apply on first M3 install. The populated-M2 upgrade test confirms
 M1/M2 rows and migration history survive the v2-to-v3 upgrade without a reset,
 loss, or false sales history. Any future persisted-schema change must append a
 new migration.
+
+## Latest M4 re-audit
+
+Coordinator independently passed `npm run validate` at `52a772a`: 364 tests /
+28 suites, strict typecheck, zero-warning lint. A1/A5 service reproductions pass;
+A2 supported guard/routed evidence is accepted for source scope. Parent-cost
+consistency, contextual Quick Add retry and merchant cost display still need
+A4-R/A3-R/A6-R in `M4_AUDIT_CORRECTIONS.md`. Same Luna task owns repairs.
+Founder approval of the separate proposed `PRODUCT_CHANGE_BACKLOG.md` scope,
+adjustment-cost policy and expiry timing also precedes M5 delegation. No new
+product feature is approved by this audit.
 
 ## M4 independent audit
 
