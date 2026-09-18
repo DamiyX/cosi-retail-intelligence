@@ -238,25 +238,37 @@ function productContexts(adapter: DatabaseAdapter, storeId: string): ProductCont
 
 function latestDiscrepancy(adapter: DatabaseAdapter, storeId: string, storeProductId: string): { difference: bigint; id: string } | null {
   const row = adapter.getFirstRow<{ id: string; difference_base_units: string | null }>(
-    `SELECT rl.id, rl.difference_base_units
-     FROM inventory_reconciliation_lines rl
+    `SELECT rs.id, rs.difference_base_units
+     FROM inventory_reconciliation_submissions rs
+     JOIN inventory_reconciliation_lines rl ON rl.id = rs.reconciliation_line_id
      JOIN inventory_reconciliations r ON r.id = rl.reconciliation_id
      WHERE rl.store_id = ? AND rl.store_product_id = ?
-       AND r.status = 'COMPLETED' AND rl.difference_base_units IS NOT NULL
-     ORDER BY r.completed_at DESC, r.id DESC, rl.id DESC LIMIT 1;`,
+       AND r.status = 'IN_PROGRESS' AND rs.difference_base_units IS NOT NULL
+       AND rs.id = (
+         SELECT latest.id
+         FROM inventory_reconciliation_submissions latest
+         WHERE latest.reconciliation_line_id = rs.reconciliation_line_id
+         ORDER BY latest.created_at DESC, latest.id DESC LIMIT 1
+       )
+     ORDER BY rs.created_at DESC, rs.id DESC LIMIT 1;`,
     [requireId(storeId), requireId(storeProductId)],
   );
   if (!row || row.difference_base_units === null) return null;
   return { difference: BigInt(row.difference_base_units), id: row.id };
 }
 
-function expiryCandidate(product: ProductContext, today: string, leadDays: number, group: BatchProjection['groups'][number]): ConditionCandidate | null {
+function conditionKey(prefix: string, product: ProductContext, settings: AttentionSettings, suffix = ''): string {
+  const state = `${product.projection.inventoryWatermark}:${product.projection.batchWatermark}:settings-${settings.version}`;
+  return `${prefix}:${product.storeProductId}:${state}${suffix ? `:${suffix}` : ''}`;
+}
+
+function expiryCandidate(product: ProductContext, settings: AttentionSettings, today: string, group: BatchProjection['groups'][number]): ConditionCandidate | null {
   const balance = BigInt(group.balanceBaseMicros);
   if (balance <= 0n || group.datePrecision === 'UNKNOWN' || group.dateValue === null) return null;
   const isMonth = group.datePrecision === 'MONTH';
   const comparisonDate = group.datePrecision === 'DAY' ? group.dateValue : `${group.dateValue}-01`;
   calendarDate(comparisonDate);
-  const leadBoundary = addCalendarDays(today, leadDays);
+  const leadBoundary = addCalendarDays(today, settings.expiryLeadDays);
   const monthEndExclusive = isMonth ? addCalendarMonths(comparisonDate, 1) : null;
   let severity: AttentionSeverity;
   let severityRank: number;
@@ -277,7 +289,7 @@ function expiryCandidate(product: ProductContext, today: string, leadDays: numbe
   const status = severity === 'UPCOMING' ? 'is within the reminder window' : severity === 'REACHED' ? 'reaches today' : 'has passed';
   return {
     id: `expiry:${group.id}`,
-    conditionKey: `EXPIRY:${group.id}`,
+    conditionKey: conditionKey('EXPIRY', product, settings, group.id),
     conditionType: 'EXPIRY',
     kind: 'EXPIRY',
     severity,
@@ -288,17 +300,17 @@ function expiryCandidate(product: ProductContext, today: string, leadDays: numbe
     balanceBaseMicros: group.balanceBaseMicros,
     title: `${product.productName}: ${printedDate} ${meaning}`,
     detail: `About ${quantityText(balance)} remain; the recorded date ${status}. Date passage does not remove stock.`,
-    primaryAction: 'REMOVE',
-    primaryActionLabel: 'Mark expired or removed',
+    primaryAction: group.dateMeaning === 'EXPIRY' ? 'REMOVE' : 'RECONCILE',
+    primaryActionLabel: group.dateMeaning === 'EXPIRY' ? 'Mark expired or removed' : 'Review recorded date',
   };
 }
 
-function stockCandidate(product: ProductContext): ConditionCandidate | null {
+function stockCandidate(product: ProductContext, settings: AttentionSettings): ConditionCandidate | null {
   const balance = BigInt(product.projection.inventoryBalanceBaseMicros);
   if (balance < 0n) {
     return {
       id: `stock:${product.storeProductId}`,
-      conditionKey: `STOCK:${product.storeProductId}`,
+      conditionKey: conditionKey('STOCK_NEGATIVE', product, settings),
       conditionType: 'STOCK',
       kind: 'NEGATIVE_STOCK',
       severity: 'NEGATIVE',
@@ -316,7 +328,7 @@ function stockCandidate(product: ProductContext): ConditionCandidate | null {
   if (balance === 0n) {
     return {
       id: `stock:${product.storeProductId}`,
-      conditionKey: `STOCK:${product.storeProductId}`,
+      conditionKey: conditionKey('STOCK_ZERO', product, settings),
       conditionType: 'STOCK',
       kind: 'ZERO_STOCK',
       severity: 'ZERO',
@@ -334,7 +346,7 @@ function stockCandidate(product: ProductContext): ConditionCandidate | null {
   if (product.reorderLevelBaseMicros !== null && balance <= BigInt(product.reorderLevelBaseMicros)) {
     return {
       id: `stock:${product.storeProductId}`,
-      conditionKey: `STOCK:${product.storeProductId}`,
+      conditionKey: conditionKey('STOCK_LOW', product, settings),
       conditionType: 'STOCK',
       kind: 'LOW_STOCK',
       severity: 'LOW',
@@ -355,13 +367,13 @@ function stockCandidate(product: ProductContext): ConditionCandidate | null {
 function deriveCandidates(adapter: DatabaseAdapter, store: StoreRow, settings: AttentionSettings, at: LocalTime): ConditionCandidate[] {
   const candidates: ConditionCandidate[] = [];
   for (const product of productContexts(adapter, store.id)) {
-    const stock = stockCandidate(product);
+    const stock = stockCandidate(product, settings);
     if (stock) candidates.push(stock);
     const unknown = BigInt(product.projection.unknownResidualBaseMicros);
     if (unknown !== 0n) {
       candidates.push({
         id: `unknown:${product.storeProductId}`,
-        conditionKey: `UNKNOWN:${product.storeProductId}`,
+        conditionKey: conditionKey('UNKNOWN', product, settings),
         conditionType: 'UNKNOWN_COVERAGE',
         kind: 'UNKNOWN_COVERAGE',
         severity: 'UNRESOLVED',
@@ -376,11 +388,31 @@ function deriveCandidates(adapter: DatabaseAdapter, store: StoreRow, settings: A
         primaryActionLabel: 'Review or reconcile stock',
       });
     }
+    for (const group of product.projection.groups) {
+      const balance = BigInt(group.balanceBaseMicros);
+      if (balance <= 0n || group.datePrecision !== 'UNKNOWN') continue;
+      candidates.push({
+        id: `undated:${group.id}`,
+        conditionKey: conditionKey('UNDATED', product, settings, group.id),
+        conditionType: 'UNKNOWN_COVERAGE',
+        kind: 'UNKNOWN_COVERAGE',
+        severity: 'UNRESOLVED',
+        severityRank: 1,
+        storeProductId: product.storeProductId,
+        productName: product.productName,
+        groupId: null,
+        balanceBaseMicros: group.balanceBaseMicros,
+        title: `${product.productName}: undated stock coverage`,
+        detail: `${quantityText(balance)} has no recorded date. Review the stock breakdown before relying on expiry reminders.`,
+        primaryAction: 'RECONCILE',
+        primaryActionLabel: 'Review stock breakdown',
+      });
+    }
     const discrepancy = latestDiscrepancy(adapter, store.id, product.storeProductId);
     if (discrepancy && discrepancy.difference !== 0n) {
       candidates.push({
         id: `discrepancy:${product.storeProductId}`,
-        conditionKey: `DISCREPANCY:${product.storeProductId}`,
+        conditionKey: conditionKey('DISCREPANCY', product, settings),
         conditionType: 'DISCREPANCY',
         kind: 'DISCREPANCY',
         severity: 'UNRESOLVED',
@@ -396,7 +428,7 @@ function deriveCandidates(adapter: DatabaseAdapter, store: StoreRow, settings: A
       });
     }
     for (const group of product.projection.groups) {
-      const expiry = expiryCandidate(product, at.date, settings.expiryLeadDays, group);
+      const expiry = expiryCandidate(product, settings, at.date, group);
       if (expiry) candidates.push(expiry);
     }
   }

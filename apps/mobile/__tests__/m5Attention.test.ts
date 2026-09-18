@@ -163,7 +163,9 @@ describe('M5 local attention and snooze', () => {
         now: '2026-09-18T08:00:00.000Z',
       }).snooze.id).toBe(snoozed.snooze.id);
       expect(fixture.adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM inventory_attention_snoozes;')?.total).toBe(1);
-      expect(client.getAttentionOverview('2026-09-18T08:30:00.000Z').items).toHaveLength(0);
+      expect(client.getAttentionOverview('2026-09-18T08:30:00.000Z').items).toEqual([
+        expect.objectContaining({ storeProductId: product.storeProduct.id, kind: 'UNKNOWN_COVERAGE' }),
+      ]);
       expect(client.getAttentionOverview('2026-09-18T08:30:00.000Z').suppressedCount).toBe(1);
 
       const projection = client.getBatchProjection(product.storeProduct.id);
@@ -205,15 +207,16 @@ describe('M5 local attention and snooze', () => {
       expect(fixture.adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM inventory_attention_settings;')?.total).toBe(beforeSettings);
       expect(fixture.adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM outbox_operations;')?.total).toBe(beforeOutbox);
 
-      const low = client.getAttentionOverview('2026-09-18T08:00:00.000Z').items[0];
+      const lowBeforeSettings = client.getAttentionOverview('2026-09-18T08:00:00.000Z').items[0];
       expect(() => snoozeAttention(new FailOnWriteAdapter(fixture.adapter, 1, new Error('snooze boundary')), {
         operationId: testId(9350), storeId: fixture.context.store.id, deviceId: fixture.context.device.id, userId: fixture.context.owner.id,
-        conditionKey: low.conditionKey, conditionType: low.conditionType, storeProductId: low.storeProductId, groupId: low.groupId,
-        severityRank: low.severityRank, snoozeKind: 'TOMORROW', now: '2026-09-18T08:00:00.000Z',
+        conditionKey: lowBeforeSettings.conditionKey, conditionType: lowBeforeSettings.conditionType, storeProductId: lowBeforeSettings.storeProductId, groupId: lowBeforeSettings.groupId,
+        severityRank: lowBeforeSettings.severityRank, snoozeKind: 'TOMORROW', now: '2026-09-18T08:00:00.000Z',
       }, { generateId: deterministicIds(9360) })).toThrow('snooze boundary');
       expect(fixture.adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM inventory_attention_snoozes;')?.total).toBe(0);
 
       client.saveAttentionSettings({ operationId: testId(9370), expiryLeadDays: 7 });
+      const low = client.getAttentionOverview('2026-09-18T08:00:00.000Z').items[0];
       const savedSnooze = client.snoozeAttention({
         operationId: testId(9380), conditionKey: low.conditionKey, conditionType: low.conditionType, storeProductId: low.storeProductId,
         groupId: low.groupId, severityRank: low.severityRank, snoozeKind: 'TOMORROW', now: '2026-09-18T08:00:00.000Z',
@@ -231,6 +234,55 @@ describe('M5 local attention and snooze', () => {
       } finally {
         reopened.close();
       }
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('surfaces undated coverage, clears completed discrepancies, and starts a new snooze episode after stock changes', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(9700));
+      const undated = catalogue.createTemporaryProduct({ name: 'Undated rice' });
+      const counted = catalogue.createTemporaryProduct({ name: 'Counted rice' });
+      const lowProduct = catalogue.createTemporaryProduct({ name: 'Recurring low rice' });
+      recordPurchase(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        occurredAt: '2026-09-18T08:00:00.000Z',
+        lines: [
+          { storeProductId: undated.storeProduct.id, packageUnitId: undated.basePackage.id, quantityPackagesMicros: 2 * MICROS_PER_UNIT, enteredCostMinor: 200, expiryPrecision: 'UNKNOWN', expiryMeaning: 'UNSPECIFIED' },
+          { storeProductId: counted.storeProduct.id, packageUnitId: counted.basePackage.id, quantityPackagesMicros: 2 * MICROS_PER_UNIT, enteredCostMinor: 200, expiryPrecision: 'DAY', expiryValue: '2026-09-17', expiryMeaning: 'BEST_BEFORE' },
+          { storeProductId: lowProduct.storeProduct.id, packageUnitId: lowProduct.basePackage.id, quantityPackagesMicros: 2 * MICROS_PER_UNIT, enteredCostMinor: 200, expiryPrecision: 'DAY', expiryValue: '2026-12-31', expiryMeaning: 'EXPIRY' },
+        ],
+      }, { generateId: deterministicIds(9710), operationId: testId(9720) });
+      setReorderLevel(fixture, lowProduct.storeProduct.id, 5);
+      const client = createDatabaseInventoryClient(fixture.adapter, { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, userId: fixture.context.owner.id, generateId: deterministicIds(9730) });
+
+      const initial = client.getAttentionOverview('2026-09-18T08:00:00.000Z');
+      expect(initial.items).toEqual(expect.arrayContaining([
+        expect.objectContaining({ storeProductId: undated.storeProduct.id, kind: 'UNKNOWN_COVERAGE', primaryAction: 'RECONCILE' }),
+        expect.objectContaining({ storeProductId: counted.storeProduct.id, kind: 'EXPIRY', primaryAction: 'RECONCILE' }),
+      ]));
+
+      const firstCheck = client.startReconciliation(counted.storeProduct.id);
+      client.submitReconciliation({ reconciliationId: firstCheck.reconciliationId, expectedInventoryWatermark: firstCheck.inventoryWatermark, expectedBatchWatermark: firstCheck.batchWatermark, physicalBaseUnits: MICROS_PER_UNIT });
+      expect(client.getAttentionOverview('2026-09-18T08:00:00.000Z').items).toEqual(expect.arrayContaining([
+        expect.objectContaining({ storeProductId: counted.storeProduct.id, kind: 'DISCREPANCY', severity: 'UNRESOLVED' }),
+      ]));
+      client.finalizeReconciliation({ reconciliationId: firstCheck.reconciliationId, operationId: testId(9740) });
+      expect(client.getAttentionOverview('2026-09-18T08:00:00.000Z').items.some((item) => item.storeProductId === counted.storeProduct.id && item.kind === 'DISCREPANCY')).toBe(false);
+
+      const low = client.getAttentionOverview('2026-09-18T08:00:00.000Z').items.find((item) => item.storeProductId === lowProduct.storeProduct.id && item.kind === 'LOW_STOCK')!;
+      client.snoozeAttention({ operationId: testId(9750), conditionKey: low.conditionKey, conditionType: low.conditionType, storeProductId: low.storeProductId, groupId: low.groupId, severityRank: low.severityRank, snoozeKind: 'LATER_TODAY', now: '2026-09-18T08:00:00.000Z' });
+      let projection = client.getBatchProjection(lowProduct.storeProduct.id);
+      client.recordAdjustment({ operationId: testId(9760), storeProductId: lowProduct.storeProduct.id, expectedInventoryWatermark: projection.inventoryWatermark, expectedBatchWatermark: projection.batchWatermark, quantityBaseDeltaMicros: 4 * MICROS_PER_UNIT, reasonCode: 'CORRECTION' });
+      projection = client.getBatchProjection(lowProduct.storeProduct.id);
+      client.recordAdjustment({ operationId: testId(9770), storeProductId: lowProduct.storeProduct.id, expectedInventoryWatermark: projection.inventoryWatermark, expectedBatchWatermark: projection.batchWatermark, quantityBaseDeltaMicros: -MICROS_PER_UNIT, groupId: projection.groups.find((group) => BigInt(group.balanceBaseMicros) > 0n)?.id, reasonCode: 'MISSING' });
+      expect(client.getAttentionOverview('2026-09-18T08:30:00.000Z').items).toEqual(expect.arrayContaining([
+        expect.objectContaining({ storeProductId: lowProduct.storeProduct.id, kind: 'LOW_STOCK' }),
+      ]));
     } finally {
       fixture.closeAndDelete();
     }
