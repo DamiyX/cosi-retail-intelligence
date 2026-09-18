@@ -1,9 +1,9 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-18  
-Current milestone: M4 Restocking + Costing — founder-approved cost/design
-contract and published tickets assigned to separate Luna max implementation;
-independent audit and physical/release evidence remain pending.  
+Current milestone: M4 Restocking + Costing — implementation evidence handed
+back at `3c4eef9`; independent audit and physical/release evidence remain
+pending.  
 Completed engineering milestones: M0 Project Foundation; M1 Domain + Local
 Database (accepted with an explicit device waiver); M2 Catalogue + Package Units
 (accepted after independent audit); M3 source/automated scope (accepted after
@@ -13,10 +13,10 @@ independent audit with physical/release gates carried).
 
 - Canonical remote: https://github.com/DamiyX/cosi-retail-intelligence
 - Current branch: `feat/m4-restocking-costing`, from accepted M3 checkpoint
-  `66cc64d`. No M4 production code has been added.
+  `66cc64d`. M4 implementation is committed in `3c4eef9`.
 - Coordinator-created M4 plan, published tickets, D-038, cost/design sources and
-  workflow registration are local documentation changes for the implementer to
-  verify and commit separately before feature tickets.
+  workflow registration were recorded in checkpoint `db5a835`; implementation
+  evidence is now recorded separately for coordinator audit.
 - Separate implementation task `01a0b1a5-4512-79f0-ae55-58d39559944d` is assigned
   M4 only as Luna max. Coordinator owns planning/tickets/workflow registration
   and independent audit; implementer owns implementation and assigned fixes.
@@ -25,7 +25,7 @@ independent audit with physical/release gates carried).
   branches are currently stacked. Rebase or retarget only after the earlier pull
   request is accepted.
 - No push, merge, deployment, production-service change, device action, or cloud
-  build was performed in this M3 implementation pass.
+  build was performed in this M4 implementation pass.
 
 ## M3 source/automated outcome
 
@@ -69,6 +69,24 @@ M1/M2 rows and migration history survive the v2-to-v3 upgrade without a reset,
 loss, or false sales history. Any future persisted-schema change must append a
 new migration.
 
+## M4 implementation handoff
+
+Commit `3c4eef9` adds migration 4 and the offline purchase/costing path without
+editing migrations 1–3. Purchases write immutable product/package/currency
+snapshots, positive inventory events, exact rational cost movements/state,
+private non-contributing price observations and one idempotent purchase outbox
+envelope atomically. Purchase replay is actor/store/device scoped and rejects
+conflicting operation reuse. New sales consume available provisional weighted
+average cost in the same transaction, preserve exact basis and rounded line
+COGS companions, and leave pre-M4 sale costs unchanged/null when unavailable.
+More now exposes Restock and Purchase history with receipt/detail reads,
+retained drafts, dirty-exit guards and offline status language.
+
+The aggregate/repository path also accepts multiline, UNIT/TOTAL and explicit
+supplier inputs. The current Restock screen remains the M4-01 one-line TOTAL
+flow; M4-02 cart/supplier UI acceptance is intentionally not claimed in this
+handoff. Independent audit owns the final source decision.
+
 ## Verified validation evidence
 
 - Clean dependency installation completed with `npm ci` (development dependencies
@@ -95,6 +113,24 @@ new migration.
 - The independent auditor reviewed the existing Expo Doctor, dependency-check,
   and Android-export evidence rather than claiming a redundant rerun.
 
+### M4 implementation checks
+
+- `npm run validate`: passed — 148 domain tests in 5 suites and 189 mobile
+  tests in 22 suites (337 tests / 27 suites total); strict typecheck and
+  zero-warning lint passed.
+- `npm run mobile:doctor`: 20/21 checks passed. The remaining check reports
+  patch drift: `expo-constants` 57.0.18 (expected ~57.0.19) and `expo-router`
+  57.0.21 (expected ~57.0.22).
+- `npx expo install --check` from `apps/mobile`: reports the same two patch
+  mismatches; no dependency update was performed in this implementation task.
+- `npm run mobile:export`: Android export passed (1,357 modules; 3.2 MB Hermes
+  bundle). Generated `apps/mobile/dist` is ignored.
+- Active M3/M4 workflow JSON Schema, date-time and gate-dependency validation
+  passed. The historical M2 workflow retains its previously recorded
+  `tests-and-review` schema limitation.
+- `git diff --check` passed before the documentation handoff commit. No device,
+  cloud, push, merge or release action was performed.
+
 ## Deferred evidence and risks
 
 - The Galaxy A15 5G (`SM-A156E`, Android 16, 1080×2340) evidence below is real
@@ -111,6 +147,9 @@ new migration.
   used. M3 offline sale, history, dirty-cart, and large-text device evidence is
   therefore deferred/blocked and required before an external beta/native-release
   claim. The earlier standalone-preview evidence must not be treated as M3 proof.
+- No M4 physical restock/restart/history/cost-availability/dirty-exit or
+  large-text session was performed. Existing Galaxy evidence remains M1/M2 only
+  and must not be treated as M4 proof.
 - The development build `1110cf51-6cfb-4b11-99af-c63e356bf9e4` completed in EAS,
   but its local transfer was corrupted after an interrupted download and Android
   rejected it before installation. The development-client/Metro check remains
@@ -121,11 +160,10 @@ new migration.
 
 ## Next action
 
-The assigned Luna max task implements M4-01 through M4-05 in dependency order
-using the approved M4_RESTOCKING_COSTING_PLAN, D-038 and DESIGN. First verify and
-commit coordinator-created documentation as a separate planning checkpoint;
-then commit each ticket separately with actual evidence. Send completion to the
-coordinating task and stop for independent audit; do not self-accept or start M5. Accepted M3 tickets are archived in
+The implementation task has returned commit `3c4eef9` and evidence to the
+coordinating task. The next action is independent audit against the approved
+M4_RESTOCKING_COSTING_PLAN, D-038, DESIGN and ticket criteria; do not self-accept
+or start M5. Accepted M3 tickets are archived in
 `docs/engineering/tickets/M3_SALES.md`. Complete the carried
 M3 physical-device/offline-sale, development-client/Metro, large-text, and
 second-laptop reproduction checks before any external beta or native-release

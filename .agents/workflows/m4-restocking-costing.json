@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "approved-m4-assigned-for-implementation",
+  "current_state": "implementation-complete-awaiting-independent-audit",
   "completed_states": [
     "m3-independent-source-automated-acceptance",
     "m4-intake",
@@ -33,6 +33,11 @@
     {
       "kind": "validation",
       "claim": "Coordinator validated M4 workflow JSON Schema/date-time formats, gate IDs/dependency cycles, artifact existence and index registration; archived M3 ledger is byte-identical to 66cc64d:tickets.md. git diff --check passed; no runtime files changed."
+    },
+    {
+      "kind": "validation",
+      "path": "3c4eef9",
+      "claim": "Implementation handoff passed full workspace validation: 148 domain tests in 5 suites, 189 mobile tests in 22 suites, strict typecheck and zero-warning lint; Android export passed. Expo Doctor and Expo install check report the same two patch-version mismatches, and physical/device/cloud checks were not performed."
     }
   ],
   "acceptance_gates": [
@@ -113,7 +118,7 @@
       "claim": "M4 tickets have actual passing checks and recoverable commits.",
       "owner": "implementation-task-01a0b1a5-4512-79f0-ae55-58d39559944d",
       "required": true,
-      "status": "pending",
+      "status": "met",
       "depends_on": [
         "m4-tickets-released"
       ],
@@ -122,8 +127,18 @@
         "procedure": "Luna max implements tickets; runs focused and full checks; returns report and stops.",
         "success_condition": "Evidence and commits recorded without self-accepting independent audit."
       },
-      "evidence": [],
-      "limitations": [],
+      "evidence": [
+        {
+          "result": "Commit 3c4eef9 records the M4 purchase aggregate, additive migration 4, provisional cost integration, receipt/history UI and focused tests. npm run validate passed (337 tests / 27 suites); Android export passed; active M3/M4 workflow validation passed.",
+          "source": "3c4eef9; tickets.md; docs/engineering/PROJECT_STATE.md",
+          "observed_at": "2026-09-18T09:54:27Z"
+        }
+      ],
+      "limitations": [
+        "The current Restock screen is the M4-01 one-line TOTAL flow; M4-02 cart/supplier UI acceptance is not claimed.",
+        "Expo Doctor and Expo install check report expo-constants and expo-router patch-version drift; no dependency update was authorized.",
+        "Physical/device/cloud/release checks remain unperformed and are not source acceptance evidence."
+      ],
       "blocker": null,
       "waiver": null
     },
@@ -193,8 +208,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Luna max implementation task verifies and separately commits coordinator documentation, implements M4-01 through M4-05 with per-ticket commits/evidence, then reports to coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 and stops for independent audit. Return corrections to this same M4 task; do not begin M5.",
+  "next_action": "Coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 independently audits commit 3c4eef9 against M4 tickets and D-038, returns any corrections to this same task, and records source acceptance separately. Do not begin M5.",
   "created_at": "2026-09-17T23:22:42Z",
-  "updated_at": "2026-09-17T23:30:57Z",
+  "updated_at": "2026-09-18T09:54:27Z",
   "archived": false
 }
