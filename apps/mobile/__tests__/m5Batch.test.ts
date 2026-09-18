@@ -459,7 +459,7 @@ describe('M5 batch inventory tracking', () => {
         }],
         payment: { method: 'CASH' },
       }, { generateId: deterministicIds(3620), operationId: testId(3630) });
-      expect(sale.batchEntries[0]).toMatchObject({ entryType: 'ASSUMED_FEFO', deltaBaseMicros: -MICROS_PER_UNIT });
+      expect(sale.batchEntries[0]).toMatchObject({ entryType: 'UNKNOWN_RESIDUAL', deltaBaseMicros: -MICROS_PER_UNIT });
       expect(purchase.batchGroups[0].datePrecision).toBe('UNKNOWN');
 
       fixture.adapter.close();

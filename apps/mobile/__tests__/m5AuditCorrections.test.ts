@@ -14,6 +14,7 @@ import {
   getBatchInventoryOperationById,
 } from '../src/db/repositories';
 import { classifyInventoryBatches } from '../src/inventory/classifyBatches';
+import { completeSale } from '../src/sales/completeSale';
 import { recordPurchase } from '../src/purchases/recordPurchase';
 import { FailOnWriteAdapter, deterministicIds, openCatalogueFixture, testId } from './catalogueSupport';
 import { provisionStoreContext } from '../src/storeContext/provisionStoreContext';
@@ -231,6 +232,53 @@ describe('M5 A01 batch graph sealing', () => {
       )).toBeNull();
     } finally {
       rollback.closeAndDelete();
+    }
+  });
+});
+
+describe('M5 A02 FEFO ordering', () => {
+  it('consumes legacy unknown stock before a newer undated receipt', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(8300));
+      const rice = catalogue.createTemporaryProduct({ name: 'Rice' });
+      createInventoryEvent(fixture.adapter, {
+        id: testId(8310),
+        storeId: fixture.context.store.id,
+        storeProductId: rice.storeProduct.id,
+        eventType: 'OPENING_BALANCE',
+        quantityBaseDeltaMicros: 40 * MICROS_PER_UNIT,
+        sourceType: 'OPENING_BALANCE',
+        sourceId: testId(8311),
+        occurredAt: '2026-01-01T00:00:00.000Z',
+        createdByUserId: fixture.context.owner.id,
+        deviceId: fixture.context.device.id,
+      });
+      recordPurchase(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        lines: [{
+          storeProductId: rice.storeProduct.id,
+          packageUnitId: rice.basePackage.id,
+          quantityPackagesMicros: 20 * MICROS_PER_UNIT,
+          enteredCostMinor: 200,
+          expiryPrecision: 'UNKNOWN',
+          expiryMeaning: 'UNSPECIFIED',
+        }],
+      }, { generateId: deterministicIds(8320), operationId: testId(8330) });
+      const sale = completeSale(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        lines: [{ storeProductId: rice.storeProduct.id, packageUnitId: rice.basePackage.id, quantityPackagesMicros: 5 * MICROS_PER_UNIT, unitPriceMinor: 20 }],
+        payment: { method: 'CASH' },
+      }, { generateId: deterministicIds(8340), operationId: testId(8350) });
+      expect(sale.batchEntries).toEqual([
+        expect.objectContaining({ entryType: 'UNKNOWN_RESIDUAL', groupId: null, deltaBaseMicros: -5 * MICROS_PER_UNIT }),
+      ]);
+    } finally {
+      fixture.closeAndDelete();
     }
   });
 });

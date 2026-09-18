@@ -9,6 +9,7 @@ import {
   getInventoryBatchGroupBalanceBigInt,
   getBatchInventoryWatermark,
   getInventoryLedgerWatermark,
+  getUnknownBatchResidualBigInt,
   listInventoryBatchGroupsByStoreProduct,
   type BatchInventoryEntryRow,
   type BatchInventoryOperationRow,
@@ -184,9 +185,32 @@ export function recordSaleBatchAllocation(
     .map((group) => ({ group, balance: getInventoryBatchGroupBalanceBigInt(adapter, group.id) }))
     .filter((entry) => entry.balance > 0n)
     .sort(compareGroupForFefo);
+  const datedGroups = groups.filter((entry) => batchDateSortKey({
+    precision: entry.group.datePrecision,
+    value: entry.group.dateValue,
+  }) !== null);
+  const undatedGroups = groups.filter((entry) => batchDateSortKey({
+    precision: entry.group.datePrecision,
+    value: entry.group.dateValue,
+  }) === null);
+  const unknownResidual = getUnknownBatchResidualBigInt(adapter, input.storeProductId);
   let remaining = BigInt(input.quantityBaseMicros);
   const allocations: { groupId: string | null; entryType: 'ASSUMED_FEFO' | 'UNKNOWN_RESIDUAL'; delta: bigint }[] = [];
-  for (const entry of groups) {
+  for (const entry of datedGroups) {
+    if (remaining <= 0n) break;
+    const consumed = entry.balance < remaining ? entry.balance : remaining;
+    allocations.push({ groupId: entry.group.id, entryType: 'ASSUMED_FEFO', delta: -consumed });
+    remaining -= consumed;
+  }
+  // Positive unknown stock predates any receipt group without a date. Keep it
+  // ahead of those newer undated receipts so a sale cannot silently consume a
+  // newer receipt while legacy stock is still unallocated.
+  if (remaining > 0n && unknownResidual > 0n) {
+    const consumed = unknownResidual < remaining ? unknownResidual : remaining;
+    allocations.push({ groupId: null, entryType: 'UNKNOWN_RESIDUAL', delta: -consumed });
+    remaining -= consumed;
+  }
+  for (const entry of undatedGroups) {
     if (remaining <= 0n) break;
     const consumed = entry.balance < remaining ? entry.balance : remaining;
     allocations.push({ groupId: entry.group.id, entryType: 'ASSUMED_FEFO', delta: -consumed });
