@@ -40,6 +40,16 @@ import {
   type GuidedCheckReplacementResult,
   type SaveGuidedCheckSettingsInput,
 } from './guidedChecks';
+import {
+  getAttentionOverview,
+  saveAttentionSettings,
+  snoozeAttention,
+  type AttentionOverview,
+  type SaveAttentionSettingsInput,
+  type SnoozeAttentionInput,
+  type SaveAttentionSettingsResult,
+  type SnoozeAttentionResult,
+} from './attention';
 
 export interface InventoryReviewProduct {
   storeProductId: string;
@@ -110,6 +120,9 @@ export interface InventoryClient {
   saveGuidedCheckSettings(input: Omit<SaveGuidedCheckSettingsInput, 'storeId' | 'deviceId' | 'userId' | 'operationId'> & { operationId?: string }): ReturnType<typeof saveGuidedCheckSettings>;
   generateGuidedChecks(input?: { operationId?: string; now?: string }): GuidedCheckGenerationResult;
   replaceGuidedCheck(input: { operationId?: string; assignmentId: string; reasonCode: string; note?: string | null; now?: string }): GuidedCheckReplacementResult;
+  getAttentionOverview(now?: string): AttentionOverview;
+  saveAttentionSettings(input: Omit<SaveAttentionSettingsInput, 'storeId' | 'deviceId' | 'userId' | 'operationId'> & { operationId?: string }): SaveAttentionSettingsResult;
+  snoozeAttention(input: Omit<SnoozeAttentionInput, 'storeId' | 'deviceId' | 'userId' | 'operationId'> & { operationId?: string }): SnoozeAttentionResult;
 }
 
 export interface CreateInventoryClientOptions {
@@ -289,6 +302,27 @@ export function createDatabaseInventoryClient(
     },
     replaceGuidedCheck(input) {
       return replaceGuidedCheck(adapter, {
+        ...input,
+        operationId: input.operationId ?? generateId(),
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+      }, { generateId });
+    },
+    getAttentionOverview(now?: string): AttentionOverview {
+      return getAttentionOverview(adapter, { storeId: store.id, deviceId: device.id, userId, now });
+    },
+    saveAttentionSettings(input) {
+      return saveAttentionSettings(adapter, {
+        ...input,
+        operationId: input.operationId ?? generateId(),
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+      });
+    },
+    snoozeAttention(input) {
+      return snoozeAttention(adapter, {
         ...input,
         operationId: input.operationId ?? generateId(),
         storeId: store.id,

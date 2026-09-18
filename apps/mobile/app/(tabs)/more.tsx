@@ -33,6 +33,10 @@ export default function MoreScreen() {
         <Text style={styles.actionTitle}>Guided stock checks</Text>
         <Text style={styles.actionBody}>Set a calm owner routine and work through due shelf counts</Text>
       </Pressable>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/attention')} style={styles.action}>
+        <Text style={styles.actionTitle}>Needs attention</Text>
+        <Text style={styles.actionBody}>Review real low stock, differences, and remaining expiry groups</Text>
+      </Pressable>
       <Text style={styles.comingSoon}>Staff dispatch and supervisor review are intentionally deferred.</Text>
     </View>
   );

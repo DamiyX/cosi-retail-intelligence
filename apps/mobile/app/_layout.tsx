@@ -34,6 +34,7 @@ export default function RootLayout() {
             <Stack.Screen name="adjustment" options={{ title: 'Record adjustment' }} />
             <Stack.Screen name="reconciliation" options={{ title: 'Check stock' }} />
             <Stack.Screen name="guided-checks" options={{ title: 'Guided stock checks' }} />
+            <Stack.Screen name="attention" options={{ title: 'Needs attention' }} />
           </Stack>
         </DatabaseProvider>
       )}

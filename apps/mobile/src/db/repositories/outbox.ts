@@ -35,6 +35,7 @@ export type OutboxEntityType =
   | 'RECONCILIATION'
   | 'INVENTORY_CHECK_SETTINGS'
   | 'CHECK_ASSIGNMENT'
+  | 'INVENTORY_ATTENTION_SETTINGS'
   | 'ATTENTION_SNOOZE';
 
 export type OutboxOperationType =
@@ -53,6 +54,7 @@ export type OutboxOperationType =
   | 'RECONCILIATION_FINALIZED'
   | 'CHECK_SETTINGS_SAVED'
   | 'CHECK_ASSIGNMENT_CREATED'
+  | 'ATTENTION_SETTINGS_SAVED'
   | 'ATTENTION_SNOOZE_CREATED';
 
 export type CatalogueOperationType = OutboxOperationType;

@@ -165,6 +165,23 @@ export {
 } from './receivables';
 export type { CreateReceivableInput, ReceivableRow, ReceivableStatus } from './receivables';
 export type { OutboxOperationType } from './outbox';
+export {
+  createInventoryAttentionSnooze,
+  getInventoryAttentionSettings,
+  getInventoryAttentionSnoozeById,
+  getLatestInventoryAttentionSnooze,
+  listInventoryAttentionSnoozesByStore,
+  saveInventoryAttentionSettings,
+  ATTENTION_POLICY_VERSION,
+} from './attention';
+export type {
+  AttentionConditionType,
+  AttentionSnoozeKind,
+  CreateInventoryAttentionSnoozeInput,
+  InventoryAttentionSettingsRow,
+  InventoryAttentionSnoozeRow,
+  SaveInventoryAttentionSettingsInput,
+} from './attention';
 export { createSupplier, getSupplierById, listSuppliersByStore, searchSuppliersByStore } from './suppliers';
 export type { CreateSupplierInput, SupplierRow, SupplierStatus } from './suppliers';
 export { createPurchase, getPurchaseById, listPurchasesByStore } from './purchases';

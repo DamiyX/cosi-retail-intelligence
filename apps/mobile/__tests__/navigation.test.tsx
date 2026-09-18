@@ -15,6 +15,11 @@ import TodayScreen from '../app/(tabs)/today';
 import RestockRoute from '../app/restock';
 import PurchaseHistoryRoute from '../app/purchase-history';
 import PurchaseDetailRoute from '../app/purchases/[id]';
+import BatchReviewRoute from '../app/batch-review';
+import AdjustmentRoute from '../app/adjustment';
+import ReconciliationRoute from '../app/reconciliation';
+import GuidedChecksRoute from '../app/guided-checks';
+import AttentionRoute from '../app/attention';
 import type { IsolatedDatabase } from '../src/db/testing';
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
 import { openIsolatedDatabase } from '../src/db/testing';
@@ -49,6 +54,11 @@ const ROUTES = {
   restock: RestockRoute,
   'purchase-history': PurchaseHistoryRoute,
   'purchases/[id]': PurchaseDetailRoute,
+  'batch-review': BatchReviewRoute,
+  adjustment: AdjustmentRoute,
+  reconciliation: ReconciliationRoute,
+  'guided-checks': GuidedChecksRoute,
+  attention: AttentionRoute,
 } as never;
 
 describe('M2 tab navigation', () => {

@@ -14,6 +14,8 @@ interface AdjustmentScreenProps {
   onDirtyDraftChange?: (dirty: boolean, discard: () => void) => void;
   isFocused?: boolean;
   storeProductId?: string;
+  groupId?: string;
+  reasonCode?: InventoryAdjustmentReason;
 }
 
 interface ScreenState {
@@ -62,13 +64,13 @@ function groupLabel(group: BatchProjection['groups'][number]): string {
   return `${quantityLabel(group.balanceBaseMicros)} · ${date}`;
 }
 
-export default function AdjustmentScreen({ client, onBack, onDirtyDraftChange, isFocused = true, storeProductId }: AdjustmentScreenProps) {
+export default function AdjustmentScreen({ client, onBack, onDirtyDraftChange, isFocused = true, storeProductId, groupId: initialGroupId, reasonCode: initialReasonCode }: AdjustmentScreenProps) {
   const [state, setState] = useState(() => read(client, storeProductId));
   const [selectedProductId, setSelectedProductId] = useState(storeProductId ?? '');
   const [direction, setDirection] = useState<AdjustmentDirection>('REMOVE');
-  const [reasonCode, setReasonCode] = useState<InventoryAdjustmentReason>('EXPIRED');
+  const [reasonCode, setReasonCode] = useState<InventoryAdjustmentReason>(initialReasonCode ?? 'EXPIRED');
   const [quantityText, setQuantityText] = useState('1');
-  const [groupId, setGroupId] = useState<string | null>(null);
+  const [groupId, setGroupId] = useState<string | null>(initialGroupId ?? null);
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);

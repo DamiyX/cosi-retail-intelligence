@@ -1897,6 +1897,129 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'finalized reconciliations are immutable'); END;`,
     ],
   },
+  {
+    version: 11,
+    name: 'inventory_attention',
+    statements: [
+      `CREATE TABLE inventory_attention_settings (
+        store_id TEXT PRIMARY KEY REFERENCES stores(id) ON DELETE RESTRICT,
+        expiry_lead_days INTEGER NOT NULL DEFAULT 30 CHECK (expiry_lead_days >= 0 AND expiry_lead_days <= 3650),
+        policy_version TEXT NOT NULL,
+        version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0),
+        updated_by_store_member_id TEXT NOT NULL REFERENCES store_members(id) ON DELETE RESTRICT,
+        updated_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        updated_by_device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        updated_at TEXT NOT NULL
+      );`,
+      `CREATE TABLE inventory_attention_snoozes (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        condition_key TEXT NOT NULL CHECK (length(condition_key) > 0 AND length(condition_key) <= 200),
+        condition_type TEXT NOT NULL CHECK (condition_type IN ('STOCK', 'EXPIRY', 'DISCREPANCY', 'UNKNOWN_COVERAGE')),
+        group_id TEXT REFERENCES inventory_batch_groups(id) ON DELETE RESTRICT,
+        severity_rank INTEGER NOT NULL CHECK (severity_rank > 0),
+        snooze_kind TEXT NOT NULL CHECK (snooze_kind IN ('LATER_TODAY', 'TOMORROW', 'CHOOSE_DATE_TIME')),
+        due_local_date TEXT NOT NULL CHECK (length(due_local_date) = 10),
+        due_local_minute INTEGER NOT NULL CHECK (due_local_minute >= 0 AND due_local_minute <= 1439),
+        policy_version TEXT NOT NULL,
+        created_by_store_member_id TEXT NOT NULL REFERENCES store_members(id) ON DELETE RESTRICT,
+        created_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        created_at TEXT NOT NULL,
+        CHECK ((condition_type = 'EXPIRY' AND group_id IS NOT NULL)
+          OR (condition_type <> 'EXPIRY' AND group_id IS NULL))
+      );`,
+      'CREATE INDEX idx_attention_snoozes_condition ON inventory_attention_snoozes(store_id, store_product_id, condition_key, created_at DESC, id DESC);',
+      'CREATE INDEX idx_attention_snoozes_store ON inventory_attention_snoozes(store_id, due_local_date, due_local_minute);',
+      `CREATE TRIGGER trg_attention_settings_member_store_insert
+        BEFORE INSERT ON inventory_attention_settings
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.updated_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.updated_by_user_id
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'attention settings actor is not an active store member'); END;`,
+      `CREATE TRIGGER trg_attention_settings_device_store_insert
+        BEFORE INSERT ON inventory_attention_settings
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.updated_by_device_id
+            AND d.store_id = NEW.store_id
+            AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'attention settings device does not belong to store'); END;`,
+      `CREATE TRIGGER trg_attention_settings_member_store_update
+        BEFORE UPDATE ON inventory_attention_settings
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.updated_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.updated_by_user_id
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'attention settings actor is not an active store member'); END;`,
+      `CREATE TRIGGER trg_attention_settings_device_store_update
+        BEFORE UPDATE ON inventory_attention_settings
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.updated_by_device_id
+            AND d.store_id = NEW.store_id
+            AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'attention settings device does not belong to store'); END;`,
+      `CREATE TRIGGER trg_attention_settings_version_update
+        BEFORE UPDATE ON inventory_attention_settings
+        WHEN NEW.store_id <> OLD.store_id OR NEW.version <> OLD.version + 1
+        BEGIN SELECT RAISE(ABORT, 'attention settings version must advance by one'); END;`,
+      `CREATE TRIGGER trg_attention_settings_immutable_delete
+        BEFORE DELETE ON inventory_attention_settings
+        BEGIN SELECT RAISE(ABORT, 'attention settings history cannot be deleted'); END;`,
+      `CREATE TRIGGER trg_attention_snoozes_product_store_insert
+        BEFORE INSERT ON inventory_attention_snoozes
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          WHERE sp.id = NEW.store_product_id AND sp.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'attention snooze product does not belong to store'); END;`,
+      `CREATE TRIGGER trg_attention_snoozes_group_store_insert
+        BEFORE INSERT ON inventory_attention_snoozes
+        WHEN NEW.group_id IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM inventory_batch_groups bg
+          WHERE bg.id = NEW.group_id
+            AND bg.store_id = NEW.store_id
+            AND bg.store_product_id = NEW.store_product_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'attention snooze group does not belong to store product'); END;`,
+      `CREATE TRIGGER trg_attention_snoozes_member_store_insert
+        BEFORE INSERT ON inventory_attention_snoozes
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.created_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.created_by_user_id
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'attention snooze actor is not an active store member'); END;`,
+      `CREATE TRIGGER trg_attention_snoozes_device_store_insert
+        BEFORE INSERT ON inventory_attention_snoozes
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id
+            AND d.store_id = NEW.store_id
+            AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'attention snooze device does not belong to store'); END;`,
+      `CREATE TRIGGER trg_attention_snoozes_immutable_update
+        BEFORE UPDATE ON inventory_attention_snoozes
+        BEGIN SELECT RAISE(ABORT, 'attention snoozes are immutable'); END;`,
+      `CREATE TRIGGER trg_attention_snoozes_immutable_delete
+        BEFORE DELETE ON inventory_attention_snoozes
+        BEGIN SELECT RAISE(ABORT, 'attention snoozes are immutable'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;
