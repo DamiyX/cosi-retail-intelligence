@@ -29,6 +29,11 @@ import {
   type ProductLifecycleResult,
 } from './manageLifecycle';
 import {
+  updateReorderLevel,
+  type ProductReorderLevelResult,
+  type UpdateReorderLevelInput,
+} from './updateReorderLevel';
+import {
   getProductVariantById,
   getStoreProductById,
   listDevicesByStore,
@@ -79,6 +84,14 @@ export type { TemporaryProductGraph };
 export type { AddProductIdentifierResult, ProductIdentityResult };
 export type { PackageResult };
 export type { ProductLifecycleResult };
+export type { ProductReorderLevelResult };
+
+export interface ProductReorderLevelInput {
+  storeProductId: string;
+  reorderLevelBaseMicros: number | null;
+  expectedVersion: number;
+  operationId?: string;
+}
 
 export interface CatalogueClient {
   readonly storeId: string;
@@ -108,6 +121,23 @@ export interface CatalogueClient {
     input: Omit<ProductLifecycleInput, 'storeId' | 'deviceId'>,
     active: boolean,
   ): ProductLifecycleResult;
+  updateReorderLevel(input: ProductReorderLevelInput): ProductReorderLevelResult;
+}
+
+function resolveCatalogueUser(adapter: DatabaseAdapter, storeId: string, device: DeviceRow): string {
+  if (device.userId !== null) {
+    return device.userId;
+  }
+  const owner = adapter.getFirstRow<{ user_id: string }>(
+    `SELECT user_id FROM store_members
+     WHERE store_id = ? AND role = 'OWNER' AND status = 'ACTIVE'
+     ORDER BY created_at ASC LIMIT 1;`,
+    [storeId],
+  );
+  if (!owner) {
+    throw new Error('Cannot update reorder threshold: no active store owner is available.');
+  }
+  return owner.user_id;
 }
 
 export function createCatalogueClient(
@@ -116,6 +146,7 @@ export function createCatalogueClient(
   device: DeviceRow,
   generateId: () => string = generateMobileId,
 ): CatalogueClient {
+  const catalogueUserId = resolveCatalogueUser(adapter, store.id, device);
   return {
     storeId: store.id,
     storeName: store.name,
@@ -213,6 +244,20 @@ export function createCatalogueClient(
         active,
         { generateId },
       );
+    },
+    updateReorderLevel(input: ProductReorderLevelInput): ProductReorderLevelResult {
+      const operation: UpdateReorderLevelInput = {
+        storeId: store.id,
+        deviceId: device.id,
+        userId: catalogueUserId,
+        storeProductId: input.storeProductId,
+        reorderLevelBaseMicros: input.reorderLevelBaseMicros,
+        expectedVersion: input.expectedVersion,
+      };
+      return updateReorderLevel(adapter, operation, {
+        generateId,
+        operationId: input.operationId,
+      });
     },
   };
 }

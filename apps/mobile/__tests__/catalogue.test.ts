@@ -176,7 +176,7 @@ describe('M2-01 catalogue migration', () => {
         [testId(950), otherContext.store.id, first.variant.id, timestamp, timestamp],
       )).toThrow();
       expect(() => fixture.adapter.run(
-        'UPDATE store_products SET preferred_package_unit_id = ? WHERE id = ?;',
+        'UPDATE store_products SET preferred_package_unit_id = ?, version = version + 1 WHERE id = ?;',
         [second.basePackage.id, first.storeProduct.id],
       )).toThrow();
       expect(() => fixture.adapter.run(

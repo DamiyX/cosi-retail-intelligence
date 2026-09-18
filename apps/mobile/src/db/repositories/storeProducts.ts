@@ -23,6 +23,7 @@ export interface StoreProductRow {
   status: CatalogueStatus;
   createdAt: string;
   updatedAt: string;
+  version: number;
 }
 
 export interface CreateStoreProductInput {
@@ -50,13 +51,25 @@ function mapRow(row: StoreProductRecord): StoreProductRow {
     status: row.status as CatalogueStatus,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
+    version: (row.version as number | null) ?? 1,
   };
 }
 
-const COLUMNS =
+const COLUMNS_WITH_VERSION =
   'id, store_id, product_variant_id, local_sku, preferred_package_unit_id, ' +
   'default_selling_price_minor, minimum_selling_price_minor, reorder_level_base_micros, ' +
-  'is_temporary, status, created_at, updated_at';
+  'is_temporary, status, created_at, updated_at, version';
+const COLUMNS_WITHOUT_VERSION = COLUMNS_WITH_VERSION.replace(', version', '');
+
+function storeProductHasVersion(adapter: DatabaseAdapter): boolean {
+  return adapter
+    .getAllRows<{ name: string }>('PRAGMA table_info(store_products);')
+    .some((column) => column.name === 'version');
+}
+
+function storeProductColumns(adapter: DatabaseAdapter): string {
+  return storeProductHasVersion(adapter) ? COLUMNS_WITH_VERSION : COLUMNS_WITHOUT_VERSION;
+}
 
 function normalizeSku(sku: string | null | undefined): string | null {
   if (sku === undefined || sku === null) {
@@ -117,7 +130,7 @@ export function createStoreProduct(
 
 export function getStoreProductById(adapter: DatabaseAdapter, id: string): StoreProductRow | null {
   const row = adapter.getFirstRow<StoreProductRecord>(
-    `SELECT ${COLUMNS} FROM store_products WHERE id = ?;`,
+    `SELECT ${storeProductColumns(adapter)} FROM store_products WHERE id = ?;`,
     [requireId(id)],
   );
   return row ? mapRow(row) : null;
@@ -129,7 +142,7 @@ export function getStoreProductByStoreAndVariant(
   productVariantId: string,
 ): StoreProductRow | null {
   const row = adapter.getFirstRow<StoreProductRecord>(
-    `SELECT ${COLUMNS} FROM store_products WHERE store_id = ? AND product_variant_id = ?;`,
+    `SELECT ${storeProductColumns(adapter)} FROM store_products WHERE store_id = ? AND product_variant_id = ?;`,
     [requireId(storeId), requireId(productVariantId)],
   );
   return row ? mapRow(row) : null;
@@ -141,7 +154,7 @@ export function getStoreProductBySku(
   localSku: string,
 ): StoreProductRow | null {
   const row = adapter.getFirstRow<StoreProductRecord>(
-    `SELECT ${COLUMNS} FROM store_products WHERE store_id = ? AND local_sku = ?;`,
+    `SELECT ${storeProductColumns(adapter)} FROM store_products WHERE store_id = ? AND local_sku = ?;`,
     [requireId(storeId), localSku],
   );
   return row ? mapRow(row) : null;
@@ -171,14 +184,64 @@ export function updateStoreProductSku(
       );
     }
   }
-  adapter.run('UPDATE store_products SET local_sku = ?, updated_at = ? WHERE id = ?;', [
-    normalized,
-    nowIso(),
-    existing.id,
+  const versionClause = storeProductHasVersion(adapter) ? ', version = version + 1' : '';
+  adapter.run(`UPDATE store_products SET local_sku = ?, updated_at = ?${versionClause} WHERE id = ?;`, [
+    normalized, nowIso(), existing.id,
   ]);
   const updated = getStoreProductById(adapter, existing.id);
   if (!updated) {
     throw new Error('Store product SKU update did not persist.');
+  }
+  return updated;
+}
+
+/**
+ * Change the store-private low-stock threshold with an optimistic local
+ * revision precondition. Null deliberately means clear; zero remains a valid
+ * threshold and is never conflated with an unset value.
+ */
+export function updateStoreProductReorderLevel(
+  adapter: DatabaseAdapter,
+  id: string,
+  reorderLevelBaseMicros: number | null,
+  expectedVersion: number,
+  updatedAt = nowIso(),
+): StoreProductRow {
+  const productId = requireId(id);
+  if (
+    reorderLevelBaseMicros !== null &&
+    (!Number.isSafeInteger(reorderLevelBaseMicros) || reorderLevelBaseMicros < 0)
+  ) {
+    throw new DomainError(
+      'INVALID_QUANTITY',
+      'Reorder threshold must be a non-negative safe integer in micro-units.',
+    );
+  }
+  if (!Number.isSafeInteger(expectedVersion) || expectedVersion < 1) {
+    throw new DomainError('INVALID_VALUE', 'Store product version is invalid. Refresh before saving.');
+  }
+  if (!storeProductHasVersion(adapter)) {
+    throw new DomainError('INVALID_VALUE', 'Store product configuration is not ready for a versioned edit. Update the app before saving.');
+  }
+  const result = adapter.run(
+    `UPDATE store_products
+     SET reorder_level_base_micros = ?, updated_at = ?, version = version + 1
+     WHERE id = ? AND version = ?;`,
+    [reorderLevelBaseMicros, updatedAt, productId, expectedVersion],
+  );
+  if (result.changes !== 1) {
+    const existing = getStoreProductById(adapter, productId);
+    if (!existing) {
+      throw new DomainError('INVALID_VALUE', 'Store product does not exist.');
+    }
+    throw new DomainError(
+      'INVALID_VALUE',
+      'Product settings changed while this threshold was open. Refresh before saving.',
+    );
+  }
+  const updated = getStoreProductById(adapter, productId);
+  if (!updated) {
+    throw new Error('Store product reorder threshold update did not persist.');
   }
   return updated;
 }
@@ -194,10 +257,9 @@ export function updateStoreProductPreferredPackage(
     throw new DomainError('INVALID_VALUE', 'Store product does not exist.');
   }
   const preferred = requireId(packageUnitId);
-  adapter.run('UPDATE store_products SET preferred_package_unit_id = ?, updated_at = ? WHERE id = ?;', [
-    preferred,
-    nowIso(),
-    existing.id,
+  const versionClause = storeProductHasVersion(adapter) ? ', version = version + 1' : '';
+  adapter.run(`UPDATE store_products SET preferred_package_unit_id = ?, updated_at = ?${versionClause} WHERE id = ?;`, [
+    preferred, nowIso(), existing.id,
   ]);
   const updated = getStoreProductById(adapter, existing.id);
   if (!updated) {
@@ -224,7 +286,8 @@ export function updateStoreProductLifecycle(
   }
   const isTemporary = input.isTemporary ?? existing.isTemporary;
   const status = input.status ?? existing.status;
-  adapter.run('UPDATE store_products SET is_temporary = ?, status = ?, updated_at = ? WHERE id = ?;', [
+  const versionClause = storeProductHasVersion(adapter) ? ', version = version + 1' : '';
+  adapter.run(`UPDATE store_products SET is_temporary = ?, status = ?, updated_at = ?${versionClause} WHERE id = ?;`, [
     fromBoolean(isTemporary),
     status,
     nowIso(),
@@ -303,7 +366,7 @@ export function searchStoreProducts(
       preferred_selling_price_minor: number | null;
     }
   >(
-    `SELECT sp.${COLUMNS.split(', ').join(', sp.')}, pv.name AS variant_name, pv.status AS variant_status,
+    `SELECT sp.${storeProductColumns(adapter).split(', ').join(', sp.')}, pv.name AS variant_name, pv.status AS variant_status,
             ppu.name AS preferred_package_name,
             sps.default_selling_price_minor AS preferred_selling_price_minor
      FROM store_products sp

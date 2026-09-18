@@ -1,5 +1,5 @@
-import { DomainError, formatQuantityMicros } from '@retail/domain';
-import { useCallback, useEffect, useState } from 'react';
+import { DomainError, formatQuantityMicros, parseQuantityDecimal } from '@retail/domain';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { CatalogueClient, ProductDetail } from '../../catalogue/client';
@@ -90,13 +90,28 @@ export default function ProductDetailScreen({
   const [identifierValue, setIdentifierValue] = useState('');
   const [identifierType, setIdentifierType] = useState<IdentifierType>('EAN');
   const [identifierError, setIdentifierError] = useState<string | null>(null);
+  const [reorderText, setReorderText] = useState('');
+  const [reorderError, setReorderError] = useState<string | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [confirmingDeactivate, setConfirmingDeactivate] = useState(false);
+  const reorderProductIdRef = useRef<string | null>(null);
 
   const state = screen.detail;
   const detail = state.detail;
   const priceHistory = screen.priceHistory;
+  useEffect(() => {
+    if (!detail || reorderProductIdRef.current === detail.product.id) {
+      return;
+    }
+    reorderProductIdRef.current = detail.product.id;
+    setReorderText(
+      detail.product.reorderLevelBaseMicros === null
+        ? ''
+        : formatQuantityMicros(detail.product.reorderLevelBaseMicros),
+    );
+    setReorderError(null);
+  }, [detail]);
   const refresh = useCallback((): void => {
     setScreen(loadScreen(client, productId));
   }, [client, productId]);
@@ -112,7 +127,12 @@ export default function ProductDetailScreen({
   const identityDirty = Boolean(
     editing && detail && (name !== detail.variant.name || localSku !== (detail.product.localSku ?? '')),
   );
-  const dirty = identityDirty || identifierValue.trim().length > 0;
+  const persistedReorderText =
+    detail?.product.reorderLevelBaseMicros === null || detail === null
+      ? ''
+      : formatQuantityMicros(detail.product.reorderLevelBaseMicros);
+  const reorderDirty = detail !== null && reorderText !== persistedReorderText;
+  const dirty = identityDirty || identifierValue.trim().length > 0 || reorderDirty;
 
   const requestBack = useCallback((): void => {
     if (!dirty) {
@@ -184,6 +204,59 @@ export default function ProductDetailScreen({
         setNameError('Enter a product name.');
       } else {
         setFailure('These changes could not be saved on the device. Nothing was changed.');
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveReorderLevel = (): void => {
+    if (saving || !detail) {
+      return;
+    }
+    setSaving(true);
+    setFailure(null);
+    setReorderError(null);
+    try {
+      const reorderLevelBaseMicros = parseQuantityDecimal(reorderText.trim());
+      const result = client.updateReorderLevel({
+        storeProductId: detail.product.id,
+        reorderLevelBaseMicros,
+        expectedVersion: detail.product.version,
+      });
+      setReorderText(formatQuantityMicros(result.storeProduct.reorderLevelBaseMicros ?? 0));
+      refresh();
+    } catch (error) {
+      if (error instanceof DomainError) {
+        setReorderError(error.message);
+      } else {
+        setFailure('This low-stock threshold could not be saved on the device. Nothing was changed.');
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const clearReorderLevel = (): void => {
+    if (saving || !detail) {
+      return;
+    }
+    setSaving(true);
+    setFailure(null);
+    setReorderError(null);
+    try {
+      client.updateReorderLevel({
+        storeProductId: detail.product.id,
+        reorderLevelBaseMicros: null,
+        expectedVersion: detail.product.version,
+      });
+      setReorderText('');
+      refresh();
+    } catch (error) {
+      if (error instanceof DomainError) {
+        setReorderError(error.message);
+      } else {
+        setFailure('This low-stock threshold could not be cleared on the device. Nothing was changed.');
       }
     } finally {
       setSaving(false);
@@ -378,6 +451,35 @@ export default function ProductDetailScreen({
               onPress={addIdentifier}
               disabled={saving}
             />
+          </View>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Low-stock alert</Text>
+            <Text style={styles.line}>
+              {detail.product.reorderLevelBaseMicros === null
+                ? 'No threshold is set. This product will not create a low-stock alert until you set one.'
+                : `Current threshold: ${formatQuantityMicros(detail.product.reorderLevelBaseMicros)} ${detail.packages.find((packageUnit) => packageUnit.isBaseUnit)?.name ?? 'base units'}`}
+            </Text>
+            <Field
+              label={`Low-stock threshold (${detail.packages.find((packageUnit) => packageUnit.isBaseUnit)?.name ?? 'base units'})`}
+              value={reorderText}
+              onChangeText={(text) => {
+                setReorderText(text);
+                setReorderError(null);
+              }}
+              error={reorderError}
+              hint="Enter an exact non-negative quantity in the product's base unit. Zero is valid."
+              keyboardType="decimal-pad"
+              maxLength={30}
+              testID="detail-reorder-threshold"
+            />
+            <PrimaryButton
+              title={saving ? 'Saving…' : 'Save threshold'}
+              onPress={saveReorderLevel}
+              disabled={saving}
+            />
+            {detail.product.reorderLevelBaseMicros !== null || reorderText.trim().length > 0 ? (
+              <SecondaryButton title="Clear threshold" onPress={clearReorderLevel} />
+            ) : null}
           </View>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Packages</Text>

@@ -107,6 +107,7 @@ export {
   searchStoreProducts,
   updateStoreProductLifecycle,
   updateStoreProductPreferredPackage,
+  updateStoreProductReorderLevel,
   updateStoreProductSku,
 } from './storeProducts';
 export type {

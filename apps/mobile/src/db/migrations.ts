@@ -2237,6 +2237,18 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'adjustment batch reclassification is incomplete or mismatched'); END;`,
     ],
   },
+  {
+    version: 14,
+    name: 'store_product_configuration_versioning',
+    statements: [
+      `ALTER TABLE store_products
+        ADD COLUMN version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0);`,
+      `CREATE TRIGGER trg_store_products_version_update
+        BEFORE UPDATE ON store_products
+        WHEN NEW.version <> OLD.version + 1
+        BEGIN SELECT RAISE(ABORT, 'store product version must advance by one'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

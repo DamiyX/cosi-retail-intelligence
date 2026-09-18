@@ -10,6 +10,7 @@ import {
   type ProductDetail,
   type ProductIdentityResult,
   type ProductLifecycleResult,
+  type ProductReorderLevelResult,
   type QuickAddInput,
   type TemporaryProductGraph,
 } from '../src/catalogue/client';
@@ -52,6 +53,9 @@ function stubClient(overrides: Partial<CatalogueClient> = {}): CatalogueClient {
       throw new Error('Stub catalogue cannot save.');
     },
     setProductActive: (): ProductLifecycleResult => {
+      throw new Error('Stub catalogue cannot save.');
+    },
+    updateReorderLevel: (): ProductReorderLevelResult => {
       throw new Error('Stub catalogue cannot save.');
     },
     ...overrides,

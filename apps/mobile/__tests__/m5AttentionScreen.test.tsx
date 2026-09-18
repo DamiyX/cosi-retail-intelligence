@@ -22,7 +22,7 @@ function seed() {
       enteredCostMinor: 200,
     }],
   }, { generateId: deterministicIds(9610), operationId: testId(9620) });
-  fixture.adapter.run('UPDATE store_products SET reorder_level_base_micros = ? WHERE id = ?;', [5 * MICROS_PER_UNIT, rice.storeProduct.id]);
+      fixture.adapter.run('UPDATE store_products SET reorder_level_base_micros = ?, version = version + 1 WHERE id = ?;', [5 * MICROS_PER_UNIT, rice.storeProduct.id]);
   const client = createDatabaseInventoryClient(fixture.adapter, {
     storeId: fixture.context.store.id,
     deviceId: fixture.context.device.id,

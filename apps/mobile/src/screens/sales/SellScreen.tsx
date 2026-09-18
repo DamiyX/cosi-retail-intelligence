@@ -677,6 +677,9 @@ export default function SellScreen({
     setProductActive: () => {
       throw new Error('Not implemented');
     },
+    updateReorderLevel: () => {
+      throw new Error('Not implemented');
+    },
   };
 
   // Subscreen: Quick Add

@@ -35,7 +35,7 @@ function buy(fixture: ReturnType<typeof openCatalogueFixture>, product: ReturnTy
 }
 
 function setReorderLevel(fixture: ReturnType<typeof openCatalogueFixture>, productId: string, units: number): void {
-  fixture.adapter.run('UPDATE store_products SET reorder_level_base_micros = ? WHERE id = ?;', [units * MICROS_PER_UNIT, productId]);
+  fixture.adapter.run('UPDATE store_products SET reorder_level_base_micros = ?, version = version + 1 WHERE id = ?;', [units * MICROS_PER_UNIT, productId]);
 }
 
 function sellOne(fixture: ReturnType<typeof openCatalogueFixture>, product: ReturnType<ReturnType<typeof createCatalogueClient>['createTemporaryProduct']>, operationSuffix: number): void {
