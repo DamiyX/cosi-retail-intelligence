@@ -1,8 +1,9 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-18  
-Current milestone: M4 Restocking + Costing — re-audit at `52a772a` requires
-A4-R, A3-R and A6-R. Source acceptance withheld; physical/release gates carried.  
+Current milestone: M4 Restocking + Costing — A4-R, A3-R and A6-R corrections
+returned at `c91d16a`. Coordinator re-audit and source acceptance remain
+pending; physical/release gates carried.  
 Completed engineering milestones: M0 Project Foundation; M1 Domain + Local
 Database (accepted with an explicit device waiver); M2 Catalogue + Package Units
 (accepted after independent audit); M3 source/automated scope (accepted after
@@ -13,8 +14,9 @@ independent audit with physical/release gates carried).
 - Canonical remote: https://github.com/DamiyX/cosi-retail-intelligence
 - Current branch: `feat/m4-restocking-costing`, from accepted M3 checkpoint
   `66cc64d`. M4 implementation is committed in `3c4eef9`, with follow-up
-  commits `b12ff0c`, `c810f5b`, `87e96a6`, `9ec9075` and correction commits
-  `457d9d9`, `08871db`, `cb0566e`.
+  commits `b12ff0c`, `c810f5`, `87e96a6`, `9ec9075`, correction commits
+  `457d9d9`, `08871db`, `cb0566e`, and re-audit returns `c30d3f7`, `9535451`,
+  `c91d16a`.
 - Coordinator-created M4 plan, published tickets, D-038, cost/design sources and
   workflow registration were recorded in checkpoint `db5a835`; implementation
   evidence is now recorded separately for coordinator audit.
@@ -74,9 +76,9 @@ new migration.
 
 Coordinator independently passed `npm run validate` at `52a772a`: 364 tests /
 28 suites, strict typecheck, zero-warning lint. A1/A5 service reproductions pass;
-A2 supported guard/routed evidence is accepted for source scope. Parent-cost
-consistency, contextual Quick Add retry and merchant cost display still need
-A4-R/A3-R/A6-R in `M4_AUDIT_CORRECTIONS.md`. Same Luna task owns repairs.
+A2 supported guard/routed evidence is accepted for source scope. The same Luna
+task returned the bounded A4-R/A3-R/A6-R corrections in `c30d3f7`, `9535451`
+and `c91d16a`; coordinator re-audit is required before source acceptance.
 Founder approval of the separate proposed `PRODUCT_CHANGE_BACKLOG.md` scope,
 adjustment-cost policy and expiry timing also precedes M5 delegation. No new
 product feature is approved by this audit.
@@ -106,9 +108,12 @@ overflow UI coverage; `87e96a6` aligns the authorized Expo patch versions.
 Correction commit `457d9d9` covers exact fractional sale-cost preservation,
 snapshot invariants and explicit-date replay; `08871db` covers supported
 native-stack draft removal and focus/Quick Add recovery; `cb0566e` makes cost
-availability and receipt estimates merchant-readable. Migration 5 is additive
-and only adds sale-cost coverage/field triggers; migrations 1–4 remain unchanged.
-Independent audit owns the final source decision.
+availability and receipt estimates merchant-readable. Re-audit return `c30d3f7`
+adds typed and SQLite parent-cost consistency with additive migration 6;
+`9535451` resumes pending contextual Quick Add selection after read retries;
+`c91d16a` removes raw receipt fractions and formats large exact estimates with
+BigInt/string arithmetic. Migrations 1–5 remain unchanged. Independent audit
+owns the final source decision.
 
 ## Verified validation evidence
 
@@ -153,6 +158,23 @@ Independent audit owns the final source decision.
 - `git diff --check` passed. No device,
   cloud, push, merge or release action was performed.
 
+### M4 re-audit correction return
+
+- `npm run validate`: passed after the correction return — 150 domain tests in
+  5 suites and 217 mobile tests in 23 suites (367 tests / 28 suites total),
+  strict typecheck and zero-warning lint.
+- Focused A4-R/A3-R/A6-R suites passed: purchases 11, restock 12, products 24,
+  and exact money display 7 tests (54 total). Coverage includes migration 6 parent-cost
+  triggers, old-null preservation, raw SQLite mismatches, retry failure then
+  success with retained cart/editor state, no repeated Quick Add selection,
+  fractional/zero/unavailable states, and overflow-sized receipt display.
+- `npm run mobile:doctor`: 21/21 checks passed; `npx expo install --check`
+  reported dependencies up to date; `npm run mobile:export` passed with 1,357
+  Android modules and a 3.2 MB Hermes bundle.
+- Active M4 workflow JSON Schema/date-time/gate-dependency/artifact validation
+  and `git diff --check` passed. Coordinator re-audit and source acceptance are
+  not claimed; no device, cloud, push, merge or release action was performed.
+
 ## Deferred evidence and risks
 
 - The Galaxy A15 5G (`SM-A156E`, Android 16, 1080×2340) evidence below is real
@@ -182,9 +204,9 @@ Independent audit owns the final source decision.
 
 ## Next action
 
-Independent coordinator re-audit of the returned M4 A1–A6 source/automated
-evidence is the next action. The implementation task must return structured
-completion via send_message_to_thread to coordinator task
+Independent coordinator re-audit of the returned M4 A1–A6 and A4-R/A3-R/A6-R
+source/automated evidence is the next action. The implementation task must
+return structured completion via send_message_to_thread to coordinator task
 `01a098ef-d830-7531-bca7-2d66b0a5b587`, then stop; no M4 code acceptance or M5
 release has occurred. Accepted M3 tickets are archived in
 `docs/engineering/tickets/M3_SALES.md`. Complete the carried

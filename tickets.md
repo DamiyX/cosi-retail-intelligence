@@ -1,7 +1,7 @@
 # Tickets: M4 Offline Restocking + Provisional Costing
 
-**Status:** Re-audit at 52a772a requires A4-R/A3-R/A6-R; source acceptance
-withheld. Founder approved the M4 costing and
+**Status:** A4-R/A3-R/A6-R corrections returned in `c30d3f7`, `9535451` and
+`c91d16a`; coordinator re-audit and source acceptance remain withheld. Founder approved the M4 costing and
 screen/state contract on 2026-09-18; D-038 and DESIGN record the approved rules.
 Coordinator verified ticket granularity/dependencies under delegated judgment.
 **Branch:** feat/m4-restocking-costing. **Accepted baseline:** 66cc64d.
@@ -44,6 +44,31 @@ Coordinator independently passed 364 tests / 28 suites, typecheck and lint at
 evidence is accepted; A4-R/A3-R/A6-R remain in M4_AUDIT_CORRECTIONS.md. Luna
 repairs only those gaps and returns. M5 also waits for founder approval of the
 separate product-change review.
+
+## Re-audit correction return — A4-R / A3-R / A6-R
+
+The same implementation task returned only the three bounded re-audit fixes:
+
+- `c30d3f7` (`M4-A4R`) adds typed parent sale-item cost checks and additive
+  migration 6 SQLite enforcement. AVAILABLE snapshots must match the immutable
+  parent COGS and safe legacy unit-cost projection; UNAVAILABLE snapshots retain
+  null parent COGS. Fractional and unsafe-integral exact bases remain valid with
+  a null legacy projection, while old M3 null rows are not backfilled.
+- `9535451` (`M4-A3R`) makes the contextual Quick Add retry itself resume the
+  pending selection after a failed catalogue read, exactly once, while retaining
+  the cart, editor and supplier state. The permanent regression covers retry
+  failure then success and a focus/quantity cycle after selection.
+- `c91d16a` (`M4-A6R`) removes raw stored rational fractions from ProductDetail
+  and PurchaseDetail, explains NGN display rounding as nearest kobo, and uses
+  exact BigInt/string formatting for overflow-sized valid receipt estimates.
+
+`npm run validate` passed after these commits: 150 domain tests and 217 mobile
+tests (367 tests / 28 suites), strict typecheck and zero-warning lint. Focused
+correction suites passed 54 tests. Doctor 21/21, Expo dependency check, Android
+export (1,357 modules; 3.2 MB Hermes), active M4 workflow validation and
+`git diff --check` also passed. This is implementation evidence only; the
+coordinator must independently re-audit and decide source acceptance. No M5,
+device, cloud, push, merge or release action was performed.
 
 ## Execution contract
 
@@ -230,8 +255,9 @@ and execution ledgers. No new feature scope or readiness waiver.
 separate. Only coordinator records independent acceptance.
 **Completion evidence:** Baseline commits `b12ff0c`, `c810f5b` and `9ec9075`
 complete the source scope; correction commits `457d9d9`, `08871db` and
-`cb0566e` return A1–A6 for re-audit. `npm run validate` passed (150 domain
-tests / 214 mobile tests; 364 tests / 28 suites), strict typecheck and
+`cb0566e` returned A1–A6, followed by bounded re-audit returns `c30d3f7`,
+`9535451` and `c91d16a`. The latest `npm run validate` passed (150 domain
+tests / 217 mobile tests; 367 tests / 28 suites), strict typecheck and
 zero-warning lint. `npm run mobile:doctor` passed 21/21, `npx expo install
 --check` reported dependencies up to date, and `npm run mobile:export` passed
 (1,357 Android modules; 3.2 MB Hermes bundle). The active M4 workflow
