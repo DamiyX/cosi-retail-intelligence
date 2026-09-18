@@ -144,6 +144,7 @@ export {
   getInventoryLedgerWatermark,
   listInventoryEventsBySource,
   listInventoryEventsByStoreProduct,
+  listInventoryEventsByStoreProductInLedgerOrder,
 } from './inventoryEvents';
 export type {
   CreateInventoryEventInput,

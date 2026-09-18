@@ -232,6 +232,24 @@ export function listInventoryEventsByStoreProduct(
     .map(mapRow);
 }
 
+/**
+ * Return the product event ledger in local application order. Attention
+ * episode reconstruction must follow the same durable order as its
+ * inventory watermark, not a user-entered occurredAt that may arrive late
+ * from an offline device.
+ */
+export function listInventoryEventsByStoreProductInLedgerOrder(
+  adapter: DatabaseAdapter,
+  storeProductId: string,
+): InventoryEventRow[] {
+  return adapter
+    .getAllRows<InventoryEventRecord>(
+      `SELECT ${COLUMNS} FROM inventory_events WHERE store_product_id = ? ORDER BY rowid ASC;`,
+      [requireId(storeProductId)],
+    )
+    .map(mapRow);
+}
+
 export function listInventoryEventsBySource(
   adapter: DatabaseAdapter,
   sourceType: InventorySourceType,

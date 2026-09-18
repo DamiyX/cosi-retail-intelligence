@@ -11,6 +11,8 @@ import {
   getInventoryAttentionSettings,
   getInventoryAttentionSnoozeById,
   getStoreById,
+  listInventoryEventsByStoreProductInLedgerOrder,
+  listBatchInventoryEntriesByStoreProduct,
   listInventoryAttentionSnoozesByStore,
   listStoreProducts,
   saveInventoryAttentionSettings,
@@ -122,6 +124,8 @@ interface ProductContext {
 }
 
 type ConditionCandidate = AttentionItem;
+
+type StockConditionKind = Extract<AttentionItemKind, 'LOW_STOCK' | 'ZERO_STOCK' | 'NEGATIVE_STOCK'>;
 
 function assertActor(adapter: DatabaseAdapter, input: AttentionActor, ownerOnly: boolean): { store: StoreRow; memberId: string } {
   const store = getStoreById(adapter, requireId(input.storeId));
@@ -257,12 +261,54 @@ function latestDiscrepancy(adapter: DatabaseAdapter, storeId: string, storeProdu
   return { difference: BigInt(row.difference_base_units), id: row.id };
 }
 
-function conditionKey(prefix: string, product: ProductContext, settings: AttentionSettings, suffix = ''): string {
-  const state = `${product.projection.inventoryWatermark}:${product.projection.batchWatermark}:settings-${settings.version}`;
-  return `${prefix}:${product.storeProductId}:${state}${suffix ? `:${suffix}` : ''}`;
+function conditionKey(prefix: string, product: ProductContext, suffix = ''): string {
+  return `${prefix}:${product.storeProductId}${suffix ? `:${suffix}` : ''}`;
 }
 
-function expiryCandidate(product: ProductContext, settings: AttentionSettings, today: string, group: BatchProjection['groups'][number]): ConditionCandidate | null {
+function stockConditionKind(balance: bigint, reorderLevelBaseMicros: number | null): StockConditionKind | null {
+  if (balance < 0n) return 'NEGATIVE_STOCK';
+  if (balance === 0n) return 'ZERO_STOCK';
+  if (reorderLevelBaseMicros !== null && balance <= BigInt(reorderLevelBaseMicros)) return 'LOW_STOCK';
+  return null;
+}
+
+function stockEpisodeToken(adapter: DatabaseAdapter, product: ProductContext, kind: StockConditionKind): string {
+  let balance = 0n;
+  let previous = stockConditionKind(0n, product.reorderLevelBaseMicros);
+  let token = 'initial';
+  for (const event of listInventoryEventsByStoreProductInLedgerOrder(adapter, product.storeProductId)) {
+    const next = balance + BigInt(event.quantityBaseDeltaMicros);
+    const nextKind = stockConditionKind(next, product.reorderLevelBaseMicros);
+    if (nextKind === kind && previous !== kind) token = event.id;
+    balance = next;
+    previous = nextKind;
+  }
+  return token;
+}
+
+function batchGroupEpisodeToken(adapter: DatabaseAdapter, storeProductId: string, groupId: string): string {
+  let balance = 0n;
+  let token = 'initial';
+  for (const entry of listBatchInventoryEntriesByStoreProduct(adapter, storeProductId).filter((candidate) => candidate.groupId === groupId)) {
+    const next = balance + BigInt(entry.deltaBaseMicros);
+    if (next > 0n && balance <= 0n) token = entry.id;
+    balance = next;
+  }
+  return token;
+}
+
+function unknownEpisodeToken(adapter: DatabaseAdapter, storeProductId: string): string {
+  let balance = 0n;
+  let token = 'initial';
+  for (const entry of listBatchInventoryEntriesByStoreProduct(adapter, storeProductId).filter((candidate) => candidate.groupId === null)) {
+    const next = balance + BigInt(entry.deltaBaseMicros);
+    if (next !== 0n && balance === 0n) token = entry.id;
+    balance = next;
+  }
+  return token;
+}
+
+function expiryCandidate(adapter: DatabaseAdapter, product: ProductContext, settings: AttentionSettings, today: string, group: BatchProjection['groups'][number]): ConditionCandidate | null {
   const balance = BigInt(group.balanceBaseMicros);
   if (balance <= 0n || group.datePrecision === 'UNKNOWN' || group.dateValue === null) return null;
   const isMonth = group.datePrecision === 'MONTH';
@@ -286,10 +332,14 @@ function expiryCandidate(product: ProductContext, settings: AttentionSettings, t
   }
   const printedDate = group.datePrecision === 'MONTH' ? localMonthLabel(group.dateValue) : group.dateValue;
   const meaning = group.dateMeaning === 'BEST_BEFORE' ? 'best-before' : group.dateMeaning === 'EXPIRY' ? 'expiry' : 'recorded date';
-  const status = severity === 'UPCOMING' ? 'is within the reminder window' : severity === 'REACHED' ? 'reaches today' : 'has passed';
+  const status = severity === 'UPCOMING'
+    ? 'is within the reminder window'
+    : severity === 'REACHED'
+      ? isMonth ? 'is within this month' : 'reaches today'
+      : 'has passed';
   return {
     id: `expiry:${group.id}`,
-    conditionKey: conditionKey('EXPIRY', product, settings, group.id),
+    conditionKey: conditionKey('EXPIRY', product, `${group.id}:${batchGroupEpisodeToken(adapter, product.storeProductId, group.id)}`),
     conditionType: 'EXPIRY',
     kind: 'EXPIRY',
     severity,
@@ -305,12 +355,12 @@ function expiryCandidate(product: ProductContext, settings: AttentionSettings, t
   };
 }
 
-function stockCandidate(product: ProductContext, settings: AttentionSettings): ConditionCandidate | null {
+function stockCandidate(adapter: DatabaseAdapter, product: ProductContext): ConditionCandidate | null {
   const balance = BigInt(product.projection.inventoryBalanceBaseMicros);
   if (balance < 0n) {
     return {
       id: `stock:${product.storeProductId}`,
-      conditionKey: conditionKey('STOCK_NEGATIVE', product, settings),
+      conditionKey: conditionKey('STOCK_NEGATIVE', product, stockEpisodeToken(adapter, product, 'NEGATIVE_STOCK')),
       conditionType: 'STOCK',
       kind: 'NEGATIVE_STOCK',
       severity: 'NEGATIVE',
@@ -328,7 +378,7 @@ function stockCandidate(product: ProductContext, settings: AttentionSettings): C
   if (balance === 0n) {
     return {
       id: `stock:${product.storeProductId}`,
-      conditionKey: conditionKey('STOCK_ZERO', product, settings),
+      conditionKey: conditionKey('STOCK_ZERO', product, stockEpisodeToken(adapter, product, 'ZERO_STOCK')),
       conditionType: 'STOCK',
       kind: 'ZERO_STOCK',
       severity: 'ZERO',
@@ -346,7 +396,7 @@ function stockCandidate(product: ProductContext, settings: AttentionSettings): C
   if (product.reorderLevelBaseMicros !== null && balance <= BigInt(product.reorderLevelBaseMicros)) {
     return {
       id: `stock:${product.storeProductId}`,
-      conditionKey: conditionKey('STOCK_LOW', product, settings),
+      conditionKey: conditionKey('STOCK_LOW', product, stockEpisodeToken(adapter, product, 'LOW_STOCK')),
       conditionType: 'STOCK',
       kind: 'LOW_STOCK',
       severity: 'LOW',
@@ -367,13 +417,13 @@ function stockCandidate(product: ProductContext, settings: AttentionSettings): C
 function deriveCandidates(adapter: DatabaseAdapter, store: StoreRow, settings: AttentionSettings, at: LocalTime): ConditionCandidate[] {
   const candidates: ConditionCandidate[] = [];
   for (const product of productContexts(adapter, store.id)) {
-    const stock = stockCandidate(product, settings);
+    const stock = stockCandidate(adapter, product);
     if (stock) candidates.push(stock);
     const unknown = BigInt(product.projection.unknownResidualBaseMicros);
     if (unknown !== 0n) {
       candidates.push({
         id: `unknown:${product.storeProductId}`,
-        conditionKey: conditionKey('UNKNOWN', product, settings),
+        conditionKey: conditionKey('UNKNOWN', product, unknownEpisodeToken(adapter, product.storeProductId)),
         conditionType: 'UNKNOWN_COVERAGE',
         kind: 'UNKNOWN_COVERAGE',
         severity: 'UNRESOLVED',
@@ -393,7 +443,7 @@ function deriveCandidates(adapter: DatabaseAdapter, store: StoreRow, settings: A
       if (balance <= 0n || group.datePrecision !== 'UNKNOWN') continue;
       candidates.push({
         id: `undated:${group.id}`,
-        conditionKey: conditionKey('UNDATED', product, settings, group.id),
+        conditionKey: conditionKey('UNDATED', product, `${group.id}:${batchGroupEpisodeToken(adapter, product.storeProductId, group.id)}`),
         conditionType: 'UNKNOWN_COVERAGE',
         kind: 'UNKNOWN_COVERAGE',
         severity: 'UNRESOLVED',
@@ -412,7 +462,7 @@ function deriveCandidates(adapter: DatabaseAdapter, store: StoreRow, settings: A
     if (discrepancy && discrepancy.difference !== 0n) {
       candidates.push({
         id: `discrepancy:${product.storeProductId}`,
-        conditionKey: conditionKey('DISCREPANCY', product, settings),
+        conditionKey: conditionKey('DISCREPANCY', product, discrepancy.id),
         conditionType: 'DISCREPANCY',
         kind: 'DISCREPANCY',
         severity: 'UNRESOLVED',
@@ -428,7 +478,7 @@ function deriveCandidates(adapter: DatabaseAdapter, store: StoreRow, settings: A
       });
     }
     for (const group of product.projection.groups) {
-      const expiry = expiryCandidate(product, settings, at.date, group);
+      const expiry = expiryCandidate(adapter, product, settings, at.date, group);
       if (expiry) candidates.push(expiry);
     }
   }

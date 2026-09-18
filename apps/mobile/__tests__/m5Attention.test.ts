@@ -16,7 +16,7 @@ import { completeSale } from '../src/sales/completeSale';
 import { openDatabase, MIGRATIONS } from '../src/db';
 import { deterministicIds, FailOnWriteAdapter, openCatalogueFixture, reopenDatabase, testId } from './catalogueSupport';
 
-function buy(fixture: ReturnType<typeof openCatalogueFixture>, product: ReturnType<ReturnType<typeof createCatalogueClient>['createTemporaryProduct']>, quantity: number, operationSuffix: number, expiry?: { precision: 'DAY' | 'MONTH'; value: string }) {
+function buy(fixture: ReturnType<typeof openCatalogueFixture>, product: ReturnType<ReturnType<typeof createCatalogueClient>['createTemporaryProduct']>, quantity: number, operationSuffix: number, expiry?: { precision: 'DAY' | 'MONTH'; value: string; meaning?: 'EXPIRY' | 'BEST_BEFORE' }) {
   recordPurchase(fixture.adapter, {
     storeId: fixture.context.store.id,
     deviceId: fixture.context.device.id,
@@ -29,7 +29,7 @@ function buy(fixture: ReturnType<typeof openCatalogueFixture>, product: ReturnTy
       enteredCostMinor: quantity * 100,
       expiryPrecision: expiry?.precision,
       expiryValue: expiry?.value,
-      expiryMeaning: expiry ? 'EXPIRY' : undefined,
+      expiryMeaning: expiry?.meaning ?? (expiry ? 'EXPIRY' : undefined),
     }],
   }, { generateId: deterministicIds(operationSuffix), operationId: testId(operationSuffix + 1) });
 }
@@ -147,16 +147,36 @@ describe('M5 local attention and snooze', () => {
     try {
       const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(9600));
       const october = catalogue.createTemporaryProduct({ name: 'October soap' });
+      const bestBefore = catalogue.createTemporaryProduct({ name: 'October flour' });
+      const day = catalogue.createTemporaryProduct({ name: 'October milk' });
       const leap = catalogue.createTemporaryProduct({ name: 'Leap soap' });
       buy(fixture, october, 1, 9610, { precision: 'MONTH', value: '2026-10' });
+      buy(fixture, bestBefore, 1, 9615, { precision: 'MONTH', value: '2026-10', meaning: 'BEST_BEFORE' });
+      buy(fixture, day, 1, 9617, { precision: 'DAY', value: '2026-10-15' });
       buy(fixture, leap, 1, 9620, { precision: 'MONTH', value: '2028-02' });
       const client = createDatabaseInventoryClient(fixture.adapter, { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, userId: fixture.context.owner.id });
-      const severityAt = (productId: string, iso: string) => client.getAttentionOverview(iso).items.find((item) => item.storeProductId === productId && item.kind === 'EXPIRY')?.severity;
+      const itemAt = (productId: string, iso: string) => client.getAttentionOverview(iso).items.find((item) => item.storeProductId === productId && item.kind === 'EXPIRY');
+      const severityAt = (productId: string, iso: string) => itemAt(productId, iso)?.severity;
 
       expect(severityAt(october.storeProduct.id, '2026-09-30T10:00:00.000Z')).toBe('UPCOMING');
-      expect(severityAt(october.storeProduct.id, '2026-10-01T10:00:00.000Z')).toBe('REACHED');
-      expect(severityAt(october.storeProduct.id, '2026-10-15T10:00:00.000Z')).toBe('REACHED');
-      expect(severityAt(october.storeProduct.id, '2026-10-31T10:00:00.000Z')).toBe('REACHED');
+      for (const iso of ['2026-10-01T10:00:00.000Z', '2026-10-15T10:00:00.000Z', '2026-10-31T10:00:00.000Z']) {
+        expect(itemAt(october.storeProduct.id, iso)).toEqual(expect.objectContaining({
+          severity: 'REACHED',
+          detail: expect.stringContaining('within this month'),
+        }));
+        expect(itemAt(october.storeProduct.id, iso)?.detail).not.toMatch(/reaches today/i);
+      }
+      expect(itemAt(october.storeProduct.id, '2026-10-15T10:00:00.000Z')?.title).toContain('expiry');
+      expect(itemAt(bestBefore.storeProduct.id, '2026-10-15T10:00:00.000Z')).toEqual(expect.objectContaining({
+        severity: 'REACHED',
+        title: expect.stringContaining('best-before'),
+        detail: expect.stringContaining('within this month'),
+      }));
+      expect(itemAt(day.storeProduct.id, '2026-10-15T10:00:00.000Z')).toEqual(expect.objectContaining({
+        severity: 'REACHED',
+        detail: expect.stringContaining('reaches today'),
+      }));
+      expect(itemAt(day.storeProduct.id, '2026-10-15T10:00:00.000Z')?.detail).not.toMatch(/countdown|days? left/i);
       expect(severityAt(october.storeProduct.id, '2026-11-01T10:00:00.000Z')).toBe('PASSED');
       expect(severityAt(leap.storeProduct.id, '2028-02-29T10:00:00.000Z')).toBe('REACHED');
       expect(severityAt(leap.storeProduct.id, '2028-03-01T10:00:00.000Z')).toBe('PASSED');
@@ -369,6 +389,75 @@ describe('M5 local attention and snooze', () => {
       client.recordAdjustment({ operationId: testId(9770), storeProductId: lowProduct.storeProduct.id, expectedInventoryWatermark: projection.inventoryWatermark, expectedBatchWatermark: projection.batchWatermark, quantityBaseDeltaMicros: -MICROS_PER_UNIT, groupId: projection.groups.find((group) => BigInt(group.balanceBaseMicros) > 0n)?.id, reasonCode: 'MISSING' });
       expect(client.getAttentionOverview('2026-09-18T08:30:00.000Z').items).toEqual(expect.arrayContaining([
         expect.objectContaining({ storeProductId: lowProduct.storeProduct.id, kind: 'LOW_STOCK' }),
+      ]));
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('keeps active stock snoozes through same-severity movements and settings/restart, then resurfaces after resolution and recurrence', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(9900));
+      const product = catalogue.createTemporaryProduct({ name: 'Episode rice' });
+      buy(fixture, product, 4, 9910);
+      setReorderLevel(fixture, product.storeProduct.id, 5);
+      const client = createDatabaseInventoryClient(fixture.adapter, { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, userId: fixture.context.owner.id, generateId: deterministicIds(9920) });
+      const low = client.getAttentionOverview('2026-09-18T08:00:00.000Z').items.find((item) => item.storeProductId === product.storeProduct.id && item.kind === 'LOW_STOCK')!;
+      client.snoozeAttention({ operationId: testId(9930), conditionKey: low.conditionKey, conditionType: low.conditionType, storeProductId: low.storeProductId, groupId: low.groupId, severityRank: low.severityRank, snoozeKind: 'LATER_TODAY', now: '2026-09-18T08:00:00.000Z' });
+
+      sellOne(fixture, product, 9940);
+      client.saveAttentionSettings({ operationId: testId(9950), expiryLeadDays: 31 });
+      const beforeRestart = client.getAttentionOverview('2026-09-18T08:30:00.000Z');
+      expect(beforeRestart.items.some((item) => item.storeProductId === product.storeProduct.id && item.kind === 'LOW_STOCK')).toBe(false);
+
+      const path = fixture.path;
+      fixture.adapter.close();
+      const reopened = reopenDatabase(path);
+      try {
+        const resumed = createDatabaseInventoryClient(reopened, { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, userId: fixture.context.owner.id, generateId: deterministicIds(9960) });
+        expect(resumed.getAttentionOverview('2026-09-18T08:30:00.000Z').items.some((item) => item.storeProductId === product.storeProduct.id && item.kind === 'LOW_STOCK')).toBe(false);
+
+        let projection = resumed.getBatchProjection(product.storeProduct.id);
+        resumed.recordAdjustment({ operationId: testId(9970), storeProductId: product.storeProduct.id, expectedInventoryWatermark: projection.inventoryWatermark, expectedBatchWatermark: projection.batchWatermark, quantityBaseDeltaMicros: 4 * MICROS_PER_UNIT, reasonCode: 'CORRECTION' });
+        projection = resumed.getBatchProjection(product.storeProduct.id);
+        resumed.recordAdjustment({ operationId: testId(9980), storeProductId: product.storeProduct.id, expectedInventoryWatermark: projection.inventoryWatermark, expectedBatchWatermark: projection.batchWatermark, quantityBaseDeltaMicros: -3 * MICROS_PER_UNIT, groupId: projection.groups.find((group) => BigInt(group.balanceBaseMicros) > 0n)?.id, reasonCode: 'MISSING' });
+        const recurring = resumed.getAttentionOverview('2026-09-18T08:30:00.000Z');
+        expect(recurring.items).toEqual(expect.arrayContaining([
+          expect.objectContaining({ storeProductId: product.storeProduct.id, kind: 'LOW_STOCK' }),
+        ]));
+      } finally {
+        reopened.close();
+      }
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('keeps expiry snoozes through same-group, unrelated-group and settings movements, then shows them at due time', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(9990));
+      const product = catalogue.createTemporaryProduct({ name: 'Episode soap' });
+      buy(fixture, product, 4, 10000, { precision: 'DAY', value: '2026-09-18' });
+      buy(fixture, product, 4, 10020, { precision: 'DAY', value: '2026-12-31' });
+      const client = createDatabaseInventoryClient(fixture.adapter, { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, userId: fixture.context.owner.id, generateId: deterministicIds(10040) });
+      const reached = client.getAttentionOverview('2026-09-18T08:00:00.000Z').items.find((item) => item.storeProductId === product.storeProduct.id && item.kind === 'EXPIRY' && item.groupId !== null)!;
+      client.snoozeAttention({ operationId: testId(10050), conditionKey: reached.conditionKey, conditionType: reached.conditionType, storeProductId: reached.storeProductId, groupId: reached.groupId, severityRank: reached.severityRank, snoozeKind: 'LATER_TODAY', now: '2026-09-18T08:00:00.000Z' });
+
+      let projection = client.getBatchProjection(product.storeProduct.id);
+      const reachedGroup = projection.groups.find((group) => group.id === reached.groupId)!;
+      const unrelatedGroup = projection.groups.find((group) => group.id !== reached.groupId)!;
+      client.recordAdjustment({ operationId: testId(10060), storeProductId: product.storeProduct.id, expectedInventoryWatermark: projection.inventoryWatermark, expectedBatchWatermark: projection.batchWatermark, quantityBaseDeltaMicros: -MICROS_PER_UNIT, groupId: reachedGroup.id, reasonCode: 'MISSING' });
+      projection = client.getBatchProjection(product.storeProduct.id);
+      client.recordAdjustment({ operationId: testId(10070), storeProductId: product.storeProduct.id, expectedInventoryWatermark: projection.inventoryWatermark, expectedBatchWatermark: projection.batchWatermark, quantityBaseDeltaMicros: -MICROS_PER_UNIT, groupId: unrelatedGroup.id, reasonCode: 'MISSING' });
+      client.saveAttentionSettings({ operationId: testId(10080), expiryLeadDays: 31 });
+
+      const beforeDue = client.getAttentionOverview('2026-09-18T08:30:00.000Z');
+      expect(beforeDue.items.some((item) => item.groupId === reached.groupId && item.kind === 'EXPIRY')).toBe(false);
+      const atDue = client.getAttentionOverview('2026-09-18T09:01:00.000Z');
+      expect(atDue.items).toEqual(expect.arrayContaining([
+        expect.objectContaining({ groupId: reached.groupId, kind: 'EXPIRY', severity: 'REACHED' }),
       ]));
     } finally {
       fixture.closeAndDelete();
