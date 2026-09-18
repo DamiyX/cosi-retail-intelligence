@@ -2,8 +2,8 @@
 
 Last updated: 2026-09-18  
 Current milestone: M5 batch-aware inventory/reconciliation implementation
-under D-039/D-040; M5-01 is implemented and awaiting independent audit, with
-M5-02 through M5-07 still in sequence.  
+under D-039/D-040; M5-01 and M5-02 are implemented and awaiting independent
+audit, with M5-03 through M5-07 still in sequence.  
 Completed engineering milestones: M0; M1 (explicit device waiver); M2 after
 independent audit; M3 and M4 source/automated scope after independent audit,
 with physical/release readiness gates carried.
@@ -13,8 +13,9 @@ with physical/release readiness gates carried.
 - Checkout: C:\Users\doyew\Documents\DEV 2\COSI-m0
 - Canonical remote: https://github.com/DamiyX/cosi-retail-intelligence
 - Branch: feat/m5-inventory-reconciliation. Documentation ownership checkpoint:
-  527a035. M5-01 implementation commit: f453b0a. Working tree was clean at
-  task start.
+  527a035. M5-01 implementation commit: f453b0a. M5-02 implementation commits:
+  ea8bfbd, 79a9c23 and 5bd7b2d. Working tree was clean at task start; M5-03 is
+  now the active uncommitted implementation slice.
 - Accepted M3 checkpoint: 66cc64d; approved M4 plan/contract checkpoint: db5a835.
 - Coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 owns product review,
   plans, tickets, workflow registration and independent acceptance. M5
@@ -75,14 +76,19 @@ normal sale batch confirmation, with unknown stock and truthful coverage.
 D-039/D-040, PRD, domain/technical/offline sources and DESIGN now record approved
 behavior. Coordinator prepared M5_INVENTORY_RECONCILIATION_PLAN and seven
 rolling tickets; M5-01 landed migration 7 and the accepted M4 ledger remains
-archived unchanged in engineering/tickets/M4_RESTOCKING_COSTING.md. Migrations
-8–11 remain a plan until their tickets land; no M4 reopening or M6 work.
+archived unchanged in engineering/tickets/M4_RESTOCKING_COSTING.md. M5-02 now
+adds owner-only unknown-stock classification, immutable correction history,
+watermark protection and the retained-input review route without inventory or
+cost mutation. Migration 8 and M5-03 adjustment work are in progress and
+uncommitted; migrations 9–11 remain a plan until their tickets land. No M4
+reopening or M6 work.
 
 Planning schema/dependency/artifact checks and unchanged M4 archive passed;
 the documentation ownership checkpoint is committed separately before feature
 work. M5-01 now has schema, service, UI, restart/replay and focused SQLite
-evidence; independent acceptance is still pending. Next: implement M5-02
-through M5-07 sequentially with truthful evidence;
+evidence; M5-02 now has classification/correction service, UI, replay,
+watermark, authorization and write-boundary evidence. Independent acceptance is
+still pending. Next: implement M5-03 through M5-07 sequentially with truthful evidence;
 the implementation-evidence and independent-audit gates remain pending.
 Implementer stops after M5-07 for coordinator independent audit. No M6 yet. Live Home remains proposed M6,
 global Scan navigation M8, real price signals M9/M10 and staff review M11.

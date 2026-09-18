@@ -4,14 +4,15 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m5-01-implemented",
+  "current_state": "m5-02-implemented",
   "completed_states": [
     "m4-independent-source-automated-acceptance",
     "m5-founder-batch-fefo-approval",
     "m5-actual-schema-impact-review",
     "m5-design-contract-and-ticket-dependency-review",
     "m5-implementation-assigned",
-    "m5-01-implemented"
+    "m5-01-implemented",
+    "m5-02-implemented"
   ],
   "owner": {
     "agent": "m5-implementation-engineer",
@@ -85,9 +86,26 @@
       ],
       "limitations": [
         "Independent audit, physical Android verification, development-build/Metro verification, second-laptop verification and accounting review remain outstanding.",
-        "M5-02 through M5-07 are not implemented yet."
+        "M5-03 through M5-07 are not implemented yet."
       ],
       "observed_at": "2026-09-18T17:10:34.227+01:00"
+    },
+    {
+      "kind": "validation",
+      "path": "apps/mobile/__tests__/m5Classification.test.ts; apps/mobile/__tests__/m5InventoryReview.test.tsx",
+      "claim": "M5-02 implementation commits ea8bfbd, 79a9c23 and 5bd7b2d add owner-only unknown-stock classification, immutable net-zero breakdown correction, actual inventory/batch watermarks, replay/conflict handling, retained-input review UI and all-write rollback coverage without product inventory or cost mutation.",
+      "checks": [
+        "npm run typecheck --workspace @retail/mobile PASS",
+        "npm run lint --workspace @retail/mobile PASS with zero warnings",
+        "m5Classification.test.ts PASS: 4 tests",
+        "m5InventoryReview.test.tsx PASS: 3 tests",
+        "git diff --check PASS"
+      ],
+      "limitations": [
+        "Independent audit, physical Android verification, development-build/Metro verification, second-laptop verification and accounting review remain outstanding.",
+        "M5-03 through M5-07 are not implemented yet."
+      ],
+      "observed_at": "2026-09-18T17:41:35.5127605+01:00"
     }
   ],
   "acceptance_gates": [
@@ -276,8 +294,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Implement M5-02 through M5-07 sequentially on feat/m5-inventory-reconciliation, record truthful ticket evidence and commits, then stop for coordinator independent audit. Keep implementation-evidence and independent-audit gates pending; no M6, push, merge or deployment.",
+  "next_action": "Implement M5-03 through M5-07 sequentially on feat/m5-inventory-reconciliation, record truthful ticket evidence and commits, then stop for coordinator independent audit. Keep implementation-evidence and independent-audit gates pending; no M6, push, merge or deployment.",
   "created_at": "2026-09-18T12:55:50.482Z",
-  "updated_at": "2026-09-18T15:34:39.359Z",
+  "updated_at": "2026-09-18T16:41:35.512Z",
   "archived": false
 }

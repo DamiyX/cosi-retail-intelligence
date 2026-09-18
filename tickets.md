@@ -1,8 +1,9 @@
 # Tickets: M5 Inventory, Batch Awareness and Reconciliation
 
-**Status:** Published by coordinator under founder-delegated ticket/design judgment;
-not started. Batch direction explicitly approved 2026-09-18. Implementation has
-not been delegated. No acceptance box below is implementation evidence yet.
+**Status:** M5-01 and M5-02 are implemented on the implementation branch and
+await independent audit; M5-03 through M5-07 remain in sequential implementation.
+Batch direction was explicitly approved 2026-09-18. The acceptance boxes below
+are implementation evidence only and are not independent acceptance.
 **Baseline:** accepted M4 source 9700ee3; M5 planning authored from c1753b6 on
 feat/m4-restocking-costing. Intended task branch: feat/m5-inventory-reconciliation.
 Accepted M4 ledger is archived in docs/engineering/tickets/M4_RESTOCKING_COSTING.md.
@@ -62,21 +63,43 @@ lines, inventory/group inspection entry and immutable receipt/sale detail.
 
 ## M5-02 — Inspect and classify existing expiry stock
 
-**Status:** Not started. **Blocked by:** M5-01.
+**Status:** Implemented; awaiting independent audit. **Blocked by:** coordinator audit gate.
 **Delivers:** unknown stock becomes usefully dated through optional physical review
 without recreating purchases or changing total stock/cost.
 **Scope:** durable inspection facts and net-zero group classification, correction
 history, product group-review UI with retained input/retry and actual watermark.
 
-- [ ] Classify existing 40 as 10/30 dated groups without product InventoryEvent,
+- [x] Classify existing 40 as 10/30 dated groups without product InventoryEvent,
   duplicate opening stock, cost movement, receipt/observation/COGS mutation;
   partial review retains unknown remainder and time-specific evidence.
-- [ ] Correcting date/breakdown appends classification history; group totals,
+- [x] Correcting date/breakdown appends classification history; group totals,
   unknown residual and immutability survive rebuild/reopen. Changed movement/
   classification watermark rejects stale review even if total is unchanged.
-- [ ] Same operation replays original result; changed count/date/group input,
+- [x] Same operation replays original result; changed count/date/group input,
   invalid totals, wrong store/device/inactive member or STAFF management fail
   without side effects. All-write rollback and dirty exit/read-retry UI pass.
+
+**Implementation evidence (awaiting independent audit):**
+
+- Commits: `ea8bfbd` (`feat(M5-02): add owner batch classification`),
+  `79a9c23` (`fix(M5-02): support classification corrections`) and `5bd7b2d`
+  (`test(M5-02): cover classification authorization boundaries`).
+- Added owner-only physical classification and correction commands using schema
+  v7 net-zero batch operations. Unknown residual classification and complete
+  named-breakdown replacement create immutable inspected groups and signed
+  entries without inventory events, cost movements, or receipt rewrites.
+  Inventory and batch watermarks reject stale review; same-operation replay
+  returns the original graph and conflicting input is rejected.
+- Added the More -> Review expiry stock route with product selection, retained
+  pending groups on durable failure, dirty-navigation protection, partial
+  unknown review, and correction mode that preserves prior group facts.
+- `apps/mobile/__tests__/m5Classification.test.ts`: 4 passing service tests
+  covering net-zero classification, correction history, stale watermarks,
+  owner/store/device/member isolation, replay/conflict and every-write rollback.
+  `apps/mobile/__tests__/m5InventoryReview.test.tsx`: 3 passing UI tests for
+  partial classification/correction and retained failure input. Mobile
+  typecheck, zero-warning lint and `git diff --check` pass. Physical Android,
+  independent audit and full M1-M4 regression evidence remain outstanding.
 
 ## M5-03 — Record stock adjustments and actual expired removal
 
@@ -182,5 +205,6 @@ review what actually passed. No feature scope expansion.
 
 ## Evidence log
 
-Planning validation only. No M5 code/tests/migrations/device session performed.
-Implementation evidence must be appended per ticket with actual commit and checks.
+M5-01 and M5-02 implementation evidence is recorded above. M5-03 through M5-07
+remain to be implemented; physical/device and independent-audit evidence must
+not be inferred from local tests.
