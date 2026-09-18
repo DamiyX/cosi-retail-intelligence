@@ -50,6 +50,141 @@ describe('M5 A05 reconciliation review and confirmation', () => {
     }
   });
 
+  it('does not finalize an edited physical count until the recount is saved', () => {
+    const { fixture, rice, client } = seedReconciliation();
+    try {
+      render(<ReconciliationScreen client={client} storeProductId={rice.storeProduct.id} onBack={() => undefined} />);
+      fireEvent.press(screen.getByText('Start blind count'));
+      fireEvent.changeText(screen.getByTestId('reconciliation-physical-quantity'), '35');
+      fireEvent.press(screen.getByText('Save first count'));
+      fireEvent.changeText(screen.getByTestId('reconciliation-physical-quantity'), '36');
+      fireEvent.press(screen.getByText('Confirm discrepancy and finalize'));
+
+      expect(screen.getByText('Review count')).toBeTruthy();
+      expect(fixture.adapter.getFirstRow<{ total: number }>(
+        "SELECT COUNT(*) AS total FROM outbox_operations WHERE operation_type = 'RECONCILIATION_FINALIZED';",
+      )?.total).toBe(0);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('blocks finalization after an unsaved package-mode change until the saved evidence is restored', () => {
+    const { fixture, rice, client } = seedReconciliation();
+    try {
+      createPackage(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        storeProductId: rice.storeProduct.id,
+        name: 'Pack',
+        conversionText: '10',
+        setting: { isPreferredForSale: true },
+      }, { generateId: deterministicIds(14050), operationId: testId(14060) });
+      render(<ReconciliationScreen client={client} storeProductId={rice.storeProduct.id} onBack={() => undefined} />);
+      fireEvent.press(screen.getByText('Start blind count'));
+      fireEvent.changeText(screen.getByTestId('reconciliation-physical-quantity'), '40');
+      fireEvent.press(screen.getByText('Save first count'));
+      fireEvent.press(screen.getByLabelText('Count in Pack'));
+      fireEvent.press(screen.getByText('Finalize stock check'));
+      expect(screen.getByText('Review count')).toBeTruthy();
+
+      fireEvent.changeText(screen.getByTestId('reconciliation-physical-quantity'), '4');
+      fireEvent.press(screen.getByText('Finalize stock check'));
+      expect(screen.getByText('Stock check finalized')).toBeTruthy();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('requires complete-group edits to be saved as a recount before finalization', () => {
+    const { fixture, rice, client } = seedReconciliation();
+    try {
+      render(<ReconciliationScreen client={client} storeProductId={rice.storeProduct.id} onBack={() => undefined} />);
+      fireEvent.press(screen.getByText('Start blind count'));
+      fireEvent.changeText(screen.getByTestId('reconciliation-physical-quantity'), '40');
+      fireEvent.press(screen.getByText('Save first count'));
+      fireEvent.press(screen.getByText('Review each recorded group'));
+      const groupField = screen.getAllByTestId(/^reconciliation-group-/)[0];
+      fireEvent.changeText(groupField, '40');
+      fireEvent.press(screen.getByText('Finalize stock check'));
+      expect(screen.getByText('Review count')).toBeTruthy();
+
+      fireEvent.press(screen.getByText('Save recount'));
+      fireEvent.press(screen.getByText('Finalize stock check'));
+      expect(screen.getByText('Stock check finalized')).toBeTruthy();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('preserves a failed recount input and keeps finalization blocked until retry succeeds', () => {
+    const { fixture, rice, client: realClient } = seedReconciliation();
+    try {
+      let failRecount = true;
+      const client = {
+        ...realClient,
+        submitReconciliation(input: Parameters<typeof realClient.submitReconciliation>[0]) {
+          if (failRecount && input.physicalBaseUnits === 36 * MICROS_PER_UNIT) {
+            failRecount = false;
+            throw new Error('Recount storage unavailable.');
+          }
+          return realClient.submitReconciliation(input);
+        },
+      };
+      render(<ReconciliationScreen client={client} storeProductId={rice.storeProduct.id} onBack={() => undefined} />);
+      fireEvent.press(screen.getByText('Start blind count'));
+      fireEvent.changeText(screen.getByTestId('reconciliation-physical-quantity'), '40');
+      fireEvent.press(screen.getByText('Save first count'));
+      fireEvent.changeText(screen.getByTestId('reconciliation-physical-quantity'), '36');
+      fireEvent.press(screen.getByText('Save recount'));
+      expect(screen.getByText('Recount storage unavailable.')).toBeTruthy();
+      expect(screen.getByTestId('reconciliation-physical-quantity').props.value).toBe('36');
+      fireEvent.press(screen.getByText('Finalize stock check'));
+      expect(screen.getByText('Review count')).toBeTruthy();
+
+      fireEvent.press(screen.getByText('Save recount'));
+      fireEvent.press(screen.getByText('Confirm discrepancy and finalize'));
+      expect(screen.getByText('Stock check finalized')).toBeTruthy();
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('reissues finalization operation IDs when explicit finalization intent changes', () => {
+    const { fixture, rice, client: realClient } = seedReconciliation();
+    try {
+      const calls: { operationId?: string; note?: string | null }[] = [];
+      let failFinalization = true;
+      const client = {
+        ...realClient,
+        finalizeReconciliation(input: Parameters<typeof realClient.finalizeReconciliation>[0]) {
+          calls.push(input);
+          if (failFinalization) {
+            failFinalization = false;
+            throw new Error('Finalization storage unavailable.');
+          }
+          return realClient.finalizeReconciliation(input);
+        },
+      };
+      render(<ReconciliationScreen client={client} storeProductId={rice.storeProduct.id} onBack={() => undefined} />);
+      fireEvent.press(screen.getByText('Start blind count'));
+      fireEvent.changeText(screen.getByTestId('reconciliation-physical-quantity'), '35');
+      fireEvent.press(screen.getByText('Save first count'));
+      fireEvent.press(screen.getByLabelText('Discrepancy reason Missing'));
+      fireEvent.press(screen.getByText('Confirm discrepancy and finalize'));
+      expect(screen.getByText('Finalization storage unavailable.')).toBeTruthy();
+      fireEvent.changeText(screen.getByTestId('reconciliation-note'), 'Updated finalization intent');
+      fireEvent.press(screen.getByText('Confirm discrepancy and finalize'));
+      expect(screen.getByText('Stock check finalized')).toBeTruthy();
+      expect(calls).toHaveLength(2);
+      expect(calls[0].operationId).toBeDefined();
+      expect(calls[1].operationId).toBeDefined();
+      expect(calls[1].operationId).not.toBe(calls[0].operationId);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
   it('guards cancellation with a destructive confirmation', () => {
     const { fixture, rice, client } = seedReconciliation();
     let cancelAction: (() => void) | undefined;

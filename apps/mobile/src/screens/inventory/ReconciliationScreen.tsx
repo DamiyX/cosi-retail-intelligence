@@ -75,6 +75,49 @@ function countsFromDraft(draft: ReconciliationDraft): GroupCountDraft {
   }, {});
 }
 
+function parsePhysicalBaseUnits(
+  value: string,
+  mode: QuantityMode,
+  product: InventoryReviewProduct | null,
+): bigint | null {
+  if (!product) return null;
+  try {
+    const entered = parseQuantityDecimal(value);
+    const base = mode === 'PACKAGE'
+      ? convertPackagesToBase(entered, product.preferredPackage?.conversionToBaseMicros ?? 0)
+      : entered;
+    return BigInt(base);
+  } catch {
+    return null;
+  }
+}
+
+function countEvidenceMatchesSaved(
+  draft: ReconciliationDraft | null,
+  physicalText: string,
+  quantityMode: QuantityMode,
+  product: InventoryReviewProduct | null,
+  completeGroupCount: boolean,
+  groupCounts: GroupCountDraft,
+): boolean {
+  if (!draft?.hasSubmission || draft.physicalBaseUnits === null) return false;
+  if (parsePhysicalBaseUnits(physicalText, quantityMode, product)?.toString() !== draft.physicalBaseUnits) return false;
+  if (completeGroupCount !== draft.completeGroupCount) return false;
+  if (!completeGroupCount) return Object.keys(groupCounts).length === 0 && draft.groupCounts.length === 0;
+
+  const savedCounts = new Map(draft.groupCounts.map((count) => [groupCountKey(count.groupId), count.physicalBaseUnits]));
+  const currentKeys = Object.keys(groupCounts);
+  if (currentKeys.length !== savedCounts.size) return false;
+  for (const key of currentKeys) {
+    try {
+      if (BigInt(parseQuantityDecimal(groupCounts[key])) .toString() !== savedCounts.get(key)) return false;
+    } catch {
+      return false;
+    }
+  }
+  return true;
+}
+
 export default function ReconciliationScreen({ client, onBack, onDirtyDraftChange, isFocused = true, storeProductId, assignmentId }: ReconciliationScreenProps) {
   const [state, setState] = useState(() => read(client));
   const [selectedProductId, setSelectedProductId] = useState(storeProductId ?? '');
@@ -100,11 +143,13 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
   const hasSubmission = draft?.hasSubmission === true;
   const difference = hasSubmission ? BigInt(draft?.differenceBaseUnits ?? '0') : null;
   const hasDiscrepancy = difference !== null && difference !== 0n;
+  const countEvidenceSaved = countEvidenceMatchesSaved(draft, physicalText, quantityMode, selectedProduct, completeGroupCount, groupCounts);
   const dirty = !saved && draft?.status === 'IN_PROGRESS' && inputDirty;
 
   const markDirty = (): void => {
     inputDirtyRef.current = true;
     setInputDirty(true);
+    finalizationOperationIdRef.current = null;
   };
 
   const hydrateDraft = useCallback((nextDraft: ReconciliationDraft, preserveUnsaved = false): void => {
@@ -224,6 +269,7 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
         note,
       });
       hydrateDraft(refreshed);
+      finalizationOperationIdRef.current = null;
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'The count could not be saved. Your entry is preserved.');
     } finally {
@@ -234,6 +280,10 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
   const finalize = (): void => {
     if (!draft || !draft.hasSubmission || submitting) {
       setError('Save a physical count before finalizing this check.');
+      return;
+    }
+    if (!countEvidenceSaved) {
+      setError('Save this changed count as a recount, or restore the saved count, before finalizing.');
       return;
     }
     if (hasDiscrepancy && !reasonCode) {
@@ -362,6 +412,7 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
             {selectedProduct.preferredPackage ? <Pressable accessibilityRole="radio" accessibilityLabel={`Count in ${selectedProduct.preferredPackage.name}`} accessibilityState={{ checked: quantityMode === 'PACKAGE' }} onPress={() => changeQuantityMode('PACKAGE')} style={[styles.packageChip, quantityMode === 'PACKAGE' && styles.packageChipSelected]}><Text style={[styles.packageText, quantityMode === 'PACKAGE' && styles.packageTextSelected]}>{selectedProduct.preferredPackage.name}</Text></Pressable> : null}
           </View>
           <Field label={quantityMode === 'PACKAGE' && selectedProduct.preferredPackage ? `Physical quantity counted (${selectedProduct.preferredPackage.name})` : 'Physical quantity counted'} value={physicalText} onChangeText={(value) => { markDirty(); setPhysicalText(value); }} keyboardType="decimal-pad" hint={quantityMode === 'PACKAGE' && selectedProduct.preferredPackage ? `1 ${selectedProduct.preferredPackage.name} = ${quantityLabel(String(selectedProduct.preferredPackage.conversionToBaseMicros))} base units` : 'Use the base unit shown on the product.'} testID="reconciliation-physical-quantity" />
+          {hasSubmission && !countEvidenceSaved ? <StatusNote>Save this changed count as a recount, or restore the saved values, before finalizing.</StatusNote> : null}
           {hasSubmission ? (
             <View style={styles.comparison}>
               <Text style={styles.sectionLabel}>Recorded stock: {quantityLabel(draft.recordedBaseUnitsSnapshot)}</Text>
@@ -393,7 +444,7 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
           ) : null}
           <Field label="Note (optional)" value={note} onChangeText={(value) => { markDirty(); setNote(value); }} maxLength={500} testID="reconciliation-note" />
           <PrimaryButton title={submitting ? 'Saving…' : draft.hasSubmission ? 'Save recount' : 'Save first count'} onPress={saveCount} disabled={submitting} />
-          {draft.hasSubmission ? <PrimaryButton title={submitting ? 'Finalizing…' : hasDiscrepancy ? 'Confirm discrepancy and finalize' : 'Finalize stock check'} onPress={finalize} disabled={submitting} /> : null}
+          {draft.hasSubmission ? <PrimaryButton title={submitting ? 'Finalizing…' : hasDiscrepancy ? 'Confirm discrepancy and finalize' : 'Finalize stock check'} onPress={finalize} disabled={submitting || !countEvidenceSaved} /> : null}
           <SecondaryButton title="Refresh before recount" onPress={refresh} />
           <SecondaryButton title="Cancel stock check" onPress={cancel} />
         </View>
