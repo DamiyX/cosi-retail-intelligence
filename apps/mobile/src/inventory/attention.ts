@@ -181,6 +181,12 @@ function addCalendarDays(value: string, days: number): string {
   return date.toISOString().slice(0, 10);
 }
 
+function addCalendarMonths(value: string, months: number): string {
+  const date = calendarDate(value);
+  date.setUTCMonth(date.getUTCMonth() + months);
+  return date.toISOString().slice(0, 10);
+}
+
 function compareLocalDateTime(leftDate: string, leftMinute: number, rightDate: string, rightMinute: number): number {
   if (leftDate !== rightDate) return leftDate < rightDate ? -1 : 1;
   return leftMinute === rightMinute ? 0 : leftMinute < rightMinute ? -1 : 1;
@@ -247,15 +253,17 @@ function latestDiscrepancy(adapter: DatabaseAdapter, storeId: string, storeProdu
 function expiryCandidate(product: ProductContext, today: string, leadDays: number, group: BatchProjection['groups'][number]): ConditionCandidate | null {
   const balance = BigInt(group.balanceBaseMicros);
   if (balance <= 0n || group.datePrecision === 'UNKNOWN' || group.dateValue === null) return null;
+  const isMonth = group.datePrecision === 'MONTH';
   const comparisonDate = group.datePrecision === 'DAY' ? group.dateValue : `${group.dateValue}-01`;
   calendarDate(comparisonDate);
   const leadBoundary = addCalendarDays(today, leadDays);
+  const monthEndExclusive = isMonth ? addCalendarMonths(comparisonDate, 1) : null;
   let severity: AttentionSeverity;
   let severityRank: number;
-  if (comparisonDate < today) {
+  if ((isMonth && monthEndExclusive !== null && today >= monthEndExclusive) || (!isMonth && comparisonDate < today)) {
     severity = 'PASSED';
     severityRank = 3;
-  } else if (comparisonDate === today) {
+  } else if ((isMonth && today >= comparisonDate) || (!isMonth && comparisonDate === today)) {
     severity = 'REACHED';
     severityRank = 2;
   } else if (comparisonDate <= leadBoundary) {

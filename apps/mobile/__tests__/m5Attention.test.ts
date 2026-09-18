@@ -102,6 +102,29 @@ describe('M5 local attention and snooze', () => {
     }
   });
 
+  it('keeps month-only dates reached through their interval and passes at the next month', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(9600));
+      const october = catalogue.createTemporaryProduct({ name: 'October soap' });
+      const leap = catalogue.createTemporaryProduct({ name: 'Leap soap' });
+      buy(fixture, october, 1, 9610, { precision: 'MONTH', value: '2026-10' });
+      buy(fixture, leap, 1, 9620, { precision: 'MONTH', value: '2028-02' });
+      const client = createDatabaseInventoryClient(fixture.adapter, { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, userId: fixture.context.owner.id });
+      const severityAt = (productId: string, iso: string) => client.getAttentionOverview(iso).items.find((item) => item.storeProductId === productId && item.kind === 'EXPIRY')?.severity;
+
+      expect(severityAt(october.storeProduct.id, '2026-09-30T10:00:00.000Z')).toBe('UPCOMING');
+      expect(severityAt(october.storeProduct.id, '2026-10-01T10:00:00.000Z')).toBe('REACHED');
+      expect(severityAt(october.storeProduct.id, '2026-10-15T10:00:00.000Z')).toBe('REACHED');
+      expect(severityAt(october.storeProduct.id, '2026-10-31T10:00:00.000Z')).toBe('REACHED');
+      expect(severityAt(october.storeProduct.id, '2026-11-01T10:00:00.000Z')).toBe('PASSED');
+      expect(severityAt(leap.storeProduct.id, '2028-02-29T10:00:00.000Z')).toBe('REACHED');
+      expect(severityAt(leap.storeProduct.id, '2028-03-01T10:00:00.000Z')).toBe('PASSED');
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
   it('keeps settings and snoozes replayable, hides due reminders, and resurfaces worsening severity', () => {
     const fixture = openCatalogueFixture();
     try {
