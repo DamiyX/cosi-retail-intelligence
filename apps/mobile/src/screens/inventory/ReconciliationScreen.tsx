@@ -186,7 +186,7 @@ export default function ReconciliationScreen({ client, onBack, onDirtyDraftChang
 
   const resume = (reconciliationId: string): void => {
     try {
-      const nextDraft = client.getReconciliationDraft(reconciliationId);
+      const nextDraft = client.resumeReconciliation(reconciliationId);
       setSelectedProductId(nextDraft.storeProductId);
       setActiveAssignmentId(nextDraft.checkAssignmentId);
       setSaved(false);

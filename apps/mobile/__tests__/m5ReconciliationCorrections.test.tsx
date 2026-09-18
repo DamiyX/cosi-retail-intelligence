@@ -104,6 +104,10 @@ describe('M5 A06 reconciliation recovery and entry modes', () => {
             draft: expect.objectContaining({ physicalBaseUnits: String(35 * MICROS_PER_UNIT), note: 'Shelf recount note' }),
           }),
         ]);
+        render(<ReconciliationScreen client={resumedClient} onBack={() => undefined} />);
+        fireEvent.press(screen.getByText('Resume Rice'));
+        expect(screen.getByText('Review count')).toBeTruthy();
+        expect(screen.getByTestId('reconciliation-physical-quantity').props.value).toBe('35');
         expect(resumedClient.startReconciliation(rice.storeProduct.id).reconciliationId).toBe(started.reconciliationId);
         expect(resumedClient.listOpenReconciliations()).toHaveLength(1);
       } finally {

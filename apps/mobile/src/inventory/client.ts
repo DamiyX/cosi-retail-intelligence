@@ -101,6 +101,7 @@ export interface InventoryClient {
     operationId?: string;
   }): InventoryAdjustmentGraph;
   startReconciliation(storeProductId: string, checkAssignmentId?: string | null): ReconciliationDraft;
+  resumeReconciliation(reconciliationId: string): ReconciliationDraft;
   getReconciliationDraft(reconciliationId: string): ReconciliationDraft;
   submitReconciliation(input: {
     reconciliationId: string;
@@ -260,6 +261,14 @@ export function createDatabaseInventoryClient(
         storeProductId,
         checkAssignmentId,
       }, { generateId });
+    },
+    resumeReconciliation(reconciliationId: string): ReconciliationDraft {
+      return getInventoryReconciliationDraft(adapter, {
+        reconciliationId,
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+      });
     },
     getReconciliationDraft(reconciliationId: string): ReconciliationDraft {
       return getInventoryReconciliationDraft(adapter, {
