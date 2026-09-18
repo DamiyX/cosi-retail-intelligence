@@ -17,6 +17,7 @@ import {
   createInventoryReconciliationLine,
   createInventoryReconciliationSubmission,
   enqueueOutboxOperation,
+  finalizeBatchInventoryOperation,
   finalizeInventoryReconciliationLine,
   findExpectedOutboxReplay,
   getCostState,
@@ -325,7 +326,7 @@ function createReconciliationBatchOperation(
       createdAt: input.createdAt,
     });
   }
-  return { operation, entries };
+  return { operation: finalizeBatchInventoryOperation(adapter, operation.id, input.createdAt), entries };
 }
 
 function validateCompleteGroupCounts(
@@ -784,6 +785,7 @@ export function finalizeInventoryReconciliation(
       entityId: completed.id,
       occurredAt: generateAt,
       entities: {
+        batchTrackingVersion: 1,
         reconciliationVersion: 1,
         request: fingerprint(input),
         reconciliation: completed,

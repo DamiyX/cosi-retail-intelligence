@@ -262,7 +262,7 @@ export function recordInventoryAdjustment(
     const outbox = enqueueOutboxOperation(adapter, {
       operationType: 'INVENTORY_ADJUSTMENT_CREATED', operationId: input.operationId, storeId: input.storeId,
       deviceId: input.deviceId, entityType: 'INVENTORY_ADJUSTMENT', entityId: adjustment.id, occurredAt,
-      entities: { adjustmentVersion: 1, request: fingerprint(input), adjustment, lines, inventoryEvents, costMovements, costStates, batchOperations, batchEntries },
+      entities: { batchTrackingVersion: 1, adjustmentVersion: 1, request: fingerprint(input), adjustment, lines, inventoryEvents, costMovements, costStates, batchOperations, batchEntries },
     });
     return { adjustment, lines, inventoryEvents, costMovements, costStates, batchOperations, batchEntries, outbox };
   });

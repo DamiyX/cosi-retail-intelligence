@@ -9,10 +9,13 @@ import { generateMobileId } from '../crypto/mobileIds';
 import type { DatabaseAdapter } from '../db/adapter';
 import {
   createBatchInventoryEntry,
+  createBatchInventoryInspection,
   createBatchInventoryOperation,
   createInventoryBatchGroup,
   enqueueOutboxOperation,
   findExpectedOutboxReplay,
+  finalizeBatchInventoryOperation,
+  getBatchInventoryInspectionByOperationId,
   getBatchInventoryOperationById,
   getBatchInventoryWatermark,
   getInventoryBatchGroupBalanceBigInt,
@@ -24,6 +27,7 @@ import {
   listBatchInventoryEntriesByOperation,
   listInventoryBatchGroupsByStoreProduct,
   type BatchInventoryEntryRow,
+  type BatchInventoryInspectionRow,
   type BatchInventoryOperationRow,
   type InventoryBatchGroupRow,
   type OutboxOperationRow,
@@ -54,6 +58,7 @@ export type BatchClassificationMode = 'UNKNOWN' | 'CORRECTION';
 
 export interface BatchClassificationGraph {
   operation: BatchInventoryOperationRow;
+  inspection: BatchInventoryInspectionRow | null;
   groups: InventoryBatchGroupRow[];
   entries: BatchInventoryEntryRow[];
   outbox: OutboxOperationRow;
@@ -175,7 +180,13 @@ function replayGraph(adapter: DatabaseAdapter, outbox: OutboxOperationRow, reque
       createdAt: group.created_at as string,
     }];
   });
-  return { operation, groups, entries: listBatchInventoryEntriesByOperation(adapter, operation.id), outbox };
+  return {
+    operation,
+    inspection: getBatchInventoryInspectionByOperationId(adapter, operation.id),
+    groups,
+    entries: listBatchInventoryEntriesByOperation(adapter, operation.id),
+    outbox,
+  };
 }
 
 function assertOwner(adapter: DatabaseAdapter, input: ReturnType<typeof normalizeInput>): { memberId: string } {
@@ -264,6 +275,7 @@ export function classifyInventoryBatches(
       group,
       balance: getInventoryBatchGroupBalanceBigInt(adapter, group.id),
     })).filter(({ balance }) => balance > 0n);
+    const unknownResidual = getUnknownBatchResidualBigInt(adapter, request.storeProductId);
     const requested = request.groups.reduce((total, group) => total + BigInt(group.quantityBaseMicros), 0n);
     if (request.mode === 'CORRECTION') {
       const namedTotal = currentGroupBalances.reduce((total, row) => total + row.balance, 0n);
@@ -271,7 +283,6 @@ export function classifyInventoryBatches(
         throw new DomainError('INVALID_QUANTITY', 'Correction groups must exactly replace the current named stock breakdown.');
       }
     } else {
-      const unknownResidual = getUnknownBatchResidualBigInt(adapter, request.storeProductId);
       if (unknownResidual <= 0n || requested > unknownResidual) {
         throw new DomainError('INVALID_QUANTITY', 'Inspected groups cannot exceed current unknown stock.');
       }
@@ -304,6 +315,24 @@ export function classifyInventoryBatches(
       sourceId: request.operationId,
       policyVersion: 'CLASSIFICATION_NET_ZERO_V1',
       evidenceVersion: 'M5-BATCH-1',
+      inventoryWatermark: request.expectedInventoryWatermark,
+      batchWatermark: request.expectedBatchWatermark,
+      recordedByStoreMemberId: memberId,
+      recordedByUserId: request.userId,
+      deviceId: request.deviceId,
+      createdAt: occurredAt,
+    });
+    const inspection = createBatchInventoryInspection(adapter, {
+      operationId: operation.id,
+      storeId: request.storeId,
+      storeProductId: request.storeProductId,
+      requestJson: JSON.stringify({ operationId: request.operationId, ...fingerprint(request) }),
+      evidenceJson: JSON.stringify({
+        mode: request.mode,
+        requestedBaseMicros: requested.toString(),
+        unknownResidualBaseMicros: unknownResidual.toString(),
+        currentGroupBalances: currentGroupBalances.map(({ group, balance }) => ({ groupId: group.id, balanceBaseMicros: balance.toString() })),
+      }),
       inventoryWatermark: request.expectedInventoryWatermark,
       batchWatermark: request.expectedBatchWatermark,
       recordedByStoreMemberId: memberId,
@@ -347,6 +376,7 @@ export function classifyInventoryBatches(
     }));
     const entryTotal = entries.reduce((total, entry) => total + BigInt(entry.deltaBaseMicros), 0n);
     if (entryTotal !== 0n) throw new DomainError('INVALID_QUANTITY', 'Classification entries must be net zero.');
+    const sealedOperation = finalizeBatchInventoryOperation(adapter, operation.id, occurredAt);
     const outbox = enqueueOutboxOperation(adapter, {
       operationType: 'BATCH_CLASSIFICATION_CREATED',
       operationId: request.operationId,
@@ -356,14 +386,16 @@ export function classifyInventoryBatches(
       entityId: operation.id,
       occurredAt,
       entities: {
+        batchTrackingVersion: 1,
         classificationVersion: 2,
         classificationMode: request.mode,
         request: fingerprint(request),
-        operation,
+        operation: sealedOperation,
+        inspection,
         groups,
         entries,
       },
     });
-    return { operation, groups, entries, outbox };
+    return { operation: sealedOperation, inspection, groups, entries, outbox };
   });
 }

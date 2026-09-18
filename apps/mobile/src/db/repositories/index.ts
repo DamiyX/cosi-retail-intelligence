@@ -251,8 +251,11 @@ export type {
 } from './costing';
 export {
   createBatchInventoryEntry,
+  createBatchInventoryInspection,
   createBatchInventoryOperation,
   createInventoryBatchGroup,
+  finalizeBatchInventoryOperation,
+  getBatchInventoryInspectionByOperationId,
   getBatchInventoryOperationById,
   getBatchInventoryWatermark,
   getInventoryBatchGroupBalanceBigInt,
@@ -266,12 +269,14 @@ export {
 } from './batchTracking';
 export type {
   BatchEntryType,
+  BatchInventoryInspectionRow,
   BatchInventoryEntryRow,
   BatchInventoryOperationRow,
   BatchOperationKind,
   BatchSourceType,
   CreateBatchEntryInput,
   CreateBatchGroupInput,
+  CreateBatchInspectionInput,
   CreateBatchOperationInput,
   InventoryBatchGroupRow,
 } from './batchTracking';

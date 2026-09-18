@@ -2020,6 +2020,192 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'attention snoozes are immutable'); END;`,
     ],
   },
+  {
+    version: 12,
+    name: 'batch_operation_sealing_and_inspection_evidence',
+    statements: [
+      // v7 operation headers were immutable, but they had no durable point at
+      // which their entry graph became complete. These nullable columns are
+      // intentionally additive so the v1-v11 history remains untouched.
+      'ALTER TABLE batch_inventory_operations ADD COLUMN sealed_at TEXT;',
+      'ALTER TABLE batch_inventory_operations ADD COLUMN sealed_entry_count INTEGER;',
+      'ALTER TABLE batch_inventory_operations ADD COLUMN sealed_delta_base_micros TEXT;',
+      'DROP TRIGGER trg_batch_operations_immutable_update;',
+      // Do not manufacture missing entries, source rows, or inspection facts
+      // for old devices. A malformed pre-v12 graph fails the upgrade instead
+      // of being silently declared complete.
+      `CREATE TEMP TABLE m12_batch_validation_guard (
+        value INTEGER NOT NULL CHECK (value = 0)
+      );`,
+      `INSERT INTO m12_batch_validation_guard (value)
+        SELECT 1
+        WHERE EXISTS (
+          SELECT 1
+          FROM batch_inventory_operations bo
+          WHERE NOT EXISTS (
+            SELECT 1 FROM batch_inventory_entries bie WHERE bie.operation_id = bo.id
+          )
+          OR (
+            bo.kind = 'EVENT_ALLOCATION'
+            AND NOT EXISTS (
+              SELECT 1
+              FROM inventory_events ie
+              WHERE ie.id = bo.inventory_event_id
+                AND ie.id = bo.source_id
+                AND ie.store_id = bo.store_id
+                AND ie.store_product_id = bo.store_product_id
+                AND ie.source_type = bo.source_type
+                AND CAST(COALESCE((SELECT SUM(delta_base_micros) FROM batch_inventory_entries WHERE operation_id = bo.id), 0) AS TEXT)
+                    = CAST(ie.quantity_base_delta_micros AS TEXT)
+            )
+          )
+          OR (
+            bo.kind IN ('CLASSIFICATION', 'RECONCILIATION')
+            AND CAST(COALESCE((SELECT SUM(delta_base_micros) FROM batch_inventory_entries WHERE operation_id = bo.id), 0) AS TEXT) <> '0'
+          )
+        );`,
+      'DROP TABLE m12_batch_validation_guard;',
+      `UPDATE batch_inventory_operations
+        SET sealed_at = created_at,
+            sealed_entry_count = (SELECT COUNT(*) FROM batch_inventory_entries WHERE operation_id = batch_inventory_operations.id),
+            sealed_delta_base_micros = CAST(COALESCE((SELECT SUM(delta_base_micros) FROM batch_inventory_entries WHERE operation_id = batch_inventory_operations.id), 0) AS TEXT)
+        WHERE sealed_at IS NULL;`,
+      `CREATE TABLE batch_inventory_inspections (
+        operation_id TEXT PRIMARY KEY REFERENCES batch_inventory_operations(id) ON DELETE RESTRICT,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        request_json TEXT NOT NULL CHECK (length(request_json) > 0),
+        evidence_json TEXT NOT NULL CHECK (length(evidence_json) > 0),
+        inventory_watermark TEXT NOT NULL,
+        batch_watermark TEXT NOT NULL,
+        recorded_by_store_member_id TEXT NOT NULL REFERENCES store_members(id) ON DELETE RESTRICT,
+        recorded_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        created_at TEXT NOT NULL
+      );`,
+      `CREATE TRIGGER trg_batch_inspections_operation_insert
+        BEFORE INSERT ON batch_inventory_inspections
+        WHEN NOT EXISTS (
+          SELECT 1 FROM batch_inventory_operations bo
+          WHERE bo.id = NEW.operation_id
+            AND bo.store_id = NEW.store_id
+            AND bo.store_product_id = NEW.store_product_id
+            AND bo.kind = 'CLASSIFICATION'
+            AND bo.source_type = 'PHYSICAL_INSPECTION'
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch inspection operation does not match classification'); END;`,
+      `CREATE TRIGGER trg_batch_inspections_member_store_insert
+        BEFORE INSERT ON batch_inventory_inspections
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.recorded_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.recorded_by_user_id
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch inspection actor is not an active store member'); END;`,
+      `CREATE TRIGGER trg_batch_inspections_device_store_insert
+        BEFORE INSERT ON batch_inventory_inspections
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id AND d.store_id = NEW.store_id AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch inspection device does not belong to store'); END;`,
+      `CREATE TRIGGER trg_batch_inspections_immutable_update
+        BEFORE UPDATE ON batch_inventory_inspections
+        BEGIN SELECT RAISE(ABORT, 'batch inspection evidence is immutable'); END;`,
+      `CREATE TRIGGER trg_batch_inspections_immutable_delete
+        BEFORE DELETE ON batch_inventory_inspections
+        BEGIN SELECT RAISE(ABORT, 'batch inspection evidence is immutable'); END;`,
+      `CREATE TRIGGER trg_batch_operations_event_source_insert
+        BEFORE INSERT ON batch_inventory_operations
+        WHEN NEW.kind = 'EVENT_ALLOCATION' AND NOT EXISTS (
+          SELECT 1 FROM inventory_events ie
+          WHERE ie.id = NEW.inventory_event_id
+            AND ie.id = NEW.source_id
+            AND ie.store_id = NEW.store_id
+            AND ie.store_product_id = NEW.store_product_id
+            AND ie.source_type = NEW.source_type
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch event operation source does not match inventory event'); END;`,
+      `CREATE TRIGGER trg_batch_operations_classification_source_insert
+        BEFORE INSERT ON batch_inventory_operations
+        WHEN NEW.kind = 'CLASSIFICATION' AND (
+          NEW.source_type <> 'PHYSICAL_INSPECTION' OR NEW.source_id IS NOT NEW.id
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch classification source does not match operation'); END;`,
+      `CREATE TRIGGER trg_batch_operations_seal_update
+        BEFORE UPDATE ON batch_inventory_operations
+        WHEN OLD.sealed_at IS NOT NULL
+          OR NEW.id IS NOT OLD.id
+          OR NEW.store_id IS NOT OLD.store_id
+          OR NEW.store_product_id IS NOT OLD.store_product_id
+          OR NEW.kind IS NOT OLD.kind
+          OR NEW.inventory_event_id IS NOT OLD.inventory_event_id
+          OR NEW.source_type IS NOT OLD.source_type
+          OR NEW.source_id IS NOT OLD.source_id
+          OR NEW.policy_version IS NOT OLD.policy_version
+          OR NEW.evidence_version IS NOT OLD.evidence_version
+          OR NEW.inventory_watermark IS NOT OLD.inventory_watermark
+          OR NEW.batch_watermark IS NOT OLD.batch_watermark
+          OR NEW.recorded_by_store_member_id IS NOT OLD.recorded_by_store_member_id
+          OR NEW.recorded_by_user_id IS NOT OLD.recorded_by_user_id
+          OR NEW.device_id IS NOT OLD.device_id
+          OR NEW.local_application_order IS NOT OLD.local_application_order
+          OR NEW.created_at IS NOT OLD.created_at
+          OR (OLD.sealed_at IS NULL AND (
+            NEW.sealed_at IS NULL
+            OR NEW.sealed_entry_count IS NULL
+            OR NEW.sealed_delta_base_micros IS NULL
+            OR NEW.sealed_entry_count <> (SELECT COUNT(*) FROM batch_inventory_entries WHERE operation_id = OLD.id)
+            OR NEW.sealed_delta_base_micros <> CAST(COALESCE((SELECT SUM(delta_base_micros) FROM batch_inventory_entries WHERE operation_id = OLD.id), 0) AS TEXT)
+          ))
+        BEGIN SELECT RAISE(ABORT, 'batch inventory operations are immutable except one valid seal'); END;`,
+      `CREATE TRIGGER trg_batch_operations_seal_graph
+        BEFORE UPDATE ON batch_inventory_operations
+        WHEN OLD.sealed_at IS NULL AND NEW.sealed_at IS NOT NULL AND (
+          (SELECT COUNT(*) FROM batch_inventory_entries WHERE operation_id = NEW.id) = 0
+          OR (
+            NEW.kind = 'EVENT_ALLOCATION'
+            AND NOT EXISTS (
+              SELECT 1
+              FROM inventory_events ie
+              WHERE ie.id = NEW.inventory_event_id
+                AND ie.id = NEW.source_id
+                AND ie.store_id = NEW.store_id
+                AND ie.store_product_id = NEW.store_product_id
+                AND ie.source_type = NEW.source_type
+                AND CAST(COALESCE((SELECT SUM(delta_base_micros) FROM batch_inventory_entries WHERE operation_id = NEW.id), 0) AS TEXT)
+                    = CAST(ie.quantity_base_delta_micros AS TEXT)
+            )
+          )
+          OR (NEW.kind = 'CLASSIFICATION' AND (
+            NEW.source_type <> 'PHYSICAL_INSPECTION'
+            OR NEW.source_id IS NOT NEW.id
+            OR CAST(COALESCE((SELECT SUM(delta_base_micros) FROM batch_inventory_entries WHERE operation_id = NEW.id), 0) AS TEXT) <> '0'
+            OR NOT EXISTS (SELECT 1 FROM batch_inventory_inspections bi WHERE bi.operation_id = NEW.id)
+          ))
+          OR (NEW.kind = 'RECONCILIATION' AND (
+            NEW.source_type <> 'RECONCILIATION'
+            OR NOT EXISTS (
+              SELECT 1 FROM inventory_reconciliation_lines rl
+              WHERE rl.id = NEW.source_id
+                AND rl.store_id = NEW.store_id
+                AND rl.store_product_id = NEW.store_product_id
+            )
+            OR CAST(COALESCE((SELECT SUM(delta_base_micros) FROM batch_inventory_entries WHERE operation_id = NEW.id), 0) AS TEXT) <> '0'
+          ))
+        )
+        BEGIN SELECT RAISE(ABORT, 'batch inventory operation graph is incomplete or mismatched'); END;`,
+      `CREATE TRIGGER trg_batch_entries_sealed_insert
+        BEFORE INSERT ON batch_inventory_entries
+        WHEN EXISTS (
+          SELECT 1 FROM batch_inventory_operations bo
+          WHERE bo.id = NEW.operation_id AND bo.sealed_at IS NOT NULL
+        )
+        BEGIN SELECT RAISE(ABORT, 'sealed batch inventory operations cannot accept entries'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

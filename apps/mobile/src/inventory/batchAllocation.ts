@@ -5,6 +5,7 @@ import {
   createBatchInventoryEntry,
   createBatchInventoryOperation,
   createInventoryBatchGroup,
+  finalizeBatchInventoryOperation,
   getInventoryBatchGroupBalanceBigInt,
   getBatchInventoryWatermark,
   getInventoryLedgerWatermark,
@@ -159,7 +160,7 @@ export function recordReceiptBatchAllocation(
     }));
   }
   assertEntryTotal(entries, quantity);
-  return { group, operation, entries };
+  return { group, operation: finalizeBatchInventoryOperation(adapter, operation.id, input.createdAt), entries };
 }
 
 function compareGroupForFefo(left: { group: InventoryBatchGroupRow; balance: bigint }, right: { group: InventoryBatchGroupRow; balance: bigint }): number {
@@ -221,7 +222,7 @@ export function recordSaleBatchAllocation(
     createdAt: input.createdAt,
   }));
   assertEntryTotal(entries, -BigInt(input.quantityBaseMicros));
-  return { operation, entries };
+  return { operation: finalizeBatchInventoryOperation(adapter, operation.id, input.createdAt), entries };
 }
 
 export function recordAdjustmentBatchAllocation(
@@ -258,7 +259,7 @@ export function recordAdjustmentBatchAllocation(
     createdAt: input.createdAt,
   });
   assertEntryTotal([entry], BigInt(input.quantityBaseDeltaMicros));
-  return { operation, entries: [entry] };
+  return { operation: finalizeBatchInventoryOperation(adapter, operation.id, input.createdAt), entries: [entry] };
 }
 
 export interface BatchProjection {

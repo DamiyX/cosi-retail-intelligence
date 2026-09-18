@@ -127,6 +127,7 @@ describe('M3 Sales milestone', () => {
             { version: 9, name: 'inventory_reconciliation_checks' },
             { version: 10, name: 'guided_inventory_checks' },
             { version: 11, name: 'inventory_attention' },
+            { version: 12, name: 'batch_operation_sealing_and_inspection_evidence' },
           ]);
         } finally {
           reopened.close();

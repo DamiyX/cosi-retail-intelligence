@@ -43,6 +43,23 @@ export interface BatchInventoryOperationRow {
   deviceId: string;
   localApplicationOrder: number;
   createdAt: string;
+  sealedAt: string | null;
+  sealedEntryCount: number | null;
+  sealedDeltaBaseMicros: string | null;
+}
+
+export interface BatchInventoryInspectionRow {
+  operationId: string;
+  storeId: string;
+  storeProductId: string;
+  requestJson: string;
+  evidenceJson: string;
+  inventoryWatermark: string;
+  batchWatermark: string;
+  recordedByStoreMemberId: string;
+  recordedByUserId: string;
+  deviceId: string;
+  createdAt: string;
 }
 
 export interface BatchInventoryEntryRow {
@@ -106,16 +123,34 @@ export interface CreateBatchEntryInput {
   createdAt?: string;
 }
 
+export interface CreateBatchInspectionInput {
+  operationId: string;
+  storeId: string;
+  storeProductId: string;
+  requestJson: string;
+  evidenceJson: string;
+  inventoryWatermark: string;
+  batchWatermark: string;
+  recordedByStoreMemberId: string;
+  recordedByUserId: string;
+  deviceId: string;
+  createdAt?: string;
+}
+
 type Row = Record<string, string | number | null>;
 
 const GROUP_COLUMNS =
   'id, store_id, store_product_id, origin, purchase_item_id, quantity_received_base_micros, ' +
   'printed_batch_number, date_precision, date_value, date_meaning, evidence_source, ' +
   'recorded_by_store_member_id, recorded_by_user_id, device_id, origin_order, created_at';
-const OPERATION_COLUMNS =
+const BASE_OPERATION_COLUMNS =
   'id, store_id, store_product_id, kind, inventory_event_id, source_type, source_id, ' +
   'policy_version, evidence_version, inventory_watermark, batch_watermark, ' +
   'recorded_by_store_member_id, recorded_by_user_id, device_id, local_application_order, created_at';
+const SEALING_OPERATION_COLUMNS = ', sealed_at, sealed_entry_count, sealed_delta_base_micros';
+const INSPECTION_COLUMNS =
+  'operation_id, store_id, store_product_id, request_json, evidence_json, inventory_watermark, ' +
+  'batch_watermark, recorded_by_store_member_id, recorded_by_user_id, device_id, created_at';
 const ENTRY_COLUMNS =
   'id, operation_id, store_id, store_product_id, group_id, entry_type, delta_base_micros, entry_order, created_at';
 
@@ -158,7 +193,36 @@ function mapOperation(row: Row): BatchInventoryOperationRow {
     deviceId: row.device_id as string,
     localApplicationOrder: row.local_application_order as number,
     createdAt: row.created_at as string,
+    sealedAt: (row.sealed_at as string | null) ?? null,
+    sealedEntryCount: (row.sealed_entry_count as number | null) ?? null,
+    sealedDeltaBaseMicros: row.sealed_delta_base_micros === null || row.sealed_delta_base_micros === undefined
+      ? null
+      : String(row.sealed_delta_base_micros),
   };
+}
+
+function mapInspection(row: Row): BatchInventoryInspectionRow {
+  return {
+    operationId: row.operation_id as string,
+    storeId: row.store_id as string,
+    storeProductId: row.store_product_id as string,
+    requestJson: row.request_json as string,
+    evidenceJson: row.evidence_json as string,
+    inventoryWatermark: row.inventory_watermark as string,
+    batchWatermark: row.batch_watermark as string,
+    recordedByStoreMemberId: row.recorded_by_store_member_id as string,
+    recordedByUserId: row.recorded_by_user_id as string,
+    deviceId: row.device_id as string,
+    createdAt: row.created_at as string,
+  };
+}
+
+function hasColumn(adapter: DatabaseAdapter, table: string, column: string): boolean {
+  return adapter.getAllRows<{ name: string }>(`PRAGMA table_info(${table});`).some((row) => row.name === column);
+}
+
+function operationColumns(adapter: DatabaseAdapter): string {
+  return BASE_OPERATION_COLUMNS + (hasColumn(adapter, 'batch_inventory_operations', 'sealed_at') ? SEALING_OPERATION_COLUMNS : '');
 }
 
 function mapEntry(row: Row): BatchInventoryEntryRow {
@@ -323,7 +387,7 @@ export function createBatchInventoryOperation(
 }
 
 export function getBatchInventoryOperationById(adapter: DatabaseAdapter, id: string): BatchInventoryOperationRow | null {
-  const row = adapter.getFirstRow<Row>(`SELECT ${OPERATION_COLUMNS} FROM batch_inventory_operations WHERE id = ?;`, [requireId(id)]);
+  const row = adapter.getFirstRow<Row>(`SELECT ${operationColumns(adapter)} FROM batch_inventory_operations WHERE id = ?;`, [requireId(id)]);
   return row ? mapOperation(row) : null;
 }
 
@@ -333,7 +397,7 @@ export function listBatchInventoryOperationsByStoreProduct(
 ): BatchInventoryOperationRow[] {
   return adapter
     .getAllRows<Row>(
-      `SELECT ${OPERATION_COLUMNS} FROM batch_inventory_operations WHERE store_product_id = ? ORDER BY local_application_order ASC, id ASC;`,
+      `SELECT ${operationColumns(adapter)} FROM batch_inventory_operations WHERE store_product_id = ? ORDER BY local_application_order ASC, id ASC;`,
       [requireId(storeProductId)],
     )
     .map(mapOperation);
@@ -345,7 +409,7 @@ export function listBatchInventoryOperationsByEvent(
 ): BatchInventoryOperationRow[] {
   return adapter
     .getAllRows<Row>(
-      `SELECT ${OPERATION_COLUMNS} FROM batch_inventory_operations WHERE inventory_event_id = ? ORDER BY local_application_order ASC, id ASC;`,
+      `SELECT ${operationColumns(adapter)} FROM batch_inventory_operations WHERE inventory_event_id = ? ORDER BY local_application_order ASC, id ASC;`,
       [requireId(inventoryEventId)],
     )
     .map(mapOperation);
@@ -373,6 +437,227 @@ export function createBatchInventoryEntry(adapter: DatabaseAdapter, input: Creat
   const row = adapter.getFirstRow<Row>(`SELECT ${ENTRY_COLUMNS} FROM batch_inventory_entries WHERE id = ?;`, [id]);
   if (!row) throw new Error('Batch inventory entry insert did not persist.');
   return mapEntry(row);
+}
+
+export function createBatchInventoryInspection(
+  adapter: DatabaseAdapter,
+  input: CreateBatchInspectionInput,
+): BatchInventoryInspectionRow {
+  if (!hasColumn(adapter, 'batch_inventory_operations', 'sealed_at')) {
+    throw new DomainError('INVALID_VALUE', 'Batch inspection evidence requires the sealed batch schema.');
+  }
+  const requestJson = requireText(input.requestJson, 'requestJson', 200_000);
+  const evidenceJson = requireText(input.evidenceJson, 'evidenceJson', 200_000);
+  const inventoryWatermark = requireText(input.inventoryWatermark, 'inventoryWatermark', 200);
+  const batchWatermark = requireText(input.batchWatermark, 'batchWatermark', 200);
+  const createdAt = input.createdAt ?? nowIso();
+  adapter.run(
+    `INSERT INTO batch_inventory_inspections
+      (operation_id, store_id, store_product_id, request_json, evidence_json,
+       inventory_watermark, batch_watermark, recorded_by_store_member_id,
+       recorded_by_user_id, device_id, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+    [
+      requireId(input.operationId),
+      requireId(input.storeId),
+      requireId(input.storeProductId),
+      requestJson,
+      evidenceJson,
+      inventoryWatermark,
+      batchWatermark,
+      requireId(input.recordedByStoreMemberId),
+      requireId(input.recordedByUserId),
+      requireId(input.deviceId),
+      createdAt,
+    ],
+  );
+  const row = adapter.getFirstRow<Row>(
+    `SELECT ${INSPECTION_COLUMNS} FROM batch_inventory_inspections WHERE operation_id = ?;`,
+    [requireId(input.operationId)],
+  );
+  if (!row) throw new Error('Batch inspection evidence insert did not persist.');
+  return mapInspection(row);
+}
+
+export function getBatchInventoryInspectionByOperationId(
+  adapter: DatabaseAdapter,
+  operationId: string,
+): BatchInventoryInspectionRow | null {
+  if (!hasColumn(adapter, 'batch_inventory_operations', 'sealed_at')) return null;
+  const row = adapter.getFirstRow<Row>(
+    `SELECT ${INSPECTION_COLUMNS} FROM batch_inventory_inspections WHERE operation_id = ?;`,
+    [requireId(operationId)],
+  );
+  return row ? mapInspection(row) : null;
+}
+
+function validateEventAllocationGraph(
+  adapter: DatabaseAdapter,
+  operation: BatchInventoryOperationRow,
+  entries: readonly BatchInventoryEntryRow[],
+  total: bigint,
+): void {
+  if (!operation.inventoryEventId || operation.sourceId !== operation.inventoryEventId) {
+    throw new DomainError('INVALID_VALUE', 'Batch event operation source does not match its inventory event.');
+  }
+  const event = adapter.getFirstRow<{
+    store_id: string;
+    store_product_id: string;
+    event_type: string;
+    quantity_base_delta_micros: string | number;
+    source_type: string;
+    source_id: string | null;
+  }>(
+    `SELECT store_id, store_product_id, event_type, quantity_base_delta_micros, source_type, source_id
+     FROM inventory_events WHERE id = ?;`,
+    [operation.inventoryEventId],
+  );
+  if (
+    !event ||
+    event.store_id !== operation.storeId ||
+    event.store_product_id !== operation.storeProductId ||
+    event.source_type !== operation.sourceType ||
+    total !== BigInt(String(event.quantity_base_delta_micros))
+  ) {
+    throw new DomainError('INVALID_VALUE', 'Batch event operation does not explain its immutable inventory event.');
+  }
+
+  if (operation.sourceType === 'PURCHASE') {
+    if (event.event_type !== 'PURCHASE' || !event.source_id || total <= 0n) {
+      throw new DomainError('INVALID_VALUE', 'Purchase batch allocation has an invalid event source or direction.');
+    }
+    const parent = adapter.getFirstRow<{ id: string; quantity_base_micros: string | number }>(
+      `SELECT pi.id, pi.quantity_base_micros
+       FROM purchase_items pi
+       JOIN purchases p ON p.id = pi.purchase_id
+       WHERE pi.purchase_id = ? AND pi.store_id = ? AND pi.store_product_id = ?
+         AND p.store_id = ? AND pi.quantity_base_micros = ?
+       ORDER BY pi.id ASC LIMIT 1;`,
+      [event.source_id, operation.storeId, operation.storeProductId, operation.storeId, Number(total)],
+    );
+    if (!parent) throw new DomainError('INVALID_VALUE', 'Purchase batch allocation is missing its immutable purchase item.');
+    const group = adapter.getFirstRow<{ id: string; quantity_received_base_micros: string | number }>(
+      `SELECT id, quantity_received_base_micros
+       FROM inventory_batch_groups
+       WHERE purchase_item_id = ? AND store_id = ? AND store_product_id = ?;`,
+      [parent.id, operation.storeId, operation.storeProductId],
+    );
+    if (!group || BigInt(String(group.quantity_received_base_micros)) !== BigInt(String(parent.quantity_base_micros))) {
+      throw new DomainError('INVALID_VALUE', 'Receipt batch group does not preserve its purchase quantity snapshot.');
+    }
+    entries.forEach((entry) => {
+      if (entry.entryType === 'DEFICIT_OFFSET' && entry.groupId !== null) {
+        throw new DomainError('INVALID_VALUE', 'Receipt deficit offsets cannot name a batch group.');
+      }
+      if (entry.entryType === 'RECEIPT' && entry.groupId !== group.id) {
+        throw new DomainError('INVALID_VALUE', 'Receipt entry does not name its purchase batch group.');
+      }
+    });
+    return;
+  }
+
+  if (operation.sourceType === 'SALE') {
+    if (event.event_type !== 'SALE' || !event.source_id || total >= 0n) {
+      throw new DomainError('INVALID_VALUE', 'Sale batch allocation has an invalid event source or direction.');
+    }
+    const parent = adapter.getFirstRow<{ quantity_base_micros: string | number }>(
+      `SELECT si.quantity_base_micros
+       FROM sale_items si
+       JOIN sales s ON s.id = si.sale_id
+       WHERE si.sale_id = ? AND si.store_product_id = ? AND s.store_id = ?
+         AND si.quantity_base_micros = ?
+       LIMIT 1;`,
+      [event.source_id, operation.storeProductId, operation.storeId, Number(-total)],
+    );
+    if (!parent) throw new DomainError('INVALID_VALUE', 'Sale batch allocation is missing its immutable sale item.');
+    entries.forEach((entry) => {
+      if (entry.entryType === 'ASSUMED_FEFO' && entry.groupId === null) {
+        throw new DomainError('INVALID_VALUE', 'FEFO sale entries must name a batch group.');
+      }
+      if (entry.entryType === 'UNKNOWN_RESIDUAL' && entry.groupId !== null) {
+        throw new DomainError('INVALID_VALUE', 'Unknown sale residuals cannot name a batch group.');
+      }
+    });
+    return;
+  }
+
+  if (operation.sourceType === 'MANUAL_ADJUSTMENT' || operation.sourceType === 'RECONCILIATION') {
+    if (!event.source_id) throw new DomainError('INVALID_VALUE', 'Adjustment batch allocation is missing its parent source.');
+    const parent = adapter.getFirstRow<{ quantity_base_delta_micros: string | number }>(
+      `SELECT ial.quantity_base_delta_micros
+       FROM inventory_adjustment_lines ial
+       JOIN inventory_adjustments ia ON ia.id = ial.adjustment_id
+       WHERE ial.inventory_event_id = ? AND ial.store_id = ? AND ial.store_product_id = ?
+         AND ia.store_id = ? AND ia.id = ?
+       LIMIT 1;`,
+      [operation.inventoryEventId, operation.storeId, operation.storeProductId, operation.storeId, event.source_id],
+    );
+    if (!parent || BigInt(String(parent.quantity_base_delta_micros)) !== total) {
+      throw new DomainError('INVALID_VALUE', 'Adjustment batch allocation does not match its immutable adjustment line.');
+    }
+    return;
+  }
+
+  throw new DomainError('INVALID_VALUE', 'Batch event operation source type is unsupported.');
+}
+
+function validateBatchOperationGraph(
+  adapter: DatabaseAdapter,
+  operation: BatchInventoryOperationRow,
+  entries: readonly BatchInventoryEntryRow[],
+): bigint {
+  if (entries.length === 0) throw new DomainError('INVALID_VALUE', 'Batch inventory operation cannot be sealed without entries.');
+  const total = entries.reduce((sum, entry) => sum + BigInt(entry.deltaBaseMicros), 0n);
+  if (operation.kind === 'EVENT_ALLOCATION') {
+    validateEventAllocationGraph(adapter, operation, entries, total);
+    return total;
+  }
+  if (operation.kind === 'CLASSIFICATION') {
+    if (operation.sourceType !== 'PHYSICAL_INSPECTION' || operation.sourceId !== operation.id || total !== 0n) {
+      throw new DomainError('INVALID_VALUE', 'Classification batch evidence must be a net-zero physical inspection.');
+    }
+    if (!getBatchInventoryInspectionByOperationId(adapter, operation.id)) {
+      throw new DomainError('INVALID_VALUE', 'Classification batch evidence is missing its durable inspection fact.');
+    }
+    return total;
+  }
+  if (operation.kind === 'RECONCILIATION') {
+    if (operation.sourceType !== 'RECONCILIATION' || !operation.sourceId || total !== 0n) {
+      throw new DomainError('INVALID_VALUE', 'Reconciliation batch evidence must be a net-zero reconciliation.');
+    }
+    const line = adapter.getFirstRow<{ store_id: string; store_product_id: string }>(
+      'SELECT store_id, store_product_id FROM inventory_reconciliation_lines WHERE id = ?;',
+      [operation.sourceId],
+    );
+    if (!line || line.store_id !== operation.storeId || line.store_product_id !== operation.storeProductId) {
+      throw new DomainError('INVALID_VALUE', 'Reconciliation batch evidence does not match its durable count line.');
+    }
+    return total;
+  }
+  throw new DomainError('INVALID_VALUE', 'Unsupported batch inventory operation kind.');
+}
+
+export function finalizeBatchInventoryOperation(
+  adapter: DatabaseAdapter,
+  operationId: string,
+  sealedAt = nowIso(),
+): BatchInventoryOperationRow {
+  const operation = getBatchInventoryOperationById(adapter, operationId);
+  if (!operation) throw new DomainError('INVALID_VALUE', 'Batch inventory operation does not exist.');
+  if (!hasColumn(adapter, 'batch_inventory_operations', 'sealed_at')) return operation;
+  if (operation.sealedAt !== null) return operation;
+  const entries = listBatchInventoryEntriesByOperation(adapter, operation.id);
+  const total = validateBatchOperationGraph(adapter, operation, entries);
+  const result = adapter.run(
+    `UPDATE batch_inventory_operations
+     SET sealed_at = ?, sealed_entry_count = ?, sealed_delta_base_micros = ?
+     WHERE id = ? AND sealed_at IS NULL;`,
+    [sealedAt, entries.length, total.toString(), operation.id],
+  );
+  if (result.changes !== 1) throw new DomainError('INVALID_VALUE', 'Batch inventory operation was sealed concurrently.');
+  const sealed = getBatchInventoryOperationById(adapter, operation.id);
+  if (!sealed || sealed.sealedAt === null) throw new Error('Batch inventory operation seal did not persist.');
+  return sealed;
 }
 
 export function listBatchInventoryEntriesByOperation(
