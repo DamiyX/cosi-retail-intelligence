@@ -66,6 +66,10 @@ export class FailOnWriteAdapter implements DatabaseAdapter {
     private readonly failure: Error,
   ) {}
 
+  get writeCount(): number {
+    return this.writes;
+  }
+
   exec(script: string): void {
     this.inner.exec(script);
   }

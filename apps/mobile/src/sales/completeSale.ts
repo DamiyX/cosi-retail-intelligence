@@ -153,6 +153,7 @@ export function completeSale(
     entityType: 'SALE',
   });
   if (replayed) {
+    assertSaleReplayMatchesRequest(replayed, input);
     return rehydrateCompletedSale(adapter, replayed, { storeId, deviceId, userId });
   }
 
@@ -469,6 +470,74 @@ export function completeSale(
       outbox,
     };
   });
+}
+
+/**
+ * An operation ID is an idempotency key, not a permission to silently accept
+ * a different sale. Compare the immutable request facts persisted in the
+ * outbox envelope before rehydrating a replay so a retry bug cannot turn into
+ * a conflicting business transaction.
+ */
+function assertSaleReplayMatchesRequest(outbox: OutboxOperationRow, input: CompleteSaleInput): void {
+  let entities: {
+    sale?: { note?: string | null };
+    items?: {
+      storeProductId?: string;
+      packageUnitId?: string;
+      quantityPackagesMicros?: number;
+      unitPriceMinor?: number;
+      discountAmountMinor?: number;
+    }[];
+    payment?: { method?: string; amountMinor?: number; paymentReference?: string | null };
+    customerAccount?: { id?: string; name?: string } | null;
+  };
+  try {
+    entities = (JSON.parse(outbox.payload) as { entities?: typeof entities }).entities ?? {};
+  } catch {
+    throw new Error('Stored sale replay envelope is not readable.');
+  }
+
+  const storedLines = entities.items ?? [];
+  if (storedLines.length !== input.lines.length) {
+    throw new DomainError('INVALID_VALUE', 'This operation ID already belongs to a different sale request.');
+  }
+  input.lines.forEach((line, index) => {
+    const stored = storedLines[index];
+    if (
+      stored.storeProductId !== line.storeProductId ||
+      stored.packageUnitId !== line.packageUnitId ||
+      stored.quantityPackagesMicros !== line.quantityPackagesMicros ||
+      stored.unitPriceMinor !== line.unitPriceMinor ||
+      stored.discountAmountMinor !== (line.discountAmountMinor ?? 0)
+    ) {
+      throw new DomainError('INVALID_VALUE', 'This operation ID already belongs to a different sale request.');
+    }
+  });
+
+  const storedPayment = entities.payment;
+  const normalizedReference = typeof input.payment.paymentReference === 'string'
+    ? input.payment.paymentReference.trim() || null
+    : null;
+  if (
+    !storedPayment ||
+    storedPayment.method !== input.payment.method ||
+    storedPayment.paymentReference !== normalizedReference
+  ) {
+    throw new DomainError('INVALID_VALUE', 'This operation ID already belongs to a different sale request.');
+  }
+
+  const storedCustomer = entities.customerAccount ?? null;
+  if (input.payment.customerAccountId && storedCustomer?.id !== input.payment.customerAccountId) {
+    throw new DomainError('INVALID_VALUE', 'This operation ID already belongs to a different customer request.');
+  }
+  if (input.payment.method === 'CREDIT' && storedCustomer?.name !== input.payment.customerName?.trim()) {
+    throw new DomainError('INVALID_VALUE', 'This operation ID already belongs to a different customer request.');
+  }
+
+  const normalizedNote = typeof input.note === 'string' ? input.note.trim() || null : null;
+  if ((entities.sale?.note ?? null) !== normalizedNote) {
+    throw new DomainError('INVALID_VALUE', 'This operation ID already belongs to a different sale request.');
+  }
 }
 
 function rehydrateCompletedSale(

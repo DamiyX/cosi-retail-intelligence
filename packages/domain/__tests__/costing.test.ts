@@ -62,4 +62,64 @@ describe('M4 exact provisional costing', () => {
       receiptBaseUnitCost: { numerator: '1', denominator: '1' },
     })).toThrow(DomainError);
   });
+
+  it('preserves weighted-average fractions and consumes them with half-up COGS', () => {
+    const first = applyPurchaseCostState(initialCostState(), {
+      priorInventoryBalanceBaseMicros: 0,
+      receiptQuantityBaseMicros: 20_000_000,
+      receiptBaseUnitCost: { numerator: '30000', denominator: '1' },
+    });
+    const second = applyPurchaseCostState(first.state, {
+      priorInventoryBalanceBaseMicros: first.state.quantityCostedBaseMicros,
+      receiptQuantityBaseMicros: 40_000_000,
+      receiptBaseUnitCost: { numerator: '35000', denominator: '1' },
+    });
+
+    expect(second.state.quantityCostedBaseMicros).toBe(60_000_000);
+    expect(second.state.remainingValue).toEqual({ numerator: '2000000', denominator: '1' });
+    expect(second.state.averageUnitCost).toEqual({ numerator: '100000', denominator: '3' });
+
+    const one = applySaleCostState(second.state, {
+      priorInventoryBalanceBaseMicros: 60_000_000,
+      saleQuantityBaseMicros: 1_000_000,
+    });
+    expect(one.available).toBe(true);
+    expect(one.valueConsumed).toEqual({ numerator: '100000', denominator: '3' });
+    expect(one.cogsAmountMinor).toBe(33_333);
+
+    const three = applySaleCostState(second.state, {
+      priorInventoryBalanceBaseMicros: 60_000_000,
+      saleQuantityBaseMicros: 3_000_000,
+    });
+    expect(three.available).toBe(true);
+    expect(three.valueConsumed).toEqual({ numerator: '100000', denominator: '1' });
+    expect(three.cogsAmountMinor).toBe(100_000);
+  });
+
+  it('keeps zero-cost receipts known and makes oversells unavailable without losing the ledger transition', () => {
+    const zero = applyPurchaseCostState(initialCostState(), {
+      priorInventoryBalanceBaseMicros: 0,
+      receiptQuantityBaseMicros: 2_000_000,
+      receiptBaseUnitCost: { numerator: '0', denominator: '1' },
+    });
+    expect(zero.state.coverageStatus).toBe('KNOWN');
+    expect(zero.state.averageUnitCost).toEqual({ numerator: '0', denominator: '1' });
+
+    const oversell = applySaleCostState(zero.state, {
+      priorInventoryBalanceBaseMicros: 2_000_000,
+      saleQuantityBaseMicros: 3_000_000,
+    });
+    expect(oversell.available).toBe(false);
+    expect(oversell.cogsAmountMinor).toBeNull();
+    expect(oversell.state.coverageStatus).toBe('KNOWN');
+
+    const replenished = applyPurchaseCostState(oversell.state, {
+      priorInventoryBalanceBaseMicros: -1_000_000,
+      receiptQuantityBaseMicros: 2_000_000,
+      receiptBaseUnitCost: { numerator: '50', denominator: '1' },
+    });
+    expect(replenished.state.coverageStatus).toBe('KNOWN');
+    expect(replenished.costedQuantityBaseMicros).toBe(1_000_000);
+    expect(replenished.state.remainingValue).toEqual({ numerator: '50', denominator: '1' });
+  });
 });

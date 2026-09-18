@@ -305,6 +305,47 @@ describe('M3 Sales milestone', () => {
       }
     });
 
+    it('rejects conflicting same-device sale replay instead of returning a different request', () => {
+      const fixture = openCatalogueFixture();
+      try {
+        const prod = createTemporaryProduct(
+          fixture.adapter,
+          {
+            storeId: fixture.context.store.id,
+            deviceId: fixture.context.device.id,
+            name: 'Conflicting replay item',
+          },
+          { generateId: deterministicIds(560) },
+        );
+        const operationId = testId(889);
+        const original = {
+          storeId: fixture.context.store.id,
+          deviceId: fixture.context.device.id,
+          userId: fixture.context.owner.id,
+          lines: [{
+            storeProductId: prod.storeProduct.id,
+            packageUnitId: prod.basePackage.id,
+            quantityPackagesMicros: MICROS_PER_UNIT,
+            unitPriceMinor: 250000,
+          }],
+          payment: { method: 'CASH' as const },
+        };
+        const first = completeSale(fixture.adapter, original, {
+          generateId: deterministicIds(570),
+          operationId,
+        });
+        const counts = saleGraphCounts(fixture.adapter);
+        expect(() => completeSale(fixture.adapter, {
+          ...original,
+          lines: [{ ...original.lines[0], unitPriceMinor: 260000 }],
+        }, { operationId })).toThrow(DomainError);
+        expect(saleGraphCounts(fixture.adapter)).toEqual(counts);
+        expect(getSaleDetail(fixture.adapter, first.sale.id)?.sale.totalMinor).toBe(250000);
+      } finally {
+        fixture.closeAndDelete();
+      }
+    });
+
     it('does not treat an operation ID as permission for another active member to read a replay', () => {
       const fixture = openCatalogueFixture();
       try {
