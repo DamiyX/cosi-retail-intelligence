@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m5-independent-audit-a08-r3-changes-required",
+  "current_state": "m5-independent-audit-a08-r3-reaudit-ready",
   "completed_states": [
     "m4-independent-source-automated-acceptance",
     "m5-founder-batch-fefo-approval",
@@ -266,6 +266,21 @@
         "Physical checks remain explicitly deferred."
       ],
       "observed_at": "2026-09-19T00:19:42.711Z"
+    },
+    {
+      "kind": "validation",
+      "path": "apps/mobile/__tests__/m5Attention.test.ts; apps/mobile/__tests__/m5ReorderThreshold.test.tsx; commits 4c0b82b, aebc6f2",
+      "claim": "A08-R3 is corrected with an atomic inventory ledger watermark carried by reorder-threshold outbox history and one interleaved LOW_STOCK episode replay; the implementation task returns for coordinator re-audit without self-acceptance.",
+      "checks": [
+        "The exact production-service SQLite regression failed before the correction and passes after it; the inverse inventory-resolution/threshold-recurrence regression also passes.",
+        "Focused m5Attention and m5ReorderThreshold suites PASS: 19/19, including restart, no-overview recurrence, unchanged replay and store isolation coverage.",
+        "npm run validate PASS: strict typecheck, zero-warning lint, 150 domain tests and 297 mobile tests (447 total).",
+        "Expo Doctor 21/21, expo install --check, Android export (1,382 modules / 3.5 MB Hermes), active workflow/index AJV, gate DAG, artifact and migration 1..14 checks, and git diff --check PASS."
+      ],
+      "limitations": [
+        "Coordinator independent acceptance remains pending; physical/device, development-client/Metro, second-laptop, cloud/deployment and professional accounting checks remain outstanding."
+      ],
+      "observed_at": "2026-09-19T00:39:28.679Z"
     }
   ],
   "acceptance_gates": [
@@ -382,8 +397,8 @@
       },
       "evidence": [
         {
-          "source": "docs/engineering/PROJECT_STATE.md; commits 0d76093..4e8e81c, 7ccf672, 985478c, de5cb2c, 2feea7a, 248250c",
-          "result": "A01-A11 plus A05-R/A08-R/A07-R/A08-R2 correction commits are complete with focused regressions and full local validation: 445 tests / 42 suites, strict typecheck, zero-warning lint, Doctor 21/21, Expo dependency check, Android export, active workflow/index/migration checks and clean status. The implementation task stops here for coordinator re-audit."
+          "source": "docs/engineering/PROJECT_STATE.md; commits 0d76093..4e8e81c, 7ccf672, 985478c, de5cb2c, 2feea7a, 248250c, 4c0b82b, aebc6f2",
+          "result": "A01-A11 plus A05-R/A08-R/A07-R/A08-R2/A08-R3 correction commits are complete with focused regressions and full local validation: 447 tests / 42 suites, strict typecheck, zero-warning lint, Doctor 21/21, Expo dependency check, Android export, active workflow/index/migration checks and clean status. The implementation task stops here for coordinator re-audit."
         }
       ],
       "limitations": [
@@ -431,12 +446,16 @@
         {
           "source": "docs/engineering/M5_AUDIT_CORRECTIONS.md",
           "result": "A08-R2 focused suites pass 17/17, but independent interleaving SQLite probe requires A08-R3 correction."
+        },
+        {
+          "source": "docs/engineering/M5_AUDIT_CORRECTIONS.md; commits 4c0b82b, aebc6f2",
+          "result": "A08-R3 is corrected with a durable local inventory watermark and interleaved episode replay; focused 19/19 and full 447-test validation pass. Coordinator independent re-audit remains required."
         }
       ],
       "limitations": [
         "Implementation completion is verified; independent acceptance is not. Physical checks are explicitly deferred."
       ],
-      "blocker": "A08-R3 interleaved threshold/inventory recurrence loses its new episode at a2e60a7; same-task correction and independent verification required.",
+      "blocker": "A08-R3 correction is returned in aebc6f2; coordinator independent verification and acceptance remain required.",
       "waiver": null
     },
     {
@@ -490,8 +509,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Existing M5 task corrects A08-R3 interleaved threshold/inventory recurrence ordering, returns clean evidence, then coordinator independently re-audits. Phone checks deferred; no M6 yet.",
+  "next_action": "Coordinator independently re-audits A08-R3 on the clean returned branch. Phone checks remain deferred; no M6 yet.",
   "created_at": "2026-09-18T12:55:50.482Z",
-  "updated_at": "2026-09-19T00:19:42.711Z",
+  "updated_at": "2026-09-19T00:39:28.679Z",
   "archived": false
 }

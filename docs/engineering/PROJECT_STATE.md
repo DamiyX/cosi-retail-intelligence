@@ -13,8 +13,9 @@ finds A08-R2: a low-stock condition resolved and recreated solely by reorder-
 threshold changes inherits its old snooze. A08-R2's threshold-only sequence is
 corrected in `248250c`, but final re-audit finds A08-R3: interleaved threshold
 resolution, inventory recurrence and a later same-active threshold edit can
-restore the old snooze. Source acceptance remains blocked pending same-task
-correction and coordinator verification. See
+restore the old snooze. A08-R3 is corrected in `aebc6f2` using an atomic local
+inventory watermark carried by threshold history; source acceptance remains
+blocked pending coordinator verification. See
 M5_AUDIT_CORRECTIONS.md.
 Completed engineering milestones: M0; M1 (explicit device waiver); M2 after
 independent audit; M3 and M4 source/automated scope after independent audit,
@@ -36,7 +37,7 @@ with physical/release readiness gates carried.
   7ccf672. A05-R correction: 985478c. A08-R/A07-R corrections: de5cb2c.
   A08-R2 checkpoint: 2feea7a. A08-R2 correction: 248250c. Final
   ledger/workflow evidence is recorded in the correction return documentation
-  commit.
+  commit. A08-R3 checkpoint: 4c0b82b. A08-R3 correction: aebc6f2.
 - Accepted M3 checkpoint: 66cc64d; approved M4 plan/contract checkpoint: db5a835.
 - Coordinator task 01a098ef-d830-7531-bca7-2d66b0a5b587 owns product review,
   plans, tickets, workflow registration and independent acceptance. M5
@@ -136,18 +137,19 @@ contract failures despite 410 passing tests, Doctor 21/21 and Android export.
 The coordinator checkpoint was committed separately before the three return
 corrections and the A08-R2 follow-up. A05-R now blocks unsaved or invalid
 recount evidence from finalization and preserves deliberate retry IDs; A08-R
-and A08-R2 rebuild stable attention episodes from durable event/batch and
-threshold outbox history; A07-R uses interval-aware MONTH wording while
-preserving DAY wording. Focused regressions pass: 10/10 reconciliation-
-correction tests, 9/9 attention tests and 8/8 reorder-threshold tests. Latest
-full validation passes with 5 domain suites/150 tests and 37 mobile suites/295
-tests (445 total), strict typecheck, zero-warning lint, Doctor 21/21,
-dependency compatibility, Android export and active workflow/index/migration
-checks. See M5_AUDIT_CORRECTIONS.md for the original findings and return
-evidence.
+  and A08-R2 rebuild stable attention episodes from durable event/batch and
+  threshold outbox history; A08-R3 replays threshold and inventory mutations
+  through one local-watermark-ordered LOW_STOCK episode state machine; A07-R
+  uses interval-aware MONTH wording while preserving DAY wording. Focused
+  regressions pass: 10/10 reconciliation-correction tests, 11/11 attention
+  tests and 8/8 reorder-threshold tests. Latest full validation passes with 5
+  domain suites/150 tests and 37 mobile suites/297 tests (447 total), strict
+  typecheck, zero-warning lint, Doctor 21/21, dependency compatibility,
+  Android export and active workflow/index/migration checks. See
+  M5_AUDIT_CORRECTIONS.md for the original findings and return evidence.
 Independent acceptance remains blocked and implementation evidence remains
 pending coordinator review; this task does not self-accept. Next: coordinator
-re-audit A01-A11 and A05-R/A08-R/A07-R/A08-R2 on this same task/branch.
+  re-audit A01-A11 and A05-R/A08-R/A07-R/A08-R2/A08-R3 on this same task/branch.
 No M6 yet. Live Home remains proposed M6,
 global Scan navigation M8, real price signals M9/M10 and staff review M11.
 

@@ -447,6 +447,50 @@ independent acceptance. Physical/device, development-client/Metro, second-
 laptop, cloud/deployment and professional accounting checks remain pending.
 No M6 work, phone action, push, merge or deployment was performed.
 
+## A08-R3 correction return — 2026-09-19
+
+The coordinator checkpoint was preserved separately in `4c0b82b`. A08-R3 is
+corrected in `aebc6f2` on the same M5 branch; A05-R, A07-R and the A08-R2
+threshold-only behavior were not reopened.
+
+The reorder-threshold writer now captures the latest product inventory ledger
+watermark (`rowid:id`) in the same SQLite transaction as the threshold update
+and outbox snapshot. Attention rebuilds LOW_STOCK episodes as one interleaved
+state machine: it replays inventory events up to each captured watermark, then
+applies that threshold transition before continuing. This prevents a later
+same-active edit from erasing an inventory-driven recurrence. The cursor is
+durable local application order, not device time; no migration or completed
+transaction was rewritten, and no separate inventory writer protocol was
+introduced.
+
+Against the pre-fix source, the exact production-service SQLite regression
+failed: the interleaved threshold 5 → 3 resolution, two-unit sale recurrence,
+threshold 5 same-active edit and restart returned no LOW_STOCK item, leaving
+the original snooze suppressed. The inverse inventory-resolution → threshold-
+recurrence regression passed only incidentally under the old independent
+history combination. After the correction, `m5Attention.test.ts` passes 11/11
+and `m5ReorderThreshold.test.tsx` passes 8/8 (19/19 combined), including the
+exact interleaving, inverse ordering, no-overview read, restart, unchanged
+replay, owner/store isolation, worsening and due-time coverage.
+
+Final local verification after A08-R3:
+
+- `npm run validate`: PASS — 5 domain suites/150 tests and 37 mobile suites/297
+  tests, 447 total; strict typecheck and zero-warning lint.
+- `npm run mobile:doctor`: PASS — 21/21.
+- `npm exec --workspace @retail/mobile -- expo install --check`: PASS;
+  dependencies are up to date.
+- `npm run mobile:export`: PASS — 1,382 Android modules and a 3.5 MB Hermes
+  bundle; generated `apps/mobile/dist` remains ignored/untracked.
+- Active workflow/index AJV draft-2020/date-time validation, gate dependency
+  DAG, registered-artifact existence, contiguous migration registry 1..14 and
+  `git diff --check`: PASS.
+
+The branch is returned for coordinator re-audit; this record does not grant
+independent acceptance. Physical/device, development-client/Metro, second-
+laptop, cloud/deployment and professional accounting checks remain pending.
+No M6 work, phone action, push, merge or deployment was performed.
+
 ## A08-R2 correction return — 2026-09-19
 
 The coordinator follow-up checkpoint was preserved separately in `2feea7a`.
