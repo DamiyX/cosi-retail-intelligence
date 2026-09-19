@@ -668,9 +668,27 @@ Prove store download/recovery.
 
 Expenses, withdrawals, supplier/reference data.
 
+### M7.7 Accepted M5 extensions
+
+Synchronize the existing batch classification, inventory adjustment,
+reconciliation, guided-check and attention operations. Preserve assumed-versus-
+physical evidence, unknown composition, stale-count conflicts and versioned
+settings; do not invent a separate feature sync protocol.
+
+### M7.8 Security and environment gate
+
+Verify explicit grants, RLS, authenticated membership/device checks, aggregate
+PostgreSQL transactions and cross-store denial against a disposable real
+Supabase/PostgreSQL environment. Mocks support unit tests but cannot close M7.
+See `M7_OFFLINE_SYNC_PLAN.md`, D-042 and the active tickets for the resolved
+sequence and operation registry.
+
 ## Acceptance
 
 Critical sync test suite in `OFFLINE_SYNC.md` passes.
+
+M7 is not source-accepted without actual PostgreSQL migration/RLS/function
+integration evidence. Production deployment is a separate approval.
 
 ---
 

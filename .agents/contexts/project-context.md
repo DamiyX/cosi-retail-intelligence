@@ -3,7 +3,7 @@
 **Status:** Active  
 **Scope:** Whole project  
 **Project ID:** COSI  
-**Updated:** 2026-09-18  
+**Updated:** 2026-09-19  
 **Confidence:** High for approved product and architecture; explicit unknowns
 remain below.
 
@@ -20,16 +20,13 @@ The current strategy is:
 > Lead with price. Deliver with control. Build the network through normal
 > business activity.
 
-M0 Project Foundation, M1 Domain + Local Database, and M2 Catalogue + Package
-Units are accepted. M3 Sales source/automated scope is accepted on
-`feat/m3-sales` after independent re-audit, under a carried physical-device
-waiver; native/release readiness is not yet approved.
-M4 Restocking + Costing source/automated scope is accepted at `9700ee3` after
-independent re-audit; physical/release gates remain carried. M5 implementation
-task `01a0b525-289e-7b40-8f4b-2701fe541ad9` is now active on
-`feat/m5-inventory-reconciliation`; coordinator task
-`01a098ef-d830-7531-bca7-2d66b0a5b587` retains independent acceptance. Network
-sync, stock-check and attention work remain within M5; no M6 work is authorized.
+M0–M6 source/automated scope is independently accepted. M5 added minimal
+batch-aware expiry, assumed FEFO, blind reconciliation, guided owner checks and
+attention. M6 added owner-only expenses/withdrawals and truthful Home/Today.
+Physical/release gates remain carried and native/release readiness is not yet
+approved. M7 planning is active on `feat/m7-offline-sync`; no M7 runtime code is
+claimed. Coordinator task `01a098ef-d830-7531-bca7-2d66b0a5b587` owns tickets
+and independent acceptance.
 
 ## Product Snapshot
 
@@ -80,20 +77,19 @@ partial measure, never full profit or P&L.
 
 ## Current Priorities
 
-1. M5 implementation is active under approved D-039/D-040: minimal pilot batch
-   awareness, automatic assumed FEFO without normal batch selection, first-class
-   unknown stock, blind owner checks, conservative adjustment cost and
-   attention/snooze. M5-01 through M5-07 execute sequentially in the assigned
-   implementation task. Coordinator owns plans/tickets/independent audit; the
-   implementation task must stop at the audit gate.
+1. Implement M7 under `M7_OFFLINE_SYNC_PLAN.md` and tickets M7-01 through M7-08.
+   Cover all accepted M2–M6 outbox envelopes, store/device authorization,
+   idempotent push, revisioned pull, conflicts and bootstrap. A real disposable
+   PostgreSQL/Supabase integration run is mandatory before acceptance.
 2. Complete the explicitly deferred M3 physical-device/offline-sale,
    development-client/Metro, large-text, and second-laptop checks before any
    external beta/native-release claim; preserve the M1/M2 Galaxy evidence as
    historical evidence only.
 3. Continue validating useful retailer workflows early instead of building all
    future infrastructure at once.
-4. Keep recognition research isolated from core transaction reliability until
-   its evidence and contracts are ready.
+4. Keep M8 scanner/recognition planning coordinator-owned. It may proceed in a
+   separate worktree while M7 implementation runs, but production M8 and shared
+   contract edits wait for accepted M7.
 
 ## Decision Budget
 
@@ -112,8 +108,9 @@ partial measure, never full profit or P&L.
 
 - main is the canonical accepted branch; task branches carry active work.
 - The temporary codename may change, so domain names remain brand-neutral.
-- Hosted Supabase development and EAS cloud builds are the current foundation
-  path.
+- EAS cloud builds are linked. M7 needs either Docker-backed local Supabase or an
+  explicitly authorized isolated hosted development project; neither is active
+  at this checkpoint.
 - M0 screens are a technical navigation shell, not approved product design.
 - The deferred second-laptop setup check remains required before external beta
   readiness.

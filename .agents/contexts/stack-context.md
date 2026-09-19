@@ -2,7 +2,7 @@
 
 **Status:** Active  
 **Scope:** Whole project  
-**Updated:** 2026-09-18
+**Updated:** 2026-09-19
 
 ## Implemented Foundation
 
@@ -20,18 +20,20 @@
 | Cloud native builds | EAS | Project linked |
 | CI | GitHub Actions | Windows and Ubuntu validation |
 
-The mobile package is apps/mobile. It contains the M1 SQLite/domain foundation,
-the audited M2 Products catalogue/package/lifecycle/local-provisioning flows,
-and M3 Sell source/automated-accepted sales flows. M3 physical-device,
-development-client/Metro, and second-laptop readiness checks remain deferred
-before external beta/native release. The app uses a small project-owned
-component/theme layer; no global or server-state library has been selected.
+The mobile package is apps/mobile. It contains the independently accepted M1–M6
+local-first source: SQLite/domain, catalogue/package units, sales, restocking and
+costing, batch-aware inventory/reconciliation/attention, expenses, withdrawals
+and Home/Today. Physical-device, development-client/Metro and second-laptop
+readiness checks remain deferred before external beta/native release. The app
+uses a small project-owned component/theme layer; no global or server-state
+library has been selected.
 
 ## Approved but Not Implemented
 
 - Supabase synchronization and remote business schema.
 - Supabase PostgreSQL, Auth, Storage, and Edge Functions.
-- A hosted Supabase development project and migration-driven schema.
+- A hosted Supabase development project or Docker-backed local integration
+  environment and migration-driven business schema.
 - Domain packages only when M1 responsibilities justify them.
 - Network synchronization workers over the implemented durable local outbox;
   they remain M7 scope.
@@ -71,8 +73,9 @@ See docs/engineering/DEVELOPMENT.md for setup and native-device commands.
 - Android is the primary MVP platform.
 - The second-laptop reproduction check is deferred, although clean CI installs
   pass on Windows and Ubuntu.
-- Java and Docker are not required for the current EAS cloud-build and hosted
-  backend path; they remain optional local tooling.
+- Java remains optional for the current EAS cloud-build path. A real PostgreSQL
+  integration environment is mandatory for M7 acceptance: Docker-backed local
+  Supabase or an explicitly authorized isolated hosted development project.
 - The current dependency graph retains upstream npm audit findings documented in
   docs/engineering/M0_FOUNDATION.md.
 - Observability, analytics, remote configuration, state management, and database

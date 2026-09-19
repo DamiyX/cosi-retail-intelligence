@@ -104,5 +104,6 @@ schema/UX details live in approved authorities, not copied into this backlog.
   parallel track; M9 must not begin in the same checkout while M8 is changing
   navigation, catalogue or scanner contracts.
 
-Next: publish and audit M7 tickets before implementation. Do not implement PC-02,
-PC-04 or PC-07 inside M7.
+M7 tickets are now published and include every accepted M5/M6 envelope. Next:
+establish the non-production Supabase integration environment and assign M7
+implementation. Do not implement PC-02, PC-04 or PC-07 inside M7.

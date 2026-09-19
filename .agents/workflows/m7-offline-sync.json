@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "task_id": "m7-offline-sync",
+  "workflow_id": "build-feature",
+  "mode": "implement",
+  "status": "active",
+  "current_state": "m7-plan-tickets-reviewed-environment-gate-open",
+  "completed_states": [
+    "m6-independent-source-accepted",
+    "m7-roadmap-and-envelope-impact-reviewed",
+    "m7-plan-tickets-reviewed"
+  ],
+  "owner": {
+    "agent": "coordinating-planner-independent-auditor",
+    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
+    "worktree": null
+  },
+  "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m0",
+  "lease": null,
+  "evidence": [
+    {
+      "kind": "inspection",
+      "claim": "Coordinator inspected accepted migrations 1-17, all canonical M2-M6 outbox operation families, Supabase foundation, decisions D-005/D-009-D-013/D-034/D-036-D-041 and OFFLINE_SYNC. No network worker, server schema, RLS, cursor, pull applier or conflict store exists.",
+      "observed_at": "2026-09-19T02:59:49.0107167Z"
+    },
+    {
+      "kind": "product-impact",
+      "claim": "Accepted M5 batch/reconciliation/attention and M6 expense/withdrawal envelopes are explicitly included in M7. Scan, price signals and staff administration remain M8, M9/M10 and M11 respectively.",
+      "path": "docs/product/PRODUCT_CHANGE_BACKLOG.md; docs/engineering/M7_OFFLINE_SYNC_PLAN.md",
+      "observed_at": "2026-09-19T02:59:49.0107167Z"
+    },
+    {
+      "kind": "planning",
+      "claim": "Eight sequential vertical tickets define protocol/security, enrolment/client state, Sale, Purchase/inventory/batch/cost, mutable catalogue, M5 operations, M6/bootstrap and hardening/evidence without starting M8.",
+      "path": "tickets.md",
+      "observed_at": "2026-09-19T02:59:49.0107167Z"
+    },
+    {
+      "kind": "environment",
+      "claim": "Pinned Supabase CLI 2.117.0 is available. Docker is not installed and no hosted development project is linked, so required PostgreSQL/RLS/function integration evidence is not yet runnable.",
+      "observed_at": "2026-09-19T02:59:49.0107167Z"
+    },
+    {
+      "kind": "research",
+      "claim": "Current official Supabase guidance confirms explicit Data API grants, RLS plus negative policy tests, authenticated Edge Function JWT handling and pgTAP database testing. The M7 plan requires these rather than relying on platform defaults.",
+      "source": "https://supabase.com/docs/guides/database/postgres/row-level-security; https://supabase.com/docs/guides/functions/auth; https://supabase.com/docs/guides/local-development/testing/overview; https://supabase.com/changelog/45329-breaking-change-tables-not-exposed-to-data-and-graphql-api-automatically",
+      "observed_at": "2026-09-19T02:59:49.0107167Z"
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "m6-source-accepted",
+      "claim": "M6 source and automated scope is independently accepted.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Read archived M6 workflow and final audit correction record.",
+        "success_condition": "M6 accepted with readiness gates carried."
+      },
+      "evidence": [
+        {
+          "result": "M6 accepted at cc18992 after correction 1d8124c and 472-test validation.",
+          "source": "docs/engineering/M6_AUDIT_CORRECTIONS.md; .agents/workflows/m6-expenses-business-summary.json",
+          "observed_at": "2026-09-19T02:59:49.0107167Z"
+        }
+      ],
+      "limitations": [
+        "Physical/release-readiness checks remain carried."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m7-plan-tickets-reviewed",
+      "claim": "M7 architecture, operation coverage, security boundary and ticket dependencies are published before implementation.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "m6-source-accepted"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Review plan and tickets against actual M1-M6 schema/envelopes, OFFLINE_SYNC and current Supabase guidance.",
+        "success_condition": "All existing operation families and critical sync invariants have an owned ticket and evidence gate."
+      },
+      "evidence": [
+        {
+          "result": "M7 plan and tickets M7-01 through M7-08 are published on feat/m7-offline-sync.",
+          "source": "docs/engineering/M7_OFFLINE_SYNC_PLAN.md; tickets.md",
+          "observed_at": "2026-09-19T02:59:49.0107167Z"
+        }
+      ],
+      "limitations": [
+        "Planning evidence only; no M7 runtime implementation is claimed."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m7-postgres-integration-environment",
+      "claim": "M7 has a non-production PostgreSQL/Supabase environment for migration, RLS and endpoint integration tests.",
+      "owner": "founder-and-environment-setup-task",
+      "required": true,
+      "status": "blocked",
+      "depends_on": [],
+      "verification": {
+        "kind": "test",
+        "procedure": "Use Docker-backed local Supabase or an explicitly authorized isolated hosted development project; reset/apply migrations and run pgTAP/function integration tests.",
+        "success_condition": "Database and endpoint integration evidence runs against disposable non-production state."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": "Docker is absent and no hosted development Supabase project is linked or authorized.",
+      "waiver": null
+    },
+    {
+      "id": "m7-implementation-assigned",
+      "claim": "One separate Luna Max task is registered as the sole M7 implementation writer.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m7-plan-tickets-reviewed"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Create the implementation task from the clean planning checkpoint and record its task ID.",
+        "success_condition": "One task owns M7-01 through M7-08 and stops for independent audit."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m7-independent-audit",
+      "claim": "Coordinator independently reviews M7 source, security and actual integration evidence.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m7-postgres-integration-environment",
+        "m7-implementation-assigned"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Inspect code/migrations/tests, reproduce critical retries/conflicts/security cases and rerun required checks.",
+        "success_condition": "No blocking finding and source acceptance remains distinct from deployment/release readiness."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    }
+  ],
+  "artifacts": [
+    "tickets.md",
+    "docs/engineering/M7_OFFLINE_SYNC_PLAN.md",
+    "docs/engineering/PROJECT_STATE.md",
+    "docs/engineering/BUILD_PLAN.md",
+    "docs/architecture/OFFLINE_SYNC.md",
+    "docs/architecture/DOMAIN_DATA_MODEL.md",
+    "docs/architecture/TECHNICAL_ARCHITECTURE.md",
+    "docs/decisions/DECISION_LOG.md",
+    "docs/product/PRODUCT_CHANGE_BACKLOG.md",
+    "apps/mobile/src/db/migrations.ts",
+    "apps/mobile/src/db/repositories/outbox.ts",
+    "supabase/config.toml",
+    "supabase/migrations",
+    "supabase/functions",
+    "supabase/tests"
+  ],
+  "approvals": [
+    {
+      "date": "2026-09-19",
+      "scope": "Founder directs coordinator to verify roadmap/product changes before M7, continue the milestone workflow, retain independent audit and keep M8 scanner/recognition planning coordinator-owned."
+    }
+  ],
+  "blockers": [
+    "A disposable PostgreSQL/Supabase integration environment is required before M7 can be accepted."
+  ],
+  "next_action": "Create the clean planning checkpoint. Establish Docker-backed local Supabase or an explicitly authorized isolated hosted development project, then assign M7-01 through M7-08 to one Luna Max implementation task.",
+  "created_at": "2026-09-19T02:59:49.0107167Z",
+  "updated_at": "2026-09-19T02:59:49.0107167Z",
+  "archived": false
+}
+

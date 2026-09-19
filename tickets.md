@@ -1,79 +1,217 @@
-# Tickets: M6 Expenses, Withdrawals and Business Summary
+# Tickets: M7 Offline Sync
 
-M6 provides owner-only offline money-out capture and a truthful local Live Today surface. The implementation follows `docs/engineering/M6_EXPENSES_BUSINESS_SUMMARY_PLAN.md`. Do not start M7.
+M7 implements the controlled custom sync protocol in
+`docs/engineering/M7_OFFLINE_SYNC_PLAN.md`. The accepted M1–M6 local-write-first
+behavior remains authoritative. Do not start M8 production integration.
 
-## M6-01 — Record and review operating expenses
+## M7-01 — Establish the secure protocol and server transaction spine
 
-**Status:** Implemented in `86e526b`; source/automated scope accepted after coordinator correction `1d8124c`. **Basis:** M5 source scope is independently accepted.
-**Delivers:** an owner can record an operating expense offline and find it after restart.
+**Status:** Planned. **Basis:** M6 source/automated scope independently accepted.
+**Delivers:** versioned protocol contracts and a testable authenticated Supabase
+boundary capable of one atomic, revisioned store operation.
 
-- [x] Add an append-only migration for store-scoped expenses with approved category, positive integer minor amount, store currency, optional note, occurred/created time, resolved owner member/user/device and useful store/time index. Preserve migrations 1–15 exactly and prove populated-v15 upgrade/rollback/retention.
-- [x] Complete expense row plus one canonical version-1 outbox envelope atomically. Same operation and explicit request replay returns the original; conflicting intent, inactive/non-owner actor, cross-store references, invalid/zero/overflow amount and malformed category fail without partial rows.
-- [x] More exposes Record expense and Expenses. Entry/review/history use store currency, approved categories, optional note/time, dirty-exit protection, retained failure input and operation ID, duplicate-submit prevention, empty/error/retry/restart states and truthful local sync wording.
-- [x] Focused domain/repository/component tests prove offline completion, exact money, owner/store isolation, idempotency, rollback, restart, routing and accessibility. Typecheck and zero-warning lint pass.
+- [ ] Add provider-independent push/pull/bootstrap DTOs with explicit protocol
+  and payload versions, bounded request/page sizes, canonical decimal strings,
+  typed acknowledgements/errors and runtime validation. Reject unknown versions.
+- [ ] Add imperative Supabase migrations for auth-subject mapping, stores,
+  memberships, devices, per-store sync state, applied operations, change log and
+  the minimum normalized domain foundation. Use UUID/timestamptz, exact numeric
+  quantity/rational values and integer minor-money types, plus constraints,
+  foreign-key/query indexes and deterministic lock order.
+- [ ] Add authenticated Edge Function shells and one transactional PostgreSQL
+  application boundary. Verify JWT, active membership, device/store relation,
+  operation permission and cross-store references; serialize each store revision
+  and keep service credentials server-only.
+- [ ] Revoke ambient access, use explicit grants, enable RLS on exposed tables,
+  pin privileged-function search paths and add positive/negative pgTAP policy
+  tests. Adopt current explicit Data API grants rather than platform defaults.
+- [ ] Add repeatable database/function test scripts and CI integration. A real
+  PostgreSQL run is required; absence of Docker/authorized dev project blocks
+  completion rather than becoming a waiver.
 
-**Implementation evidence (self-check; source/automated scope accepted after coordinator correction `1d8124c`):** Commit `86e526b`; `m6Expenses.test.ts` and `m6ExpenseScreens.test.tsx` pass, covering exact integer money, owner/store isolation, replay/conflict, rollback, restart and populated-v15 upgrade retention. Mobile typecheck and zero-warning lint passed at the ticket checkpoint.
+**Evidence:** focused contract tests, clean Supabase reset/migration, database
+lint/advisors where available, pgTAP RLS suite, function tests, typecheck and
+zero-warning lint.
 
-**Out of scope:** withdrawal, receipt media, recurring expenses, cash accounts, edit/delete, tax/accounting automation, M7 transport.
+**Out of scope:** business aggregate coverage beyond a tracer fixture, final Auth
+screens, production project linking/deployment.
 
-## M6-02 — Record and review owner withdrawals
+## M7-02 — Enrol a local store and add crash-safe client sync state
 
-**Status:** Implemented in `1cce732`; source/automated scope accepted after coordinator correction `1d8124c`. **Dependency:** M6-01 complete.
-**Delivers:** an owner can record personal money removed from the business without misclassifying it as expense.
+**Status:** Planned. **Dependency:** M7-01.
+**Delivers:** an authenticated owner can bind one existing local-only store safely,
+and the app can retain retry/cursor/conflict state across restart.
 
-- [x] Add a separate append-only migration/table for owner withdrawals with positive integer store-currency amount, optional note, occurred/created time and immutable owner/member/device attribution. Prove populated prior-schema upgrade/rollback/retention.
-- [x] Complete withdrawal plus one canonical outbox envelope atomically with owner/store authorization, stable operation replay, conflicting-intent rejection and no duplicate/partial rows after retry or injected failure.
-- [x] More exposes Record owner withdrawal and Withdrawals with explicit non-expense copy, review/confirm, dirty-exit/failure recovery, accessible exact amount/history and restart survival.
-- [x] Focused tests distinguish expense and withdrawal queries/envelopes under identical dates/amounts and cover boundary, isolation, replay, rollback, UI and restart. Typecheck and zero-warning lint pass.
+- [ ] Add an idempotent first-owner enrolment transaction for the existing
+  domain user/store/owner-member/device IDs. Bind verified auth subject exactly
+  once; reject attempts to claim an already-bound store or inject another store.
+- [ ] Add additive SQLite migration(s) for store cursor/bootstrap state, remote
+  versions, durable conflicts and outbox lease/retry metadata without rewriting
+  migrations 1–17 or pending envelopes.
+- [ ] Build an injected authenticated-session/transport boundary and worker with
+  one-active-run guard, stale-lease recovery, bounded batches/backoff/jitter,
+  acknowledgement handling and permanent versus retryable errors.
+- [ ] Build paginated pull application transactions: validate page, preserve
+  pending local work, apply echo safely, persist conflicts and advance cursor
+  only after commit.
+- [ ] Add honest compact sync status/diagnostics and manual retry without exposing
+  outbox/revision jargon in ordinary flows. Offline or expired tokens pause cloud
+  work but never local completion.
 
-**Implementation evidence (self-check; source/automated scope accepted after coordinator correction `1d8124c`):** Commit `1cce732`; `m6Withdrawals.test.ts` and `m6WithdrawalScreens.test.tsx` pass, covering the separate immutable table/envelope, owner/store isolation, replay/conflict, rollback, restart and non-expense UI wording. Mobile typecheck and zero-warning lint passed at the ticket checkpoint.
+**Evidence:** fresh/populated-v17 migration tests, restart/lease/ack/pull crash
+checks, enrolment replay and hostile ownership tests, component status tests,
+typecheck and zero-warning lint.
 
-**Out of scope:** drawings accounts, dividends, payroll, staff permissions, edit/delete, cash settlement.
+**Out of scope:** final onboarding/invitation/multi-store UI.
 
-## M6-03 — Calculate an exact local daily business summary
+## M7-03 — Synchronize completed Sale end to end
 
-**Status:** Implemented in `ef47fab`; source/automated scope accepted after coordinator correction `1d8124c`. **Dependencies:** M6-01 and M6-02 complete.
-**Delivers:** one read model truthfully explains the selected store-local day.
+**Status:** Planned. **Dependencies:** M7-01 and M7-02.
+**Delivers:** one offline completed sale reaches the server once and returns by
+pull/echo without duplicating inventory or financial effects.
 
-- [x] Build full-range, store-scoped half-open day queries for completed sales value (credit included), sale count, expenses and withdrawals. Handle store timezone, DST/offset boundaries, empty days and safe integer aggregation without paged-history truncation or SQLite overflow.
-- [x] Derive tracked COGS/gross margin only from immutable available cost snapshots. Report explicit covered/unavailable sale counts/value; never treat unavailable COGS as zero or label partial data profit/P&L/cash.
-- [x] Derive optional Most frequently sold today by distinct completed-sale appearances, with stable count/earliest-application/product-ID ties. Do not sum unlike package quantities or substitute revenue rank.
-- [x] Provide an accessible summary-detail surface with exact values, coverage/label explanations, empty/error/retry/restart behavior and no mutation. Tests cover credit, partial cost, expenses versus withdrawals, ties, cross-store isolation and local-day rollover.
+- [ ] Add normalized server sale, items, payment, optional customer/receivable,
+  inventory-event, batch-allocation and immutable cost-snapshot application from
+  versioned sale envelopes. Revalidate exact arithmetic, immutable snapshots,
+  store ownership and package/product references server-side.
+- [ ] Apply sale graph, inventory/batch/cost effects, applied-operation result,
+  revision and change records in one PostgreSQL transaction.
+- [ ] Make identical operation/entity replay return `ALREADY_APPLIED`; reject
+  different immutable content under reused IDs. Preserve two genuine concurrent
+  offline sales and a negative/discrepancy projection where required by D-013.
+- [ ] Pull/echo into a second local database without rerunning sale effects or
+  overwriting local pending work.
 
-**Implementation evidence (self-check; source/automated scope accepted after coordinator correction `1d8124c`):** Commit `ef47fab`; `m6BusinessSummary.test.ts` and `m6BusinessSummaryScreen.test.tsx` pass, covering store-local half-open/DST boundaries, credit-inclusive value, cost coverage truth, safe-integer overflow rejection, stable popular-product ties, isolation and exact accessible copy. Mobile typecheck and zero-warning lint passed at the ticket checkpoint.
+**Evidence:** offline push, timeout-after-commit retry, two-device final-stock,
+cross-store/tampered payload, echo/restart and immutable-content conflict tests;
+typecheck and zero-warning lint.
 
-**Out of scope:** arbitrary analytics ranges, cash received, balance sheet, formal accounting, purchase-cost/market signals.
+**Out of scope:** voids, returns, split tender, receivable settlement.
 
-## M6-04 — Promote Live Today and real attention to Home
+## M7-04 — Synchronize Purchase, inventory, batch and costing facts
 
-**Status:** Implemented in `1c9a134`; source/automated scope accepted after coordinator correction `1d8124c`. **Dependencies:** M6-03 and accepted M5 attention.
-**Delivers:** Today answers what happened, what needs attention and what to do next without becoming a dense dashboard.
+**Status:** Planned. **Dependency:** M7-03.
+**Delivers:** a completed restock and its accepted M5 batch/cost extensions move
+atomically between devices without changing historical meaning.
 
-- [x] Replace the Today shell with a restrained Home surface: Sales value, Transactions, recorded expenses/withdrawals, optional popular product and cautious cost-coverage link. Include credit-aware and non-profit copy.
-- [x] Add a bounded severity-ordered Needs attention preview backed by the real M5 service, with See all and real contextual routing. Preserve snooze/due/worsening/episode behavior; no duplicate attention store or decorative dismissals.
-- [x] Add compact next actions for Sell, Restock, Stock checks and Record expense. No global Scan, second add-product action, Reports tab or M9/M10 price signal.
-- [x] Refresh after durable local writes, focus, foreground resume and store-local rollover without background spin or dirty-form loss. Component/routed tests cover zero/loading/error/partial states, navigation, accessibility, large-content structure and refresh timing.
+- [ ] Apply completed purchase, items, optional supplier, inventory events,
+  private price observations, batch groups/operations/entries and immutable cost
+  movements/snapshots atomically from legacy/current envelope versions.
+- [ ] Preserve exact D-034 quantities and D-038 rational cost values. FEFO batch
+  projection remains separate from financial costing; unknown stock and negative
+  stock remain valid first-class states.
+- [ ] Define deterministic server projection/rebuild ordering for accepted
+  immutable movements and surface unresolved cost/batch coverage instead of
+  inventing certainty after concurrent device work.
+- [ ] Pull purchases and dependent reference/fact rows in safe dependency order;
+  replay and echo never duplicate inventory, observations or cost.
 
-**Implementation evidence (self-check; source/automated scope accepted after coordinator correction `1d8124c`):** Commit `1c9a134`; `m6Home.test.tsx` passes with the combined M6 suite, covering summary/attention loading and failure states, bounded real M5 attention, approved actions, focus/foreground/interval refresh and route behavior. Mobile typecheck and zero-warning lint passed at the ticket checkpoint.
+**Evidence:** legacy/current envelope, replay, timeout, two-device purchase/sale,
+unknown-batch, rational-cost, cross-store and rebuild tests; typecheck and lint.
 
-**Out of scope:** M8 scanner navigation, M9/M10 price intelligence, M11 staff activity, dense analytics.
+**Out of scope:** payables, batch financial costing, strict traceability.
 
-## M6-05 — Complete evidence and stop for independent audit
+## M7-05 — Synchronize mutable catalogue, package and store configuration
 
-**Status:** Source/automated scope accepted after coordinator correction `1d8124c`. **Dependencies:** M6-01 through M6-04 complete.
-**Delivers:** a recoverable M6 handoff; no M7 implementation.
+**Status:** Planned. **Dependency:** M7-04.
+**Delivers:** catalogue/config edits use explicit versions and visible conflicts
+instead of last-write-wins.
 
-- [x] Run focused suites, strict typecheck, zero-warning lint and full tests; prove expense/withdrawal migrations, atomicity/replay, local-day summary, cost-coverage truth, Home refresh/attention and M1–M5 regression behavior.
-- [x] Run Expo Doctor, dependency compatibility, Android export, workflow/index/gate/artifact/migration checks and `git diff --check`. Keep secrets/generated builds out of Git.
-- [x] Update this ledger, PROJECT_STATE and M6 workflow with actual commits/commands/results, remaining accounting/device risks and a clean branch/full HEAD/status. Notify the coordinator and stop for independent audit.
-- [x] Do not start M7, push, merge, deploy, claim physical-device checks or call the tracked summary full profit/P&L.
+- [ ] Cover product creation/identity/lifecycle, identifier addition, package
+  create/update/deactivation, preferred store package, reorder level/history and
+  supplier metadata under the approved ownership and cross-symbology uniqueness
+  rules.
+- [ ] Populate and require `baseServerVersion` for existing mutable records.
+  Apply only compatible edits; return current record/version on conflict and
+  retain the original local operation plus durable conflict.
+- [ ] Protect immutable package conversions/historical snapshots and stale-cart
+  sales. Concurrent deactivation or metadata change cannot erase a genuine
+  completed transaction.
+- [ ] Add bounded conflict review/resolution that creates a new operation against
+  the latest version. Owner-only high-impact settings remain enforced.
 
-**Implementation evidence (self-check; source/automated scope accepted after coordinator correction `1d8124c`):** Commits `86e526b`, `1cce732`, `ef47fab` and `1c9a134` implement M6-01 through M6-04. Independent final validation after `1d8124c` passes: environment checks, strict typecheck, zero-warning lint, 5 domain suites/150 tests and 44 mobile suites/322 tests. `npm run mobile:doctor` passes 21/21; Expo dependency compatibility is up to date; Android export passes with 1,402 modules and a 3.6 MB Hermes bundle. Workflow/index/gate/artifact/migration checks and `git diff --check` pass. Generated export output is ignored. Separate Luna Max implementation task `01a0b72e-5fdf-7022-afc8-2e1796f49b66` completed the implementation and stopped; coordinator audit and corrections are recorded in `M6_AUDIT_CORRECTIONS.md`.
+**Evidence:** concurrent price/name/package/reorder edits, stale deactivation
+versus sale, barcode ownership collision, conflict restart/resolution, store
+isolation and authorization tests; typecheck and lint.
+
+**Out of scope:** shared-catalogue consolidation, staff permission management.
+
+## M7-06 — Synchronize M5 reconciliation, checks and attention
+
+**Status:** Planned. **Dependency:** M7-05.
+**Delivers:** batch classification, adjustments, blind checks and attention state
+retain their audit meaning across devices.
+
+- [ ] Apply inventory adjustments, batch classifications and finalized
+  reconciliation graphs with actor/source links, immutable submissions,
+  inventory/batch/cost effects and one applied operation.
+- [ ] Recheck inventory-event and batch-operation watermarks. A stale physical
+  count becomes a conflict and never overwrites intervening work.
+- [ ] Synchronize check and attention settings with optimistic versions;
+  synchronize assignments, attempts and snoozes as auditable facts with stable
+  idempotency and owner authorization.
+- [ ] Preserve inferred-versus-physical evidence labels, unknown composition,
+  actual expired removal and condition-driven attention semantics on pull.
+
+**Evidence:** concurrent sale-versus-count, classification-versus-count, expired
+removal, duplicate attempts, settings conflict, snooze/worsening, restart and
+cross-store tests; typecheck and lint.
+
+**Out of scope:** M11 staff assignment/reviewer policy, background notifications.
+
+## M7-07 — Synchronize money-out and prove consistent bootstrap
+
+**Status:** Planned. **Dependency:** M7-06.
+**Delivers:** expenses/withdrawals deduplicate and a newly authorized installation
+can reconstruct the accepted M1–M6 private store state.
+
+- [ ] Apply expenses and owner withdrawals as immutable owner-authorized facts;
+  preserve exact store currency, actor/device/time and separation from purchases
+  or each other.
+- [ ] Build a consistent paginated bootstrap snapshot with its matching revision.
+  Restore dependencies, immutable history, current projections, mutable versions
+  and sync metadata into a fresh SQLite database, then start incremental pull.
+- [ ] Register a later device only for an authorized member. Interrupted
+  bootstrap restarts safely; a failed snapshot never becomes the active store.
+- [ ] Protect unsynced local work during full resync/logout/reset paths and state
+  clearly that only server-acknowledged records are recoverable after uninstall.
+
+**Evidence:** expense/withdrawal retry/isolation, concurrent bootstrap mutation,
+interrupted bootstrap, fresh second database, subsequent incremental pull,
+pending-work protection and derived Home-summary parity tests.
+
+**Out of scope:** final multi-store selector, invitation UI, production recovery
+support process.
+
+## M7-08 — Harden, validate and stop for independent audit
+
+**Status:** Planned. **Dependency:** M7-01 through M7-07.
+**Delivers:** a recoverable M7 handoff with actual server integration evidence.
+
+- [ ] Run all required scenarios in `OFFLINE_SYNC.md`: restart/crash boundaries,
+  commit-before-ack, pagination, unsupported versions, revoked user/device,
+  tampered cross-store IDs, duplicate/reused IDs and two-device conflicts.
+- [ ] Run Supabase reset/migrations, database lint/advisors where available,
+  pgTAP/RLS and Edge Function integration tests against local Docker or an
+  explicitly authorized isolated hosted development project. Do not substitute
+  mocks for this gate.
+- [ ] Run focused suites, full `npm run validate`, Expo Doctor, dependency check,
+  Android export, workflow/index/artifact/migration checks and `git diff --check`.
+- [ ] Update tickets, PROJECT_STATE and M7 workflow with actual commits/commands,
+  server migrations, residual risks and clean branch/HEAD/status. Stop for
+  independent audit; do not start M8, push, deploy or claim physical-device work.
+
+**Out of scope:** production Supabase migration, App Store/Play deployment,
+physical-device release acceptance, M8 code.
 
 ## Dependency frontier
 
 ```text
-M5 accepted -> M6-01 -> M6-02 -> M6-03 -> M6-04 -> M6-05 -> independent audit
+M6 accepted -> M7-01 -> M7-02 -> M7-03 -> M7-04
+            -> M7-05 -> M7-06 -> M7-07 -> M7-08 -> independent audit
 ```
 
-One implementation task owns the checkout sequentially. Corrections return to that same task; the coordinator alone records independent acceptance.
+The coordinator owns plan/ticket decisions and independent acceptance. One M7
+implementation task owns this checkout sequentially. M8 planning may occur in a
+separate worktree, but production M8 and shared-contract edits wait for accepted
+M7.

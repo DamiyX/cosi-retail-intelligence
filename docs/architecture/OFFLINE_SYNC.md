@@ -1761,6 +1761,41 @@ gates before coordinated multi-device claims; M5 prepares immutable local facts.
 
 ---
 
+## M6 Expense / Withdrawal Envelope Compatibility — D-041
+
+`EXPENSE_CREATED` and `OWNER_WITHDRAWAL_CREATED` are append-oriented Category A
+operations. Each envelope retains positive integer minor money, store currency,
+occurred/created time, actor/member/device and the immutable entity payload.
+Identical operation/entity replay deduplicates; a reused ID with different
+immutable content is a permanent integrity error. The server rechecks active
+OWNER authorization and store/device ownership rather than trusting the local
+role claim.
+
+Expenses and withdrawals remain distinct from each other and from purchases.
+They do not mutate a cash balance or become accounting journals. Home/Today and
+business summaries remain local derived read models; bootstrap restores their
+underlying facts and subsequent pull applies new facts exactly once.
+
+## M7 implementation resolution — D-042
+
+M7 uses authenticated Edge Functions as narrow transport adapters and one
+transaction-owning PostgreSQL application boundary for each accepted store
+operation. PostgreSQL owns applied-operation uniqueness, per-store revision
+serialization, normalized facts and change-log writes. Do not apply one
+aggregate through unrelated Data API calls.
+
+Map the verified Supabase Auth subject explicitly to the COSI domain user/member.
+First-owner enrolment may bind an existing local-only store exactly once; later
+devices require active membership and explicit registration. Every private table
+or callable function uses explicit grants and RLS/authorization tests. Current
+Supabase platform defaults for Data API exposure are not an authorization model.
+
+The active operation registry and detailed vertical acceptance evidence live in
+`M7_OFFLINE_SYNC_PLAN.md` and `tickets.md`. A disposable real PostgreSQL/Supabase
+integration run is mandatory before accepting M7.
+
+---
+
 # 75. Source-of-Truth Relationship
 
 This document is subordinate to:

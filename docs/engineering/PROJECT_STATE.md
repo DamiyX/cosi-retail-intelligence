@@ -1,8 +1,9 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-19  
-Current milestone: M7 offline-sync planning; M8 scanner planning may proceed in a
-separate worktree while M7 implementation runs.
+Current milestone: M7 offline-sync planning checkpoint complete; implementation
+awaits assignment and a real non-production Supabase integration environment.
+M8 scanner planning may proceed in a separate worktree.
 
 ## Current status
 
@@ -21,7 +22,7 @@ currency wording. See `M5_AUDIT_CORRECTIONS.md` and `M6_AUDIT_CORRECTIONS.md`.
 
 - Checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m0`
 - Canonical remote: `https://github.com/DamiyX/cosi-retail-intelligence`
-- Current branch: `feat/m6-expenses-business-summary`
+- Current branch: `feat/m7-offline-sync`
 - Coordinator task: `01a098ef-d830-7531-bca7-2d66b0a5b587`
 - M6 Luna Max implementation task: `01a0b72e-5fdf-7022-afc8-2e1796f49b66`
   (completed and stopped)
@@ -72,6 +73,20 @@ Recognition Track B research may run in parallel behind stable contracts and
 feature flags. Concurrent writers must not edit shared catalogue, package-unit,
 sync or recognition contracts.
 
+## M7 planning checkpoint
+
+`M7_OFFLINE_SYNC_PLAN.md` and `tickets.md` define eight sequential vertical
+tickets. They cover every canonical M2–M6 outbox operation, authenticated
+store/device enrolment, PostgreSQL idempotency/revisions, push/pull, durable
+conflicts, M5 batch/reconciliation/attention behavior, M6 money-out facts and a
+consistent second-device bootstrap. No M7 runtime code exists at this checkpoint.
+
+Supabase CLI 2.117.0 is available, but Docker is not installed and no isolated
+hosted development project is linked. M7 may not be independently accepted until
+PostgreSQL migrations, RLS, functions and retry/conflict behavior run against a
+real disposable non-production Supabase environment. Mocks are supporting
+evidence only.
+
 ## Carried readiness gates
 
 - Actual Galaxy M3–M6 offline sale/restock, attention/expiry, expense/withdrawal,
@@ -85,9 +100,11 @@ sync or recognition contracts.
 
 ## Next action
 
-Commit the M6 audit/roadmap checkpoint. Then create the M7 plan, tickets and
-workflow before assigning implementation. M8 planning may be prepared by the
-coordinator in a separate worktree, but do not start production M8 or M9 code.
+Commit the M7 planning checkpoint. Establish Docker-backed local Supabase or an
+explicitly authorized isolated hosted development project, then assign M7-01
+through M7-08 to one Luna Max implementation task. The coordinator may prepare
+M8 contracts/UX/tickets in a separate worktree, but must not start production M8
+or M9 code before accepted M7.
 
 A continuing agent must first read `AGENTS.md`, this file,
 `MULTI_AGENT_WORKFLOW.md`, `IMPLEMENTATION_AUDIT_WORKFLOW.md`, the workflow

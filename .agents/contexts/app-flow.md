@@ -1,6 +1,6 @@
 # COSI Application Flow
 
-**Status:** Active; M1–M5 source scope accepted with readiness carried. M6 Home, expense, withdrawal and truthful daily-summary behavior is planned.  
+**Status:** Active; M1–M6 source scope accepted with readiness carried. M7 sync is planned and unimplemented.  
 **Scope:** MVP user journeys  
 **Updated:** 2026-09-19  
 **Confidence:** High for required jobs and transaction behavior; medium or low
@@ -190,12 +190,12 @@ transaction completed if its local atomic commit failed.
 | Capability | MVP intent | Design status |
 | --- | --- | --- |
 | Account/store onboarding | Minimal path to useful work | Flow details open |
-| Today/Home | Live daily facts, compact M5 attention and next actions | M6 contract in DESIGN/D-041; implementation pending |
+| Today/Home | Live daily facts, compact M5 attention and next actions | M6 source accepted; physical checks carried |
 | Sale/cart/payment/completion | Required offline workflow | Capability flow approved |
 | Catalogue/search/product edit | Progressive digitization | M2 flow approved in `docs/design/DESIGN.md` |
 | Restock/purchase | Required offline workflow | M4 source accepted; M5 expiry-group extension accepted |
 | Inventory/reconciliation | Event-based blind checks and batch control | M5 source accepted; physical checks carried |
-| Expense/withdrawal | Separate immutable owner-only offline records | M6 contract in DESIGN/D-041; implementation pending |
+| Expense/withdrawal | Separate immutable owner-only offline records | M6 source accepted; M7 sync pending |
 | Transactions/history | Review and accountability | Filters/actions open |
 | Price history/signals | Lead value proposition | Presentation open |
 | Scanner | Barcode first, recognition later | Interaction open |

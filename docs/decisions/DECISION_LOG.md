@@ -1349,6 +1349,58 @@ acceptance.
 
 ---
 
+## D-042 — M7 Authenticated Sync and PostgreSQL Application Boundary
+
+**Status:** ACTIVE implementation contract under D-005/D-011/D-012; custom-sync
+fallback remains available if the controlled spike proves unsafe.  
+**Date:** 2026-09-19.  
+**Approval:** Founder directed the coordinator to reconcile product changes,
+prepare M7 and continue the milestone workflow; this records the smallest
+transaction-safe implementation of the already approved Supabase/custom-sync
+architecture rather than changing the selected stack.
+
+### Decision
+
+- Keep provider-independent, explicitly versioned sync DTOs in application code.
+  Authenticated Edge Functions form the narrow transport boundary; PostgreSQL
+  performs idempotency checks, aggregate application, store-revision assignment
+  and change-log writes in one transaction.
+- A verified Supabase Auth subject maps explicitly to a COSI domain user/member.
+  Local user IDs are not silently treated as `auth.users.id`. The first owner may
+  idempotently enrol one existing local-only store; later devices require active
+  membership and explicit device registration. Final sign-in/invitation UI stays
+  deferred.
+- Every endpoint revalidates active membership, device/store relation, payload
+  schema, operation permission and cross-store references. Secret/service-role
+  credentials remain server-side. Use explicit grants, RLS and negative tests;
+  never depend on automatic Data API exposure.
+- Serialize accepted changes by locking one per-store sync-state row, then write
+  applied-operation result, normalized business facts, incremented revision and
+  change records before commit. Pull cursors advance only after local application
+  commits.
+- M7 includes every current M2–M6 canonical outbox operation. Append facts
+  deduplicate; mutable catalogue/configuration uses base server versions and
+  durable conflicts. M5 batch/count uncertainty and M6 owner-only money-out
+  semantics remain intact.
+- M7 source acceptance requires an actual disposable PostgreSQL/Supabase
+  integration run. Mocks cannot prove transaction, grant or RLS behavior.
+
+### Rationale
+
+Independent Data API calls cannot make a multi-table Sale or Purchase commit
+atomic. A transaction-owning database boundary preserves D-013 and the aggregate
+outbox design while Edge Functions keep authentication and transport concerns
+small. Explicit auth mapping allows existing local-first pilot data to enrol
+without rewriting actor history or prematurely deciding final onboarding UX.
+
+### Revisit trigger
+
+Revisit D-011 and evaluate a managed sync engine if the M7 sale spike cannot
+demonstrate safe idempotent retry, per-store ordering, RLS isolation and
+recoverable pull without disproportionate complexity.
+
+---
+
 # 6. Explicitly Deferred Decisions
 
 These are intentionally unresolved and should not be reopened as though they were forgotten.

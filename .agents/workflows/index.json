@@ -1,12 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-19T00:59:06.5628600Z",
+  "updated_at": "2026-09-19T02:59:49.0107167Z",
   "tasks": {
     "m1-domain-local-database": "m1-domain-local-database.json",
     "m2-catalogue-package-units": "m2-catalogue-package-units.json",
     "m3-sales": "m3-sales.json",
     "m4-restocking-costing": "m4-restocking-costing.json",
     "m5-inventory-reconciliation": "m5-inventory-reconciliation.json",
-    "m6-expenses-business-summary": "m6-expenses-business-summary.json"
+    "m6-expenses-business-summary": "m6-expenses-business-summary.json",
+    "m7-offline-sync": "m7-offline-sync.json"
   }
 }

@@ -72,11 +72,10 @@ copying full histories between them.
 
 ## Current Milestone Gate
 
-M1–M4 source scope passed independent audits, with physical/release gates carried.
-M4's accepted ledger is archived in docs/engineering/tickets/M4_RESTOCKING_COSTING.md.
-Founder approved minimal pilot batch awareness/automatic assumed FEFO and blind
-owner checks/attention/conservative adjustment costing on 2026-09-18. D-039/D-040
-record durable behavior; coordinator-reviewed M5 tickets are now published in
-tickets.md and registered in .agents/workflows/m5-inventory-reconciliation.json.
-They are unstarted. The separate implementation task has not been created;
-coordinator owns delegation and final independent acceptance. No M6 work.
+M0–M6 source/automated scope passed independent audits, with physical/release
+gates carried. Accepted ledgers remain archived under `docs/engineering/tickets/`.
+The active `tickets.md` contains coordinator-reviewed M7-01 through M7-08 and is
+registered in `.agents/workflows/m7-offline-sync.json`. No M7 runtime work is
+claimed at the planning checkpoint. A disposable non-production Supabase
+PostgreSQL environment is required before M7 can close; coordinator retains
+delegation and final independent acceptance. Production M8 has not started.
