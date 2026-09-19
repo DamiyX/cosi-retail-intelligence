@@ -381,6 +381,36 @@ overview and unchanged replay. Run focused and full final checks. Commit this
 checkpoint separately, return a clean branch and stop for independent acceptance.
 No M6 or phone action.
 
+## Final independent acceptance — 2026-09-19
+
+The coordinator reviewed stopped A08-R3 return `d9a222a` and independently ran
+the focused attention/reorder suites. The interleaved state machine corrected
+the reproduced functional sequence. One standards issue remained: condition
+episode reconstruction used outbox rows as permanent business history, while
+`OFFLINE_SYNC.md` defines the outbox as unacknowledged transport work and permits
+post-acknowledgement lifecycle handling. M7 cleanup could therefore change an
+active condition key and invalidate a legitimate snooze.
+
+Under the founder's instruction to end correction ping-pong, the coordinator
+implemented the bounded correction directly. Additive migration 15 introduces
+immutable `store_product_reorder_level_history`, backfills valid version-14
+threshold envelopes, and records future threshold/balance/inventory-watermark
+facts atomically with the product mutation and outbox. Attention reads the
+domain history; outbox parsing remains only a compatibility fallback when no
+durable history exists. A regression deletes threshold outbox transport rows
+and proves the snooze/key survives, while immutable-history deletion is rejected.
+A populated-v14 probe upgrades to v15 and retains the original threshold facts.
+
+**Decision: M5 source/automated scope accepted.** A01–A11,
+A05-R/A07-R/A08-R/A08-R2/A08-R3 and the outbox-lifecycle standards correction
+have no remaining blocking finding in the reviewed scope. Exact focused suites,
+strict typecheck, zero-warning lint and full validation evidence are recorded in
+PROJECT_STATE and the archived workflow. Physical Galaxy, development-client/
+Metro, second-laptop, cloud/deployment, M7 concurrency and professional
+accounting checks remain explicitly carried; this is not pilot/beta/release
+acceptance. The founder deferred phone verification and authorized source
+continuation into M6.
+
 ## Correction return — 2026-09-19
 
 The coordinator checkpoint was preserved separately in `7ccf672` before any

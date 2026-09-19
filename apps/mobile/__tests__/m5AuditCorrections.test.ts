@@ -210,7 +210,7 @@ describe('M5 A01 batch graph sealing', () => {
       const beforeEventCount = isolated.adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM inventory_events;')?.total;
       const beforeOperationId = purchase.batchOperations[0].id;
       const report = openDatabase(isolated.adapter, MIGRATIONS);
-    expect(report.schemaVersion).toBe(14);
+    expect(report.schemaVersion).toBe(15);
       expect(isolated.adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM inventory_events;')?.total).toBe(beforeEventCount);
       expect(isolated.adapter.getFirstRow<{ sealed_at: string; sealed_entry_count: number }>(
         'SELECT sealed_at, sealed_entry_count FROM batch_inventory_operations WHERE id = ?;',

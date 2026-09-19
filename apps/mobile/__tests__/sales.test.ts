@@ -130,6 +130,7 @@ describe('M3 Sales milestone', () => {
             { version: 12, name: 'batch_operation_sealing_and_inspection_evidence' },
             { version: 13, name: 'adjustment_batch_reclassification_sealing' },
             { version: 14, name: 'store_product_configuration_versioning' },
+            { version: 15, name: 'durable_reorder_level_history' },
           ]);
         } finally {
           reopened.close();

@@ -270,6 +270,14 @@ export {
   listBatchInventoryOperationsByStoreProduct,
   listInventoryBatchGroupsByStoreProduct,
 } from './batchTracking';
+export {
+  createReorderLevelHistory,
+  listReorderLevelHistory,
+} from './reorderLevelHistory';
+export type {
+  CreateReorderLevelHistoryInput,
+  ReorderLevelHistoryRow,
+} from './reorderLevelHistory';
 export type {
   BatchEntryType,
   BatchInventoryInspectionRow,

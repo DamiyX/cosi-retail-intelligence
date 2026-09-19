@@ -8,9 +8,14 @@ import {
   createStoreMember,
   createUser,
   findOutboxOperation,
+  enqueueOutboxOperation,
   getActiveBasePackageUnit,
   getStoreProductById,
+  listReorderLevelHistory,
 } from '../src/db/repositories';
+import { MIGRATIONS, openDatabase } from '../src/db';
+import { openIsolatedDatabase } from '../src/db/testing';
+import { provisionStoreContext } from '../src/storeContext/provisionStoreContext';
 import { createDatabaseInventoryClient } from '../src/inventory/client';
 import { createDatabasePurchasesClient } from '../src/purchases/client';
 import ProductDetailScreen from '../src/screens/products/ProductDetailScreen';
@@ -23,6 +28,52 @@ import {
 } from './catalogueSupport';
 
 describe('A11 reorder threshold service', () => {
+  it('migrates populated v14 threshold history into the durable domain ledger', () => {
+    const isolated = openIsolatedDatabase(MIGRATIONS.slice(0, 14));
+    try {
+      const context = provisionStoreContext(isolated.adapter, {
+        ownerDisplayName: 'Migration owner', storeName: 'Migration shop',
+        currencyCode: 'NGN', countryCode: 'NG', timezone: 'Africa/Lagos',
+        deviceLabel: 'Migration phone', appVersion: '0.0.1',
+      }, { generateId: deterministicIds(19000) });
+      const catalogue = createCatalogueClient(isolated.adapter, context.store, context.device, deterministicIds(19100));
+      const graph = catalogue.createTemporaryProduct({ name: 'Migration rice' });
+      const before = getStoreProductById(isolated.adapter, graph.storeProduct.id);
+      if (!before) throw new Error('Migration product missing.');
+      isolated.adapter.transaction(() => {
+        isolated.adapter.run(
+          'UPDATE store_products SET reorder_level_base_micros = ?, version = version + 1 WHERE id = ?;',
+          [5 * MICROS_PER_UNIT, graph.storeProduct.id],
+        );
+        const after = getStoreProductById(isolated.adapter, graph.storeProduct.id);
+        if (!after) throw new Error('Updated migration product missing.');
+        enqueueOutboxOperation(isolated.adapter, {
+          operationType: 'PRODUCT_REORDER_LEVEL_UPDATED', operationId: testId(19200),
+          storeId: context.store.id, deviceId: context.device.id,
+          entityType: 'STORE_PRODUCT', entityId: graph.storeProduct.id,
+          occurredAt: '2026-09-19T00:00:00.000Z',
+          entities: {
+            storeProductVersion: 1, previousStoreProductVersion: before.version,
+            previousReorderLevelBaseMicros: null, inventoryBalanceBaseMicros: '0',
+            inventoryLedgerWatermark: '0:', request: { reorderLevelBaseMicros: 5 * MICROS_PER_UNIT },
+            storeProduct: after,
+          },
+        });
+      });
+
+      expect(openDatabase(isolated.adapter, MIGRATIONS).schemaVersion).toBe(15);
+      expect(listReorderLevelHistory(isolated.adapter, context.store.id, graph.storeProduct.id)).toEqual([
+        expect.objectContaining({
+          operationId: testId(19200), previousReorderLevelBaseMicros: null,
+          reorderLevelBaseMicros: 5 * MICROS_PER_UNIT,
+          inventoryBalanceBaseMicros: '0', inventoryLedgerWatermark: '0:',
+        }),
+      ]);
+    } finally {
+      isolated.closeAndDelete();
+    }
+  });
+
   it('sets, accepts zero, clears, and emits one versioned atomic outbox operation', () => {
     const fixture = openCatalogueFixture();
     try {
@@ -225,7 +276,7 @@ describe('A11 reorder threshold service', () => {
         reorderLevelBaseMicros: MICROS_PER_UNIT,
         expectedVersion: detail.product.version,
       }, { operationId: testId(20330) })).not.toThrow();
-      expect(probe.writeCount).toBe(2);
+      expect(probe.writeCount).toBe(3);
 
       const rollbackFixture = openCatalogueFixture();
       try {
@@ -238,7 +289,7 @@ describe('A11 reorder threshold service', () => {
         const rollbackGraph = rollbackCatalogue.createTemporaryProduct({ name: 'Rollback rice' });
         const rollbackDetail = rollbackCatalogue.getProductDetail(rollbackGraph.storeProduct.id);
         if (!rollbackDetail) throw new Error('Rollback product fixture missing.');
-        const failing = new FailOnWriteAdapter(rollbackFixture.adapter, 2, new Error('outbox failure'));
+        const failing = new FailOnWriteAdapter(rollbackFixture.adapter, 3, new Error('outbox failure'));
         expect(() => updateReorderLevel(failing, {
           storeId: rollbackFixture.context.store.id,
           deviceId: rollbackFixture.context.device.id,

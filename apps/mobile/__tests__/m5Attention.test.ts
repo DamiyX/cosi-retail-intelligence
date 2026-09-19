@@ -712,4 +712,48 @@ describe('M5 local attention and snooze', () => {
       fixture.closeAndDelete();
     }
   });
+
+  it('keeps low-stock episode identity after acknowledged threshold outbox cleanup', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(10400));
+      const product = catalogue.createTemporaryProduct({ name: 'Durable episode rice' });
+      buy(fixture, product, 4, 10410);
+      const initial = catalogue.getProductDetail(product.storeProduct.id);
+      if (!initial) throw new Error('Durable episode product missing.');
+      updateReorderLevel(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: product.storeProduct.id,
+        reorderLevelBaseMicros: 5 * MICROS_PER_UNIT,
+        expectedVersion: initial.product.version,
+      }, { generateId: deterministicIds(10420), operationId: testId(10421) });
+      const client = createDatabaseInventoryClient(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+      });
+      const low = client.getAttentionOverview('2026-09-18T08:00:00.000Z').items.find((item) => item.kind === 'LOW_STOCK');
+      if (!low) throw new Error('Expected durable low-stock condition.');
+      client.snoozeAttention({
+        operationId: testId(10430), conditionKey: low.conditionKey,
+        conditionType: low.conditionType, storeProductId: low.storeProductId,
+        groupId: low.groupId, severityRank: low.severityRank,
+        snoozeKind: 'TOMORROW', now: '2026-09-18T08:00:00.000Z',
+      });
+
+      // M7 may clean acknowledged transport rows. Business episode identity
+      // must continue to come from its immutable domain history.
+      fixture.adapter.run("DELETE FROM outbox_operations WHERE operation_type = 'PRODUCT_REORDER_LEVEL_UPDATED';");
+      const beforeDue = client.getAttentionOverview('2026-09-18T08:20:00.000Z');
+      expect(beforeDue.items.some((item) => item.kind === 'LOW_STOCK')).toBe(false);
+      expect(beforeDue.suppressedCount).toBeGreaterThan(0);
+      const atDue = client.getAttentionOverview('2026-09-19T09:01:00.000Z');
+      expect(atDue.items.find((item) => item.kind === 'LOW_STOCK')?.conditionKey).toBe(low.conditionKey);
+      expect(() => fixture.adapter.run('DELETE FROM store_product_reorder_level_history;')).toThrow('immutable');
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
 });

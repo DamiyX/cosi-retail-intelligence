@@ -1,8 +1,8 @@
 # COSI Application Flow
 
-**Status:** Active; M1–M4 source scope accepted with readiness carried. M5 batch/FEFO and blind-count behavior approved; M5 implementation not started.  
+**Status:** Active; M1–M5 source scope accepted with readiness carried. M6 Home, expense, withdrawal and truthful daily-summary behavior is planned.  
 **Scope:** MVP user journeys  
-**Updated:** 2026-09-18  
+**Updated:** 2026-09-19  
 **Confidence:** High for required jobs and transaction behavior; medium or low
 where later-milestone navigation, permissions, and recovery UI remain undecided.
 
@@ -134,7 +134,9 @@ missing batches and leaves breakdown unknown. Actual expired removal records
 real quantity/event effects. Guided owner checks are configurable and reasoned
 replacements auditable. Attention snooze suppresses reminders, never stock.
 No 100% business accuracy, misconduct or physically guaranteed FEFO claim.
-D-039/D-040 and DESIGN define the approved M5 behavior; not implemented yet.
+D-039/D-040 and DESIGN define the approved M5 behavior; the source and automated
+scope is implemented and independently accepted, with physical-device evidence
+still carried.
 
 ## Expenses and Withdrawals
 
@@ -191,8 +193,8 @@ transaction completed if its local atomic commit failed.
 | Today/Home | Daily task entry and honest summary | Layout open |
 | Sale/cart/payment/completion | Required offline workflow | Capability flow approved |
 | Catalogue/search/product edit | Progressive digitization | M2 flow approved in `docs/design/DESIGN.md` |
-| Restock/purchase | Required offline workflow | M4 source accepted; M5 expiry-group extension planned |
-| Inventory/reconciliation | Event-based blind checks and batch control | M5 states specified in DESIGN; not implemented |
+| Restock/purchase | Required offline workflow | M4 source accepted; M5 expiry-group extension accepted |
+| Inventory/reconciliation | Event-based blind checks and batch control | M5 source accepted; physical checks carried |
 | Expense/withdrawal | Required offline record | Screen split open |
 | Transactions/history | Review and accountability | Filters/actions open |
 | Price history/signals | Lead value proposition | Presentation open |

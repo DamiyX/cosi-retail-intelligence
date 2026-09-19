@@ -4,6 +4,7 @@ import { generateMobileId } from '../crypto/mobileIds';
 import type { DatabaseAdapter } from '../db/adapter';
 import {
   enqueueOutboxOperation,
+  createReorderLevelHistory,
   findExpectedOutboxReplay,
   getInventoryBalanceBigIntByStoreProduct,
   getInventoryLedgerWatermark,
@@ -161,6 +162,17 @@ export function updateReorderLevel(
       input.expectedVersion,
       occurredAt,
     );
+    createReorderLevelHistory(adapter, {
+      operationId,
+      storeId,
+      storeProductId,
+      storeProductVersion: storeProduct.version,
+      previousReorderLevelBaseMicros: existing.reorderLevelBaseMicros,
+      reorderLevelBaseMicros: request.reorderLevelBaseMicros,
+      inventoryBalanceBaseMicros: inventoryBalanceAtUpdate.toString(),
+      inventoryLedgerWatermark: inventoryLedgerWatermarkAtUpdate,
+      createdAt: occurredAt,
+    });
     const outbox = enqueueOutboxOperation(adapter, {
       operationType: 'PRODUCT_REORDER_LEVEL_UPDATED',
       operationId,

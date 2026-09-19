@@ -3,8 +3,8 @@
   "task_id": "m5-inventory-reconciliation",
   "workflow_id": "build-feature",
   "mode": "implement",
-  "status": "in_progress",
-  "current_state": "m5-independent-audit-a08-r3-reaudit-ready",
+  "status": "complete",
+  "current_state": "m5-independent-source-accepted",
   "completed_states": [
     "m4-independent-source-automated-acceptance",
     "m5-founder-batch-fefo-approval",
@@ -18,12 +18,13 @@
     "m5-05-implemented",
     "m5-06-implemented",
     "m5-07-implemented",
-    "m5-audit-corrections-implemented"
+    "m5-audit-corrections-implemented",
+    "m5-independent-source-accepted"
   ],
   "owner": {
-    "agent": "m5-implementation-engineer",
-    "thread": "01a0b525-289e-7b40-8f4b-2701fe541ad9",
-    "worktree": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m0"
+    "agent": "coordinating-independent-auditor",
+    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
+    "worktree": null
   },
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m0",
   "lease": null,
@@ -251,7 +252,7 @@
         "Full validation was implementer-reported and not rerun after the blocking independent probe.",
         "Physical checks remain explicitly deferred."
       ],
-      "observed_at": "2026-09-19T00:01:26.830Z"
+      "observed_at": "2026-09-19T00:01:26.83Z"
     },
     {
       "kind": "independent-audit",
@@ -281,6 +282,28 @@
         "Coordinator independent acceptance remains pending; physical/device, development-client/Metro, second-laptop, cloud/deployment and professional accounting checks remain outstanding."
       ],
       "observed_at": "2026-09-19T00:39:28.679Z"
+    },
+    {
+      "kind": "independent-audit",
+      "path": "docs/engineering/M5_AUDIT_CORRECTIONS.md",
+      "claim": "Coordinator accepts M5 source/automated scope after independently verifying A08-R3 and directly replacing outbox-dependent episode history with immutable migration-15 reorder-level history. Focused migration/outbox-cleanup evidence passes; complete final validation recorded separately. Phone/release gates remain carried.",
+      "observed_at": "2026-09-19T00:49:27.218Z"
+    },
+    {
+      "kind": "validation",
+      "path": "apps/mobile/__tests__/m5Attention.test.ts; apps/mobile/__tests__/m5ReorderThreshold.test.tsx; apps/mobile/src/db/repositories/reorderLevelHistory.ts",
+      "claim": "Final coordinator correction adds immutable migration-15 reorder-level history so low-stock condition episodes survive acknowledged outbox cleanup. Independent focused, populated-v14 migration/backfill and complete repository checks pass.",
+      "checks": [
+        "Focused M5 migration/attention/reorder/adjustment/batch/sales suites PASS: 63/63",
+        "npm run validate PASS: strict typecheck, zero-warning lint, 150 domain and 299 mobile tests (449 total)",
+        "Populated-v14-to-v15 SQLite migration/backfill probe PASS",
+        "Expo Doctor 21/21, Expo dependency compatibility and Android export PASS (1,383 modules / 3.5 MB Hermes)",
+        "Workflow/index schema/date-time, gate DAG, artifact, migration 1..15 and git diff --check PASS"
+      ],
+      "limitations": [
+        "Physical Galaxy M3-M5, development-client/Metro, second-laptop, cloud/deployment and professional accounting checks remain carried."
+      ],
+      "observed_at": "2026-09-19T00:57:08.4593673Z"
     }
   ],
   "acceptance_gates": [
@@ -386,7 +409,7 @@
       "claim": "Implementer returns actual passing M5 ticket commits/checks then stops.",
       "owner": "coordinator",
       "required": true,
-      "status": "pending",
+      "status": "met",
       "depends_on": [
         "m5-implementation-assigned"
       ],
@@ -399,6 +422,11 @@
         {
           "source": "docs/engineering/PROJECT_STATE.md; commits 0d76093..4e8e81c, 7ccf672, 985478c, de5cb2c, 2feea7a, 248250c, 4c0b82b, aebc6f2",
           "result": "A01-A11 plus A05-R/A08-R/A07-R/A08-R2/A08-R3 correction commits are complete with focused regressions and full local validation: 447 tests / 42 suites, strict typecheck, zero-warning lint, Doctor 21/21, Expo dependency check, Android export, active workflow/index/migration checks and clean status. The implementation task stops here for coordinator re-audit."
+        },
+        {
+          "result": "M5-01 through M5-07 and all audit corrections are committed; final independent suite passes 449 tests with migration 15 and clean source checks.",
+          "source": "docs/engineering/tickets/M5_INVENTORY_RECONCILIATION.md; docs/engineering/M5_AUDIT_CORRECTIONS.md",
+          "observed_at": "2026-09-19T00:57:08.4593673Z"
         }
       ],
       "limitations": [
@@ -413,7 +441,7 @@
       "claim": "Coordinator independently reviews source/evidence and accepted corrections.",
       "owner": "coordinator",
       "required": true,
-      "status": "blocked",
+      "status": "met",
       "depends_on": [
         "m5-implementation-evidence"
       ],
@@ -450,12 +478,21 @@
         {
           "source": "docs/engineering/M5_AUDIT_CORRECTIONS.md; commits 4c0b82b, aebc6f2",
           "result": "A08-R3 is corrected with a durable local inventory watermark and interleaved episode replay; focused 19/19 and full 447-test validation pass. Coordinator independent re-audit remains required."
+        },
+        {
+          "source": "docs/engineering/M5_AUDIT_CORRECTIONS.md",
+          "result": "M5 independently accepted after migration 15 makes low-stock episode history durable outside transport outbox lifecycle."
+        },
+        {
+          "result": "Coordinator independently accepts M5 source/automated scope after adding and verifying immutable migration-15 reorder-level history outside outbox lifecycle.",
+          "source": "docs/engineering/M5_AUDIT_CORRECTIONS.md; apps/mobile/src/db/repositories/reorderLevelHistory.ts",
+          "observed_at": "2026-09-19T00:57:08.4593673Z"
         }
       ],
       "limitations": [
-        "Implementation completion is verified; independent acceptance is not. Physical checks are explicitly deferred."
+        "Source/automated scope only; physical phone, Metro, second-laptop, cloud/deployment, M7 concurrency and professional accounting remain pending."
       ],
-      "blocker": "A08-R3 correction is returned in aebc6f2; coordinator independent verification and acceptance remain required.",
+      "blocker": null,
       "waiver": null
     },
     {
@@ -483,7 +520,6 @@
     }
   ],
   "artifacts": [
-    "tickets.md",
     "docs/engineering/tickets/M4_RESTOCKING_COSTING.md",
     "docs/engineering/M5_INVENTORY_RECONCILIATION_PLAN.md",
     "docs/engineering/PROJECT_STATE.md",
@@ -496,7 +532,9 @@
     "docs/decisions/DECISION_LOG.md",
     "docs/design/DESIGN.md",
     ".agents/contexts/app-flow.md",
-    "docs/engineering/M5_AUDIT_CORRECTIONS.md"
+    "docs/engineering/M5_AUDIT_CORRECTIONS.md",
+    "apps/mobile/src/db/repositories/reorderLevelHistory.ts",
+    "docs/engineering/tickets/M5_INVENTORY_RECONCILIATION.md"
   ],
   "approvals": [
     {
@@ -509,8 +547,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Coordinator independently re-audits A08-R3 on the clean returned branch. Phone checks remain deferred; no M6 yet.",
+  "next_action": "Begin M6 planning and implementation on a new task branch; physical/release gates remain carried.",
   "created_at": "2026-09-18T12:55:50.482Z",
-  "updated_at": "2026-09-19T00:39:28.679Z",
-  "archived": false
+  "updated_at": "2026-09-19T00:57:08.4593673Z",
+  "archived": true
 }

@@ -2249,6 +2249,58 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'store product version must advance by one'); END;`,
     ],
   },
+  {
+    version: 15,
+    name: 'durable_reorder_level_history',
+    statements: [
+      `CREATE TABLE store_product_reorder_level_history (
+        operation_id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        store_product_version INTEGER NOT NULL CHECK (store_product_version > 0),
+        has_previous_threshold INTEGER NOT NULL CHECK (has_previous_threshold IN (0, 1)),
+        previous_reorder_level_base_micros INTEGER NULL CHECK (previous_reorder_level_base_micros IS NULL OR previous_reorder_level_base_micros >= 0),
+        reorder_level_base_micros INTEGER NULL CHECK (reorder_level_base_micros IS NULL OR reorder_level_base_micros >= 0),
+        inventory_balance_base_micros TEXT NULL,
+        inventory_ledger_watermark TEXT NULL,
+        created_at TEXT NOT NULL,
+        UNIQUE (store_product_id, store_product_version)
+      );`,
+      `CREATE INDEX idx_reorder_level_history_product_version
+        ON store_product_reorder_level_history(store_id, store_product_id, store_product_version);`,
+      `INSERT INTO store_product_reorder_level_history (
+        operation_id, store_id, store_product_id, store_product_version,
+        has_previous_threshold, previous_reorder_level_base_micros,
+        reorder_level_base_micros, inventory_balance_base_micros,
+        inventory_ledger_watermark, created_at
+      )
+      SELECT
+        operation_id, store_id, entity_id,
+        CAST(json_extract(payload, '$.entities.storeProduct.version') AS INTEGER),
+        CASE WHEN json_type(payload, '$.entities.previousReorderLevelBaseMicros') IS NULL THEN 0 ELSE 1 END,
+        CASE WHEN json_type(payload, '$.entities.previousReorderLevelBaseMicros') = 'integer'
+          THEN CAST(json_extract(payload, '$.entities.previousReorderLevelBaseMicros') AS INTEGER) ELSE NULL END,
+        CASE WHEN json_type(payload, '$.entities.request.reorderLevelBaseMicros') = 'integer'
+          THEN CAST(json_extract(payload, '$.entities.request.reorderLevelBaseMicros') AS INTEGER) ELSE NULL END,
+        CASE WHEN json_type(payload, '$.entities.inventoryBalanceBaseMicros') IN ('integer', 'text')
+          THEN CAST(json_extract(payload, '$.entities.inventoryBalanceBaseMicros') AS TEXT) ELSE NULL END,
+        CASE WHEN json_type(payload, '$.entities.inventoryLedgerWatermark') = 'text'
+          THEN CAST(json_extract(payload, '$.entities.inventoryLedgerWatermark') AS TEXT) ELSE NULL END,
+        created_at
+      FROM outbox_operations
+      WHERE operation_type = 'PRODUCT_REORDER_LEVEL_UPDATED'
+        AND entity_type = 'STORE_PRODUCT'
+        AND json_valid(payload)
+        AND json_type(payload, '$.entities.storeProduct.version') = 'integer'
+        AND json_type(payload, '$.entities.request.reorderLevelBaseMicros') IN ('integer', 'null');`,
+      `CREATE TRIGGER trg_reorder_level_history_update
+        BEFORE UPDATE ON store_product_reorder_level_history
+        BEGIN SELECT RAISE(ABORT, 'reorder level history is immutable'); END;`,
+      `CREATE TRIGGER trg_reorder_level_history_delete
+        BEFORE DELETE ON store_product_reorder_level_history
+        BEGIN SELECT RAISE(ABORT, 'reorder level history is immutable'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

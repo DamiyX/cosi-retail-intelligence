@@ -14,6 +14,7 @@ import {
   listInventoryEventsByStoreProductInLedgerOrder,
   listBatchInventoryEntriesByStoreProduct,
   listOutboxOperationsByStoreEntityInLedgerOrder,
+  listReorderLevelHistory as listDurableReorderLevelHistory,
   listInventoryAttentionSnoozesByStore,
   listStoreProducts,
   saveInventoryAttentionSettings,
@@ -310,7 +311,19 @@ function parseInventoryBalance(value: unknown): bigint | null {
   }
 }
 
-function listReorderLevelHistory(adapter: DatabaseAdapter, product: ProductContext): ReorderLevelHistoryEntry[] {
+function listReorderLevelHistoryEntries(adapter: DatabaseAdapter, product: ProductContext): ReorderLevelHistoryEntry[] {
+  const durable = listDurableReorderLevelHistory(adapter, product.storeId, product.storeProductId);
+  if (durable.length > 0) {
+    return durable.map((entry) => ({
+      operationId: entry.operationId,
+      previousThreshold: entry.previousReorderLevelBaseMicros,
+      nextThreshold: entry.reorderLevelBaseMicros,
+      balanceAtUpdate: entry.inventoryBalanceBaseMicros === null ? null : BigInt(entry.inventoryBalanceBaseMicros),
+      inventoryLedgerWatermark: entry.inventoryLedgerWatermark === null
+        ? undefined
+        : parseInventoryLedgerWatermark(entry.inventoryLedgerWatermark),
+    }));
+  }
   const history: ReorderLevelHistoryEntry[] = [];
   for (const operation of listOutboxOperationsByStoreEntityInLedgerOrder(
     adapter,
@@ -473,7 +486,7 @@ function interleavedLowStockEpisodeToken(
 
 function stockEpisodeToken(adapter: DatabaseAdapter, product: ProductContext, kind: StockConditionKind): string {
   const events = listInventoryEventsByStoreProductInLedgerOrder(adapter, product.storeProductId);
-  const history = listReorderLevelHistory(adapter, product);
+  const history = listReorderLevelHistoryEntries(adapter, product);
   if (kind !== 'LOW_STOCK' || history.length === 0 || !history.some((entry) => entry.inventoryLedgerWatermark !== undefined)) {
     return legacyCombinedStockEpisodeToken(product, kind, events, history);
   }

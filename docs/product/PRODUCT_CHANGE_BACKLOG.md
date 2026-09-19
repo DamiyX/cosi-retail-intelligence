@@ -1,11 +1,11 @@
 # Product Change / UX Backlog and Impact Review
 
-**Updated:** 2026-09-18. **Owner:** coordinating product/planning/audit task.
-**Status:** M5 batch/FEFO/check/attention direction approved and documented;
-future UX ideas retain their own gates. No M5 implementation/delegation yet.
-**Verified baseline:** M4 source 9700ee3, planning authored from c1753b6 on
-feat/m4-restocking-costing. This supersedes earlier review proposals; their
-history remains in Git (c1753b6 version of this file).
+**Updated:** 2026-09-19. **Owner:** coordinating product/planning/audit task.
+**Status:** M5 batch/FEFO/check/attention source scope is independently accepted;
+physical release-readiness checks remain carried. M6 promotes live daily facts
+and compact real attention to Home. Future UX ideas retain their own gates.
+**Verified baseline:** accepted M5 source on `feat/m5-inventory-reconciliation`,
+including additive migration 15 for durable reorder-threshold history.
 
 This is the single disposition/backlog for the founder's structured ideas,
 raw transcript and external architect feedback. It routes to approved sources,
