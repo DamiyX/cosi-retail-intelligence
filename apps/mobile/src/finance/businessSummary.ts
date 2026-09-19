@@ -153,10 +153,12 @@ function assertReadableActor(adapter: DatabaseAdapter, input: BusinessSummaryInp
     throw new DomainError('INVALID_VALUE', 'Device does not belong to this store or is not active.');
   }
   const member = adapter.getFirstRow<{ id: string }>(
-    `SELECT id FROM store_members WHERE store_id = ? AND user_id = ? AND status = 'ACTIVE' LIMIT 1;`,
+    `SELECT id FROM store_members
+     WHERE store_id = ? AND user_id = ? AND role = 'OWNER' AND status = 'ACTIVE'
+     LIMIT 1;`,
     [store.id, input.userId],
   );
-  if (!member) throw new DomainError('INVALID_VALUE', 'User is not an active member of this store.');
+  if (!member) throw new DomainError('INVALID_VALUE', 'Only an active store owner can read this financial summary.');
   return store;
 }
 

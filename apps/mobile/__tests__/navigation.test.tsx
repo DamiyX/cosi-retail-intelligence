@@ -2,6 +2,7 @@ import { act, fireEvent, renderRouter, screen, testRouter } from 'expo-router/te
 import { Alert, BackHandler } from 'react-native';
 
 import RootLayout from '../app/_layout';
+import IndexRoute from '../app/index';
 import MoreScreen from '../app/(tabs)/more';
 import ProductsLayout from '../app/(tabs)/products/_layout';
 import ProductDetailRoute from '../app/(tabs)/products/[id]/index';
@@ -46,6 +47,7 @@ jest.mock('../src/db/initialize', () => ({
 
 const ROUTES = {
   _layout: RootLayout,
+  index: IndexRoute,
   '(tabs)/_layout': TabsLayout,
   '(tabs)/today': TodayScreen,
   '(tabs)/sell': SellScreen,
@@ -91,6 +93,12 @@ describe('M2 tab navigation', () => {
   afterEach(() => {
     mockDatabase?.closeAndDelete();
     mockDatabase = null;
+  });
+
+  it('opens the promoted Home operating surface by default', async () => {
+    const router = renderRouter(ROUTES, { initialUrl: '/' });
+    expect(await screen.findByText('Live today')).toBeTruthy();
+    expect(router.getPathname()).toBe('/today');
   });
 
   it('switches between Products and the live Home summary', async () => {

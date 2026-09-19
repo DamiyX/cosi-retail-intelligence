@@ -7,6 +7,8 @@ import {
   createSale,
   createSaleItem,
   createSaleItemCostSnapshot,
+  createStoreMember,
+  createUser,
 } from '../src/db/repositories';
 import { deterministicIds, openCatalogueFixture, testId } from './catalogueSupport';
 
@@ -65,6 +67,30 @@ function summarySaleAt(
 }
 
 describe('M6-03 daily business summary', () => {
+  it('keeps owner financial summaries unavailable to staff before M11 permissions', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const staff = createUser(fixture.adapter, {
+        id: testId(11901),
+        displayName: 'Staff member',
+      });
+      createStoreMember(fixture.adapter, {
+        id: testId(11902),
+        storeId: fixture.context.store.id,
+        userId: staff.id,
+        role: 'STAFF',
+      });
+      expect(() => getBusinessSummary(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: staff.id,
+        localDate: '2026-09-18',
+      })).toThrow(DomainError);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
   it('uses the store-local half-open day, includes credit sales, preserves unavailable cost, and ranks sale appearances', () => {
     const fixture = openCatalogueFixture();
     try {

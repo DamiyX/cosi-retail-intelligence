@@ -88,6 +88,8 @@ describe('HomeScreen', () => {
     expect(screen.getByText('Home')).toBeTruthy();
     expect(screen.getByText('₦2,500.00')).toBeTruthy();
     expect(screen.getByText('₦50.00')).toBeTruthy();
+    expect(screen.getByText('Most frequently sold today')).toBeTruthy();
+    expect(screen.getByText('Rice · 3 completed sale appearances')).toBeTruthy();
     expect(screen.getByText('Rice: low recorded stock')).toBeTruthy();
     expect(screen.getAllByText('Rice: low recorded stock')).toHaveLength(1);
     expect(screen.getByText('1 current condition')).toBeTruthy();

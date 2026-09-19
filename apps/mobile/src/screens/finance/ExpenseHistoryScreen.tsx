@@ -72,7 +72,7 @@ export default function ExpenseHistoryScreen({ client, isFocused = true, onBack,
           renderItem={renderRow}
           contentContainerStyle={styles.list}
           ListHeaderComponent={<PrimaryButton title="Record expense" onPress={onRecordExpense} />}
-          ListFooterComponent={<View style={styles.footer}><StatusNote>Amounts are stored in {client.storeCurrencyCode} minor units.</StatusNote></View>}
+          ListFooterComponent={<View style={styles.footer}><StatusNote>All expense amounts are shown in {client.storeCurrencyCode}.</StatusNote></View>}
         />
       )}
     </View>

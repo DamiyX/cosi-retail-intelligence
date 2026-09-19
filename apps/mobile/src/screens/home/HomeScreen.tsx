@@ -106,6 +106,14 @@ export default function HomeScreen({
             <View style={styles.metricCard}><Text style={styles.cardLabel}>Expenses</Text><Text style={styles.metricValue}>{money(summary.recordedExpensesMinor, summary.currencyCode)}</Text></View>
             <View style={styles.metricCard}><Text style={styles.cardLabel}>Withdrawals</Text><Text style={styles.metricValue}>{money(summary.ownerWithdrawalsMinor, summary.currencyCode)}</Text></View>
           </View>
+          {summary.popularProduct ? (
+            <View style={styles.card}>
+              <Text accessibilityRole="header" style={styles.cardTitle}>Most frequently sold today</Text>
+              <Text style={styles.metric}>
+                {summary.popularProduct.productName} · {summary.popularProduct.saleCount} completed sale appearance{summary.popularProduct.saleCount === 1 ? '' : 's'}
+              </Text>
+            </View>
+          ) : null}
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Tracked cost coverage</Text>
             <Text style={styles.cardHint}>

@@ -72,7 +72,7 @@ function TabsContent() {
 
   return (
     <Tabs
-      initialRouteName="products"
+      initialRouteName="today"
       screenListeners={screenListeners}
       screenOptions={{
         headerTintColor: '#174F46',
@@ -90,9 +90,9 @@ function TabsContent() {
 }
 
 /**
- * MVP baseline navigation (docs/design/DESIGN.md). Products is the only
- * primary areas now surface Home, Sell, Products, and More. Text labels keep
- * every destination accessible without an icon dependency.
+ * MVP baseline navigation (docs/design/DESIGN.md). Home is the default operating
+ * surface; Sell, Products, and More remain one tap away. Text labels keep every
+ * destination accessible without an icon dependency.
  */
 export default function TabsLayout() {
   return (
