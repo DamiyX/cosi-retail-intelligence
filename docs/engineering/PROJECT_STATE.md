@@ -1,16 +1,21 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-19  
-Current milestone: M7 offline-sync planning checkpoint complete; implementation
-awaits assignment and a real non-production Supabase integration environment.
-Founder has deferred M8 scanner planning until this coordinator task is
-explicitly switched to Astra.
+Current milestone: M7 offline-sync source implementation handoff complete;
+acceptance is blocked by the required real non-production Supabase integration
+environment and independent audit. Founder has deferred M8 scanner planning
+until this coordinator task is explicitly switched to Astra.
 
 ## Current status
 
 M0–M6 source and automated scope is independently accepted. M1 acceptance uses
 an explicit device waiver. Physical/release-readiness checks carried from M3–M6
 remain pending and are not implied by source acceptance.
+
+M7 source work is implemented sequentially in commits `66507e6` through
+`e9ef793` (M7-01 through M7-08). Source acceptance is intentionally not
+claimed: the local Docker/Postgres gate could not start on this laptop and the
+independent audit has not yet run.
 
 M5 closed at coordinator correction `9ba4801` with additive migration 15 durable
 reorder-threshold history. M6 implementation commits are `86e526b`, `1cce732`,
@@ -75,19 +80,24 @@ behind stable contracts and feature flags only after it is deliberately started.
 Concurrent writers must not edit shared catalogue, package-unit, sync or
 recognition contracts.
 
-## M7 planning checkpoint
+## M7 implementation handoff
 
 `M7_OFFLINE_SYNC_PLAN.md` and `tickets.md` define eight sequential vertical
-tickets. They cover every canonical M2–M6 outbox operation, authenticated
-store/device enrolment, PostgreSQL idempotency/revisions, push/pull, durable
-conflicts, M5 batch/reconciliation/attention behavior, M6 money-out facts and a
-consistent second-device bootstrap. No M7 runtime code exists at this checkpoint.
+tickets. Source implementation covers every canonical M2–M6 outbox operation,
+authenticated store/device enrolment, PostgreSQL idempotency/revisions,
+push/pull, durable conflicts, M5 batch/reconciliation/attention behavior, M6
+money-out facts and a consistent second-device bootstrap.
+
+Local evidence: 51 suites/484 tests passed; root typecheck and zero-warning lint
+passed; Expo Doctor passed 21/21; Expo dependency check and Android export
+passed. The M7 sync suite is 7/7 and the contracts suite is 5/5.
 
 Supabase CLI 2.117.0 is available, but Docker is not installed and no isolated
-hosted development project is linked. M7 may not be independently accepted until
-PostgreSQL migrations, RLS, functions and retry/conflict behavior run against a
-real disposable non-production Supabase environment. Mocks are supporting
-evidence only.
+hosted development project is linked. `supabase db lint --local --fail-on
+error` and `supabase test db --local supabase/tests/m7_sync.sql` both failed to
+connect to `127.0.0.1:54322`; no database/RLS/function acceptance is claimed.
+Mocks remain supporting evidence only. The branch is ready for independent
+audit after the environment gate is satisfied.
 
 ## Carried readiness gates
 
@@ -102,12 +112,13 @@ evidence only.
 
 ## Next action
 
-Commit the M7 planning checkpoint. Establish Docker-backed local Supabase or an
-explicitly authorized isolated hosted development project, then assign M7-01
-through M7-08 to one Luna Max implementation task. Do not resume M8 planning
-until the founder switches this coordinator task to Astra. M9 planning may be
-prepared separately while M7 runs, but production M9 code remains after accepted
-M8 because both milestones touch navigation/catalogue selection contracts.
+Establish Docker-backed local Supabase or an explicitly authorized isolated
+hosted development project, run the migration/lint/pgTAP and endpoint evidence,
+then perform the independent M7 source audit. Do not resume M8 planning until
+the founder switches this coordinator task to Astra. M9 planning may be
+prepared separately while M7 runs, but production M9 code remains after
+accepted M8 because both milestones touch navigation/catalogue selection
+contracts.
 
 A continuing agent must first read `AGENTS.md`, this file,
 `MULTI_AGENT_WORKFLOW.md`, `IMPLEMENTATION_AUDIT_WORKFLOW.md`, the workflow

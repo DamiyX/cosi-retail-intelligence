@@ -1,6 +1,6 @@
 # M7 Offline Sync Plan
 
-**Status:** Coordinator-reviewed planning baseline; implementation not started.  
+**Status:** Source implementation handoff complete; real PostgreSQL integration gate blocked and independent audit pending.  
 **Depends on:** independently accepted M6 source/automated scope.  
 **Boundary:** first controlled private-store sync only. No M8 scanner, shared
 market-price network, staff administration, recognition payloads, production
@@ -25,12 +25,12 @@ withdrawal completion.
   envelope atomically with each synchronizable mutation.
 - The current outbox supports globally unique operation IDs, aggregate payloads,
   `base_server_version`, attempts, next-attempt time, error code and the required
-  lifecycle states. There is no network worker, server cursor, pull applier,
-  durable conflict store or remote server-version projection yet.
-- No Supabase business migration, RLS policy, sync function or linked hosted
-  development project exists. Supabase CLI 2.117.0 is pinned. Docker is absent
-  on this laptop, so local PostgreSQL/pgTAP/Edge Function integration checks are
-  an explicit implementation gate rather than accepted evidence.
+  lifecycle states. M7 now adds the network worker, server cursor, pull applier,
+  durable conflict store and remote server-version projection.
+- M7 Supabase migrations, RLS policies, sync functions and Edge Function shells
+  are present. Supabase CLI 2.117.0 is pinned. Docker is absent on this laptop,
+  so local PostgreSQL/pgTAP/Edge Function integration checks remain an explicit
+  acceptance gate rather than accepted evidence.
 - The app currently provisions a local owner/store/member/device graph before
   customer authentication exists. M7 must not silently equate a local domain
   user ID with `auth.users.id` or invent final sign-in UX.
@@ -52,6 +52,21 @@ withdrawal completion.
 - Service-role or secret keys stay server-side. The mobile app receives only the
   project URL and publishable key. Final Auth screens remain deferred; M7 exposes
   an injected authenticated-session boundary and a bounded pilot enrolment path.
+
+## Implementation handoff
+
+M7-01 through M7-08 are committed sequentially on `feat/m7-offline-sync`:
+`66507e6`, `74b2053`, `6a15692`, `f411b0c`, `ecb1c21`, `f60c348`, `1b3236d`,
+`e9ef793`. Local validation passed with 51 suites and 484 tests, root
+typecheck/lint, Expo Doctor 21/21, dependency check and Android export.
+
+The required database evidence has not been substituted with mocks. Both
+`supabase db lint --local --fail-on error` and
+`supabase test db --local supabase/tests/m7_sync.sql` attempted the local
+database and failed only because `127.0.0.1:54322` refused the connection while
+Docker is unavailable. Source acceptance and the independent audit remain open
+until a disposable local or explicitly authorized isolated hosted Postgres
+environment is available.
 
 ### PostgreSQL shape
 

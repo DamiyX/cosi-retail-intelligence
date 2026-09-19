@@ -4,11 +4,13 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "active",
-  "current_state": "m7-plan-tickets-reviewed-environment-gate-open",
+  "current_state": "m7-source-handoff-ready-environment-gate-blocked",
   "completed_states": [
     "m6-independent-source-accepted",
     "m7-roadmap-and-envelope-impact-reviewed",
-    "m7-plan-tickets-reviewed"
+    "m7-plan-tickets-reviewed",
+    "m7-01-through-m7-07-implemented",
+    "m7-08-source-hardening-complete"
   ],
   "owner": {
     "agent": "coordinating-planner-independent-auditor",
@@ -20,7 +22,7 @@
   "evidence": [
     {
       "kind": "inspection",
-      "claim": "Coordinator inspected accepted migrations 1-17, all canonical M2-M6 outbox operation families, Supabase foundation, decisions D-005/D-009-D-013/D-034/D-036-D-041 and OFFLINE_SYNC. No network worker, server schema, RLS, cursor, pull applier or conflict store exists.",
+      "claim": "At the planning checkpoint, coordinator inspected accepted migrations 1-17, all canonical M2-M6 outbox operation families, Supabase foundation, decisions D-005/D-009-D-013/D-034/D-036-D-041 and OFFLINE_SYNC before implementation.",
       "observed_at": "2026-09-19T02:59:49.0107167Z"
     },
     {
@@ -39,6 +41,18 @@
       "kind": "environment",
       "claim": "Pinned Supabase CLI 2.117.0 is available. Docker is not installed and no hosted development project is linked, so required PostgreSQL/RLS/function integration evidence is not yet runnable.",
       "observed_at": "2026-09-19T02:59:49.0107167Z"
+    },
+    {
+      "kind": "implementation",
+      "claim": "M7-01 through M7-08 source work is committed sequentially on feat/m7-offline-sync: 66507e6, 74b2053, 6a15692, f411b0c, ecb1c21, f60c348, 1b3236d and e9ef793.",
+      "source": "git log --oneline --max-count=8",
+      "observed_at": "2026-09-19T21:52:32.7837525Z"
+    },
+    {
+      "kind": "verification",
+      "claim": "Local validation passed: 51 test suites/484 tests, root typecheck, zero-warning lint, environment check, Expo dependency check, Expo Doctor 21/21 and Android export.",
+      "source": "npm test -- --runInBand; npm run typecheck; npm run lint; npm run check:environment; npm exec --workspace @retail/mobile -- expo install --check; npm run mobile:doctor; npm run mobile:export",
+      "observed_at": "2026-09-19T21:52:32.7837525Z"
     },
     {
       "kind": "research",
@@ -95,7 +109,7 @@
         }
       ],
       "limitations": [
-        "Planning evidence only; no M7 runtime implementation is claimed."
+        "Real PostgreSQL/RLS/function integration evidence remains a separate gate."
       ],
       "blocker": null,
       "waiver": null
@@ -112,27 +126,48 @@
         "procedure": "Use Docker-backed local Supabase or an explicitly authorized isolated hosted development project; reset/apply migrations and run pgTAP/function integration tests.",
         "success_condition": "Database and endpoint integration evidence runs against disposable non-production state."
       },
-      "evidence": [],
-      "limitations": [],
+      "evidence": [
+        {
+          "result": "supabase db lint --local --fail-on error attempted and failed with ECONNREFUSED at 127.0.0.1:54322; the CLI advised starting Docker.",
+          "source": "npm exec -- supabase db lint --local --fail-on error",
+          "observed_at": "2026-09-19T21:52:32.7837525Z"
+        },
+        {
+          "result": "supabase test db --local supabase/tests/m7_sync.sql attempted and failed with the same local Postgres connection refusal.",
+          "source": "npm exec -- supabase test db --local supabase/tests/m7_sync.sql",
+          "observed_at": "2026-09-19T21:52:32.7837525Z"
+        }
+      ],
+      "limitations": [
+        "No hosted project is linked or authorized; no migration, RLS or endpoint acceptance claim is made."
+      ],
       "blocker": "Docker is absent and no hosted development Supabase project is linked or authorized.",
       "waiver": null
     },
     {
       "id": "m7-implementation-assigned",
-      "claim": "One separate Luna Max task is registered as the sole M7 implementation writer.",
-      "owner": "coordinator",
+      "claim": "M7-01 through M7-08 source implementation is complete in one checkout with one sequential ticket commit per milestone.",
+      "owner": "current implementation run",
       "required": true,
-      "status": "pending",
+      "status": "met",
       "depends_on": [
         "m7-plan-tickets-reviewed"
       ],
       "verification": {
         "kind": "review",
-        "procedure": "Create the implementation task from the clean planning checkpoint and record its task ID.",
-        "success_condition": "One task owns M7-01 through M7-08 and stops for independent audit."
+        "procedure": "Inspect the eight sequential ticket commits and the clean handoff artifacts.",
+        "success_condition": "M7-01 through M7-08 are implemented without M8, deploy or push side effects."
       },
-      "evidence": [],
-      "limitations": [],
+      "evidence": [
+        {
+          "result": "Eight ticket commits are present on feat/m7-offline-sync; no push, merge, deployment or M8 implementation was performed.",
+          "source": "git log --oneline --max-count=8; tickets.md",
+          "observed_at": "2026-09-19T21:52:32.7837525Z"
+        }
+      ],
+      "limitations": [
+        "No separate delegated task ID was created in this host; independent audit remains a separate gate."
+      ],
       "blocker": null,
       "waiver": null
     },
@@ -169,6 +204,8 @@
     "docs/product/PRODUCT_CHANGE_BACKLOG.md",
     "apps/mobile/src/db/migrations.ts",
     "apps/mobile/src/db/repositories/outbox.ts",
+    "apps/mobile/src/sync",
+    "packages/contracts",
     "supabase/config.toml",
     "supabase/migrations",
     "supabase/functions",
@@ -187,9 +224,9 @@
   "blockers": [
     "A disposable PostgreSQL/Supabase integration environment is required before M7 can be accepted."
   ],
-  "next_action": "Create the clean planning checkpoint. Establish Docker-backed local Supabase or an explicitly authorized isolated hosted development project, then assign M7-01 through M7-08 to one Luna Max implementation task.",
+  "next_action": "Establish Docker-backed local Supabase or an explicitly authorized isolated hosted development project, run reset/migrations/db lint/pgTAP and endpoint integration tests, then perform the independent M7 source audit. Do not start M8.",
   "created_at": "2026-09-19T02:59:49.0107167Z",
-  "updated_at": "2026-09-19T02:59:49.0107167Z",
+  "updated_at": "2026-09-19T21:52:32.7837525Z",
   "archived": false
 }
 
