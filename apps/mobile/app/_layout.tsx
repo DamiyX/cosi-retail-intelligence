@@ -35,6 +35,8 @@ export default function RootLayout() {
             <Stack.Screen name="reconciliation" options={{ title: 'Check stock' }} />
             <Stack.Screen name="guided-checks" options={{ title: 'Guided stock checks' }} />
             <Stack.Screen name="attention" options={{ title: 'Needs attention' }} />
+            <Stack.Screen name="expense" options={{ title: 'Record expense' }} />
+            <Stack.Screen name="expenses" options={{ title: 'Expense history' }} />
           </Stack>
         </DatabaseProvider>
       )}

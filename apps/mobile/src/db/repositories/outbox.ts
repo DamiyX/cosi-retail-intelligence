@@ -36,7 +36,9 @@ export type OutboxEntityType =
   | 'INVENTORY_CHECK_SETTINGS'
   | 'CHECK_ASSIGNMENT'
   | 'INVENTORY_ATTENTION_SETTINGS'
-  | 'ATTENTION_SNOOZE';
+  | 'ATTENTION_SNOOZE'
+  | 'EXPENSE'
+  | 'OWNER_WITHDRAWAL';
 
 export type OutboxOperationType =
   | 'PRODUCT_CREATED'
@@ -56,7 +58,9 @@ export type OutboxOperationType =
   | 'CHECK_SETTINGS_SAVED'
   | 'CHECK_ASSIGNMENT_CREATED'
   | 'ATTENTION_SETTINGS_SAVED'
-  | 'ATTENTION_SNOOZE_CREATED';
+  | 'ATTENTION_SNOOZE_CREATED'
+  | 'EXPENSE_CREATED'
+  | 'OWNER_WITHDRAWAL_CREATED';
 
 export type CatalogueOperationType = OutboxOperationType;
 

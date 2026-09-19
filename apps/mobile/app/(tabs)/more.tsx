@@ -37,6 +37,14 @@ export default function MoreScreen() {
         <Text style={styles.actionTitle}>Needs attention</Text>
         <Text style={styles.actionBody}>Review real low stock, differences, and remaining expiry groups</Text>
       </Pressable>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/expense')} style={styles.action}>
+        <Text style={styles.actionTitle}>Record expense</Text>
+        <Text style={styles.actionBody}>Save a store cost in the store currency</Text>
+      </Pressable>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/expenses')} style={styles.action}>
+        <Text style={styles.actionTitle}>Expense history</Text>
+        <Text style={styles.actionBody}>Review owner-recorded costs saved on this device</Text>
+      </Pressable>
       <Text style={styles.comingSoon}>Staff dispatch and supervisor review are intentionally deferred.</Text>
     </View>
   );

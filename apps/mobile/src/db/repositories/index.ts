@@ -1,5 +1,7 @@
 export { createDevice, getDeviceById, listDevicesByStore } from './devices';
 export type { CreateDeviceInput, DevicePlatform, DeviceRow } from './devices';
+export { createExpense, getExpenseById, listExpensesByStore, EXPENSE_CATEGORIES } from './expenses';
+export type { CreateExpenseInput, ExpenseCategory, ExpenseRow } from './expenses';
 export {
   createInventoryAdjustment,
   createInventoryAdjustmentLine,
