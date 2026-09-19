@@ -5,6 +5,7 @@ export const PAYLOAD_VERSION = 1 as const;
 export const MAX_PUSH_OPERATIONS = 50;
 export const MAX_PULL_CHANGES = 100;
 export const MAX_BOOTSTRAP_ENTITIES = 500;
+export const MAX_OPERATION_PAYLOAD_BYTES = 512 * 1024;
 
 const id = z.string().min(1).max(128);
 const timestamp = z.string().datetime({ offset: true });
@@ -45,6 +46,14 @@ const operation = z.object({
   occurredAt: timestamp,
   entities: jsonObject,
 }).strict();
+
+function assertOperationPayloadSize(value: z.infer<typeof operation>) {
+  const bytes = new TextEncoder().encode(JSON.stringify(value)).byteLength;
+  if (bytes > MAX_OPERATION_PAYLOAD_BYTES) {
+    throw new Error(`Sync operation payload exceeds ${MAX_OPERATION_PAYLOAD_BYTES} bytes.`);
+  }
+  return value;
+}
 
 export const pushRequest = z.object({
   protocolVersion: z.literal(PROTOCOL_VERSION),
@@ -89,7 +98,9 @@ export function parseJson(request: Request): Promise<unknown> {
 }
 
 export function assertPushRequest(value: unknown) {
-  return pushRequest.parse(value);
+  const parsed = pushRequest.parse(value);
+  parsed.operations.forEach(assertOperationPayloadSize);
+  return parsed;
 }
 
 export function assertPullRequest(value: unknown) {

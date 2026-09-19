@@ -1,7 +1,9 @@
 import {
   parseSyncBootstrapRequest,
+  parseSyncBootstrapResponse,
   parseSyncOperationEnvelope,
   parseSyncPushRequest,
+  MAX_OPERATION_PAYLOAD_BYTES,
   isCanonicalDecimalString,
 } from '../src';
 
@@ -49,10 +51,28 @@ describe('M7 provider-independent sync contracts', () => {
     })).toThrow();
   });
 
+  it('allows a bootstrap response to close its final page with a null cursor', () => {
+    expect(() => parseSyncBootstrapResponse({
+      protocolVersion: 1,
+      payloadVersion: 1,
+      snapshotRevision: 4,
+      entities: [],
+      nextCursor: null,
+      hasMore: false,
+    })).not.toThrow();
+  });
+
   it('accepts canonical decimal strings and rejects exponent/leading-zero forms', () => {
     expect(isCanonicalDecimalString('0')).toBe(true);
     expect(isCanonicalDecimalString('-12.500000')).toBe(true);
     expect(isCanonicalDecimalString('01.5')).toBe(false);
     expect(isCanonicalDecimalString('1e-6')).toBe(false);
+  });
+
+  it('rejects an operation envelope above the byte bound', () => {
+    expect(() => parseSyncOperationEnvelope({
+      ...envelope,
+      entities: { blob: 'x'.repeat(MAX_OPERATION_PAYLOAD_BYTES) },
+    })).toThrow(`exceeds ${MAX_OPERATION_PAYLOAD_BYTES} bytes`);
   });
 });

@@ -281,19 +281,52 @@ export const syncBootstrapResponseSchema = z
     payloadVersion: z.literal(SYNC_PAYLOAD_VERSION),
     snapshotRevision: nonNegativeIntegerSchema,
     entities: z.array(syncBootstrapEntitySchema).max(MAX_BOOTSTRAP_ENTITIES),
-    nextCursor: syncBootstrapRequestSchema.shape.cursor.unwrap(),
+    nextCursor: syncBootstrapRequestSchema.shape.cursor,
     hasMore: z.boolean(),
   })
   .strict();
 
 export type SyncBootstrapResponse = z.infer<typeof syncBootstrapResponseSchema>;
 
+function utf8ByteLength(value: string): number {
+  let length = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index);
+    if (code <= 0x7f) {
+      length += 1;
+    } else if (code <= 0x7ff) {
+      length += 2;
+    } else if (code >= 0xd800 && code <= 0xdbff && index + 1 < value.length) {
+      const next = value.charCodeAt(index + 1);
+      if (next >= 0xdc00 && next <= 0xdfff) {
+        length += 4;
+        index += 1;
+      } else {
+        length += 3;
+      }
+    } else {
+      length += 3;
+    }
+  }
+  return length;
+}
+
+export function assertSyncOperationPayloadSize(value: SyncOperationEnvelope): SyncOperationEnvelope {
+  const serialized = JSON.stringify(value);
+  if (utf8ByteLength(serialized) > MAX_OPERATION_PAYLOAD_BYTES) {
+    throw new Error(`Sync operation payload exceeds ${MAX_OPERATION_PAYLOAD_BYTES} bytes.`);
+  }
+  return value;
+}
+
 export function parseSyncOperationEnvelope(value: unknown): SyncOperationEnvelope {
-  return syncOperationEnvelopeSchema.parse(value);
+  return assertSyncOperationPayloadSize(syncOperationEnvelopeSchema.parse(value));
 }
 
 export function parseSyncPushRequest(value: unknown): SyncPushRequest {
-  return syncPushRequestSchema.parse(value);
+  const parsed = syncPushRequestSchema.parse(value);
+  parsed.operations.forEach(assertSyncOperationPayloadSize);
+  return parsed;
 }
 
 export function parseSyncPushResponse(value: unknown): SyncPushResponse {

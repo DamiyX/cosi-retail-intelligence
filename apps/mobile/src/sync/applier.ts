@@ -8,6 +8,7 @@ import type { DatabaseAdapter } from '../db/adapter';
 import {
   createSyncConflict,
   findOutboxOperation,
+  getSyncStoreState,
   listActiveOutboxOperationsForEntity,
   markOutboxEchoApplied,
   saveSyncEntityVersion,
@@ -118,12 +119,13 @@ export function applySyncPullPage(
       echoes += result.echoes;
       conflicts += result.conflicts;
     }
+    const currentState = getSyncStoreState(adapter, input.storeId);
     updateSyncStoreState(adapter, {
       storeId: input.storeId,
       status: 'IDLE',
       cursorRevision: response.nextCursor.revision,
       cursorChangeIndex: response.nextCursor.changeIndex,
-      serverRevision: response.serverRevision,
+      serverRevision: Math.max(currentState?.serverRevision ?? 0, response.serverRevision),
       lastSuccessAt: input.options.now,
       lastErrorCode: null,
       lastErrorMessage: null,

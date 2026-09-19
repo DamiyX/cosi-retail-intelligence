@@ -28,23 +28,24 @@ set search_path = public, sync_private, pg_temp
 as $$
 declare
   v_operation_type text := p_payload->>'operationType';
-  v_entities jsonb := p_payload->'entities';
+  v_entities jsonb := coalesce(p_payload->'entities', '{}'::jsonb);
   v_request jsonb := v_entities->'request';
 begin
   if v_operation_type in ('BATCH_CLASSIFICATION_CREATED', 'INVENTORY_ADJUSTMENT_CREATED', 'RECONCILIATION_FINALIZED')
-     and jsonb_typeof(v_request) <> 'object' then
+     and jsonb_typeof(v_request) is distinct from 'object' then
     raise exception using errcode = '22023', message = 'M5 operation is missing its request fingerprint.';
   end if;
   if v_operation_type = 'BATCH_CLASSIFICATION_CREATED'
-     and jsonb_typeof(v_entities->'entries') <> 'array' then
+     and jsonb_typeof(v_entities->'entries') is distinct from 'array' then
     raise exception using errcode = '22023', message = 'Batch classification must include its immutable entries.';
   end if;
   if v_operation_type = 'INVENTORY_ADJUSTMENT_CREATED'
-     and jsonb_typeof(v_entities->'inventoryEvents') <> 'array' then
+     and jsonb_typeof(v_entities->'inventoryEvents') is distinct from 'array' then
     raise exception using errcode = '22023', message = 'Inventory adjustment must include its inventory events.';
   end if;
   if v_operation_type = 'RECONCILIATION_FINALIZED'
-     and (v_entities->'reconciliation' is null or v_entities->'line' is null) then
+     and (jsonb_typeof(v_entities->'reconciliation') is distinct from 'object'
+       or jsonb_typeof(v_entities->'line') is distinct from 'object') then
     raise exception using errcode = '22023', message = 'Reconciliation finalization must include its parent and line facts.';
   end if;
 end;

@@ -12,6 +12,7 @@ import {
   createSyncConflict,
   ensureSyncStoreState,
   findOutboxOperation,
+  getSyncBootstrapState,
   getSyncStoreState,
   listOpenSyncConflicts,
   markOutboxRetryable,
@@ -245,6 +246,97 @@ describe('M7 offline sync local durability', () => {
       expect(listOpenSyncConflicts(fixture.adapter, fixture.context.store.id)).toEqual([
         expect.objectContaining({ operationId: graph.outbox.operationId, serverVersion: 3, status: 'OPEN' }),
       ]);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('resumes a paginated bootstrap and commits its snapshot cursor atomically', async () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const entityId = testId(700);
+      const envelope = {
+        payloadVersion: 1 as const,
+        operationType: 'EXPENSE_CREATED' as const,
+        operationId: testId(701),
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        entityType: 'EXPENSE' as const,
+        entityId,
+        baseServerVersion: null,
+        occurredAt: NOW,
+        entities: {},
+      };
+      const requests: { cursor: unknown }[] = [];
+      const transport: SyncTransport = {
+        enroll: async () => { throw new Error('not used'); },
+        push: async () => { throw new Error('not used'); },
+        pull: async () => emptyPull(5),
+        bootstrap: async (request) => {
+          requests.push({ cursor: request.cursor });
+          if (requests.length === 1) {
+            return {
+              protocolVersion: 1,
+              payloadVersion: 1,
+              snapshotRevision: 5,
+              entities: [{
+                storeId: fixture.context.store.id,
+                entityType: 'EXPENSE' as const,
+                entityId,
+                entityVersion: 1,
+                payloadVersion: 1 as const,
+                payload: envelope,
+              }],
+              nextCursor: {
+                snapshotRevision: 5,
+                afterEntityType: 'EXPENSE' as const,
+                afterEntityId: entityId,
+              },
+              hasMore: true,
+            };
+          }
+          return {
+            protocolVersion: 1,
+            payloadVersion: 1,
+            snapshotRevision: 5,
+            entities: [],
+            nextCursor: null,
+            hasMore: false,
+          };
+        },
+      };
+      const worker = new OfflineSyncWorker({
+        adapter: fixture.adapter,
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        sessionProvider: sessionProvider(),
+        transport,
+        now: () => NOW,
+        idFactory: () => testId(701),
+      });
+
+      const result = await worker.bootstrap();
+      expect(result.status).toBe('SYNCED');
+      expect(result.pulled).toBe(1);
+      expect(requests).toEqual([
+        { cursor: null },
+        { cursor: {
+          snapshotRevision: 5,
+          afterEntityType: 'EXPENSE',
+          afterEntityId: entityId,
+        } },
+      ]);
+      expect(getSyncBootstrapState(fixture.adapter, fixture.context.store.id)).toMatchObject({
+        status: 'COMMITTED',
+        snapshotRevision: 5,
+        snapshotAfterEntityType: null,
+        snapshotAfterEntityId: null,
+      });
+      expect(getSyncStoreState(fixture.adapter, fixture.context.store.id)).toMatchObject({
+        status: 'IDLE',
+        cursorRevision: 5,
+        serverRevision: 5,
+      });
     } finally {
       fixture.closeAndDelete();
     }

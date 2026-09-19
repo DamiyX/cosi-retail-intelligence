@@ -421,7 +421,7 @@ export class OfflineSyncWorker {
       failSyncBootstrap(adapter, {
         storeId,
         errorCode: errorCode(error),
-        errorMessage: error instanceof Error ? error.message : 'Bootstrap failed.',
+        errorMessage: error instanceof Error ? error.message : String(error),
         updatedAt: now,
       });
       return {
