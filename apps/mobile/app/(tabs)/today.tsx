@@ -1,21 +1,35 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useIsFocused, useRouter } from 'expo-router';
 
-export default function TodayScreen() {
+import { FinanceProvider, useFinance } from '../../src/finance/FinanceContext';
+import { InventoryProvider, useInventory } from '../../src/inventory/InventoryContext';
+import HomeScreen from '../../src/screens/home/HomeScreen';
+import MissingFinanceStore from '../../src/screens/finance/MissingFinanceStore';
+import { ErrorPanel } from '../../src/ui/components';
+
+function HomeRouteContent() {
+  const router = useRouter();
+  const focused = useIsFocused();
+  const { client: financeClient, failure: financeFailure, retryLocalStore } = useFinance();
+  const { client: inventoryClient, failure: inventoryFailure } = useInventory();
+  if (!financeClient) {
+    return financeFailure ? <ErrorPanel title="Home unavailable" message={financeFailure} onRetry={retryLocalStore} /> : <MissingFinanceStore />;
+  }
   return (
-    <View style={styles.container}>
-      <Text accessibilityRole="header" style={styles.title}>
-        Today
-      </Text>
-      <Text style={styles.body}>
-        Your daily summary, shortcuts, and sync status will live here. This area arrives in a
-        later milestone; start with Products.
-      </Text>
-    </View>
+    <HomeScreen
+      financeClient={financeClient}
+      inventoryClient={inventoryClient}
+      inventoryFailure={inventoryFailure}
+      isFocused={focused}
+      onSell={() => router.push('/sell')}
+      onRestock={() => router.push('/restock')}
+      onStockChecks={() => router.push('/reconciliation')}
+      onRecordExpense={() => router.push('/expense')}
+      onOpenSummary={() => router.push('/summary')}
+      onSeeAttention={() => router.push('/attention')}
+    />
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, gap: 16, backgroundColor: '#F7F8F5' },
-  title: { color: '#17251F', fontSize: 32, fontWeight: '600' },
-  body: { color: '#41534C', fontSize: 18, lineHeight: 28 },
-});
+export default function TodayRoute() {
+  return <FinanceProvider><InventoryProvider><HomeRouteContent /></InventoryProvider></FinanceProvider>;
+}

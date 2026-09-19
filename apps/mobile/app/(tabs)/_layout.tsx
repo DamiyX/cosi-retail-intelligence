@@ -91,9 +91,8 @@ function TabsContent() {
 
 /**
  * MVP baseline navigation (docs/design/DESIGN.md). Products is the only
- * implemented area in M2; Today, Sell, and More stay clearly labelled
- * placeholders until their milestones. Text labels keep every destination
- * accessible without an icon dependency.
+ * primary areas now surface Home, Sell, Products, and More. Text labels keep
+ * every destination accessible without an icon dependency.
  */
 export default function TabsLayout() {
   return (
