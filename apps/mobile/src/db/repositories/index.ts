@@ -20,6 +20,7 @@ export {
   findOutboxOperationForEntity,
   findOutboxOperation,
   findExpectedOutboxReplay,
+  listOutboxOperationsByStoreEntityInLedgerOrder,
   listPendingOutboxOperations,
   OUTBOX_PAYLOAD_VERSION,
 } from './outbox';

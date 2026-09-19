@@ -13,6 +13,7 @@ import {
   getStoreById,
   listInventoryEventsByStoreProductInLedgerOrder,
   listBatchInventoryEntriesByStoreProduct,
+  listOutboxOperationsByStoreEntityInLedgerOrder,
   listInventoryAttentionSnoozesByStore,
   listStoreProducts,
   saveInventoryAttentionSettings,
@@ -117,6 +118,7 @@ interface LocalTime {
 }
 
 interface ProductContext {
+  storeId: string;
   storeProductId: string;
   productName: string;
   reorderLevelBaseMicros: number | null;
@@ -233,6 +235,7 @@ function mapSettings(storeId: string, row: InventoryAttentionSettingsRow | null)
 
 function productContexts(adapter: DatabaseAdapter, storeId: string): ProductContext[] {
   return listStoreProducts(adapter, storeId, '', 'ACTIVE').map((hit) => ({
+    storeId,
     storeProductId: hit.product.id,
     productName: hit.variantName,
     reorderLevelBaseMicros: hit.product.reorderLevelBaseMicros,
@@ -272,6 +275,57 @@ function stockConditionKind(balance: bigint, reorderLevelBaseMicros: number | nu
   return null;
 }
 
+function parseReorderLevel(value: unknown): number | null | undefined {
+  if (value === null) return null;
+  if (typeof value === 'number' && Number.isSafeInteger(value) && value >= 0) return value;
+  return undefined;
+}
+
+function thresholdEpisodeToken(adapter: DatabaseAdapter, product: ProductContext, kind: StockConditionKind): string {
+  if (kind !== 'LOW_STOCK') return 'initial';
+  const fallbackBalance = BigInt(product.projection.inventoryBalanceBaseMicros);
+  let previousThreshold: number | null = null;
+  let token = 'initial';
+  for (const operation of listOutboxOperationsByStoreEntityInLedgerOrder(
+    adapter,
+    product.storeId,
+    'STORE_PRODUCT',
+    product.storeProductId,
+    'PRODUCT_REORDER_LEVEL_UPDATED',
+  )) {
+    type ReorderLevelEntities = {
+      previousReorderLevelBaseMicros?: unknown;
+      inventoryBalanceBaseMicros?: unknown;
+      request?: { reorderLevelBaseMicros?: unknown };
+      storeProduct?: { reorderLevelBaseMicros?: unknown };
+    };
+    let entities: ReorderLevelEntities;
+    try {
+      entities = (JSON.parse(operation.payload) as { entities?: ReorderLevelEntities }).entities ?? {};
+    } catch {
+      continue;
+    }
+    const nextThreshold = parseReorderLevel(entities.request?.reorderLevelBaseMicros ?? entities.storeProduct?.reorderLevelBaseMicros);
+    if (nextThreshold === undefined) continue;
+    const parsedPrevious = parseReorderLevel(entities.previousReorderLevelBaseMicros);
+    const previous = parsedPrevious === undefined ? previousThreshold : parsedPrevious;
+    const balanceValue = entities.inventoryBalanceBaseMicros;
+    let balance = fallbackBalance;
+    if (typeof balanceValue === 'string' || typeof balanceValue === 'number') {
+      try {
+        balance = BigInt(String(balanceValue));
+      } catch {
+        balance = fallbackBalance;
+      }
+    }
+    const previousKind = stockConditionKind(balance, previous);
+    const nextKind = stockConditionKind(balance, nextThreshold);
+    if (nextKind === kind && previousKind !== kind) token = operation.operationId;
+    previousThreshold = nextThreshold;
+  }
+  return token;
+}
+
 function stockEpisodeToken(adapter: DatabaseAdapter, product: ProductContext, kind: StockConditionKind): string {
   let balance = 0n;
   let previous = stockConditionKind(0n, product.reorderLevelBaseMicros);
@@ -283,7 +337,8 @@ function stockEpisodeToken(adapter: DatabaseAdapter, product: ProductContext, ki
     balance = next;
     previous = nextKind;
   }
-  return token;
+  const thresholdToken = thresholdEpisodeToken(adapter, product, kind);
+  return thresholdToken === 'initial' ? token : `${token}:${thresholdToken}`;
 }
 
 function batchGroupEpisodeToken(adapter: DatabaseAdapter, storeProductId: string, groupId: string): string {

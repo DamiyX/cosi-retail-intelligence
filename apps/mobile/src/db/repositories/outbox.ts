@@ -223,6 +223,29 @@ export function findOutboxOperationForEntity(
   return row ? mapRow(row) : null;
 }
 
+/**
+ * Return durable local mutations for one store entity in application order.
+ * Rebuildable local condition episodes must not rely on created_at alone:
+ * offline timestamps can be supplied by a device clock and may tie or arrive
+ * out of order, while SQLite rowid records the local application sequence.
+ */
+export function listOutboxOperationsByStoreEntityInLedgerOrder(
+  adapter: DatabaseAdapter,
+  storeId: string,
+  entityType: OutboxEntityType,
+  entityId: string,
+  operationType: OutboxOperationType,
+): OutboxOperationRow[] {
+  return adapter
+    .getAllRows<OutboxRecord>(
+      `SELECT ${COLUMNS} FROM outbox_operations
+       WHERE store_id = ? AND entity_type = ? AND entity_id = ? AND operation_type = ?
+       ORDER BY rowid ASC;`,
+      [requireId(storeId), entityType, requireId(entityId), operationType],
+    )
+    .map(mapRow);
+}
+
 export interface ExpectedOutboxReplay {
   operationId: string;
   storeId: string;

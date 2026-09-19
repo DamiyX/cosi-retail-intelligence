@@ -1,6 +1,7 @@
 import { MICROS_PER_UNIT } from '@retail/domain';
 
 import { createCatalogueClient } from '../src/catalogue/client';
+import { updateReorderLevel } from '../src/catalogue/updateReorderLevel';
 import { createDatabaseInventoryClient } from '../src/inventory/client';
 import { saveAttentionSettings, snoozeAttention } from '../src/inventory/attention';
 import {
@@ -459,6 +460,115 @@ describe('M5 local attention and snooze', () => {
       expect(atDue.items).toEqual(expect.arrayContaining([
         expect.objectContaining({ groupId: reached.groupId, kind: 'EXPIRY', severity: 'REACHED' }),
       ]));
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('starts a new low-stock episode when a threshold resolves and recreates it without an overview read', () => {
+    const fixture = openCatalogueFixture();
+    const path = fixture.path;
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(10100));
+      const product = catalogue.createTemporaryProduct({ name: 'Threshold episode rice' });
+      buy(fixture, product, 4, 10110);
+      const initial = catalogue.getProductDetail(product.storeProduct.id);
+      if (!initial) throw new Error('Threshold episode product missing.');
+      const setFive = updateReorderLevel(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: product.storeProduct.id,
+        reorderLevelBaseMicros: 5 * MICROS_PER_UNIT,
+        expectedVersion: initial.product.version,
+      }, { generateId: deterministicIds(10120), operationId: testId(10121) });
+      const staff = createUser(fixture.adapter, { id: testId(10122), displayName: 'Threshold staff' });
+      createStoreMember(fixture.adapter, {
+        id: testId(10123),
+        storeId: fixture.context.store.id,
+        userId: staff.id,
+        role: 'STAFF',
+      });
+      expect(() => updateReorderLevel(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: staff.id,
+        storeProductId: product.storeProduct.id,
+        reorderLevelBaseMicros: 6 * MICROS_PER_UNIT,
+        expectedVersion: setFive.storeProduct.version,
+      }, { operationId: testId(10124) })).toThrow('active store owner');
+      const client = createDatabaseInventoryClient(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+      });
+      const low = client.getAttentionOverview('2026-09-18T08:00:00.000Z').items.find((item) => item.storeProductId === product.storeProduct.id && item.kind === 'LOW_STOCK');
+      if (!low) throw new Error('Expected low-stock episode before snoozing.');
+      client.snoozeAttention({
+        operationId: testId(10130),
+        conditionKey: low.conditionKey,
+        conditionType: low.conditionType,
+        storeProductId: low.storeProductId,
+        groupId: low.groupId,
+        severityRank: low.severityRank,
+        snoozeKind: 'TOMORROW',
+        now: '2026-09-18T08:00:00.000Z',
+      });
+
+      const sameActive = updateReorderLevel(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: product.storeProduct.id,
+        reorderLevelBaseMicros: 6 * MICROS_PER_UNIT,
+        expectedVersion: setFive.storeProduct.version,
+      }, { generateId: deterministicIds(10140), operationId: testId(10141) });
+      const outboxBeforeReplay = countPendingOutboxOperations(fixture.adapter, fixture.context.store.id);
+      const replay = updateReorderLevel(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: product.storeProduct.id,
+        reorderLevelBaseMicros: 6 * MICROS_PER_UNIT,
+        expectedVersion: setFive.storeProduct.version,
+      }, { generateId: deterministicIds(10150), operationId: testId(10141) });
+      expect(replay.storeProduct.version).toBe(sameActive.storeProduct.version);
+      expect(countPendingOutboxOperations(fixture.adapter, fixture.context.store.id)).toBe(outboxBeforeReplay);
+      expect(client.getAttentionOverview('2026-09-18T08:20:00.000Z').items.some((item) => item.storeProductId === product.storeProduct.id && item.kind === 'LOW_STOCK')).toBe(false);
+
+      const resolved = updateReorderLevel(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: product.storeProduct.id,
+        reorderLevelBaseMicros: 3 * MICROS_PER_UNIT,
+        expectedVersion: sameActive.storeProduct.version,
+      }, { generateId: deterministicIds(10160), operationId: testId(10161) });
+      updateReorderLevel(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: product.storeProduct.id,
+        reorderLevelBaseMicros: 5 * MICROS_PER_UNIT,
+        expectedVersion: resolved.storeProduct.version,
+      }, { generateId: deterministicIds(10170), operationId: testId(10171) });
+
+      fixture.adapter.close();
+      const reopened = reopenDatabase(path);
+      try {
+        const resumed = createDatabaseInventoryClient(reopened, {
+          storeId: fixture.context.store.id,
+          deviceId: fixture.context.device.id,
+          userId: fixture.context.owner.id,
+        });
+        const recurring = resumed.getAttentionOverview('2026-09-18T08:20:00.000Z');
+        const recurringItem = recurring.items.find((item) => item.storeProductId === product.storeProduct.id && item.kind === 'LOW_STOCK');
+        expect(recurringItem).toEqual(expect.objectContaining({ storeProductId: product.storeProduct.id, kind: 'LOW_STOCK' }));
+        expect(recurringItem?.conditionKey).not.toBe(low.conditionKey);
+        expect(recurring.suppressedCount).toBe(0);
+      } finally {
+        reopened.close();
+      }
     } finally {
       fixture.closeAndDelete();
     }

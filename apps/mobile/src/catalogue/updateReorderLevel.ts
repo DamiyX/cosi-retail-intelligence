@@ -5,6 +5,7 @@ import type { DatabaseAdapter } from '../db/adapter';
 import {
   enqueueOutboxOperation,
   findExpectedOutboxReplay,
+  getInventoryBalanceBigIntByStoreProduct,
   getDeviceById,
   getStoreById,
   getStoreProductById,
@@ -150,6 +151,7 @@ export function updateReorderLevel(
         'Product settings changed while this threshold was open. Refresh before saving.',
       );
     }
+    const inventoryBalanceAtUpdate = getInventoryBalanceBigIntByStoreProduct(adapter, storeProductId);
     const storeProduct = updateStoreProductReorderLevel(
       adapter,
       existing.id,
@@ -169,6 +171,8 @@ export function updateReorderLevel(
       entities: {
         storeProductVersion: 1,
         previousStoreProductVersion: existing.version,
+        previousReorderLevelBaseMicros: existing.reorderLevelBaseMicros,
+        inventoryBalanceBaseMicros: inventoryBalanceAtUpdate.toString(),
         request,
         storeProduct,
       },
