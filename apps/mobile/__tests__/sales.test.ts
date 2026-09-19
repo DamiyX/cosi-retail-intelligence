@@ -133,6 +133,7 @@ describe('M3 Sales milestone', () => {
             { version: 15, name: 'durable_reorder_level_history' },
             { version: 16, name: 'expenses' },
             { version: 17, name: 'owner_withdrawals' },
+            { version: 18, name: 'offline_sync_state' },
           ]);
         } finally {
           reopened.close();

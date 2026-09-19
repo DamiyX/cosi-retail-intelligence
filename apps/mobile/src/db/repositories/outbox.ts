@@ -82,6 +82,11 @@ export interface OutboxOperationRow {
   nextAttemptAt: string | null;
   lastErrorCode: string | null;
   status: OutboxStatus;
+  leaseId: string | null;
+  leaseExpiresAt: string | null;
+  serverVersion: number | null;
+  serverRevision: number | null;
+  syncedAt: string | null;
 }
 
 export interface OutboxEnvelopeInput {
@@ -114,13 +119,26 @@ function mapRow(row: OutboxRecord): OutboxOperationRow {
     nextAttemptAt: (row.next_attempt_at as string | null) ?? null,
     lastErrorCode: (row.last_error_code as string | null) ?? null,
     status: row.status as OutboxStatus,
+    leaseId: (row.lease_id as string | null) ?? null,
+    leaseExpiresAt: (row.lease_expires_at as string | null) ?? null,
+    serverVersion: (row.server_version as number | null) ?? null,
+    serverRevision: (row.server_revision as number | null) ?? null,
+    syncedAt: (row.synced_at as string | null) ?? null,
   };
 }
 
-const COLUMNS =
+const LEGACY_COLUMNS =
   'operation_id, store_id, device_id, entity_type, entity_id, operation_type, ' +
   'base_server_version, payload, created_at, attempt_count, next_attempt_at, ' +
   'last_error_code, status';
+
+const SYNC_COLUMNS =
+  `${LEGACY_COLUMNS}, lease_id, lease_expires_at, server_version, server_revision, synced_at`;
+
+function outboxColumns(adapter: DatabaseAdapter): string {
+  const columns = adapter.getAllRows<{ name: string }>('PRAGMA table_info(outbox_operations);');
+  return columns.some((column) => column.name === 'lease_id') ? SYNC_COLUMNS : LEGACY_COLUMNS;
+}
 
 /**
  * Build the canonical JSON envelope. Keys are emitted in a fixed order so
@@ -189,7 +207,7 @@ export function findOutboxOperation(
   operationId: string,
 ): OutboxOperationRow | null {
   const row = adapter.getFirstRow<OutboxRecord>(
-    `SELECT ${COLUMNS} FROM outbox_operations WHERE operation_id = ?;`,
+    `SELECT ${outboxColumns(adapter)} FROM outbox_operations WHERE operation_id = ?;`,
     [requireId(operationId)],
   );
   return row ? mapRow(row) : null;
@@ -215,7 +233,7 @@ export function findOutboxOperationForEntity(
   const entityId = requireId(input.entityId);
   const hasOperationType = input.operationType !== undefined;
   const row = adapter.getFirstRow<OutboxRecord>(
-    `SELECT ${COLUMNS} FROM outbox_operations
+    `SELECT ${outboxColumns(adapter)} FROM outbox_operations
      WHERE store_id = ? AND entity_type = ? AND entity_id = ?
      ${hasOperationType ? 'AND operation_type = ?' : ''}
      ORDER BY created_at DESC, operation_id DESC
@@ -242,7 +260,7 @@ export function listOutboxOperationsByStoreEntityInLedgerOrder(
 ): OutboxOperationRow[] {
   return adapter
     .getAllRows<OutboxRecord>(
-      `SELECT ${COLUMNS} FROM outbox_operations
+      `SELECT ${outboxColumns(adapter)} FROM outbox_operations
        WHERE store_id = ? AND entity_type = ? AND entity_id = ? AND operation_type = ?
        ORDER BY rowid ASC;`,
       [requireId(storeId), entityType, requireId(entityId), operationType],
@@ -294,7 +312,7 @@ export function listPendingOutboxOperations(
 ): OutboxOperationRow[] {
   return adapter
     .getAllRows<OutboxRecord>(
-      `SELECT ${COLUMNS} FROM outbox_operations
+      `SELECT ${outboxColumns(adapter)} FROM outbox_operations
        WHERE store_id = ? AND status = 'PENDING' ORDER BY created_at ASC;`,
       [requireId(storeId)],
     )
@@ -307,4 +325,203 @@ export function countPendingOutboxOperations(adapter: DatabaseAdapter, storeId: 
     [requireId(storeId)],
   );
   return row?.total ?? 0;
+}
+
+export interface ClaimOutboxBatchInput {
+  storeId: string;
+  leaseId: string;
+  now: string;
+  leaseExpiresAt: string;
+  limit: number;
+}
+
+/**
+ * Requeue abandoned work and claim one bounded batch atomically. A lease is
+ * local process state only; the operation remains durable until a server ack
+ * moves it to a terminal status.
+ */
+export function claimOutboxBatch(
+  adapter: DatabaseAdapter,
+  input: ClaimOutboxBatchInput,
+): OutboxOperationRow[] {
+  const storeId = requireId(input.storeId);
+  const leaseId = requireId(input.leaseId);
+  if (!Number.isInteger(input.limit) || input.limit <= 0) {
+    throw new DomainError('INVALID_VALUE', 'Outbox claim limit must be a positive integer.');
+  }
+  return adapter.transaction(() => {
+    releaseExpiredOutboxLeases(adapter, storeId, input.now);
+    const candidates = adapter.getAllRows<OutboxRecord>(
+      `SELECT operation_id FROM outbox_operations
+       WHERE store_id = ?
+         AND status IN ('PENDING', 'ERROR_RETRYABLE')
+         AND (next_attempt_at IS NULL OR next_attempt_at <= ?)
+       ORDER BY created_at ASC, rowid ASC
+       LIMIT ?;`,
+      [storeId, input.now, input.limit],
+    );
+    if (candidates.length === 0) {
+      return [];
+    }
+    const placeholders = candidates.map(() => '?').join(', ');
+    const operationIds = candidates.map((row) => row.operation_id as string);
+    adapter.run(
+      `UPDATE outbox_operations
+       SET status = 'SYNCING', lease_id = ?, lease_expires_at = ?,
+           attempt_count = attempt_count + 1, last_error_code = NULL
+       WHERE store_id = ? AND operation_id IN (${placeholders})
+         AND status IN ('PENDING', 'ERROR_RETRYABLE');`,
+      [leaseId, input.leaseExpiresAt, storeId, ...operationIds],
+    );
+    return adapter
+      .getAllRows<OutboxRecord>(
+        `SELECT ${outboxColumns(adapter)} FROM outbox_operations
+         WHERE store_id = ? AND lease_id = ?
+         ORDER BY created_at ASC, rowid ASC;`,
+        [storeId, leaseId],
+      )
+      .map(mapRow);
+  });
+}
+
+export function releaseExpiredOutboxLeases(
+  adapter: DatabaseAdapter,
+  storeId: string,
+  now: string,
+): number {
+  const result = adapter.run(
+    `UPDATE outbox_operations
+     SET status = 'PENDING', lease_id = NULL, lease_expires_at = NULL
+     WHERE store_id = ? AND status = 'SYNCING'
+       AND lease_expires_at IS NOT NULL AND lease_expires_at <= ?;`,
+    [requireId(storeId), now],
+  );
+  return result.changes;
+}
+
+export interface OutboxStatusUpdate {
+  operationId: string;
+  leaseId?: string;
+  serverVersion?: number | null;
+  serverRevision?: number | null;
+  errorCode?: string | null;
+  nextAttemptAt?: string | null;
+  syncedAt?: string | null;
+}
+
+function statusLeasePredicate(update: OutboxStatusUpdate): { sql: string; params: string[] } {
+  if (update.leaseId === undefined) {
+    return { sql: '', params: [] };
+  }
+  return { sql: ' AND lease_id = ?', params: [requireId(update.leaseId)] };
+}
+
+export function markOutboxApplied(
+  adapter: DatabaseAdapter,
+  update: OutboxStatusUpdate,
+): void {
+  const lease = statusLeasePredicate(update);
+  adapter.run(
+    `UPDATE outbox_operations
+     SET status = 'SYNCED', lease_id = NULL, lease_expires_at = NULL,
+         server_version = ?, server_revision = ?, synced_at = ?,
+         last_error_code = NULL, next_attempt_at = NULL
+     WHERE operation_id = ? AND status = 'SYNCING'${lease.sql};`,
+    [
+      update.serverVersion ?? null,
+      update.serverRevision ?? null,
+      update.syncedAt ?? nowIso(),
+      requireId(update.operationId),
+      ...lease.params,
+    ],
+  );
+}
+
+/** A pull echo can arrive before the push response; it is still a server ack. */
+export function markOutboxEchoApplied(
+  adapter: DatabaseAdapter,
+  update: Omit<OutboxStatusUpdate, 'leaseId'>,
+): void {
+  adapter.run(
+    `UPDATE outbox_operations
+     SET status = 'SYNCED', lease_id = NULL, lease_expires_at = NULL,
+         server_version = ?, server_revision = ?, synced_at = ?,
+         last_error_code = NULL, next_attempt_at = NULL
+     WHERE operation_id = ? AND status IN ('PENDING', 'SYNCING', 'ERROR_RETRYABLE');`,
+    [
+      update.serverVersion ?? null,
+      update.serverRevision ?? null,
+      update.syncedAt ?? nowIso(),
+      requireId(update.operationId),
+    ],
+  );
+}
+
+export function listActiveOutboxOperationsForEntity(
+  adapter: DatabaseAdapter,
+  input: {
+    storeId: string;
+    entityType: OutboxEntityType;
+    entityId: string;
+    excludeOperationId?: string;
+  },
+): OutboxOperationRow[] {
+  const exclude = input.excludeOperationId !== undefined;
+  return adapter
+    .getAllRows<OutboxRecord>(
+      `SELECT ${outboxColumns(adapter)} FROM outbox_operations
+       WHERE store_id = ? AND entity_type = ? AND entity_id = ?
+         AND status IN ('PENDING', 'SYNCING', 'ERROR_RETRYABLE')
+         ${exclude ? 'AND operation_id <> ?' : ''}
+       ORDER BY created_at ASC, rowid ASC;`,
+      exclude
+        ? [requireId(input.storeId), input.entityType, requireId(input.entityId), requireId(input.excludeOperationId!)]
+        : [requireId(input.storeId), input.entityType, requireId(input.entityId)],
+    )
+    .map(mapRow);
+}
+
+export function markOutboxRetryable(
+  adapter: DatabaseAdapter,
+  update: Required<Pick<OutboxStatusUpdate, 'operationId' | 'errorCode' | 'nextAttemptAt'>> &
+    Pick<OutboxStatusUpdate, 'leaseId'>,
+): void {
+  const lease = statusLeasePredicate(update);
+  adapter.run(
+    `UPDATE outbox_operations
+     SET status = 'ERROR_RETRYABLE', lease_id = NULL, lease_expires_at = NULL,
+         last_error_code = ?, next_attempt_at = ?
+     WHERE operation_id = ? AND status = 'SYNCING'${lease.sql};`,
+    [update.errorCode, update.nextAttemptAt, requireId(update.operationId), ...lease.params],
+  );
+}
+
+export function markOutboxPermanent(
+  adapter: DatabaseAdapter,
+  update: Required<Pick<OutboxStatusUpdate, 'operationId' | 'errorCode'>> &
+    Pick<OutboxStatusUpdate, 'leaseId'>,
+): void {
+  const lease = statusLeasePredicate(update);
+  adapter.run(
+    `UPDATE outbox_operations
+     SET status = 'ERROR_PERMANENT', lease_id = NULL, lease_expires_at = NULL,
+         last_error_code = ?, next_attempt_at = NULL
+     WHERE operation_id = ? AND status = 'SYNCING'${lease.sql};`,
+    [update.errorCode, requireId(update.operationId), ...lease.params],
+  );
+}
+
+export function markOutboxConflict(
+  adapter: DatabaseAdapter,
+  update: Required<Pick<OutboxStatusUpdate, 'operationId' | 'errorCode'>> &
+    Pick<OutboxStatusUpdate, 'leaseId'>,
+): void {
+  const lease = statusLeasePredicate(update);
+  adapter.run(
+    `UPDATE outbox_operations
+     SET status = 'CONFLICT', lease_id = NULL, lease_expires_at = NULL,
+         last_error_code = ?, next_attempt_at = NULL
+     WHERE operation_id = ? AND status = 'SYNCING'${lease.sql};`,
+    [update.errorCode, requireId(update.operationId), ...lease.params],
+  );
 }

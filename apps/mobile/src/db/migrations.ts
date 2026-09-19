@@ -2469,6 +2469,83 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'owner withdrawals are immutable'); END;`,
     ],
   },
+  {
+    version: 18,
+    name: 'offline_sync_state',
+    statements: [
+      `CREATE TABLE sync_store_state (
+        store_id TEXT PRIMARY KEY REFERENCES stores(id) ON DELETE CASCADE,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        status TEXT NOT NULL CHECK (status IN (
+          'UNINITIALIZED', 'BOOTSTRAPPING', 'IDLE', 'RUNNING',
+          'PAUSED_AUTH', 'ERROR_RETRYABLE'
+        )),
+        cursor_revision INTEGER NOT NULL DEFAULT 0 CHECK (cursor_revision >= 0),
+        cursor_change_index INTEGER NOT NULL DEFAULT 0 CHECK (cursor_change_index >= 0),
+        server_revision INTEGER NOT NULL DEFAULT 0 CHECK (server_revision >= 0),
+        last_attempt_at TEXT NULL,
+        last_success_at TEXT NULL,
+        last_error_code TEXT NULL,
+        last_error_message TEXT NULL,
+        updated_at TEXT NOT NULL
+      );`,
+      `CREATE INDEX idx_sync_store_state_device ON sync_store_state(device_id);`,
+      `CREATE TABLE sync_bootstrap_state (
+        store_id TEXT PRIMARY KEY REFERENCES stores(id) ON DELETE CASCADE,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        bootstrap_id TEXT NOT NULL UNIQUE,
+        status TEXT NOT NULL CHECK (status IN ('IN_PROGRESS', 'COMMITTED', 'FAILED')),
+        snapshot_revision INTEGER NULL CHECK (snapshot_revision IS NULL OR snapshot_revision >= 0),
+        snapshot_cursor_revision INTEGER NOT NULL DEFAULT 0 CHECK (snapshot_cursor_revision >= 0),
+        snapshot_cursor_change_index INTEGER NOT NULL DEFAULT 0 CHECK (snapshot_cursor_change_index >= 0),
+        snapshot_after_entity_type TEXT NULL,
+        snapshot_after_entity_id TEXT NULL,
+        started_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        last_error_code TEXT NULL,
+        last_error_message TEXT NULL
+      );`,
+      `CREATE TABLE sync_entity_versions (
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+        entity_type TEXT NOT NULL,
+        entity_id TEXT NOT NULL,
+        server_version INTEGER NOT NULL CHECK (server_version >= 0),
+        server_revision INTEGER NOT NULL CHECK (server_revision >= 0),
+        updated_at TEXT NOT NULL,
+        PRIMARY KEY (store_id, entity_type, entity_id)
+      );`,
+      `CREATE INDEX idx_sync_entity_versions_store_revision
+        ON sync_entity_versions(store_id, server_revision);`,
+      `CREATE TABLE sync_conflicts (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+        operation_id TEXT NOT NULL REFERENCES outbox_operations(operation_id) ON DELETE RESTRICT,
+        entity_type TEXT NOT NULL,
+        entity_id TEXT NOT NULL,
+        conflict_type TEXT NOT NULL CHECK (conflict_type IN (
+          'STALE_VERSION', 'IMMUTABLE_ID_REUSE', 'SERVER_REJECTED'
+        )),
+        local_payload TEXT NOT NULL,
+        server_payload TEXT NULL,
+        server_version INTEGER NULL CHECK (server_version IS NULL OR server_version >= 0),
+        status TEXT NOT NULL CHECK (status IN ('OPEN', 'RESOLVED')),
+        resolution TEXT NULL,
+        created_at TEXT NOT NULL,
+        resolved_at TEXT NULL
+      );`,
+      `CREATE UNIQUE INDEX idx_sync_conflicts_open_operation
+        ON sync_conflicts(operation_id) WHERE status = 'OPEN';`,
+      `CREATE INDEX idx_sync_conflicts_store_status
+        ON sync_conflicts(store_id, status, created_at DESC);`,
+      `ALTER TABLE outbox_operations ADD COLUMN lease_id TEXT NULL;`,
+      `ALTER TABLE outbox_operations ADD COLUMN lease_expires_at TEXT NULL;`,
+      `ALTER TABLE outbox_operations ADD COLUMN server_version INTEGER NULL CHECK (server_version IS NULL OR server_version >= 0);`,
+      `ALTER TABLE outbox_operations ADD COLUMN server_revision INTEGER NULL CHECK (server_revision IS NULL OR server_revision >= 0);`,
+      `ALTER TABLE outbox_operations ADD COLUMN synced_at TEXT NULL;`,
+      `CREATE INDEX idx_outbox_sync_lease
+        ON outbox_operations(store_id, status, next_attempt_at, lease_expires_at, created_at);`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;
