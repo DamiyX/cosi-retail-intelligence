@@ -573,4 +573,143 @@ describe('M5 local attention and snooze', () => {
       fixture.closeAndDelete();
     }
   });
+
+  it('rebuilds an interleaved inventory recurrence after a threshold resolution and same-active edit', () => {
+    const fixture = openCatalogueFixture();
+    const path = fixture.path;
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(10200));
+      const product = catalogue.createTemporaryProduct({ name: 'Interleaved episode rice' });
+      buy(fixture, product, 4, 10210);
+      const initial = catalogue.getProductDetail(product.storeProduct.id);
+      if (!initial) throw new Error('Interleaved episode product missing.');
+
+      const thresholdFive = updateReorderLevel(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: product.storeProduct.id,
+        reorderLevelBaseMicros: 5 * MICROS_PER_UNIT,
+        expectedVersion: initial.product.version,
+      }, { generateId: deterministicIds(10220), operationId: testId(10221) });
+      const client = createDatabaseInventoryClient(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+      });
+      const low = client.getAttentionOverview('2026-09-18T08:00:00.000Z').items.find((item) => item.storeProductId === product.storeProduct.id && item.kind === 'LOW_STOCK');
+      if (!low) throw new Error('Expected interleaved low-stock episode before snoozing.');
+      client.snoozeAttention({
+        operationId: testId(10230),
+        conditionKey: low.conditionKey,
+        conditionType: low.conditionType,
+        storeProductId: low.storeProductId,
+        groupId: low.groupId,
+        severityRank: low.severityRank,
+        snoozeKind: 'TOMORROW',
+        now: '2026-09-18T08:00:00.000Z',
+      });
+
+      const thresholdThree = updateReorderLevel(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: product.storeProduct.id,
+        reorderLevelBaseMicros: 3 * MICROS_PER_UNIT,
+        expectedVersion: thresholdFive.storeProduct.version,
+      }, { generateId: deterministicIds(10240), operationId: testId(10241) });
+      sellOne(fixture, product, 10250);
+      sellOne(fixture, product, 10260);
+      updateReorderLevel(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: product.storeProduct.id,
+        reorderLevelBaseMicros: 5 * MICROS_PER_UNIT,
+        expectedVersion: thresholdThree.storeProduct.version,
+      }, { generateId: deterministicIds(10270), operationId: testId(10271) });
+
+      fixture.adapter.close();
+      const reopened = reopenDatabase(path);
+      try {
+        const resumed = createDatabaseInventoryClient(reopened, {
+          storeId: fixture.context.store.id,
+          deviceId: fixture.context.device.id,
+          userId: fixture.context.owner.id,
+        });
+        const overview = resumed.getAttentionOverview('2026-09-18T08:20:00.000Z');
+        const recurring = overview.items.find((item) => item.storeProductId === product.storeProduct.id && item.kind === 'LOW_STOCK');
+        expect(recurring).toEqual(expect.objectContaining({ storeProductId: product.storeProduct.id, kind: 'LOW_STOCK' }));
+        expect(recurring?.conditionKey).not.toBe(low.conditionKey);
+        expect(overview.suppressedCount).toBe(0);
+        expect(resumed.getBatchProjection(product.storeProduct.id).inventoryBalanceBaseMicros).toBe(String(2 * MICROS_PER_UNIT));
+      } finally {
+        reopened.close();
+      }
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('rebuilds an inventory-resolved episode before threshold recurrence and preserves it through a same-active edit', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(10300));
+      const product = catalogue.createTemporaryProduct({ name: 'Inverse episode rice' });
+      buy(fixture, product, 4, 10310);
+      const initial = catalogue.getProductDetail(product.storeProduct.id);
+      if (!initial) throw new Error('Inverse episode product missing.');
+      const thresholdFive = updateReorderLevel(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: product.storeProduct.id,
+        reorderLevelBaseMicros: 5 * MICROS_PER_UNIT,
+        expectedVersion: initial.product.version,
+      }, { generateId: deterministicIds(10320), operationId: testId(10321) });
+      const client = createDatabaseInventoryClient(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+      });
+      const low = client.getAttentionOverview('2026-09-18T08:00:00.000Z').items.find((item) => item.storeProductId === product.storeProduct.id && item.kind === 'LOW_STOCK');
+      if (!low) throw new Error('Expected inverse low-stock episode before snoozing.');
+      client.snoozeAttention({
+        operationId: testId(10330),
+        conditionKey: low.conditionKey,
+        conditionType: low.conditionType,
+        storeProductId: low.storeProductId,
+        groupId: low.groupId,
+        severityRank: low.severityRank,
+        snoozeKind: 'TOMORROW',
+        now: '2026-09-18T08:00:00.000Z',
+      });
+
+      buy(fixture, product, 2, 10340);
+      const thresholdSeven = updateReorderLevel(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: product.storeProduct.id,
+        reorderLevelBaseMicros: 7 * MICROS_PER_UNIT,
+        expectedVersion: thresholdFive.storeProduct.version,
+      }, { generateId: deterministicIds(10350), operationId: testId(10351) });
+      updateReorderLevel(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id,
+        storeProductId: product.storeProduct.id,
+        reorderLevelBaseMicros: 9 * MICROS_PER_UNIT,
+        expectedVersion: thresholdSeven.storeProduct.version,
+      }, { generateId: deterministicIds(10360), operationId: testId(10361) });
+
+      const overview = client.getAttentionOverview('2026-09-18T08:20:00.000Z');
+      const recurring = overview.items.find((item) => item.storeProductId === product.storeProduct.id && item.kind === 'LOW_STOCK');
+      expect(recurring).toEqual(expect.objectContaining({ storeProductId: product.storeProduct.id, kind: 'LOW_STOCK' }));
+      expect(recurring?.conditionKey).not.toBe(low.conditionKey);
+      expect(overview.suppressedCount).toBe(0);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
 });

@@ -6,6 +6,7 @@ import {
   enqueueOutboxOperation,
   findExpectedOutboxReplay,
   getInventoryBalanceBigIntByStoreProduct,
+  getInventoryLedgerWatermark,
   getDeviceById,
   getStoreById,
   getStoreProductById,
@@ -152,6 +153,7 @@ export function updateReorderLevel(
       );
     }
     const inventoryBalanceAtUpdate = getInventoryBalanceBigIntByStoreProduct(adapter, storeProductId);
+    const inventoryLedgerWatermarkAtUpdate = getInventoryLedgerWatermark(adapter, storeProductId);
     const storeProduct = updateStoreProductReorderLevel(
       adapter,
       existing.id,
@@ -173,6 +175,7 @@ export function updateReorderLevel(
         previousStoreProductVersion: existing.version,
         previousReorderLevelBaseMicros: existing.reorderLevelBaseMicros,
         inventoryBalanceBaseMicros: inventoryBalanceAtUpdate.toString(),
+        inventoryLedgerWatermark: inventoryLedgerWatermarkAtUpdate,
         request,
         storeProduct,
       },

@@ -48,6 +48,7 @@ describe('A11 reorder threshold service', () => {
       expect(JSON.parse(set.outbox.payload).entities).toMatchObject({
         storeProductVersion: 1,
         previousStoreProductVersion: before.product.version,
+        inventoryLedgerWatermark: '0:',
         request: { reorderLevelBaseMicros: 2 * MICROS_PER_UNIT },
       });
 

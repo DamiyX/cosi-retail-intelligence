@@ -281,11 +281,37 @@ function parseReorderLevel(value: unknown): number | null | undefined {
   return undefined;
 }
 
-function thresholdEpisodeToken(adapter: DatabaseAdapter, product: ProductContext, kind: StockConditionKind): string {
-  if (kind !== 'LOW_STOCK') return 'initial';
-  const fallbackBalance = BigInt(product.projection.inventoryBalanceBaseMicros);
-  let previousThreshold: number | null = null;
-  let token = 'initial';
+interface ReorderLevelHistoryEntry {
+  operationId: string;
+  previousThreshold: number | null | undefined;
+  nextThreshold: number | null;
+  balanceAtUpdate: bigint | null;
+  inventoryLedgerWatermark: string | null | undefined;
+}
+
+function parseInventoryLedgerWatermark(value: unknown): string | null | undefined {
+  if (typeof value !== 'string') return undefined;
+  const separator = value.indexOf(':');
+  if (separator < 0) return undefined;
+  const rowid = Number(value.slice(0, separator));
+  const eventId = value.slice(separator + 1);
+  if (!Number.isSafeInteger(rowid) || rowid < 0 || (rowid === 0 && eventId !== '') || (rowid > 0 && eventId.length === 0)) {
+    return undefined;
+  }
+  return rowid === 0 ? null : eventId;
+}
+
+function parseInventoryBalance(value: unknown): bigint | null {
+  if (typeof value !== 'string' && typeof value !== 'number') return null;
+  try {
+    return BigInt(String(value));
+  } catch {
+    return null;
+  }
+}
+
+function listReorderLevelHistory(adapter: DatabaseAdapter, product: ProductContext): ReorderLevelHistoryEntry[] {
+  const history: ReorderLevelHistoryEntry[] = [];
   for (const operation of listOutboxOperationsByStoreEntityInLedgerOrder(
     adapter,
     product.storeId,
@@ -296,6 +322,7 @@ function thresholdEpisodeToken(adapter: DatabaseAdapter, product: ProductContext
     type ReorderLevelEntities = {
       previousReorderLevelBaseMicros?: unknown;
       inventoryBalanceBaseMicros?: unknown;
+      inventoryLedgerWatermark?: unknown;
       request?: { reorderLevelBaseMicros?: unknown };
       storeProduct?: { reorderLevelBaseMicros?: unknown };
     };
@@ -307,38 +334,150 @@ function thresholdEpisodeToken(adapter: DatabaseAdapter, product: ProductContext
     }
     const nextThreshold = parseReorderLevel(entities.request?.reorderLevelBaseMicros ?? entities.storeProduct?.reorderLevelBaseMicros);
     if (nextThreshold === undefined) continue;
-    const parsedPrevious = parseReorderLevel(entities.previousReorderLevelBaseMicros);
-    const previous = parsedPrevious === undefined ? previousThreshold : parsedPrevious;
-    const balanceValue = entities.inventoryBalanceBaseMicros;
-    let balance = fallbackBalance;
-    if (typeof balanceValue === 'string' || typeof balanceValue === 'number') {
-      try {
-        balance = BigInt(String(balanceValue));
-      } catch {
-        balance = fallbackBalance;
-      }
-    }
-    const previousKind = stockConditionKind(balance, previous);
-    const nextKind = stockConditionKind(balance, nextThreshold);
-    if (nextKind === kind && previousKind !== kind) token = operation.operationId;
-    previousThreshold = nextThreshold;
+    history.push({
+      operationId: operation.operationId,
+      previousThreshold: parseReorderLevel(entities.previousReorderLevelBaseMicros),
+      nextThreshold,
+      balanceAtUpdate: parseInventoryBalance(entities.inventoryBalanceBaseMicros),
+      inventoryLedgerWatermark: parseInventoryLedgerWatermark(entities.inventoryLedgerWatermark),
+    });
   }
-  return token;
+  return history;
 }
 
-function stockEpisodeToken(adapter: DatabaseAdapter, product: ProductContext, kind: StockConditionKind): string {
+function legacyStockEpisodeToken(
+  events: ReturnType<typeof listInventoryEventsByStoreProductInLedgerOrder>,
+  product: ProductContext,
+  kind: StockConditionKind,
+): string {
   let balance = 0n;
   let previous = stockConditionKind(0n, product.reorderLevelBaseMicros);
   let token = 'initial';
-  for (const event of listInventoryEventsByStoreProductInLedgerOrder(adapter, product.storeProductId)) {
+  for (const event of events) {
     const next = balance + BigInt(event.quantityBaseDeltaMicros);
     const nextKind = stockConditionKind(next, product.reorderLevelBaseMicros);
     if (nextKind === kind && previous !== kind) token = event.id;
     balance = next;
     previous = nextKind;
   }
-  const thresholdToken = thresholdEpisodeToken(adapter, product, kind);
-  return thresholdToken === 'initial' ? token : `${token}:${thresholdToken}`;
+  return token;
+}
+
+function legacyThresholdEpisodeToken(
+  product: ProductContext,
+  kind: StockConditionKind,
+  history: ReorderLevelHistoryEntry[],
+): string {
+  if (kind !== 'LOW_STOCK') return 'initial';
+  const fallbackBalance = BigInt(product.projection.inventoryBalanceBaseMicros);
+  let previousThreshold: number | null = null;
+  let token = 'initial';
+  for (const operation of history) {
+    const previous = operation.previousThreshold === undefined ? previousThreshold : operation.previousThreshold;
+    const balance = operation.balanceAtUpdate ?? fallbackBalance;
+    const previousKind = stockConditionKind(balance, previous);
+    const nextKind = stockConditionKind(balance, operation.nextThreshold);
+    if (nextKind === kind && previousKind !== kind) token = operation.operationId;
+    previousThreshold = operation.nextThreshold;
+  }
+  return token;
+}
+
+function legacyCombinedStockEpisodeToken(
+  product: ProductContext,
+  kind: StockConditionKind,
+  events: ReturnType<typeof listInventoryEventsByStoreProductInLedgerOrder>,
+  history: ReorderLevelHistoryEntry[],
+): string {
+  const inventoryToken = legacyStockEpisodeToken(events, product, kind);
+  const thresholdToken = legacyThresholdEpisodeToken(product, kind, history);
+  return thresholdToken === 'initial' ? inventoryToken : `${inventoryToken}:${thresholdToken}`;
+}
+
+function findEventIndexForWatermark(
+  events: ReturnType<typeof listInventoryEventsByStoreProductInLedgerOrder>,
+  watermark: string | null | undefined,
+): number | null {
+  if (watermark === null) return 0;
+  if (watermark === undefined) return null;
+  const eventIndex = events.findIndex((event) => event.id === watermark);
+  return eventIndex < 0 ? null : eventIndex + 1;
+}
+
+function findEventIndexForBalance(
+  events: ReturnType<typeof listInventoryEventsByStoreProductInLedgerOrder>,
+  startIndex: number,
+  startBalance: bigint,
+  targetBalance: bigint | null,
+): number {
+  if (targetBalance === null) return startIndex;
+  let balance = startBalance;
+  if (balance === targetBalance) return startIndex;
+  for (let index = startIndex; index < events.length; index += 1) {
+    balance += BigInt(events[index].quantityBaseDeltaMicros);
+    if (balance === targetBalance) return index + 1;
+  }
+  return startIndex;
+}
+
+function interleavedLowStockEpisodeToken(
+  events: ReturnType<typeof listInventoryEventsByStoreProductInLedgerOrder>,
+  history: ReorderLevelHistoryEntry[],
+): string {
+  // Threshold writers capture the latest product-event watermark in the same
+  // SQLite transaction. That cursor lets this rebuild interleave both durable
+  // histories without treating device timestamps as a global ordering.
+  let balance = 0n;
+  let eventIndex = 0;
+  let threshold: number | null = history[0]?.previousThreshold ?? null;
+  let previousKind = stockConditionKind(balance, threshold);
+  let token = 'initial';
+
+  for (const operation of history) {
+    const watermarkIndex = findEventIndexForWatermark(events, operation.inventoryLedgerWatermark);
+    const targetIndex = Math.max(
+      eventIndex,
+      watermarkIndex ?? findEventIndexForBalance(events, eventIndex, balance, operation.balanceAtUpdate),
+    );
+    while (eventIndex < targetIndex) {
+      const event = events[eventIndex];
+      const nextBalance = balance + BigInt(event.quantityBaseDeltaMicros);
+      const nextKind = stockConditionKind(nextBalance, threshold);
+      if (nextKind === 'LOW_STOCK' && previousKind !== 'LOW_STOCK') token = event.id;
+      balance = nextBalance;
+      previousKind = nextKind;
+      eventIndex += 1;
+    }
+
+    if (operation.previousThreshold !== undefined && operation.previousThreshold !== threshold) {
+      threshold = operation.previousThreshold;
+      previousKind = stockConditionKind(balance, threshold);
+    }
+    const nextKind = stockConditionKind(balance, operation.nextThreshold);
+    if (nextKind === 'LOW_STOCK' && previousKind !== 'LOW_STOCK') token = operation.operationId;
+    threshold = operation.nextThreshold;
+    previousKind = nextKind;
+  }
+
+  while (eventIndex < events.length) {
+    const event = events[eventIndex];
+    const nextBalance = balance + BigInt(event.quantityBaseDeltaMicros);
+    const nextKind = stockConditionKind(nextBalance, threshold);
+    if (nextKind === 'LOW_STOCK' && previousKind !== 'LOW_STOCK') token = event.id;
+    balance = nextBalance;
+    previousKind = nextKind;
+    eventIndex += 1;
+  }
+  return token;
+}
+
+function stockEpisodeToken(adapter: DatabaseAdapter, product: ProductContext, kind: StockConditionKind): string {
+  const events = listInventoryEventsByStoreProductInLedgerOrder(adapter, product.storeProductId);
+  const history = listReorderLevelHistory(adapter, product);
+  if (kind !== 'LOW_STOCK' || history.length === 0 || !history.some((entry) => entry.inventoryLedgerWatermark !== undefined)) {
+    return legacyCombinedStockEpisodeToken(product, kind, events, history);
+  }
+  return interleavedLowStockEpisodeToken(events, history);
 }
 
 function batchGroupEpisodeToken(adapter: DatabaseAdapter, storeProductId: string, groupId: string): string {
