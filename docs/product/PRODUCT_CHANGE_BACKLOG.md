@@ -1,11 +1,11 @@
 # Product Change / UX Backlog and Impact Review
 
 **Updated:** 2026-09-19. **Owner:** coordinating product/planning/audit task.
-**Status:** M5 batch/FEFO/check/attention source scope is independently accepted;
-physical release-readiness checks remain carried. M6 promotes live daily facts
-and compact real attention to Home. Future UX ideas retain their own gates.
-**Verified baseline:** accepted M5 source on `feat/m5-inventory-reconciliation`,
-including additive migration 15 for durable reorder-threshold history.
+**Status:** PC-03/PC-05/PC-06 are accepted in M5; PC-01/PC-01a and the M6 Home
+promotion of PC-05 are accepted in M6. Physical release-readiness checks remain
+carried. Future UX ideas retain their documented gates.
+**Verified baseline:** accepted M6 source on
+`feat/m6-expenses-business-summary`, including coordinator correction `1d8124c`.
 
 This is the single disposition/backlog for the founder's structured ideas,
 raw transcript and external architect feedback. It routes to approved sources,
@@ -24,8 +24,8 @@ catalogue/inventory enrichment must preserve immediate sell-first value.
 
 | ID | Requirement / disposition | Milestone and gate |
 | --- | --- | --- |
-| PC-01 | Live Today count and sales value after completed sales; sales value is not profit or cash received | M6; use stored completed sale totals over store-local day, full-range exact query rather than paged history; refresh on durable writes/focus/resume/rollover/eventual sync |
-| PC-01a | Optional one popular product; deeper rankings in Reports | M6 design gate: proposed “Most frequently sold today” by distinct completed sales containing product, stable ties; do not compare unlike unit quantities or silently call value/popularity the same metric |
+| PC-01 | Live Today count and sales value after completed sales; sales value is not profit or cash received | Accepted M6 source; stored completed totals over the store-local day, full-range exact query and focus/resume/rollover refresh |
+| PC-01a | Optional one popular product; deeper rankings in Reports | Accepted M6 source after audit correction: “Most frequently sold today” by distinct completed sales containing product with stable ties |
 | PC-02 | One prominent accessible floating Scan on suitable major surfaces; no second global product + and no permanent Sell tab once scanner is delivered | M8 navigation gate; preserve manual/search fallback, dirty sale state/history/deep links and accessible reachability; hide in scanner/cart/payment/restock/count/edit/keyboard flows |
 | PC-03 | Blind-first count -> compare -> optional recount -> confirm difference/reason -> real reconciliation; matching check has no zero event | Approved M5, D-040; retains first/recount facts and protects event/batch watermarks while trading |
 | PC-03a | Rotate quick/easy, moving and not-recently-checked stock using extensible policy | Approved simple M5 selector; advanced risk/value/discrepancy/recent-restock/random scoring future, no permanently fixed three classes |
@@ -85,10 +85,24 @@ schema/UX details live in approved authorities, not copied into this backlog.
 - Hours/days/week/month reminder intent is supported by explicit reminder times;
   condition-specific escalation must prevent long snooze hiding worsening alerts.
 
-## Active next action
+## Roadmap checkpoint before M7
 
-M5_INVENTORY_RECONCILIATION_PLAN, tickets.md and
-.agents/workflows/m5-inventory-reconciliation.json register seven unstarted
-vertical slices. Coordinator owns planning/design/tickets/delegation/audit;
-separate implementation tasks own implementation/corrections and stop for audit.
-Do not start M6 or dispatch future backlog items through this document.
+- M1–M4 remain accepted foundations; these product changes required no broad
+  rewrite. M5 extended M4 additively for batch/expiry/reconciliation behavior.
+- M5 owns PC-03, PC-05 list/actions and PC-06. M6 owns PC-01/PC-01a and Home's
+  compact PC-05 preview. Their audit records and tests are the implementation
+  evidence; this backlog remains a disposition index.
+- M7 must preserve and synchronize the completed M5/M6 envelopes under
+  `OFFLINE_SYNC.md`, including legacy/extended sale and purchase payloads,
+  batch/reconciliation facts, mutable settings, expenses and withdrawals.
+- M8 owns PC-02 and scanner/barcode application integration after the M7 source
+  contract is accepted. Astra/coordinator planning for M8 and separate
+  Recognition Track B research may proceed while another task implements M7,
+  provided they use separate branches/worktrees and do not edit shared schema or
+  contracts concurrently.
+- Production M8 and M9 remain sequential in the core app. Recognition R&D is the
+  parallel track; M9 must not begin in the same checkout while M8 is changing
+  navigation, catalogue or scanner contracts.
+
+Next: publish and audit M7 tickets before implementation. Do not implement PC-02,
+PC-04 or PC-07 inside M7.

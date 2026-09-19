@@ -699,6 +699,15 @@ Offline:
 - unknown barcode does not block sale;
 - scanner can be disabled without breaking product selection.
 
+## Parallel-planning boundary
+
+The coordinator may prepare M8 scanner contracts, UX states, tickets and the
+Recognition Track B evaluation plan while a separate task implements M7. Keep
+that planning in a separate branch/worktree and avoid concurrent edits to shared
+catalogue, package-unit, sync or recognition contracts. Production M8 integration
+starts only after M7 source acceptance; core-app M9 follows M8. Recognition R&D
+may continue independently behind the stable contract and feature flags.
+
 ---
 
 # 22. M9 — Personal Restock-Price Intelligence
