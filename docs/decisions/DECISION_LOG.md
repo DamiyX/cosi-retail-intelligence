@@ -1312,6 +1312,43 @@ accounting review and M7 concurrent-device order/conflict review remain gates.
 
 ---
 
+## D-041 — M6 Money-Out Capture and Truthful Daily Summary
+
+**Status:** ACTIVE engineering/product behavior; accounting interpretation remains provisional.  
+**Date:** 2026-09-19.  
+**Approval:** Established PRD/build requirements plus founder-delegated milestone
+planning and ticket/design judgment; no new formal accounting claim.
+
+### Decision
+
+M6 records operating Expense and OwnerWithdrawal as separate immutable,
+store-private, owner-attributed transactions. Initial management is active OWNER
+only; later staff permissions belong to M11. Positive integer minor money, store
+currency, optional note, occurred time, resolved member/user/device and one
+atomic idempotent outbox envelope are required. M6 does not add edit/delete,
+cash-account allocation, recurring schedules, receipts or accounting journals.
+
+The store-local daily summary uses full half-open time ranges. Sales value includes
+credit sales and is not cash received. Tracked COGS/gross margin is shown only
+with explicit immutable cost coverage; unavailable coverage never becomes zero.
+Expenses and owner withdrawals remain separate. No value is labelled net profit,
+P&L, cash balance or retained capital. The optional popular product means the
+product occurring in the most distinct completed sales that day, with stable ties,
+not unlike-unit volume or revenue rank.
+
+Home promotes these real facts and a bounded preview of M5 attention. Purchase-
+cost/market movement signals remain M9/M10 under PC-07. M8 owns global Scan and
+navigation changes; M11 owns staff activity/accountability.
+
+### Consequences
+
+Migrations are additive; expenses/withdrawals later sync as append/deduplicate
+transactions. Professional accounting review remains required before formal
+claims. Physical-device and release-readiness checks remain independent of source
+acceptance.
+
+---
+
 # 6. Explicitly Deferred Decisions
 
 These are intentionally unresolved and should not be reopened as though they were forgotten.

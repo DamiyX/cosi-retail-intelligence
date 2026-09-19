@@ -602,7 +602,12 @@ Provide first meaningful owner visibility.
 - withdrawals;
 - transaction count;
 - top-moving products;
-- purchase-cost change highlights.
+- compact real inventory/expiry attention.
+
+Purchase-cost/market movement highlights are deferred to M9/M10 under the later
+approved product-change disposition (PC-07); M6 must not simulate them. The
+implementation contract, cautious financial labels and five vertical tickets
+are in `M6_EXPENSES_BUSINESS_SUMMARY_PLAN.md` and `tickets.md`.
 
 ## Acceptance
 

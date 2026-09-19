@@ -190,12 +190,12 @@ transaction completed if its local atomic commit failed.
 | Capability | MVP intent | Design status |
 | --- | --- | --- |
 | Account/store onboarding | Minimal path to useful work | Flow details open |
-| Today/Home | Daily task entry and honest summary | Layout open |
+| Today/Home | Live daily facts, compact M5 attention and next actions | M6 contract in DESIGN/D-041; implementation pending |
 | Sale/cart/payment/completion | Required offline workflow | Capability flow approved |
 | Catalogue/search/product edit | Progressive digitization | M2 flow approved in `docs/design/DESIGN.md` |
 | Restock/purchase | Required offline workflow | M4 source accepted; M5 expiry-group extension accepted |
 | Inventory/reconciliation | Event-based blind checks and batch control | M5 source accepted; physical checks carried |
-| Expense/withdrawal | Required offline record | Screen split open |
+| Expense/withdrawal | Separate immutable owner-only offline records | M6 contract in DESIGN/D-041; implementation pending |
 | Transactions/history | Review and accountability | Filters/actions open |
 | Price history/signals | Lead value proposition | Presentation open |
 | Scanner | Barcode first, recognition later | Interaction open |

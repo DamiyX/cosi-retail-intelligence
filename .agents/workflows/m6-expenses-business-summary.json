@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "task_id": "m6-expenses-business-summary",
+  "workflow_id": "build-feature",
+  "mode": "implement",
+  "status": "pending",
+  "current_state": "m6-planning-published",
+  "completed_states": [
+    "m5-independent-source-accepted",
+    "m6-plan-design-tickets-reviewed"
+  ],
+  "owner": {
+    "agent": "m6-implementation-engineer",
+    "thread": "pending-new-task",
+    "worktree": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m0"
+  },
+  "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m0",
+  "lease": null,
+  "evidence": [
+    {
+      "kind": "inspection",
+      "claim": "Coordinator inspected accepted M5 schema and code. No expense or owner-withdrawal persistence/routes exist; completed sales, immutable sale-cost snapshots, store timezone and M5 attention are available for M6 read models.",
+      "observed_at": "2026-09-19T00:59:06.5628600Z"
+    },
+    {
+      "kind": "planning",
+      "path": "docs/engineering/M6_EXPENSES_BUSINESS_SUMMARY_PLAN.md",
+      "claim": "Coordinator published the M6 domain, data, UX, migration and verification contract plus five sequential vertical tickets. No M6 runtime implementation or physical evidence is claimed.",
+      "observed_at": "2026-09-19T00:59:06.5628600Z"
+    },
+    {
+      "kind": "ticket-dependencies",
+      "dependencies": {
+        "M6-01": [],
+        "M6-02": [
+          "M6-01"
+        ],
+        "M6-03": [
+          "M6-01",
+          "M6-02"
+        ],
+        "M6-04": [
+          "M6-03"
+        ],
+        "M6-05": [
+          "M6-01",
+          "M6-02",
+          "M6-03",
+          "M6-04"
+        ]
+      },
+      "claim": "One implementation task owns the checkout sequentially; coordinator retains independent audit.",
+      "observed_at": "2026-09-19T00:59:06.5628600Z"
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "m5-source-accepted",
+      "claim": "M5 source and automated scope is independently accepted.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Read archived M5 workflow and final audit.",
+        "success_condition": "M5 accepted with readiness gates carried."
+      },
+      "evidence": [
+        {
+          "result": "M5 accepted after migration 15 durability correction and 449-test validation.",
+          "source": "docs/engineering/M5_AUDIT_CORRECTIONS.md; .agents/workflows/m5-inventory-reconciliation.json",
+          "observed_at": "2026-09-19T00:59:06.5628600Z"
+        }
+      ],
+      "limitations": [
+        "Physical/release-readiness checks remain carried."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m6-plan-design-tickets-reviewed",
+      "claim": "M6 product, domain, UX and ticket boundaries are published before implementation.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "m5-source-accepted"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Review M6 plan, DESIGN, D-041, BUILD_PLAN and tickets against accepted M1-M5 contracts.",
+        "success_condition": "Five runnable tickets preserve exact money, offline atomicity, truthful reporting and later-milestone boundaries."
+      },
+      "evidence": [
+        {
+          "result": "M6 plan, D-041, DESIGN contract and tickets M6-01 through M6-05 prepared on feat/m6-expenses-business-summary.",
+          "source": "docs/engineering/M6_EXPENSES_BUSINESS_SUMMARY_PLAN.md; docs/decisions/DECISION_LOG.md; docs/design/DESIGN.md; tickets.md",
+          "observed_at": "2026-09-19T00:59:06.5628600Z"
+        }
+      ],
+      "limitations": [
+        "No M6 runtime implementation exists yet."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m6-implementation-assigned",
+      "claim": "One separate Luna Max task is registered as the sole M6 writer.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m6-plan-design-tickets-reviewed"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Create the task from the clean planning checkpoint and record its task ID.",
+        "success_condition": "One task owns M6-01 through M6-05; no overlapping writer."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m6-implementation-evidence",
+      "claim": "M6 tickets have recoverable commits and actual passing checks.",
+      "owner": "m6-implementation-task",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m6-implementation-assigned"
+      ],
+      "verification": {
+        "kind": "test",
+        "procedure": "Implement tickets sequentially with focused and final repository checks.",
+        "success_condition": "Ticket criteria, migrations, tests, docs and clean handoff are recorded truthfully."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m6-independent-audit",
+      "claim": "Coordinator independently reviews M6 and accepts or returns bounded corrections.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m6-implementation-evidence"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Inspect code, migrations, tests and user paths; independently rerun proportionate checks.",
+        "success_condition": "No blocking finding; source acceptance distinguished from release readiness."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "carried-device-release-readiness",
+      "claim": "Physical device, Metro, second-laptop and accounting gates precede pilot/beta/native-release claims.",
+      "owner": "founder-and-verification-task",
+      "required": false,
+      "status": "blocked",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Perform the deferred real-device and environment checks and professional accounting review where required.",
+        "success_condition": "Actual observations are recorded for the claims they support."
+      },
+      "evidence": [],
+      "limitations": [
+        "Founder deferred phone checks and allows source continuation."
+      ],
+      "blocker": "Physical/setup/accounting evidence remains outstanding.",
+      "waiver": {
+        "reason": "Founder allows source continuation with readiness carried, not passed.",
+        "approved_by": "founder"
+      }
+    }
+  ],
+  "artifacts": [
+    "tickets.md",
+    "docs/engineering/M6_EXPENSES_BUSINESS_SUMMARY_PLAN.md",
+    "docs/engineering/PROJECT_STATE.md",
+    "docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md",
+    "docs/engineering/BUILD_PLAN.md",
+    "docs/decisions/DECISION_LOG.md",
+    "docs/design/DESIGN.md",
+    "docs/product/PRD_MVP.md",
+    "docs/architecture/DOMAIN_DATA_MODEL.md",
+    "docs/architecture/TECHNICAL_ARCHITECTURE.md",
+    "docs/architecture/OFFLINE_SYNC.md",
+    ".agents/contexts/app-flow.md"
+  ],
+  "approvals": [
+    {
+      "date": "2026-09-19",
+      "scope": "Founder directs coordinator to close M5, then start M6 with a separate Luna max implementation task; coordinator owns planning, tickets and independent audit."
+    }
+  ],
+  "blockers": [],
+  "next_action": "Commit the M6 planning checkpoint, create the separate Luna Max implementation task, register it, then implement M6-01 through M6-05 and stop for coordinator audit.",
+  "created_at": "2026-09-19T00:59:06.5628600Z",
+  "updated_at": "2026-09-19T00:59:06.5628600Z",
+  "archived": false
+}

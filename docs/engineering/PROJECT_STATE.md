@@ -9,17 +9,18 @@ M0–M5 source and automated scope is independently accepted. M1 acceptance uses
 an explicit device waiver. Physical/release-readiness checks carried from M3–M5
 remain pending and are not implied by source acceptance.
 
-M5 closed after the implementation task returned A08-R3 at `d9a222a`. The
-coordinator independently verified it and made the founder-authorized final
-correction directly: additive migration 15 stores immutable reorder-threshold
-history outside the sync outbox lifecycle. See
+M5 closed after the implementation task returned A08-R3 at `d9a222a`; the final
+coordinator correction and acceptance commit is `9ba4801`. The coordinator
+independently verified it and made the founder-authorized final correction
+directly: additive migration 15 stores immutable reorder-threshold history
+outside the sync outbox lifecycle. See
 `docs/engineering/M5_AUDIT_CORRECTIONS.md` and the archived M5 workflow.
 
 ## Active checkout and ownership
 
 - Checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m0`
 - Canonical remote: `https://github.com/DamiyX/cosi-retail-intelligence`
-- Current branch while this record is authored: `feat/m5-inventory-reconciliation`
+- Current branch: `feat/m6-expenses-business-summary`
 - Canonical implementation sequence: M0 through M13 in `BUILD_PLAN.md`
 - Coordinator task: `01a098ef-d830-7531-bca7-2d66b0a5b587`
 - M5 implementation task: `01a0b525-289e-7b40-8f4b-2701fe541ad9` (stopped)
@@ -93,10 +94,9 @@ this checkout after the planning checkpoint is committed.
 
 ## Next action
 
-Commit the final M5 correction and acceptance record, create
-`feat/m6-expenses-business-summary`, publish the M6 plan/design/tickets/workflow,
-then start one separate Luna Max implementation task. That task implements only
-M6-01 through M6-05 sequentially and stops for coordinator audit before M7.
+Commit the M6 plan/design/tickets/workflow, then start one separate Luna Max
+implementation task. That task implements only M6-01 through M6-05 sequentially
+and stops for coordinator audit before M7.
 
 A continuing agent must first read `AGENTS.md`, this file,
 `MULTI_AGENT_WORKFLOW.md`, `IMPLEMENTATION_AUDIT_WORKFLOW.md`, the workflow

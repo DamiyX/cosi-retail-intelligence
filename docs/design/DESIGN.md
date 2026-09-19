@@ -374,6 +374,56 @@ All surfaces require loading/empty/error/retry, retained input after read errors
 locally saved/pending sync versus acknowledged status, accessible labelled actions,
 large text and hardware/header exit checks. Physical evidence remains separate.
 
+## M6 Expenses, Withdrawals and Live Today
+
+M6 keeps the established navigation. **Today** becomes the calm Home operating
+surface; **More** receives expense/withdrawal entry and history. Do not add a
+Reports tab, global Scan action or price-movement simulation in this milestone.
+
+### Home sequence
+
+1. Header identifies the store and local day without presenting a cloud state as
+   business truth.
+2. **Live today** leads with Sales value and Transactions. Sales value includes
+   recorded credit sales and is labelled as sales, never cash received or profit.
+3. Show Recorded expenses and Owner withdrawals as separate facts. Cost coverage
+   may expose Tracked COGS / Tracked gross margin with an explanation; partial
+   coverage stays visibly unavailable and never becomes zero.
+4. Optionally show **Most frequently sold today** using distinct completed-sale
+   frequency. Omit it calmly when there is no qualifying product.
+5. **Needs attention** previews a small severity-ordered subset of real M5
+   conditions. `See all` opens the complete existing list; actions retain their
+   real restock/reconcile/remove behavior and snooze rules.
+6. A compact next-action row links to Sell, Restock, Stock checks and Record
+   expense. Avoid another global add-product button.
+
+Use zero-day, partial-coverage, loading, failure/retry and local-day rollover
+states. Refresh on focus/foreground and after local durable mutations without
+continuous background polling. Cards wrap at large text and actions retain 48dp
+targets and explicit accessible labels.
+
+### Record money leaving the business
+
+Expense entry: amount in store currency, one approved category, optional note
+and date/time, followed by review/confirm. Withdrawal entry: amount, optional
+note and date/time, visibly described as owner/personal withdrawal rather than an
+operating expense. Invalid/overflow values stay in the field with a clear error.
+Dirty header/hardware Back and Cancel require discard confirmation. A failed
+save retains input and retry identity; success appears only after durable local
+completion.
+
+Expense and withdrawal histories use human category/amount/time/actor labels,
+empty and retry states, and established saved-on-device sync wording. Records are
+immutable in M6; no swipe delete, silent edit, receipt upload, recurring schedule,
+cash-account allocation or accounting journal.
+
+### Summary explanation
+
+The detail surface explains the store-local day, tracked inputs, missing cost
+coverage and why the values are not a complete P&L. Use labels such as **Tracked
+gross margin** and **Recorded expenses**. Do not display **Net profit**, **cash
+balance**, **100% accurate**, or equivalent certainty.
+
 ## Gates for Later Milestones
 
 Before each substantial UI milestone, add its screen sequence, states, recovery
