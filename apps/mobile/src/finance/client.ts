@@ -4,16 +4,19 @@ import {
   findOutboxOperationForEntity,
   getDeviceById,
   getStoreById,
+  listOwnerWithdrawalsByStore,
   listDevicesByStore,
   listExpensesByStore,
   listStores,
   type DeviceRow,
   type ExpenseCategory,
   type ExpenseRow,
+  type OwnerWithdrawalRow,
   type OutboxStatus,
   type StoreRow,
 } from '../db/repositories';
 import { recordExpense, type RecordedExpenseGraph } from './recordExpense';
+import { recordOwnerWithdrawal, type RecordedOwnerWithdrawalGraph } from './recordOwnerWithdrawal';
 
 export interface ExpenseHistoryRow extends ExpenseRow {
   syncStatus: OutboxStatus | null;
@@ -21,6 +24,17 @@ export interface ExpenseHistoryRow extends ExpenseRow {
 
 export interface RecordExpenseScreenInput {
   category: ExpenseCategory;
+  amountMinor: number;
+  note?: string | null;
+  occurredAt?: string;
+  operationId?: string;
+}
+
+export interface OwnerWithdrawalHistoryRow extends OwnerWithdrawalRow {
+  syncStatus: OutboxStatus | null;
+}
+
+export interface RecordOwnerWithdrawalScreenInput {
   amountMinor: number;
   note?: string | null;
   occurredAt?: string;
@@ -35,6 +49,8 @@ export interface FinanceClient {
   readonly userId: string;
   recordExpense(input: RecordExpenseScreenInput): RecordedExpenseGraph;
   listExpenses(): ExpenseHistoryRow[];
+  recordOwnerWithdrawal(input: RecordOwnerWithdrawalScreenInput): RecordedOwnerWithdrawalGraph;
+  listOwnerWithdrawals(): OwnerWithdrawalHistoryRow[];
 }
 
 export interface CreateFinanceClientOptions {
@@ -115,6 +131,31 @@ export function createDatabaseFinanceClient(
           entityType: 'EXPENSE',
           entityId: expense.id,
           operationType: 'EXPENSE_CREATED',
+        })?.status ?? null,
+      }));
+    },
+    recordOwnerWithdrawal(input: RecordOwnerWithdrawalScreenInput): RecordedOwnerWithdrawalGraph {
+      return recordOwnerWithdrawal(adapter, {
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+        amountMinor: input.amountMinor,
+        currencyCode: store.currencyCode,
+        note: input.note,
+        occurredAt: input.occurredAt,
+      }, {
+        operationId: input.operationId,
+        generateId,
+      });
+    },
+    listOwnerWithdrawals(): OwnerWithdrawalHistoryRow[] {
+      return listOwnerWithdrawalsByStore(adapter, store.id).map((withdrawal) => ({
+        ...withdrawal,
+        syncStatus: findOutboxOperationForEntity(adapter, {
+          storeId: store.id,
+          entityType: 'OWNER_WITHDRAWAL',
+          entityId: withdrawal.id,
+          operationType: 'OWNER_WITHDRAWAL_CREATED',
         })?.status ?? null,
       }));
     },

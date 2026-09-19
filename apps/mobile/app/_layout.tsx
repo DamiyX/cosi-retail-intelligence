@@ -37,6 +37,8 @@ export default function RootLayout() {
             <Stack.Screen name="attention" options={{ title: 'Needs attention' }} />
             <Stack.Screen name="expense" options={{ title: 'Record expense' }} />
             <Stack.Screen name="expenses" options={{ title: 'Expense history' }} />
+            <Stack.Screen name="withdrawal" options={{ title: 'Record owner withdrawal' }} />
+            <Stack.Screen name="withdrawals" options={{ title: 'Withdrawal history' }} />
           </Stack>
         </DatabaseProvider>
       )}

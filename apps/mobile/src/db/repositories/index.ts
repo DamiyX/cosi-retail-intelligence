@@ -2,6 +2,8 @@ export { createDevice, getDeviceById, listDevicesByStore } from './devices';
 export type { CreateDeviceInput, DevicePlatform, DeviceRow } from './devices';
 export { createExpense, getExpenseById, listExpensesByStore, EXPENSE_CATEGORIES } from './expenses';
 export type { CreateExpenseInput, ExpenseCategory, ExpenseRow } from './expenses';
+export { createOwnerWithdrawal, getOwnerWithdrawalById, listOwnerWithdrawalsByStore } from './withdrawals';
+export type { CreateOwnerWithdrawalInput, OwnerWithdrawalRow } from './withdrawals';
 export {
   createInventoryAdjustment,
   createInventoryAdjustmentLine,

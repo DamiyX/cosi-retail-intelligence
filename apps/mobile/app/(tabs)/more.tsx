@@ -45,6 +45,14 @@ export default function MoreScreen() {
         <Text style={styles.actionTitle}>Expense history</Text>
         <Text style={styles.actionBody}>Review owner-recorded costs saved on this device</Text>
       </Pressable>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/withdrawal')} style={styles.action}>
+        <Text style={styles.actionTitle}>Record owner withdrawal</Text>
+        <Text style={styles.actionBody}>Keep owner or personal money separate from expenses</Text>
+      </Pressable>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/withdrawals')} style={styles.action}>
+        <Text style={styles.actionTitle}>Withdrawal history</Text>
+        <Text style={styles.actionBody}>Review owner withdrawals saved on this device</Text>
+      </Pressable>
       <Text style={styles.comingSoon}>Staff dispatch and supervisor review are intentionally deferred.</Text>
     </View>
   );

@@ -2387,6 +2387,88 @@ export const MIGRATIONS: Migration[] = [
         BEGIN SELECT RAISE(ABORT, 'expenses are immutable'); END;`,
     ],
   },
+  {
+    version: 17,
+    name: 'owner_withdrawals',
+    statements: [
+      `CREATE TABLE owner_withdrawals (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        amount_minor INTEGER NOT NULL CHECK (amount_minor > 0),
+        currency_code TEXT NOT NULL CHECK (length(currency_code) = 3),
+        note TEXT CHECK (note IS NULL OR length(note) <= 500),
+        occurred_at TEXT NOT NULL,
+        created_by_store_member_id TEXT NOT NULL REFERENCES store_members(id) ON DELETE RESTRICT,
+        created_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+        created_at TEXT NOT NULL
+      );`,
+      `CREATE INDEX idx_owner_withdrawals_store_occurred
+        ON owner_withdrawals(store_id, occurred_at DESC, created_at DESC, id DESC);`,
+      `CREATE TRIGGER trg_owner_withdrawals_member_store_owner_insert
+        BEFORE INSERT ON owner_withdrawals
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.created_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.created_by_user_id
+            AND sm.role = 'OWNER'
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'withdrawal creator is not an active store owner'); END;`,
+      `CREATE TRIGGER trg_owner_withdrawals_member_store_owner_update
+        BEFORE UPDATE ON owner_withdrawals
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_members sm
+          WHERE sm.id = NEW.created_by_store_member_id
+            AND sm.store_id = NEW.store_id
+            AND sm.user_id = NEW.created_by_user_id
+            AND sm.role = 'OWNER'
+            AND sm.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'withdrawal creator is not an active store owner'); END;`,
+      `CREATE TRIGGER trg_owner_withdrawals_device_store_insert
+        BEFORE INSERT ON owner_withdrawals
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id
+            AND d.store_id = NEW.store_id
+            AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'withdrawal device does not belong to active store'); END;`,
+      `CREATE TRIGGER trg_owner_withdrawals_device_store_update
+        BEFORE UPDATE OF store_id, device_id ON owner_withdrawals
+        WHEN NOT EXISTS (
+          SELECT 1 FROM devices d
+          WHERE d.id = NEW.device_id
+            AND d.store_id = NEW.store_id
+            AND d.status = 'ACTIVE'
+        )
+        BEGIN SELECT RAISE(ABORT, 'withdrawal device does not belong to active store'); END;`,
+      `CREATE TRIGGER trg_owner_withdrawals_currency_store_insert
+        BEFORE INSERT ON owner_withdrawals
+        WHEN NOT EXISTS (
+          SELECT 1 FROM stores s
+          WHERE s.id = NEW.store_id
+            AND s.currency_code = NEW.currency_code
+        )
+        BEGIN SELECT RAISE(ABORT, 'withdrawal currency mismatch with store'); END;`,
+      `CREATE TRIGGER trg_owner_withdrawals_currency_store_update
+        BEFORE UPDATE OF store_id, currency_code ON owner_withdrawals
+        WHEN NOT EXISTS (
+          SELECT 1 FROM stores s
+          WHERE s.id = NEW.store_id
+            AND s.currency_code = NEW.currency_code
+        )
+        BEGIN SELECT RAISE(ABORT, 'withdrawal currency mismatch with store'); END;`,
+      `CREATE TRIGGER trg_owner_withdrawals_immutable_update
+        BEFORE UPDATE ON owner_withdrawals
+        BEGIN SELECT RAISE(ABORT, 'owner withdrawals are immutable'); END;`,
+      `CREATE TRIGGER trg_owner_withdrawals_immutable_delete
+        BEFORE DELETE ON owner_withdrawals
+        BEGIN SELECT RAISE(ABORT, 'owner withdrawals are immutable'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;
