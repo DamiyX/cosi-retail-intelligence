@@ -316,6 +316,37 @@ before pilot/beta/native-release readiness; it does not prevent source acceptanc
 or later M6 source continuation once the independent M5 gate is actually met.
 No phone actions or physical evidence were performed in this review.
 
+## Coordinator final re-audit follow-up — 2026-09-19
+
+Reviewed stopped return `9104c49c1d0918866dfd2ecdc15cd6dd0e7755a8`.
+Focused independent execution passed: `m5Attention.test.ts` and
+`m5ReconciliationCorrections.test.tsx`, 18/18 tests. A05-R count-evidence
+blocking and A07-R month-precision copy now satisfy their reproduced cases.
+A08-R still has one material recurrence gap.
+
+### Specification: A08-R2 — Medium: threshold-based recurrence inherits an old snooze
+
+The new stock episode token is reconstructed only from `InventoryEvent` history.
+The low-stock predicate also depends on the mutable reorder threshold, so a
+condition can resolve and recur without an inventory event. Independent real
+SQLite production-service probe: stock 4, threshold 5, snooze LOW_STOCK until
+tomorrow; change threshold to 3 (condition resolves); change it back to 5
+(condition recurs). At 08:20 the recurring condition remained suppressed with
+the original condition key and `suppressedCount: 1`.
+
+Preserve an active snooze through ordinary same-episode movements and unrelated
+settings changes, but ensure a genuine threshold-driven resolution followed by
+recurrence receives a new durable/rebuildable episode. Do not solve this by
+invalidating snoozes for every harmless threshold edit or catalogue edit: the
+approved rule remains suppression until due, real worsening, or resolution.
+Cover restart and recurrence without requiring an overview read during the
+resolved interval. Include unchanged operation replay and store isolation.
+
+**Decision: changes required.** Return A08-R2 to the existing M5 task. Commit
+this follow-up checkpoint separately before correction, run focused regressions
+and the full documented final checks, then stop for independent re-audit. A05-R
+and A07-R require no further correction from this pass. No M6 or phone action.
+
 ## Correction return — 2026-09-19
 
 The coordinator checkpoint was preserved separately in `7ccf672` before any

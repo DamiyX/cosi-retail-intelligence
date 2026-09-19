@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m5-independent-audit-reaudit-ready",
+  "current_state": "m5-independent-audit-a08-r2-changes-required",
   "completed_states": [
     "m4-independent-source-automated-acceptance",
     "m5-founder-batch-fefo-approval",
@@ -238,6 +238,20 @@
         "Doctor/export not rerun in this pass; latest success implementer-reported.",
         "Physical phone checks explicitly deferred. A05-R is source/user-path evidence; A08-R/A07-R independently reproduced using production SQLite services."
       ]
+    },
+    {
+      "kind": "independent-audit",
+      "path": "docs/engineering/M5_AUDIT_CORRECTIONS.md",
+      "claim": "Coordinator final re-audit of 9104c49: focused correction suites PASS 18/18; A05-R and A07-R reproduced cases accepted. Production SQLite probe finds A08-R2: threshold 5 low-stock snooze, threshold 3 resolution, threshold 5 recurrence remains suppressed under the old event-only episode token.",
+      "checks": [
+        "Focused m5Attention + m5ReconciliationCorrections PASS: 18/18.",
+        "Isolated production-service SQLite threshold recurrence probe reproduced recurringVisible false and suppressedCount 1."
+      ],
+      "limitations": [
+        "Full validation was implementer-reported and not rerun after the blocking independent probe.",
+        "Physical checks remain explicitly deferred."
+      ],
+      "observed_at": "2026-09-19T00:01:26.830Z"
     }
   ],
   "acceptance_gates": [
@@ -391,12 +405,16 @@
         {
           "source": "docs/engineering/M5_AUDIT_CORRECTIONS.md; commits 7ccf672, 985478c, de5cb2c",
           "result": "Coordinator checkpoint was committed separately; A05-R now blocks unsaved finalization evidence, A08-R rebuilds stable condition episodes from durable history, and A07-R uses interval-aware MONTH wording. Focused regressions and full validation pass; independent acceptance remains pending coordinator review."
+        },
+        {
+          "source": "docs/engineering/M5_AUDIT_CORRECTIONS.md",
+          "result": "Focused corrections pass 18/18, but independent SQLite threshold recurrence probe requires A08-R2 correction."
         }
       ],
       "limitations": [
         "Implementation completion is verified; independent acceptance is not. Physical checks are explicitly deferred."
       ],
-      "blocker": "A05-R/A08-R/A07-R are corrected; coordinator re-audit and independent acceptance remain required.",
+      "blocker": "A08-R2 threshold-driven resolution/recurrence inherits an old snooze at 9104c49; same-task correction and independent verification required.",
       "waiver": null
     },
     {
@@ -450,8 +468,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Existing M5 task 01a0b525-289e-7b40-8f4b-2701fe541ad9 has committed the coordinator checkpoint separately, corrected A05-R/A08-R/A07-R, completed local validation and returned a clean handoff for coordinator re-audit. Phone checks explicitly deferred; no M6 until source acceptance and M6 planning.",
+  "next_action": "Existing M5 task corrects A08-R2 threshold-driven resolve/recurrence snooze inheritance, returns clean evidence, then coordinator independently re-audits. A05-R/A07-R reproduced cases pass. Phone checks deferred; no M6 yet.",
   "created_at": "2026-09-18T12:55:50.482Z",
-  "updated_at": "2026-09-18T23:54:59.731Z",
+  "updated_at": "2026-09-19T00:01:26.830Z",
   "archived": false
 }

@@ -8,8 +8,11 @@ independent pass at 0a0ea94; coordinator re-audit is still required before any
 acceptance claim. Coordinator re-audit of stopped handoff a6f4153 found
 A05-R/A08-R/A07-R: unsaved recount finalization, premature snooze resurfacing
 and month-precision wording. The checkpoint and all three corrections are now
-recorded on the same M5 task; source acceptance remains blocked pending
-coordinator re-audit. See M5_AUDIT_CORRECTIONS.md.
+recorded on the same M5 task. Final re-audit at 9104c49 accepts A05-R/A07-R but
+finds A08-R2: a low-stock condition resolved and recreated solely by reorder-
+threshold changes inherits its old snooze. Source acceptance remains blocked
+pending the same-task correction and coordinator verification. See
+M5_AUDIT_CORRECTIONS.md.
 Completed engineering milestones: M0; M1 (explicit device waiver); M2 after
 independent audit; M3 and M4 source/automated scope after independent audit,
 with physical/release readiness gates carried.
