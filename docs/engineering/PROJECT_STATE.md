@@ -10,8 +10,11 @@ A05-R/A08-R/A07-R: unsaved recount finalization, premature snooze resurfacing
 and month-precision wording. The checkpoint and all three corrections are now
 recorded on the same M5 task. Final re-audit at 9104c49 accepts A05-R/A07-R but
 finds A08-R2: a low-stock condition resolved and recreated solely by reorder-
-threshold changes inherits its old snooze. A08-R2 is corrected in `248250c`;
-source acceptance remains blocked pending coordinator verification. See
+threshold changes inherits its old snooze. A08-R2's threshold-only sequence is
+corrected in `248250c`, but final re-audit finds A08-R3: interleaved threshold
+resolution, inventory recurrence and a later same-active threshold edit can
+restore the old snooze. Source acceptance remains blocked pending same-task
+correction and coordinator verification. See
 M5_AUDIT_CORRECTIONS.md.
 Completed engineering milestones: M0; M1 (explicit device waiver); M2 after
 independent audit; M3 and M4 source/automated scope after independent audit,

@@ -347,6 +347,40 @@ this follow-up checkpoint separately before correction, run focused regressions
 and the full documented final checks, then stop for independent re-audit. A05-R
 and A07-R require no further correction from this pass. No M6 or phone action.
 
+## Coordinator A08-R2 re-audit follow-up — 2026-09-19
+
+Reviewed stopped return `a2e60a7ca4b8546c300e4fc7456f563e6c53ca6c`.
+Independent focused execution passed: `m5Attention.test.ts` and
+`m5ReorderThreshold.test.tsx`, 17/17 tests. The exact threshold-only 5→3→5
+reproduction is corrected, but interleaved inventory and threshold history
+reveals one remaining ordering defect.
+
+### Specification: A08-R3 — Medium: interleaved recurrence loses its episode
+
+`stockEpisodeToken` independently replays every inventory event using the
+current threshold, then combines that result with a separately replayed threshold
+token. Independent real SQLite production-service probe: stock 4, threshold 5,
+snooze LOW_STOCK until tomorrow; threshold 3 resolves; sell 2 while threshold 3
+recreates LOW_STOCK; threshold 5 remains active; query at 08:20 without any
+overview read during the resolved/recreated interval. Current stock is 2, but
+LOW_STOCK remains hidden with `suppressedCount: 1` and the original key.
+
+Reconstruct one truthful episode across the actual interleaving of threshold and
+inventory mutations. A resolution followed by either kind of mutation recreating
+the condition must receive a new durable token, even if later same-active changes
+occur before the next overview read or after restart. Preserve same-episode
+snoozes and replay/store isolation. Do not depend on device timestamps as the
+sole ordering mechanism or combine two independently replayed histories that can
+erase their intervening transition. A durable snapshot/cursor carried by the
+existing atomic writers is acceptable; keep the solution bounded to low-stock
+episode identity.
+
+Add the exact failing-before regression above plus its inverse ordering (an
+inventory resolution followed by threshold recurrence), restart, no-intermediate-
+overview and unchanged replay. Run focused and full final checks. Commit this
+checkpoint separately, return a clean branch and stop for independent acceptance.
+No M6 or phone action.
+
 ## Correction return — 2026-09-19
 
 The coordinator checkpoint was preserved separately in `7ccf672` before any
