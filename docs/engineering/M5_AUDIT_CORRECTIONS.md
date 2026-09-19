@@ -412,3 +412,46 @@ The branch is returned for coordinator re-audit; this record does not grant
 independent acceptance. Physical/device, development-client/Metro, second-
 laptop, cloud/deployment and professional accounting checks remain pending.
 No M6 work, phone action, push, merge or deployment was performed.
+
+## A08-R2 correction return — 2026-09-19
+
+The coordinator follow-up checkpoint was preserved separately in `2feea7a`.
+A08-R2 is corrected in `248250c` on the same M5 branch; A05-R and A07-R were
+not changed in this follow-up.
+
+The reorder-threshold mutation now records its prior threshold and the durable
+inventory balance at the mutation point in the existing outbox snapshot.
+Attention rebuilds threshold-driven LOW_STOCK episode transitions from those
+durable local records in SQLite application order. A same-active threshold edit
+does not change the episode token; a threshold-driven resolution followed by
+recurrence receives the new threshold operation token. Replays do not append a
+second history row. No migration was necessary and no prior migration or
+completed transaction was rewritten.
+
+Baseline against the reviewed `9104c49` source: the new exact probe regression
+failed while the eight existing attention tests passed. The original failure
+returned only the unrelated coverage item after threshold 5→3→5 because the
+LOW_STOCK item remained suppressed. After the fix, `m5Attention.test.ts` passes
+9/9, including same-active threshold movement, threshold-operation replay with
+no duplicate outbox write, owner isolation, no overview read during resolution,
+restart and recurring condition-key identity. Existing reorder-threshold
+service tests pass 8/8, including store isolation and replay.
+
+Final local verification after A08-R2:
+
+- `npm run validate`: PASS — 5 domain suites/150 tests and 37 mobile suites/295
+  tests, 445 total; strict typecheck and zero-warning lint.
+- `npm run mobile:doctor`: PASS — 21/21 after one transient `exp.host:443`
+  timeout on the first attempt.
+- `npm exec --workspace @retail/mobile -- expo install --check`: PASS;
+  dependencies are up to date.
+- `npm run mobile:export`: PASS — 1,382 Android modules and a 3.5 MB Hermes
+  bundle; generated `apps/mobile/dist` remains ignored/untracked.
+- Active workflow/index AJV draft-2020/date-time validation, gate dependency
+  DAG, registered-artifact existence, contiguous migration registry 1..14 and
+  `git diff --check`: PASS.
+
+The branch is returned for coordinator re-audit; independent acceptance remains
+unresolved and is not claimed. Physical/device, development-client/Metro,
+second-laptop, cloud/deployment and professional accounting checks remain
+pending. No M6 work, phone action, push, merge or deployment was performed.

@@ -286,6 +286,13 @@ and reminders from actual recorded remaining inventory.
   `expiry`/`best-before` meaning and DAY-specific `reaches today` coverage.
   The focused attention suite has 8 passing tests, including due-time,
   worsening, recurrence without an overview read, restart and replay cases.
+- A08-R2 correction: checkpoint `2feea7a` and fix `248250c` record prior
+  reorder threshold plus inventory balance in the existing reorder outbox
+  snapshot. Threshold-driven LOW_STOCK resolution/recurrence now receives a new
+  rebuildable episode token, while same-active threshold edits preserve the
+  snooze. The focused regression passes 9/9 with threshold replay/no duplicate
+  outbox write, owner isolation, no-intermediate-overview and restart coverage;
+  the existing reorder-threshold service suite passes 8/8 with store isolation.
 - Physical Android, development-build/Metro, second-laptop, accounting and
   independent-audit evidence remain outstanding; no Home/M6 cards were added.
 
@@ -312,15 +319,17 @@ review what actually passed. No feature scope expansion.
 
 - Validation/correction commits: `f8d63d7` (M5-06), `af475c2` (M5-07
   route/schema harness correction), `7ccf672` (coordinator re-audit checkpoint),
-  `985478c` (A05-R), and `de5cb2c` (A08-R/A07-R). Migration history is additive
-  through v14: v7 receipt groups, v8 adjustments, v9 reconciliation, v10 guided
-  checks, v11 attention, and v14 reorder thresholds.
+  `985478c` (A05-R), `de5cb2c` (A08-R/A07-R), `2feea7a` (A08-R2 audit
+  checkpoint), and `248250c` (A08-R2). Migration history is additive through
+  v14: v7 receipt groups, v8 adjustments, v9 reconciliation, v10 guided checks,
+  v11 attention, and v14 reorder thresholds.
 - `npm run validate` PASS: environment pinned Node 24.21.0/npm 11.19.0/git
-  2.55.0 with adb available; domain 5 suites/150 tests; mobile 37 suites/294
-  tests; 444 tests total, strict typecheck and zero-warning lint. The focused
-  A05-R reconciliation correction suite has 1 suite/10 tests; the A08-R/A07-R
-  attention suite has 1 suite/8 tests. Populated-v6/v7 migration retention,
-  rollback, reopen and rebuilt projection/cost evidence is included in the M5
+  2.55.0 with adb available; domain 5 suites/150 tests; mobile 37 suites/295
+  tests; 445 tests total, strict typecheck and zero-warning lint. The focused
+  A05-R reconciliation correction suite has 1 suite/10 tests; the A08-R/A07-R/
+  A08-R2 attention suite has 1 suite/9 tests; the reorder-threshold service
+  suite has 1 suite/8 tests. Populated-v6/v7 migration retention, rollback,
+  reopen and rebuilt projection/cost evidence is included in the M5
   batch/adjustment suites.
 - `npm run mobile:doctor` PASS 21/21; `npm exec --workspace @retail/mobile --
   expo install --check` PASS with dependencies up to date; `npm run mobile:export`
