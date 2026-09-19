@@ -19,6 +19,11 @@ import AdjustmentRoute from '../app/adjustment';
 import ReconciliationRoute from '../app/reconciliation';
 import GuidedChecksRoute from '../app/guided-checks';
 import AttentionRoute from '../app/attention';
+import ExpenseEntryRoute from '../app/expense';
+import ExpenseHistoryRoute from '../app/expenses';
+import OwnerWithdrawalEntryRoute from '../app/withdrawal';
+import OwnerWithdrawalHistoryRoute from '../app/withdrawals';
+import BusinessSummaryRoute from '../app/summary';
 import type { IsolatedDatabase } from '../src/db/testing';
 import { openIsolatedDatabase } from '../src/db/testing';
 import { CURRENT_SCHEMA_VERSION, MIGRATIONS } from '../src/db';
@@ -57,6 +62,11 @@ const ROUTES = {
   reconciliation: ReconciliationRoute,
   'guided-checks': GuidedChecksRoute,
   attention: AttentionRoute,
+  expense: ExpenseEntryRoute,
+  expenses: ExpenseHistoryRoute,
+  withdrawal: OwnerWithdrawalEntryRoute,
+  withdrawals: OwnerWithdrawalHistoryRoute,
+  summary: BusinessSummaryRoute,
 } as never;
 
 function openStoreDatabase(): IsolatedDatabase {
@@ -133,9 +143,9 @@ describe('M2 product shell', () => {
     expect(router.getPathname()).toBe(detailPath);
   });
 
-  it('keeps later-milestone areas as clearly labelled placeholders', async () => {
+  it('keeps the Home tab focused on the live daily summary', async () => {
     renderRouter(ROUTES, { initialUrl: '/today' });
-    expect(await screen.findByText(/arrives in a\s*later milestone/)).toBeTruthy();
+    expect(await screen.findByText('Live today')).toBeTruthy();
   });
 
   it('provisions a local store from a fresh database and reaches Products', async () => {

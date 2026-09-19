@@ -13,7 +13,7 @@ import {
   getStoreProductById,
   listReorderLevelHistory,
 } from '../src/db/repositories';
-import { MIGRATIONS, openDatabase } from '../src/db';
+import { CURRENT_SCHEMA_VERSION, MIGRATIONS, openDatabase } from '../src/db';
 import { openIsolatedDatabase } from '../src/db/testing';
 import { provisionStoreContext } from '../src/storeContext/provisionStoreContext';
 import { createDatabaseInventoryClient } from '../src/inventory/client';
@@ -61,7 +61,7 @@ describe('A11 reorder threshold service', () => {
         });
       });
 
-      expect(openDatabase(isolated.adapter, MIGRATIONS).schemaVersion).toBe(15);
+      expect(openDatabase(isolated.adapter, MIGRATIONS).schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
       expect(listReorderLevelHistory(isolated.adapter, context.store.id, graph.storeProduct.id)).toEqual([
         expect.objectContaining({
           operationId: testId(19200), previousReorderLevelBaseMicros: null,

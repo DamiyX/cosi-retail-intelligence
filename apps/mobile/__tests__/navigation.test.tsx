@@ -20,6 +20,11 @@ import AdjustmentRoute from '../app/adjustment';
 import ReconciliationRoute from '../app/reconciliation';
 import GuidedChecksRoute from '../app/guided-checks';
 import AttentionRoute from '../app/attention';
+import ExpenseEntryRoute from '../app/expense';
+import ExpenseHistoryRoute from '../app/expenses';
+import OwnerWithdrawalEntryRoute from '../app/withdrawal';
+import OwnerWithdrawalHistoryRoute from '../app/withdrawals';
+import BusinessSummaryRoute from '../app/summary';
 import type { IsolatedDatabase } from '../src/db/testing';
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
 import { openIsolatedDatabase } from '../src/db/testing';
@@ -59,6 +64,11 @@ const ROUTES = {
   reconciliation: ReconciliationRoute,
   'guided-checks': GuidedChecksRoute,
   attention: AttentionRoute,
+  expense: ExpenseEntryRoute,
+  expenses: ExpenseHistoryRoute,
+  withdrawal: OwnerWithdrawalEntryRoute,
+  withdrawals: OwnerWithdrawalHistoryRoute,
+  summary: BusinessSummaryRoute,
 } as never;
 
 describe('M2 tab navigation', () => {
@@ -83,7 +93,7 @@ describe('M2 tab navigation', () => {
     mockDatabase = null;
   });
 
-  it('switches between Products and the later-milestone placeholders', async () => {
+  it('switches between Products and the live Home summary', async () => {
     const router = renderRouter(ROUTES, { initialUrl: '/products' });
     expect(await screen.findByText('No products yet')).toBeTruthy();
 
@@ -92,7 +102,7 @@ describe('M2 tab navigation', () => {
     expect(router.getPathname()).toBe('/sell');
 
     fireEvent.press(screen.getByLabelText(/Today, tab/));
-    expect(await screen.findByText(/arrives in a\s*later milestone/)).toBeTruthy();
+    expect(await screen.findByText('Live today')).toBeTruthy();
 
     fireEvent.press(screen.getByLabelText(/More, tab/));
     expect(await screen.findByText(/Keep purchases and receipts available/)).toBeTruthy();
@@ -154,7 +164,7 @@ describe('M2 tab navigation', () => {
     act(() => {
       actions?.find((action) => action.text === 'Discard')?.onPress?.();
     });
-    expect(await screen.findByText(/arrives in a\s*later milestone/)).toBeTruthy();
+    expect(await screen.findByText('Live today')).toBeTruthy();
     expect(router.getPathname()).toBe('/today');
 
     alertSpy.mockRestore();
@@ -254,7 +264,7 @@ describe('M2 tab navigation', () => {
     act(() => {
       actions?.find((action) => action.text === 'Discard')?.onPress?.();
     });
-    expect(await screen.findByText(/arrives in a\s*later milestone/)).toBeTruthy();
+    expect(await screen.findByText('Live today')).toBeTruthy();
     expect(router.getPathname()).toBe('/today');
 
     alertSpy.mockRestore();

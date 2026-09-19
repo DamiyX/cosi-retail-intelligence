@@ -1,7 +1,7 @@
 import { MICROS_PER_UNIT } from '@retail/domain';
 
 import { createCatalogueClient } from '../src/catalogue/client';
-import { MIGRATIONS, openDatabase } from '../src/db';
+import { CURRENT_SCHEMA_VERSION, MIGRATIONS, openDatabase } from '../src/db';
 import type { DatabaseAdapter } from '../src/db/adapter';
 import { openIsolatedDatabase } from '../src/db/testing';
 import {
@@ -210,7 +210,7 @@ describe('M5 A01 batch graph sealing', () => {
       const beforeEventCount = isolated.adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM inventory_events;')?.total;
       const beforeOperationId = purchase.batchOperations[0].id;
       const report = openDatabase(isolated.adapter, MIGRATIONS);
-    expect(report.schemaVersion).toBe(15);
+      expect(report.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
       expect(isolated.adapter.getFirstRow<{ total: number }>('SELECT COUNT(*) AS total FROM inventory_events;')?.total).toBe(beforeEventCount);
       expect(isolated.adapter.getFirstRow<{ sealed_at: string; sealed_entry_count: number }>(
         'SELECT sealed_at, sealed_entry_count FROM batch_inventory_operations WHERE id = ?;',

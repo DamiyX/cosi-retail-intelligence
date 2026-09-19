@@ -3,15 +3,20 @@
   "task_id": "m6-expenses-business-summary",
   "workflow_id": "build-feature",
   "mode": "implement",
-  "status": "pending",
-  "current_state": "m6-planning-published",
+  "status": "in_progress",
+  "current_state": "m6-implementation-evidence-ready",
   "completed_states": [
     "m5-independent-source-accepted",
-    "m6-plan-design-tickets-reviewed"
+    "m6-plan-design-tickets-reviewed",
+    "m6-01-implemented",
+    "m6-02-implemented",
+    "m6-03-implemented",
+    "m6-04-implemented",
+    "m6-05-evidence-recorded"
   ],
   "owner": {
     "agent": "m6-implementation-engineer",
-    "thread": "pending-new-task",
+    "thread": "01a0b72e-5fdf-7022-afc8-2e1796f49b66",
     "worktree": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m0"
   },
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m0",
@@ -51,6 +56,41 @@
       },
       "claim": "One implementation task owns the checkout sequentially; coordinator retains independent audit.",
       "observed_at": "2026-09-19T00:59:06.5628600Z"
+    },
+    {
+      "kind": "validation",
+      "path": "apps/mobile/src/db/migrations.ts; apps/mobile/src/finance; apps/mobile/src/screens/finance; apps/mobile/src/screens/home; tickets.md",
+      "claim": "M6-01 through M6-04 are implemented sequentially in recoverable commits 86e526b, 1cce732, ef47fab and 1c9a134. The implementation preserves additive migrations, exact integer money, owner/store authorization, atomic canonical outbox completion, truthful local-day reporting and real M5 attention routing.",
+      "checks": [
+        "Focused M6 suites PASS: 7 suites, 21 tests",
+        "npm run typecheck PASS",
+        "npm run lint PASS with zero warnings",
+        "git diff --check PASS at ticket checkpoints"
+      ],
+      "limitations": [
+        "Coordinator independent audit remains pending.",
+        "Physical device, development-client/Metro, second-laptop and professional accounting checks remain outstanding."
+      ],
+      "observed_at": "2026-09-19T02:27:59.6551548Z"
+    },
+    {
+      "kind": "validation",
+      "path": "tickets.md; docs/engineering/PROJECT_STATE.md; .agents/workflows/m6-expenses-business-summary.json",
+      "claim": "M6-05 repository validation passes and the branch is ready for independent audit without starting M7.",
+      "checks": [
+        "npm run validate PASS: environment checks, strict typecheck, zero-warning lint, 5 domain suites/150 tests and 44 mobile suites/320 tests",
+        "npm run mobile:doctor PASS: 21/21 checks",
+        "npm exec --workspace @retail/mobile -- expo install --check PASS: dependencies up to date",
+        "npm run mobile:export PASS: 1,402 Android modules and 3.6 MB Hermes bundle",
+        "Workflow/index AJV schema/date-time, gate dependency, artifact and contiguous migration registry 1..17 checks PASS",
+        "git diff --check PASS; generated export output remains ignored"
+      ],
+      "limitations": [
+        "The requested separate Luna Max task could not be created because the host account usage limit was reached; the user authorized direct continuation in this current task.",
+        "Coordinator-owned independent audit remains pending; this evidence is not milestone acceptance.",
+        "Physical device, development-client/Metro, second-laptop, cloud/deployment and professional accounting checks remain outstanding."
+      ],
+      "observed_at": "2026-09-19T02:27:59.6551548Z"
     }
   ],
   "acceptance_gates": [
@@ -120,9 +160,17 @@
         "procedure": "Create the task from the clean planning checkpoint and record its task ID.",
         "success_condition": "One task owns M6-01 through M6-05; no overlapping writer."
       },
-      "evidence": [],
-      "limitations": [],
-      "blocker": null,
+      "evidence": [
+        {
+          "result": "The requested separate Luna Max task could not be created because the host account usage limit was reached. The user then authorized this current task thread 01a0b72e-5fdf-7022-afc8-2e1796f49b66 to continue as the sole writer on the existing branch; no overlapping writer was used.",
+          "source": "current task delegation result; git status --short --branch; git log --oneline",
+          "observed_at": "2026-09-19T02:27:59.6551548Z"
+        }
+      ],
+      "limitations": [
+        "Coordinator must resolve this ownership-gate exception during independent audit; implementation evidence does not self-waive the separate-task process."
+      ],
+      "blocker": "Separate implementation-task creation was unavailable because the host account usage limit was reached; direct continuation was authorized by the user.",
       "waiver": null
     },
     {
@@ -130,7 +178,7 @@
       "claim": "M6 tickets have recoverable commits and actual passing checks.",
       "owner": "m6-implementation-task",
       "required": true,
-      "status": "pending",
+      "status": "met",
       "depends_on": [
         "m6-implementation-assigned"
       ],
@@ -139,8 +187,17 @@
         "procedure": "Implement tickets sequentially with focused and final repository checks.",
         "success_condition": "Ticket criteria, migrations, tests, docs and clean handoff are recorded truthfully."
       },
-      "evidence": [],
-      "limitations": [],
+      "evidence": [
+        {
+          "result": "M6-01 through M6-05 implementation evidence is recorded with commits 86e526b, 1cce732, ef47fab and 1c9a134 plus the M6-05 completion commit; focused and full checks pass, with no M7 work.",
+          "source": "tickets.md; docs/engineering/PROJECT_STATE.md; current branch commits",
+          "observed_at": "2026-09-19T02:27:59.6551548Z"
+        }
+      ],
+      "limitations": [
+        "Evidence is implementer-reported and does not satisfy the coordinator-owned independent-audit gate.",
+        "The separate-task ownership gate remains pending due the host account usage limit exception."
+      ],
       "blocker": null,
       "waiver": null
     },
@@ -198,7 +255,19 @@
     "docs/architecture/DOMAIN_DATA_MODEL.md",
     "docs/architecture/TECHNICAL_ARCHITECTURE.md",
     "docs/architecture/OFFLINE_SYNC.md",
-    ".agents/contexts/app-flow.md"
+    ".agents/contexts/app-flow.md",
+    "apps/mobile/src/db/migrations.ts",
+    "apps/mobile/src/finance/recordExpense.ts",
+    "apps/mobile/src/finance/recordOwnerWithdrawal.ts",
+    "apps/mobile/src/finance/businessSummary.ts",
+    "apps/mobile/src/screens/finance/ExpenseEntryScreen.tsx",
+    "apps/mobile/src/screens/finance/OwnerWithdrawalEntryScreen.tsx",
+    "apps/mobile/src/screens/finance/BusinessSummaryScreen.tsx",
+    "apps/mobile/src/screens/home/HomeScreen.tsx",
+    "apps/mobile/__tests__/m6Expenses.test.ts",
+    "apps/mobile/__tests__/m6Withdrawals.test.ts",
+    "apps/mobile/__tests__/m6BusinessSummary.test.ts",
+    "apps/mobile/__tests__/m6Home.test.tsx"
   ],
   "approvals": [
     {
@@ -207,8 +276,8 @@
     }
   ],
   "blockers": [],
-  "next_action": "Commit the M6 planning checkpoint, create the separate Luna Max implementation task, register it, then implement M6-01 through M6-05 and stop for coordinator audit.",
+  "next_action": "Coordinator independently audits the M6 implementation evidence on feat/m6-expenses-business-summary; return bounded corrections to this branch if needed, otherwise accept source/automated scope. Do not start M7.",
   "created_at": "2026-09-19T00:59:06.5628600Z",
-  "updated_at": "2026-09-19T00:59:06.5628600Z",
+  "updated_at": "2026-09-19T02:27:59.6551548Z",
   "archived": false
 }
