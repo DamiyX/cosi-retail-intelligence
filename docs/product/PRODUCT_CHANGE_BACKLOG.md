@@ -96,10 +96,10 @@ schema/UX details live in approved authorities, not copied into this backlog.
   `OFFLINE_SYNC.md`, including legacy/extended sale and purchase payloads,
   batch/reconciliation facts, mutable settings, expenses and withdrawals.
 - M8 owns PC-02 and scanner/barcode application integration after the M7 source
-  contract is accepted. Astra/coordinator planning for M8 and separate
-  Recognition Track B research may proceed while another task implements M7,
-  provided they use separate branches/worktrees and do not edit shared schema or
-  contracts concurrently.
+  contract is accepted. Founder deferred Astra/coordinator M8 planning until this
+  coordinator task is explicitly switched to Astra. When resumed, any parallel
+  Recognition Track B work uses separate branches/worktrees and does not edit
+  shared schema or contracts concurrently.
 - Production M8 and M9 remain sequential in the core app. Recognition R&D is the
   parallel track; M9 must not begin in the same checkout while M8 is changing
   navigation, catalogue or scanner contracts.

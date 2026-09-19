@@ -87,9 +87,10 @@ partial measure, never full profit or P&L.
    historical evidence only.
 3. Continue validating useful retailer workflows early instead of building all
    future infrastructure at once.
-4. Keep M8 scanner/recognition planning coordinator-owned. It may proceed in a
-   separate worktree while M7 implementation runs, but production M8 and shared
-   contract edits wait for accepted M7.
+4. Keep M8 scanner/recognition planning coordinator/Astra-owned. Founder
+   explicitly deferred it until this task is switched to Astra. Production M8
+   and shared contract edits wait for accepted M7; production M9 remains after
+   accepted M8.
 
 ## Decision Budget
 

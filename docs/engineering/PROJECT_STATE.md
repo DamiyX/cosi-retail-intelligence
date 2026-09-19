@@ -3,7 +3,8 @@
 Last updated: 2026-09-19  
 Current milestone: M7 offline-sync planning checkpoint complete; implementation
 awaits assignment and a real non-production Supabase integration environment.
-M8 scanner planning may proceed in a separate worktree.
+Founder has deferred M8 scanner planning until this coordinator task is
+explicitly switched to Astra.
 
 ## Current status
 
@@ -66,12 +67,13 @@ legacy plus extended sale/purchase envelopes, M5 batch/reconciliation/config
 facts and M6 expense/withdrawal transactions without inventing feature-specific
 sync protocols. M7 does not implement Scan, staff workflows or price signals.
 
-M8 product planning is complex and remains coordinator/Astra-owned. It may be
-prepared in a separate worktree while a separate task implements M7. Production
-M8 integration begins after M7 source acceptance; M9 follows M8 in the core app.
-Recognition Track B research may run in parallel behind stable contracts and
-feature flags. Concurrent writers must not edit shared catalogue, package-unit,
-sync or recognition contracts.
+M8 product planning is complex and remains coordinator/Astra-owned. On
+2026-09-19 the founder explicitly deferred that planning until this task is
+switched to Astra. Production M8 integration begins after M7 source acceptance;
+M9 follows M8 in the core app. Recognition Track B research may run in parallel
+behind stable contracts and feature flags only after it is deliberately started.
+Concurrent writers must not edit shared catalogue, package-unit, sync or
+recognition contracts.
 
 ## M7 planning checkpoint
 
@@ -102,9 +104,10 @@ evidence only.
 
 Commit the M7 planning checkpoint. Establish Docker-backed local Supabase or an
 explicitly authorized isolated hosted development project, then assign M7-01
-through M7-08 to one Luna Max implementation task. The coordinator may prepare
-M8 contracts/UX/tickets in a separate worktree, but must not start production M8
-or M9 code before accepted M7.
+through M7-08 to one Luna Max implementation task. Do not resume M8 planning
+until the founder switches this coordinator task to Astra. M9 planning may be
+prepared separately while M7 runs, but production M9 code remains after accepted
+M8 because both milestones touch navigation/catalogue selection contracts.
 
 A continuing agent must first read `AGENTS.md`, this file,
 `MULTI_AGENT_WORKFLOW.md`, `IMPLEMENTATION_AUDIT_WORKFLOW.md`, the workflow

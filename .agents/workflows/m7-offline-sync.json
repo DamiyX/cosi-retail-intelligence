@@ -178,6 +178,10 @@
     {
       "date": "2026-09-19",
       "scope": "Founder directs coordinator to verify roadmap/product changes before M7, continue the milestone workflow, retain independent audit and keep M8 scanner/recognition planning coordinator-owned."
+    },
+    {
+      "date": "2026-09-19",
+      "scope": "Founder explicitly defers M8 planning until the coordinator task is switched to Astra; no M8 implementation is authorized."
     }
   ],
   "blockers": [
