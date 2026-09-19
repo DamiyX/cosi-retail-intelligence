@@ -1,8 +1,8 @@
 export { createDevice, getDeviceById, listDevicesByStore } from './devices';
 export type { CreateDeviceInput, DevicePlatform, DeviceRow } from './devices';
-export { createExpense, getExpenseById, listExpensesByStore, EXPENSE_CATEGORIES } from './expenses';
+export { createExpense, getExpenseById, listExpensesByStore, listExpensesByStoreInRange, EXPENSE_CATEGORIES } from './expenses';
 export type { CreateExpenseInput, ExpenseCategory, ExpenseRow } from './expenses';
-export { createOwnerWithdrawal, getOwnerWithdrawalById, listOwnerWithdrawalsByStore } from './withdrawals';
+export { createOwnerWithdrawal, getOwnerWithdrawalById, listOwnerWithdrawalsByStore, listOwnerWithdrawalsByStoreInRange } from './withdrawals';
 export type { CreateOwnerWithdrawalInput, OwnerWithdrawalRow } from './withdrawals';
 export {
   createInventoryAdjustment,
@@ -131,8 +131,8 @@ export { countStores, createStore, getStoreById, listStores } from './stores';
 export type { CreateStoreInput, StoreRow } from './stores';
 export { createUser, getUserById } from './users';
 export type { CreateUserInput, UserRow } from './users';
-export { createSale, getSaleById, listSalesByStore } from './sales';
-export type { CreateSaleInput, SaleRow, SaleStatus, SaleSummaryRow } from './sales';
+export { createSale, getSaleById, listSalesByStore, listCompletedSalesByStoreInRange } from './sales';
+export type { CreateSaleInput, SaleRangeRow, SaleRow, SaleStatus, SaleSummaryRow } from './sales';
 export { createSaleItem, listSaleItemsBySaleId } from './saleItems';
 export type { CreateSaleItemInput, SaleItemRow } from './saleItems';
 export {

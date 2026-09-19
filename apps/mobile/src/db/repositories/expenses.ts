@@ -145,3 +145,20 @@ export function listExpensesByStore(adapter: DatabaseAdapter, storeId: string): 
     )
     .map(mapRow);
 }
+
+export function listExpensesByStoreInRange(
+  adapter: DatabaseAdapter,
+  storeId: string,
+  startUtc: string,
+  endUtc: string,
+): ExpenseRow[] {
+  return adapter
+    .getAllRows<ExpenseRecord>(
+      `SELECT ${COLUMNS}
+       FROM expenses
+       WHERE store_id = ? AND occurred_at >= ? AND occurred_at < ?
+       ORDER BY occurred_at ASC, created_at ASC, id ASC;`,
+      [requireId(storeId), startUtc, endUtc],
+    )
+    .map(mapRow);
+}

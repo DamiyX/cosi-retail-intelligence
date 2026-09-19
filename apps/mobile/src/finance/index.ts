@@ -17,3 +17,4 @@ export {
   type RecordOwnerWithdrawalOptions,
   type RecordedOwnerWithdrawalGraph,
 } from './recordOwnerWithdrawal';
+export { getBusinessSummary, type BusinessSummary, type BusinessSummaryInput, type BusinessSummaryRange, type PopularProductSummary } from './businessSummary';

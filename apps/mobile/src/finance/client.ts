@@ -17,6 +17,7 @@ import {
 } from '../db/repositories';
 import { recordExpense, type RecordedExpenseGraph } from './recordExpense';
 import { recordOwnerWithdrawal, type RecordedOwnerWithdrawalGraph } from './recordOwnerWithdrawal';
+import { getBusinessSummary, type BusinessSummary } from './businessSummary';
 
 export interface ExpenseHistoryRow extends ExpenseRow {
   syncStatus: OutboxStatus | null;
@@ -51,6 +52,7 @@ export interface FinanceClient {
   listExpenses(): ExpenseHistoryRow[];
   recordOwnerWithdrawal(input: RecordOwnerWithdrawalScreenInput): RecordedOwnerWithdrawalGraph;
   listOwnerWithdrawals(): OwnerWithdrawalHistoryRow[];
+  getBusinessSummary(localDate?: string, now?: string): BusinessSummary;
 }
 
 export interface CreateFinanceClientOptions {
@@ -158,6 +160,15 @@ export function createDatabaseFinanceClient(
           operationType: 'OWNER_WITHDRAWAL_CREATED',
         })?.status ?? null,
       }));
+    },
+    getBusinessSummary(localDate?: string, now?: string): BusinessSummary {
+      return getBusinessSummary(adapter, {
+        storeId: store.id,
+        deviceId: device.id,
+        userId,
+        localDate,
+        now,
+      });
     },
   };
 }

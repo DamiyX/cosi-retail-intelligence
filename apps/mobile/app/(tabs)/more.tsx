@@ -53,6 +53,10 @@ export default function MoreScreen() {
         <Text style={styles.actionTitle}>Withdrawal history</Text>
         <Text style={styles.actionBody}>Review owner withdrawals saved on this device</Text>
       </Pressable>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/summary')} style={styles.action}>
+        <Text style={styles.actionTitle}>Today’s summary</Text>
+        <Text style={styles.actionBody}>See sales, costs, coverage, and owner withdrawals for the store-local day</Text>
+      </Pressable>
       <Text style={styles.comingSoon}>Staff dispatch and supervisor review are intentionally deferred.</Text>
     </View>
   );

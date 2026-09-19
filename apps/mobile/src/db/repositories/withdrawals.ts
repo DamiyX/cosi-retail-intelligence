@@ -122,3 +122,20 @@ export function listOwnerWithdrawalsByStore(adapter: DatabaseAdapter, storeId: s
     )
     .map(mapRow);
 }
+
+export function listOwnerWithdrawalsByStoreInRange(
+  adapter: DatabaseAdapter,
+  storeId: string,
+  startUtc: string,
+  endUtc: string,
+): OwnerWithdrawalRow[] {
+  return adapter
+    .getAllRows<WithdrawalRecord>(
+      `SELECT ${COLUMNS}
+       FROM owner_withdrawals
+       WHERE store_id = ? AND occurred_at >= ? AND occurred_at < ?
+       ORDER BY occurred_at ASC, created_at ASC, id ASC;`,
+      [requireId(storeId), startUtc, endUtc],
+    )
+    .map(mapRow);
+}

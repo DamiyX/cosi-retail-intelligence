@@ -30,6 +30,11 @@ export interface SaleSummaryRow extends SaleRow {
   syncStatus: OutboxStatus | null;
 }
 
+export interface SaleRangeRow extends SaleRow {
+  /** SQLite rowid records local application order for deterministic ties. */
+  applicationOrder: number;
+}
+
 export interface CreateSaleInput {
   id: string;
   storeId: string;
@@ -177,4 +182,23 @@ export function listSalesByStore(
     itemCount: Number(row.item_count ?? 0),
     syncStatus: (row.sync_status as OutboxStatus | null) ?? null,
   }));
+}
+
+export function listCompletedSalesByStoreInRange(
+  adapter: DatabaseAdapter,
+  storeId: string,
+  startUtc: string,
+  endUtc: string,
+): SaleRangeRow[] {
+  const rows = adapter.getAllRows<SaleRecord & { application_order: number }>(
+    `SELECT s.id, s.store_id, s.device_id, s.created_by_user_id, s.occurred_at, s.currency_code,
+            s.subtotal_minor, s.discount_total_minor, s.total_minor, s.status, s.note, s.created_at, s.completed_at,
+            s.rowid AS application_order
+     FROM sales s
+     WHERE s.store_id = ? AND s.status = 'COMPLETED'
+       AND s.occurred_at >= ? AND s.occurred_at < ?
+     ORDER BY s.rowid ASC;`,
+    [requireId(storeId), startUtc, endUtc],
+  );
+  return rows.map((row) => ({ ...mapRow(row), applicationOrder: row.application_order }));
 }
