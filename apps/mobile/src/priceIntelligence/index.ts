@@ -7,4 +7,5 @@ export type {
   PersonalPriceChangeRow,
   PersonalPriceClient,
   PersonalPriceComparisonRecord,
+  PersonalPriceOverview,
 } from './client';

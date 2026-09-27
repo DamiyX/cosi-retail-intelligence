@@ -86,11 +86,27 @@ describe('M9 personal price client', () => {
       const otherProduct = createTemporaryProduct(fixture.adapter, {
         storeId: otherStore.store.id, deviceId: otherStore.device.id, name: 'Other product',
       }, { generateId: deterministicIds(2200) });
+      const otherBase = getActiveBasePackageUnit(fixture.adapter, otherProduct.variant.id)!;
+      recordPurchase(fixture.adapter, {
+        storeId: otherStore.store.id,
+        deviceId: otherStore.device.id,
+        userId: otherStore.owner.id,
+        occurredAt: '2026-01-01T10:00:00.000Z',
+        lines: [{ storeProductId: otherProduct.storeProduct.id, packageUnitId: otherBase.id, quantityPackagesMicros: MICROS_PER_UNIT, enteredCostMinor: 100 }],
+      }, { generateId: deterministicIds(2300), operationId: testId(2301) });
+      recordPurchase(fixture.adapter, {
+        storeId: otherStore.store.id,
+        deviceId: otherStore.device.id,
+        userId: otherStore.owner.id,
+        occurredAt: '2026-01-02T10:00:00.000Z',
+        lines: [{ storeProductId: otherProduct.storeProduct.id, packageUnitId: otherBase.id, quantityPackagesMicros: MICROS_PER_UNIT, enteredCostMinor: 150 }],
+      }, { generateId: deterministicIds(2400), operationId: testId(2401) });
 
       const ownerClient = createDatabasePersonalPriceClient(fixture.adapter, {
         storeId: fixture.context.store.id, userId: fixture.context.owner.id,
       });
       expect(ownerClient.getProductPriceComparison(otherProduct.storeProduct.id)).toBeNull();
+      expect(ownerClient.listPriceChanges()).toEqual([]);
       expect(() => createDatabasePersonalPriceClient(fixture.adapter, {
         storeId: fixture.context.store.id, userId: otherStore.owner.id,
       })).toThrow(/active store owner/i);
@@ -151,6 +167,8 @@ describe('M9 personal price client', () => {
         expect(client.getProductPriceComparison(product.storeProduct.id)?.comparison).toMatchObject({
           kind: 'comparison', direction: 'INCREASE', percentageTenths: '500',
         });
+        expect(client.listPriceChanges()).toHaveLength(1);
+        expect(client.getOverview()).toEqual({ oneObservationProductCount: 0, unchangedComparisonCount: 0 });
       } finally {
         reopened.close();
       }

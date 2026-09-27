@@ -37,6 +37,7 @@ export default function ProductDetailRoute() {
         justSaved={params.saved === '1'}
         priceClient={priceAccess.client}
         priceClientFailure={priceAccess.failure}
+        onOpenPriceChanges={() => router.push('/products/price-changes')}
         onBack={() => router.back()}
         onAddPackage={() => router.push(`/products/${productId}/packages/new`)}
         onEditPackage={(packageUnitId) => router.push(`/products/${productId}/packages/${packageUnitId}`)}

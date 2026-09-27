@@ -24,11 +24,17 @@ export interface PersonalPriceChangeRow extends PersonalPriceComparisonRecord {
   comparison: Extract<PersonalPriceComparisonSelection, { kind: 'comparison' }>;
 }
 
+export interface PersonalPriceOverview {
+  oneObservationProductCount: number;
+  unchangedComparisonCount: number;
+}
+
 export interface PersonalPriceClient {
   readonly storeId: string;
   readonly userId: string;
   getProductPriceComparison(storeProductId: string): PersonalPriceComparisonRecord | null;
   listPriceChanges(options?: { includeUnchanged?: boolean }): PersonalPriceChangeRow[];
+  getOverview(): PersonalPriceOverview;
 }
 
 export interface CreatePersonalPriceClientOptions {
@@ -132,6 +138,29 @@ export function createDatabasePersonalPriceClient(
         });
       }
       return changes.sort(compareChanges);
+    },
+    getOverview(): PersonalPriceOverview {
+      assertActiveOwner(adapter, storeId, userId);
+      const rowsByProduct = new Map<string, PurchasePriceHistoryRow[]>();
+      for (const row of listPurchasePriceHistoryByStore(adapter, storeId)) {
+        const rows = rowsByProduct.get(row.storeProductId) ?? [];
+        rows.push(row);
+        rowsByProduct.set(row.storeProductId, rows);
+      }
+
+      let oneObservationProductCount = 0;
+      let unchangedComparisonCount = 0;
+      for (const [storeProductId, rows] of rowsByProduct) {
+        const product = getStoreProductById(adapter, storeProductId);
+        if (!product || product.storeId !== storeId) continue;
+        const result = comparisonForRows(storeId, storeProductId, product.productVariantId, rows);
+        if (result.comparison.kind === 'none' && result.comparison.reason === 'ONE_VALID_OBSERVATION') {
+          oneObservationProductCount += 1;
+        } else if (result.comparison.kind === 'comparison' && result.comparison.direction === 'UNCHANGED') {
+          unchangedComparisonCount += 1;
+        }
+      }
+      return { oneObservationProductCount, unchangedComparisonCount };
     },
   };
 }

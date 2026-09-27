@@ -159,4 +159,28 @@ describe('M9 product detail purchase cost comparison', () => {
       context.fixture.closeAndDelete();
     }
   });
+
+  it('offers the store-wide Personal price changes route from product detail', () => {
+    const context = renderProductDetail([]);
+    const onOpenPriceChanges = jest.fn();
+    try {
+      const priceClient = createDatabasePersonalPriceClient(context.fixture.adapter, {
+        storeId: context.fixture.context.store.id,
+        userId: context.fixture.context.owner.id,
+      });
+      render(<ProductDetailScreen
+        client={context.catalogueClient}
+        priceClient={priceClient}
+        productId={context.product.storeProduct.id}
+        onBack={() => undefined}
+        onAddPackage={() => undefined}
+        onEditPackage={() => undefined}
+        onOpenPriceChanges={onOpenPriceChanges}
+      />);
+      fireEvent.press(screen.getByText('Personal price changes'));
+      expect(onOpenPriceChanges).toHaveBeenCalledTimes(1);
+    } finally {
+      context.fixture.closeAndDelete();
+    }
+  });
 });

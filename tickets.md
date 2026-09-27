@@ -42,25 +42,36 @@ selling-price recommendations.
 
 ## M9-02 — Add the store-wide Personal price changes view
 
-**Status:** Planned. **Dependency:** M9-01.  
+**Status:** Implemented locally; automated verification blocked pending locked dependency installation. **Dependency:** M9-01.  
 **Delivers:** the owner can review all recent personal restock-cost changes and
 open the affected product without relying on network participation.
 
-- [ ] Add a store-wide projection that emits at most one current signal per
+- [x] Add a store-wide projection that emits at most one current signal per
   store product, includes only comparable same-currency observations, orders
   changed products by latest observation time with stable ties and retains an
   explicit path to unchanged/history information.
-- [ ] Add a route-level **Personal price changes** screen reached from product
+- [x] Add a route-level **Personal price changes** screen reached from product
   detail/ordinary stack navigation. Show product, comparison basis, previous and
   latest prices, exact direction/percentage display, freshness and supplier when
   known.
-- [ ] Add accessible loading/empty/one-observation/read-failure/refresh states.
-  Copy must say purchase/restock cost and must not say market price, profit,
-  recommended selling price or live/current price without the observation date.
-- [ ] Verify store isolation, OWNER authorization, deterministic ordering,
+- [x] Add accessible empty/one-observation/read-failure/refresh states and keep
+  copy grounded in purchase/restock costs. Local SQLite reads are synchronous,
+  so the screen has no separate asynchronous loading state; copy does not claim
+  market price, profit, recommended selling price or an undated live price.
+- [x] Author tests for store isolation, OWNER authorization, deterministic ordering,
   mixed packages/currencies, deactivated products and offline restart.
 
-**Evidence:** focused repository/component/navigation tests, typecheck and lint.
+**Evidence:** `apps/mobile/src/priceIntelligence/client.ts` returns one store-scoped
+comparison per store product with stable newest-observation ordering and an
+explicit unchanged-comparison view; the route is nested in the Products stack
+and opens from Product detail. Focused UI/client tests were authored, including
+inactive products, one observation, owner restriction, read failure, offline
+restart, supplier/date/basis rendering and history navigation. Test/typecheck/
+lint execution remains blocked by missing locked workspace dependencies;
+`npm run test --workspace @retail/mobile -- --runTestsByPath
+__tests__/m9PersonalPriceClient.test.ts __tests__/m9ProductDetail.test.tsx
+__tests__/m9PersonalPriceChanges.test.tsx --runInBand` failed before test
+execution because `jest` is not recognized. `git diff --check` passed.
 
 **Out of scope:** global tab changes, scanner entry, network aggregation,
 notifications or price-change snooze.
