@@ -54,6 +54,17 @@ export interface SyncEntityVersionRow {
   updatedAt: string;
 }
 
+export interface SyncBootstrapEntityRow {
+  storeId: string;
+  bootstrapId: string;
+  snapshotRevision: number;
+  serverRevision: number;
+  entityType: string;
+  entityId: string;
+  entityVersion: number;
+  payload: string;
+}
+
 export interface SyncConflictRow {
   id: string;
   storeId: string;
@@ -114,6 +125,19 @@ function mapEntityVersion(row: Row): SyncEntityVersionRow {
     serverVersion: row.server_version as number,
     serverRevision: row.server_revision as number,
     updatedAt: row.updated_at as string,
+  };
+}
+
+function mapBootstrapEntity(row: Row): SyncBootstrapEntityRow {
+  return {
+    storeId: row.store_id as string,
+    bootstrapId: row.bootstrap_id as string,
+    snapshotRevision: row.snapshot_revision as number,
+    serverRevision: row.server_revision as number,
+    entityType: row.entity_type as string,
+    entityId: row.entity_id as string,
+    entityVersion: row.entity_version as number,
+    payload: row.payload as string,
   };
 }
 
@@ -249,37 +273,88 @@ export function beginSyncBootstrap(
   input: BeginSyncBootstrapInput,
 ): SyncBootstrapStateRow {
   const startedAt = input.startedAt ?? nowIso();
-  adapter.run(
-    `INSERT INTO sync_bootstrap_state
-      (store_id, device_id, bootstrap_id, status, started_at, updated_at)
-     VALUES (?, ?, ?, 'IN_PROGRESS', ?, ?)
-     ON CONFLICT(store_id) DO UPDATE SET
-       device_id = excluded.device_id,
-       bootstrap_id = excluded.bootstrap_id,
-       status = 'IN_PROGRESS',
-       snapshot_revision = NULL,
-       snapshot_cursor_revision = 0,
-       snapshot_cursor_change_index = 0,
-       snapshot_after_entity_type = NULL,
-       snapshot_after_entity_id = NULL,
-       started_at = excluded.started_at,
-       updated_at = excluded.updated_at,
-       last_error_code = NULL,
-       last_error_message = NULL;`,
-    [requireId(input.storeId), requireId(input.deviceId), requireId(input.bootstrapId), startedAt, startedAt],
-  );
-  updateSyncStoreState(adapter, {
-    storeId: input.storeId,
-    status: 'BOOTSTRAPPING',
-    cursorRevision: 0,
-    cursorChangeIndex: 0,
-    updatedAt: startedAt,
+  adapter.transaction(() => {
+    adapter.run('DELETE FROM sync_bootstrap_entities WHERE store_id = ?;', [requireId(input.storeId)]);
+    adapter.run(
+      `INSERT INTO sync_bootstrap_state
+        (store_id, device_id, bootstrap_id, status, started_at, updated_at)
+       VALUES (?, ?, ?, 'IN_PROGRESS', ?, ?)
+       ON CONFLICT(store_id) DO UPDATE SET
+         device_id = excluded.device_id,
+         bootstrap_id = excluded.bootstrap_id,
+         status = 'IN_PROGRESS',
+         snapshot_revision = NULL,
+         snapshot_cursor_revision = 0,
+         snapshot_cursor_change_index = 0,
+         snapshot_after_entity_type = NULL,
+         snapshot_after_entity_id = NULL,
+         started_at = excluded.started_at,
+         updated_at = excluded.updated_at,
+         last_error_code = NULL,
+         last_error_message = NULL;`,
+      [requireId(input.storeId), requireId(input.deviceId), requireId(input.bootstrapId), startedAt, startedAt],
+    );
+    updateSyncStoreState(adapter, {
+      storeId: input.storeId,
+      status: 'BOOTSTRAPPING',
+      updatedAt: startedAt,
+    });
   });
   const state = getSyncBootstrapState(adapter, input.storeId);
   if (!state) {
     throw new Error('Sync bootstrap state was not persisted.');
   }
   return state;
+}
+
+export function stageSyncBootstrapEntity(
+  adapter: DatabaseAdapter,
+  input: SyncBootstrapEntityRow,
+): void {
+  adapter.run(
+    `INSERT INTO sync_bootstrap_entities
+      (store_id, bootstrap_id, snapshot_revision, server_revision, entity_type, entity_id, entity_version, payload)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(store_id, bootstrap_id, entity_type, entity_id) DO UPDATE SET
+       snapshot_revision = excluded.snapshot_revision,
+       server_revision = excluded.server_revision,
+       entity_version = excluded.entity_version,
+       payload = excluded.payload;`,
+    [
+      requireId(input.storeId),
+      requireId(input.bootstrapId),
+      input.snapshotRevision,
+      input.serverRevision,
+      input.entityType,
+      requireId(input.entityId),
+      input.entityVersion,
+      input.payload,
+    ],
+  );
+}
+
+export function listSyncBootstrapEntities(
+  adapter: DatabaseAdapter,
+  input: { storeId: string; bootstrapId: string },
+): SyncBootstrapEntityRow[] {
+  return adapter.getAllRows<Row>(
+    `SELECT store_id, bootstrap_id, snapshot_revision, server_revision, entity_type, entity_id,
+            entity_version, payload
+     FROM sync_bootstrap_entities
+     WHERE store_id = ? AND bootstrap_id = ?
+     ORDER BY server_revision ASC, entity_type ASC, entity_id ASC;`,
+    [requireId(input.storeId), requireId(input.bootstrapId)],
+  ).map(mapBootstrapEntity);
+}
+
+export function clearSyncBootstrapEntities(
+  adapter: DatabaseAdapter,
+  input: { storeId: string; bootstrapId: string },
+): void {
+  adapter.run(
+    'DELETE FROM sync_bootstrap_entities WHERE store_id = ? AND bootstrap_id = ?;',
+    [requireId(input.storeId), requireId(input.bootstrapId)],
+  );
 }
 
 export function commitSyncBootstrap(
@@ -352,7 +427,13 @@ export function advanceSyncBootstrap(
 
 export function failSyncBootstrap(
   adapter: DatabaseAdapter,
-  input: { storeId: string; errorCode: string; errorMessage: string; updatedAt?: string },
+  input: {
+    storeId: string;
+    errorCode: string;
+    errorMessage: string;
+    storeStatus?: SyncStoreStatus;
+    updatedAt?: string;
+  },
 ): void {
   const updatedAt = input.updatedAt ?? nowIso();
   adapter.run(
@@ -362,7 +443,7 @@ export function failSyncBootstrap(
   );
   updateSyncStoreState(adapter, {
     storeId: input.storeId,
-    status: 'ERROR_RETRYABLE',
+    status: input.storeStatus ?? 'ERROR_RETRYABLE',
     lastErrorCode: input.errorCode,
     lastErrorMessage: input.errorMessage,
     updatedAt,

@@ -308,6 +308,7 @@ export type {
 export {
   beginSyncBootstrap,
   advanceSyncBootstrap,
+  clearSyncBootstrapEntities,
   commitSyncBootstrap,
   createSyncConflict,
   ensureSyncStoreState,
@@ -315,9 +316,11 @@ export {
   getSyncBootstrapState,
   getSyncEntityVersion,
   getSyncStoreState,
+  listSyncBootstrapEntities,
   listOpenSyncConflicts,
   resolveSyncConflict,
   saveSyncEntityVersion,
+  stageSyncBootstrapEntity,
   updateSyncStoreState,
 } from './sync';
 export type {
@@ -325,6 +328,7 @@ export type {
   CreateSyncConflictInput,
   EnsureSyncStoreStateInput,
   SyncBootstrapStateRow,
+  SyncBootstrapEntityRow,
   SyncBootstrapStatus,
   SyncConflictRow,
   SyncConflictStatus,

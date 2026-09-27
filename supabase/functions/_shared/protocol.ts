@@ -7,7 +7,7 @@ export const MAX_PULL_CHANGES = 100;
 export const MAX_BOOTSTRAP_ENTITIES = 500;
 export const MAX_OPERATION_PAYLOAD_BYTES = 512 * 1024;
 
-const id = z.string().min(1).max(128);
+const id = z.string().uuid();
 const timestamp = z.string().datetime({ offset: true });
 const jsonObject = z.record(z.string(), z.unknown());
 const operationTypes = [

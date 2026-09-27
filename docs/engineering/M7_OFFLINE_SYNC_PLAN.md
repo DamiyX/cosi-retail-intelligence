@@ -1,6 +1,6 @@
 # M7 Offline Sync Plan
 
-**Status:** Source implementation handoff complete; real PostgreSQL integration gate blocked and independent audit pending.  
+**Status:** Independent audit found blocking source gaps; PostgreSQL integration deferred. See `M7_INDEPENDENT_AUDIT.md`.  
 **Depends on:** independently accepted M6 source/automated scope.  
 **Boundary:** first controlled private-store sync only. No M8 scanner, shared
 market-price network, staff administration, recognition payloads, production
@@ -28,9 +28,9 @@ withdrawal completion.
   lifecycle states. M7 now adds the network worker, server cursor, pull applier,
   durable conflict store and remote server-version projection.
 - M7 Supabase migrations, RLS policies, sync functions and Edge Function shells
-  are present. Supabase CLI 2.117.0 is pinned. Docker is absent on this laptop,
-  so local PostgreSQL/pgTAP/Edge Function integration checks remain an explicit
-  acceptance gate rather than accepted evidence.
+  are present. Supabase CLI 2.117.0 is pinned. Docker Desktop is installed but
+  its engine does not start, so local PostgreSQL/pgTAP/Edge Function integration
+  checks remain an explicit acceptance gate rather than accepted evidence.
 - The app currently provisions a local owner/store/member/device graph before
   customer authentication exists. M7 must not silently equate a local domain
   user ID with `auth.users.id` or invent final sign-in UX.
@@ -60,7 +60,9 @@ M7-01 through M7-08 are committed sequentially on `feat/m7-offline-sync`:
 `e9ef793`. Local validation passed with 51 suites and 484 tests, root
 typecheck/lint, Expo Doctor 21/21, dependency check and Android export.
 
-The required database evidence has not been substituted with mocks. Both
+The independent audit found that latest-document bootstrap omits original
+creation facts after a mutable edit, and the app has no integrated sync path.
+See `M7_INDEPENDENT_AUDIT.md`. The required database evidence has not been substituted with mocks. Both
 `supabase db lint --local --fail-on error` and
 `supabase test db --local supabase/tests/m7_sync.sql` attempted the local
 database and failed only because `127.0.0.1:54322` refused the connection while

@@ -2,7 +2,7 @@ import {
   applySyncPullPage,
 } from '../src/sync/applier';
 import { OfflineSyncWorker } from '../src/sync/worker';
-import type { SyncTransport } from '../src/sync/transport';
+import { SyncTransportError, type SyncTransport } from '../src/sync/transport';
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
 import { MIGRATIONS, openDatabase } from '../src/db';
 import { openIsolatedDatabase } from '../src/db/testing';
@@ -35,6 +35,37 @@ function emptyPull(revision: number) {
     nextCursor: { revision, changeIndex: 0 },
     hasMore: false,
     serverRevision: revision,
+  };
+}
+
+function remoteProductEnvelope(input: {
+  storeId: string;
+  deviceId: string;
+  operationId: string;
+  entityId: string;
+}) {
+  return {
+    payloadVersion: 1 as const,
+    operationType: 'PRODUCT_CREATED' as const,
+    operationId: input.operationId,
+    storeId: input.storeId,
+    deviceId: input.deviceId,
+    entityType: 'PRODUCT_VARIANT' as const,
+    entityId: input.entityId,
+    baseServerVersion: null,
+    occurredAt: NOW,
+    entities: {
+      productVariant: {
+        id: input.entityId,
+        canonicalProductId: null,
+        identityScope: 'STORE_LOCAL',
+        ownerStoreId: input.storeId,
+        name: 'Remote product',
+        status: 'ACTIVE',
+        createdAt: NOW,
+        updatedAt: NOW,
+      },
+    },
   };
 }
 
@@ -183,7 +214,7 @@ describe('M7 offline sync local durability', () => {
             error: null,
           })),
         }),
-        pull: async () => emptyPull(1),
+        pull: async () => emptyPull(0),
       };
       const worker = new OfflineSyncWorker({
         adapter: fixture.adapter,
@@ -284,6 +315,7 @@ describe('M7 offline sync local durability', () => {
                 entityType: 'EXPENSE' as const,
                 entityId,
                 entityVersion: 1,
+                serverRevision: 4,
                 payloadVersion: 1 as const,
                 payload: envelope,
               }],
@@ -336,6 +368,394 @@ describe('M7 offline sync local durability', () => {
         status: 'IDLE',
         cursorRevision: 5,
         serverRevision: 5,
+      });
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('does not expose a partial bootstrap when a later page fails', async () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const entityId = testId(710);
+      const envelope = remoteProductEnvelope({
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        operationId: testId(711),
+        entityId,
+      });
+      let callCount = 0;
+      const transport: SyncTransport = {
+        enroll: async () => { throw new Error('not used'); },
+        push: async () => { throw new Error('not used'); },
+        pull: async () => emptyPull(0),
+        bootstrap: async () => {
+          callCount += 1;
+          if (callCount > 1) {
+            throw new SyncTransportError('NETWORK', 'offline', { retryable: true });
+          }
+          return {
+            protocolVersion: 1,
+            payloadVersion: 1,
+            snapshotRevision: 8,
+            entities: [{
+              storeId: fixture.context.store.id,
+              entityType: 'PRODUCT_VARIANT' as const,
+              entityId,
+              entityVersion: 1,
+              serverRevision: 7,
+              payloadVersion: 1,
+              payload: envelope,
+            }],
+            nextCursor: {
+              snapshotRevision: 8,
+              afterEntityType: 'PRODUCT_VARIANT' as const,
+              afterEntityId: entityId,
+            },
+            hasMore: true,
+          };
+        },
+      };
+      const worker = new OfflineSyncWorker({
+        adapter: fixture.adapter,
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        sessionProvider: sessionProvider(),
+        transport,
+        now: () => NOW,
+        idFactory: () => testId(712),
+      });
+
+      ensureSyncStoreState(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        now: NOW,
+      });
+      fixture.adapter.run(
+        `UPDATE sync_store_state
+         SET cursor_revision = 3, cursor_change_index = 0, server_revision = 3
+         WHERE store_id = ?;`,
+        [fixture.context.store.id],
+      );
+
+      expect(await worker.bootstrap()).toMatchObject({ status: 'RETRY_SCHEDULED', pulled: 0 });
+      expect(fixture.adapter.getFirstRow<{ total: number }>(
+        'SELECT COUNT(*) AS total FROM product_variants WHERE id = ?;',
+        [entityId],
+      )?.total).toBe(0);
+      expect(getSyncBootstrapState(fixture.adapter, fixture.context.store.id)?.status).toBe('FAILED');
+      expect(getSyncStoreState(fixture.adapter, fixture.context.store.id)).toMatchObject({
+        cursorRevision: 3,
+        cursorChangeIndex: 0,
+        serverRevision: 3,
+      });
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('commits bootstrap entities in server revision order across page order', async () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const variantId = testId(714);
+      const packageId = testId(715);
+      const variant = remoteProductEnvelope({
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        operationId: testId(716),
+        entityId: variantId,
+      });
+      const packageEnvelope = {
+        payloadVersion: 1 as const,
+        operationType: 'PACKAGE_CREATED' as const,
+        operationId: testId(717),
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        entityType: 'PACKAGE_UNIT' as const,
+        entityId: packageId,
+        baseServerVersion: null,
+        occurredAt: NOW,
+        entities: {
+          packageUnit: {
+            id: packageId,
+            productVariantId: variantId,
+            name: 'carton',
+            symbol: null,
+            conversionToBaseMicros: 1_000_000,
+            isBaseUnit: true,
+            isSellable: true,
+            isPurchasable: true,
+            status: 'ACTIVE',
+            createdAt: NOW,
+            updatedAt: NOW,
+          },
+        },
+      };
+      let page = 0;
+      const transport: SyncTransport = {
+        enroll: async () => { throw new Error('not used'); },
+        push: async () => { throw new Error('not used'); },
+        pull: async () => emptyPull(0),
+        bootstrap: async () => {
+          page += 1;
+          return page === 1 ? {
+            protocolVersion: 1,
+            payloadVersion: 1,
+            snapshotRevision: 2,
+            entities: [{
+              storeId: fixture.context.store.id,
+              entityType: 'PACKAGE_UNIT' as const,
+              entityId: packageId,
+              entityVersion: 1,
+              serverRevision: 2,
+              payloadVersion: 1 as const,
+              payload: packageEnvelope,
+            }],
+            nextCursor: {
+              snapshotRevision: 2,
+              afterEntityType: 'PACKAGE_UNIT' as const,
+              afterEntityId: packageId,
+            },
+            hasMore: true,
+          } : {
+            protocolVersion: 1,
+            payloadVersion: 1,
+            snapshotRevision: 2,
+            entities: [{
+              storeId: fixture.context.store.id,
+              entityType: 'PRODUCT_VARIANT' as const,
+              entityId: variantId,
+              entityVersion: 1,
+              serverRevision: 1,
+              payloadVersion: 1 as const,
+              payload: variant,
+            }],
+            nextCursor: null,
+            hasMore: false,
+          };
+        },
+      };
+      const worker = new OfflineSyncWorker({
+        adapter: fixture.adapter,
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        sessionProvider: sessionProvider(),
+        transport,
+        now: () => NOW,
+        idFactory: () => testId(718),
+      });
+      expect(await worker.bootstrap()).toMatchObject({ status: 'SYNCED', pulled: 2 });
+      expect(fixture.adapter.getFirstRow<{ product_variant_id: string }>(
+        'SELECT product_variant_id FROM package_units WHERE id = ?;',
+        [packageId],
+      )?.product_variant_id).toBe(variantId);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('uses one active-run guard for incremental sync and bootstrap', async () => {
+    const fixture = openCatalogueFixture();
+    try {
+      createTemporaryProduct(
+        fixture.adapter,
+        { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, name: 'Guard product' },
+        { generateId: () => testId(720) },
+      );
+      let releasePush!: () => void;
+      const pushGate = new Promise<void>((resolve) => { releasePush = resolve; });
+      const transport: SyncTransport = {
+        enroll: async () => { throw new Error('not used'); },
+        bootstrap: async () => { throw new Error('bootstrap should be guarded'); },
+        pull: async () => emptyPull(0),
+        push: async (request) => {
+          await pushGate;
+          return {
+            protocolVersion: 1,
+            payloadVersion: 1,
+            acks: request.operations.map((operation) => ({
+              operationId: operation.operationId,
+              status: 'APPLIED' as const,
+              entityType: operation.entityType,
+              entityId: operation.entityId,
+              serverVersion: 1,
+              serverRevision: 1,
+              error: null,
+            })),
+          };
+        },
+      };
+      const worker = new OfflineSyncWorker({
+        adapter: fixture.adapter,
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        sessionProvider: sessionProvider(),
+        transport,
+        now: () => NOW,
+        idFactory: () => testId(721),
+      });
+      const running = worker.runOnce();
+      await Promise.resolve();
+      expect(await worker.bootstrap()).toMatchObject({ status: 'ALREADY_RUNNING' });
+      releasePush();
+      await expect(running).resolves.toMatchObject({ status: 'SYNCED' });
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('does not start incremental sync while a persisted bootstrap is in progress', async () => {
+    const fixture = openCatalogueFixture();
+    try {
+      ensureSyncStoreState(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        now: NOW,
+      });
+      fixture.adapter.run(
+        `INSERT INTO sync_bootstrap_state
+          (store_id, device_id, bootstrap_id, status, started_at, updated_at)
+         VALUES (?, ?, ?, 'IN_PROGRESS', ?, ?);`,
+        [fixture.context.store.id, fixture.context.device.id, testId(725), NOW, NOW],
+      );
+      let transportCalled = false;
+      const transport: SyncTransport = {
+        enroll: async () => { throw new Error('not used'); },
+        bootstrap: async () => { throw new Error('not used'); },
+        push: async () => { transportCalled = true; throw new Error('must not run'); },
+        pull: async () => { transportCalled = true; return emptyPull(0); },
+      };
+      const worker = new OfflineSyncWorker({
+        adapter: fixture.adapter,
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        sessionProvider: sessionProvider(),
+        transport,
+        now: () => NOW,
+      });
+      expect(await worker.runOnce()).toMatchObject({ status: 'ALREADY_RUNNING' });
+      expect(transportCalled).toBe(false);
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('rejects a cross-store pull page without advancing the cursor', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      ensureSyncStoreState(fixture.adapter, {
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        now: NOW,
+      });
+      const otherStoreId = testId(730);
+      const envelope = remoteProductEnvelope({
+        storeId: otherStoreId,
+        deviceId: fixture.context.device.id,
+        operationId: testId(731),
+        entityId: testId(732),
+      });
+      expect(() => applySyncPullPage(fixture.adapter, {
+        protocolVersion: 1,
+        payloadVersion: 1,
+        changes: [{
+          operationId: envelope.operationId,
+          storeId: otherStoreId,
+          entityType: envelope.entityType,
+          entityId: envelope.entityId,
+          operationType: envelope.operationType,
+          changeType: 'UPSERT',
+          payloadVersion: 1,
+          payload: envelope,
+          entityVersion: 1,
+          serverRevision: 1,
+          occurredAt: NOW,
+        }],
+        nextCursor: { revision: 1, changeIndex: 0 },
+        hasMore: false,
+        serverRevision: 1,
+      }, {
+        storeId: fixture.context.store.id,
+        options: { now: NOW, conflictIdFactory: () => testId(733) },
+      })).toThrow('another store');
+      expect(getSyncStoreState(fixture.adapter, fixture.context.store.id)).toMatchObject({
+        cursorRevision: 0,
+        cursorChangeIndex: 0,
+      });
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('does not acknowledge a local operation when the server identity is mismatched', async () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const graph = createTemporaryProduct(
+        fixture.adapter,
+        { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, name: 'Ack identity product' },
+        { generateId: () => testId(740) },
+      );
+      const transport: SyncTransport = {
+        enroll: async () => { throw new Error('not used'); },
+        bootstrap: async () => { throw new Error('not used'); },
+        pull: async () => emptyPull(0),
+        push: async () => ({
+          protocolVersion: 1,
+          payloadVersion: 1,
+          acks: [{
+            operationId: graph.outbox.operationId,
+            status: 'APPLIED',
+            entityType: graph.outbox.entityType,
+            entityId: testId(741),
+            serverVersion: 1,
+            serverRevision: 1,
+            error: null,
+          }],
+        }),
+      };
+      const worker = new OfflineSyncWorker({
+        adapter: fixture.adapter,
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        sessionProvider: sessionProvider(),
+        transport,
+        now: () => NOW,
+        random: () => 0,
+        idFactory: () => testId(742),
+      });
+      expect(await worker.runOnce()).toMatchObject({ status: 'RETRY_SCHEDULED', retryableErrors: 1 });
+      expect(findOutboxOperation(fixture.adapter, graph.outbox.operationId)).toMatchObject({
+        status: 'ERROR_RETRYABLE',
+        lastErrorCode: 'INVALID_RESPONSE',
+      });
+    } finally {
+      fixture.closeAndDelete();
+    }
+  });
+
+  it('reports a permanent pull rejection without overwriting it as success', async () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const transport: SyncTransport = {
+        enroll: async () => { throw new Error('not used'); },
+        bootstrap: async () => { throw new Error('not used'); },
+        push: async () => { throw new Error('not used'); },
+        pull: async () => {
+          throw new SyncTransportError('INVALID_REQUEST', 'request rejected', { retryable: false, status: 400 });
+        },
+      };
+      const worker = new OfflineSyncWorker({
+        adapter: fixture.adapter,
+        storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id,
+        sessionProvider: sessionProvider(),
+        transport,
+        now: () => NOW,
+      });
+      expect(await worker.runOnce()).toMatchObject({ status: 'PERMANENT_ERROR', permanentErrors: 1 });
+      expect(getSyncStoreState(fixture.adapter, fixture.context.store.id)).toMatchObject({
+        status: 'IDLE',
+        lastErrorCode: 'INVALID_REQUEST',
       });
     } finally {
       fixture.closeAndDelete();

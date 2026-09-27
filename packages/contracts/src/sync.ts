@@ -87,7 +87,7 @@ export const SYNC_ERROR_CODES = [
 
 export type SyncErrorCode = (typeof SYNC_ERROR_CODES)[number];
 
-const idSchema = z.string().min(1).max(128);
+const idSchema = z.string().uuid();
 const timestampSchema = z.string().datetime({ offset: true });
 const nonNegativeIntegerSchema = z.number().int().nonnegative();
 const decimalStringSchema = z
@@ -268,6 +268,7 @@ export const syncBootstrapEntitySchema = z
     entityType: z.enum(SYNC_ENTITY_TYPES),
     entityId: idSchema,
     entityVersion: nonNegativeIntegerSchema,
+    serverRevision: nonNegativeIntegerSchema,
     payloadVersion: z.literal(SYNC_PAYLOAD_VERSION),
     payload: jsonObjectSchema,
   })

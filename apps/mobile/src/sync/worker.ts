@@ -14,7 +14,6 @@ import type { DatabaseAdapter } from '../db/adapter';
 import {
   beginSyncBootstrap,
   claimOutboxBatch,
-  commitSyncBootstrap,
   createSyncConflict,
   ensureSyncStoreState,
   failSyncBootstrap,
@@ -28,7 +27,11 @@ import {
   updateSyncStoreState,
 } from '../db/repositories';
 import { generateMobileId } from '../crypto/mobileIds';
-import { applySyncBootstrapPage, applySyncPullPage } from './applier';
+import {
+  applySyncBootstrapPage,
+  applySyncPullPage,
+  commitSyncBootstrapSnapshot,
+} from './applier';
 import {
   type AuthenticatedSessionProvider,
   SyncTransportError,
@@ -47,6 +50,7 @@ export type SyncCycleStatus =
   | 'NO_WORK'
   | 'PAUSED_AUTH'
   | 'RETRY_SCHEDULED'
+  | 'PERMANENT_ERROR'
   | 'ALREADY_RUNNING';
 
 export interface SyncCycleResult {
@@ -116,6 +120,45 @@ function operationRequest(
   };
 }
 
+function assertPushAcknowledgements(
+  operations: OutboxOperationRow[],
+  response: SyncPushResponse,
+): void {
+  const byId = new Map(operations.map((operation) => [operation.operationId, operation]));
+  const seen = new Set<string>();
+  for (const acknowledgement of response.acks) {
+    const operation = byId.get(acknowledgement.operationId);
+    if (!operation || seen.has(acknowledgement.operationId)) {
+      throw new SyncTransportError(
+        'INVALID_RESPONSE',
+        'Sync server returned an unknown or duplicate acknowledgement.',
+        { retryable: true },
+      );
+    }
+    seen.add(acknowledgement.operationId);
+    if (
+      acknowledgement.entityType !== operation.entityType ||
+      acknowledgement.entityId !== operation.entityId
+    ) {
+      throw new SyncTransportError(
+        'INVALID_RESPONSE',
+        'Sync acknowledgement identity does not match the local operation.',
+        { retryable: true },
+      );
+    }
+    if (
+      (acknowledgement.status === 'APPLIED' || acknowledgement.status === 'ALREADY_APPLIED') &&
+      (acknowledgement.serverVersion === null || acknowledgement.serverRevision === null)
+    ) {
+      throw new SyncTransportError(
+        'INVALID_RESPONSE',
+        'Successful sync acknowledgement omitted server version metadata.',
+        { retryable: true },
+      );
+    }
+  }
+}
+
 export class OfflineSyncWorker {
   private readonly options: Required<Pick<OfflineSyncWorkerOptions, 'now' | 'random' | 'idFactory'>> &
     OfflineSyncWorkerOptions;
@@ -143,7 +186,7 @@ export class OfflineSyncWorker {
   }
 
   async bootstrap(): Promise<SyncCycleResult> {
-    const key = `${this.options.storeId}:${this.options.deviceId}:bootstrap`;
+    const key = `${this.options.storeId}:${this.options.deviceId}`;
     if (activeRuns.has(key)) {
       return { status: 'ALREADY_RUNNING', pushed: 0, pulled: 0, conflicts: 0, retryableErrors: 0, permanentErrors: 0 };
     }
@@ -159,6 +202,9 @@ export class OfflineSyncWorker {
     const { adapter, storeId, deviceId } = this.options;
     const now = this.options.now();
     ensureSyncStoreState(adapter, { storeId, deviceId, now });
+    if (getSyncBootstrapState(adapter, storeId)?.status === 'IN_PROGRESS') {
+      return { status: 'ALREADY_RUNNING', pushed: 0, pulled: 0, conflicts: 0, retryableErrors: 0, permanentErrors: 0 };
+    }
 
     const session = await this.options.sessionProvider.getSession();
     if (!session?.accessToken) {
@@ -205,6 +251,7 @@ export class OfflineSyncWorker {
       let pushResponse: SyncPushResponse;
       try {
         pushResponse = await this.options.transport.push(operationRequest(storeId, deviceId, validOperations));
+        assertPushAcknowledgements(validOperations, pushResponse);
       } catch (error) {
         if (error instanceof SyncTransportError && !error.retryable && error.code !== 'AUTH_REQUIRED') {
           for (const operation of validOperations) {
@@ -235,10 +282,19 @@ export class OfflineSyncWorker {
             updatedAt: now,
           });
         }
+        if (error instanceof SyncTransportError && !error.retryable && error.code !== 'AUTH_REQUIRED') {
+          updateSyncStoreState(adapter, {
+            storeId,
+            status: 'IDLE',
+            lastErrorCode: error.code,
+            lastErrorMessage: error.message,
+            updatedAt: now,
+          });
+        }
         return {
           status: error instanceof SyncTransportError && error.code === 'AUTH_REQUIRED'
             ? 'PAUSED_AUTH'
-            : retryableErrors > 0 ? 'RETRY_SCHEDULED' : 'SYNCED',
+            : retryableErrors > 0 ? 'RETRY_SCHEDULED' : 'PERMANENT_ERROR',
           pushed,
           pulled: 0,
           conflicts,
@@ -322,29 +378,48 @@ export class OfflineSyncWorker {
       let response;
       try {
         response = await this.options.transport.pull(request);
+        const result = applySyncPullPage(adapter, response, { storeId, options: {
+          now,
+          conflictIdFactory: this.options.idFactory,
+        } });
+        pulled += result.applied + result.echoes;
+        conflicts += result.conflicts;
       } catch (error) {
+        const normalizedError = error instanceof SyncTransportError
+          ? error
+          : new SyncTransportError(
+            'INVALID_RESPONSE',
+            error instanceof Error ? error.message : 'Pull response could not be applied.',
+            { retryable: true },
+          );
+        const isAuth = normalizedError.code === 'AUTH_REQUIRED';
         updateSyncStoreState(adapter, {
           storeId,
-          status: error instanceof SyncTransportError && !error.retryable ? 'PAUSED_AUTH' : 'ERROR_RETRYABLE',
-          lastErrorCode: errorCode(error),
-          lastErrorMessage: error instanceof Error ? error.message : 'Pull failed.',
+          status: isAuth ? 'PAUSED_AUTH' : normalizedError.retryable ? 'ERROR_RETRYABLE' : 'IDLE',
+          lastErrorCode: normalizedError.code,
+          lastErrorMessage: normalizedError.message,
           updatedAt: now,
         });
-        if (error instanceof SyncTransportError && !error.retryable) permanentErrors += 1;
-        else retryableErrors += 1;
-        break;
+        if (isAuth) {
+          return { status: 'PAUSED_AUTH', pushed, pulled, conflicts, retryableErrors, permanentErrors };
+        }
+        if (normalizedError.retryable) retryableErrors += 1;
+        else permanentErrors += 1;
+        return {
+          status: normalizedError.retryable ? 'RETRY_SCHEDULED' : 'PERMANENT_ERROR',
+          pushed,
+          pulled,
+          conflicts,
+          retryableErrors,
+          permanentErrors,
+        };
       }
-      const result = applySyncPullPage(adapter, response, { storeId, options: {
-        now,
-        conflictIdFactory: this.options.idFactory,
-      } });
-      pulled += result.applied + result.echoes;
-      conflicts += result.conflicts;
       if (!response.hasMore) break;
     }
 
     const finalStatus: SyncCycleStatus = retryableErrors > 0 ? 'RETRY_SCHEDULED' :
-      pushed + pulled + conflicts + permanentErrors > 0 ? 'SYNCED' : 'NO_WORK';
+      permanentErrors > 0 ? 'PERMANENT_ERROR' :
+        pushed + pulled + conflicts > 0 ? 'SYNCED' : 'NO_WORK';
     updateSyncStoreState(adapter, {
       storeId,
       status: retryableErrors > 0 ? 'ERROR_RETRYABLE' : 'IDLE',
@@ -377,9 +452,6 @@ export class OfflineSyncWorker {
         afterEntityId: bootstrapState.snapshotAfterEntityId,
       }
       : null;
-    let applied = 0;
-    let echoes = 0;
-    let conflicts = 0;
     try {
       for (let page = 0; page < MAX_BOOTSTRAP_PAGES_PER_RUN; page += 1) {
         const response = await this.options.transport.bootstrap({
@@ -390,26 +462,21 @@ export class OfflineSyncWorker {
           cursor,
           pageSize: Math.min(MAX_BOOTSTRAP_ENTITIES, MAX_BOOTSTRAP_ENTITIES),
         });
-        const result = applySyncBootstrapPage(adapter, response, {
+        applySyncBootstrapPage(adapter, response, {
           storeId,
           options: { now, conflictIdFactory: this.options.idFactory },
         });
-        applied += result.applied;
-        echoes += result.echoes;
-        conflicts += result.conflicts;
         if (!response.hasMore || response.nextCursor === null) {
-          commitSyncBootstrap(adapter, {
+          const result = commitSyncBootstrapSnapshot(adapter, {
             storeId,
             snapshotRevision: response.snapshotRevision,
-            cursorRevision: response.snapshotRevision,
-            cursorChangeIndex: 0,
-            updatedAt: now,
+            options: { now, conflictIdFactory: this.options.idFactory },
           });
           return {
-            status: conflicts > 0 ? 'SYNCED' : 'SYNCED',
+            status: 'SYNCED',
             pushed: 0,
-            pulled: applied + echoes,
-            conflicts,
+            pulled: result.applied + result.echoes,
+            conflicts: result.conflicts,
             retryableErrors: 0,
             permanentErrors: 0,
           };
@@ -418,19 +485,31 @@ export class OfflineSyncWorker {
       }
       throw new Error('Bootstrap exceeded the bounded page limit.');
     } catch (error) {
+      const normalizedError = error instanceof SyncTransportError
+        ? error
+        : new SyncTransportError(
+          'INVALID_RESPONSE',
+          error instanceof Error ? error.message : String(error),
+          { retryable: true },
+        );
       failSyncBootstrap(adapter, {
         storeId,
-        errorCode: errorCode(error),
-        errorMessage: error instanceof Error ? error.message : String(error),
+        errorCode: normalizedError.code,
+        errorMessage: normalizedError.message,
+        storeStatus: normalizedError.code === 'AUTH_REQUIRED'
+          ? 'PAUSED_AUTH'
+          : normalizedError.retryable ? 'ERROR_RETRYABLE' : 'IDLE',
         updatedAt: now,
       });
       return {
-        status: 'RETRY_SCHEDULED',
+        status: normalizedError.code === 'AUTH_REQUIRED'
+          ? 'PAUSED_AUTH'
+          : normalizedError.retryable ? 'RETRY_SCHEDULED' : 'PERMANENT_ERROR',
         pushed: 0,
-        pulled: applied + echoes,
-        conflicts,
-        retryableErrors: 1,
-        permanentErrors: 0,
+        pulled: 0,
+        conflicts: 0,
+        retryableErrors: normalizedError.retryable ? 1 : 0,
+        permanentErrors: normalizedError.retryable || normalizedError.code === 'AUTH_REQUIRED' ? 0 : 1,
       };
     }
   }

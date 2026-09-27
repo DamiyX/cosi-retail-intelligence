@@ -4,7 +4,7 @@ M7 implements the controlled custom sync protocol in
 `docs/engineering/M7_OFFLINE_SYNC_PLAN.md`. The accepted M1–M6 local-write-first
 behavior remains authoritative. Do not start M8 production integration.
 
-## Implementation handoff — 2026-09-19
+## Implementation handoff and independent audit — 2026-09-27
 
 M7-01 through M7-08 source work is committed sequentially on
 `feat/m7-offline-sync`: `66507e6`, `74b2053`, `6a15692`, `f411b0c`,
@@ -18,8 +18,10 @@ lint, environment check, Expo dependency check, Expo Doctor 21/21 and Android
 export. The required database evidence is still blocked: both
 `supabase db lint --local --fail-on error` and `supabase test db --local`
 refused at `127.0.0.1:54322` because Docker is unavailable. M7 is therefore
-not source-accepted yet; independent audit remains pending and no M8 work is
-authorized.
+not source-accepted. Independent audit found two additional source blockers:
+fresh-device bootstrap can omit creation data after an edit, and the app has
+no integrated enrolment/sync/retry/conflict path. See
+`docs/engineering/M7_INDEPENDENT_AUDIT.md`. No M8 work is authorized.
 
 ## M7-01 — Establish the secure protocol and server transaction spine
 
@@ -55,7 +57,7 @@ screens, production project linking/deployment.
 
 ## M7-02 — Enrol a local store and add crash-safe client sync state
 
-**Status:** Implemented for local state/worker; UI status surface and real transport evidence remain open. **Dependency:** M7-01.
+**Status:** Local state/worker implemented; app integration, pilot enrolment, UI status and real transport evidence remain open. **Dependency:** M7-01.
 **Delivers:** an authenticated owner can bind one existing local-only store safely,
 and the app can retain retry/cursor/conflict state across restart.
 
@@ -179,16 +181,17 @@ tests require the real database gate.
 
 ## M7-07 — Synchronize money-out and prove consistent bootstrap
 
-**Status:** Implemented in source; fresh-database and real server evidence remain open. **Dependency:** M7-06.
+**Status:** Bootstrap source has a blocking reconstruction defect; fresh-database and real server evidence remain open. **Dependency:** M7-06.
 **Delivers:** expenses/withdrawals deduplicate and a newly authorized installation
 can reconstruct the accepted M1–M6 private store state.
 
 - [x] Apply expenses and owner withdrawals as immutable owner-authorized facts;
   preserve exact store currency, actor/device/time and separation from purchases
   or each other.
-- [x] Build a consistent paginated bootstrap snapshot with its matching revision.
+- [ ] Build a consistent paginated bootstrap snapshot with its matching revision.
   Restore dependencies, immutable history, current projections, mutable versions
   and sync metadata into a fresh SQLite database, then start incremental pull.
+  The current latest-document query loses earlier creation facts after edits.
 - [x] Register a later device only for an authorized member. Interrupted
   bootstrap restarts safely; a failed snapshot never becomes the active store.
 - [x] Protect unsynced local work during full resync/logout/reset paths and state
@@ -203,7 +206,7 @@ support process.
 
 ## M7-08 — Harden, validate and stop for independent audit
 
-**Status:** Handoff ready; real PostgreSQL gate blocked and independent audit pending. **Dependency:** M7-01 through M7-07.
+**Status:** Handoff audited; source blockers open and real PostgreSQL gate deferred. **Dependency:** M7-01 through M7-07.
 **Delivers:** a recoverable M7 handoff with actual server integration evidence.
 
 - [ ] Run all required scenarios in `OFFLINE_SYNC.md`: restart/crash boundaries,

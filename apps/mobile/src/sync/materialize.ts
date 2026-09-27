@@ -234,7 +234,12 @@ function safeIdentifier(value: string): string {
   return value;
 }
 
-function upsertRow(adapter: DatabaseAdapter, tableName: string, value: JsonRecord): void {
+function upsertRow(
+  adapter: DatabaseAdapter,
+  tableName: string,
+  value: JsonRecord,
+  expectedStoreId: string,
+): void {
   if (!ENTITY_TABLES.has(tableName)) return;
   const table = safeIdentifier(tableName);
   const columns = adapter
@@ -247,14 +252,24 @@ function upsertRow(adapter: DatabaseAdapter, tableName: string, value: JsonRecor
     const scalar = scalarValue(rawValue);
     if (available.has(column) && scalar !== undefined) row.set(column, scalar);
   }
+  if (available.has('store_id') && row.has('store_id') && row.get('store_id') !== expectedStoreId) {
+    throw new Error(`Sync payload row for ${table} belongs to another store.`);
+  }
   const primaryKeyColumns = columns.filter((column) => column.pk > 0).map((column) => column.name);
   if (primaryKeyColumns.length === 0 || primaryKeyColumns.some((column) => !row.has(column))) return;
   const primaryKeyParams = primaryKeyColumns.map((column) => row.get(column) ?? null);
   const existing = adapter.getFirstRow<Record<string, string | number | null>>(
-    `SELECT 1 AS present FROM ${table} WHERE ${primaryKeyColumns.map((column) => `${safeIdentifier(column)} = ?`).join(' AND ')} LIMIT 1;`,
+    `SELECT * FROM ${table} WHERE ${primaryKeyColumns.map((column) => `${safeIdentifier(column)} = ?`).join(' AND ')} LIMIT 1;`,
     primaryKeyParams,
   );
-  if (existing && IMMUTABLE_TABLES.has(table)) return;
+  if (existing && IMMUTABLE_TABLES.has(table)) {
+    for (const [column, incomingValue] of row) {
+      if ((existing[column] ?? null) !== incomingValue) {
+        throw new Error(`Immutable sync row ${table}.${column} does not match local history.`);
+      }
+    }
+    return;
+  }
 
   if (!existing) {
     const insertColumns = [...row.keys()];
@@ -298,7 +313,9 @@ export function materializeSyncOperation(
   for (const [key, rawValue] of entries) {
     const tableName = tableForKey(envelope.operationType, key);
     if (!tableName) continue;
-    for (const row of rowsForValue(rawValue)) upsertRow(adapter, tableName, row);
+    for (const row of rowsForValue(rawValue)) {
+      upsertRow(adapter, tableName, row, envelope.storeId);
+    }
   }
 }
 

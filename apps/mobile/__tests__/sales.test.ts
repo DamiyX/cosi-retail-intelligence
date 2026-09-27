@@ -134,6 +134,7 @@ describe('M3 Sales milestone', () => {
             { version: 16, name: 'expenses' },
             { version: 17, name: 'owner_withdrawals' },
             { version: 18, name: 'offline_sync_state' },
+            { version: 19, name: 'offline_sync_bootstrap_staging' },
           ]);
         } finally {
           reopened.close();

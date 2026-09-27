@@ -32,6 +32,18 @@ describe('M7 provider-independent sync contracts', () => {
     })).toThrow();
   });
 
+  it('rejects identifiers that cannot cross the PostgreSQL UUID boundary', () => {
+    expect(() => parseSyncOperationEnvelope({ ...envelope, operationId: 'not-a-uuid' })).toThrow();
+    expect(() => parseSyncBootstrapRequest({
+      protocolVersion: 1,
+      payloadVersion: 1,
+      storeId: 'not-a-uuid',
+      deviceId: envelope.deviceId,
+      cursor: null,
+      pageSize: 100,
+    })).toThrow();
+  });
+
   it('enforces a bounded, paginated bootstrap request', () => {
     expect(parseSyncBootstrapRequest({
       protocolVersion: 1,

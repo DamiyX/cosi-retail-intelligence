@@ -1,6 +1,7 @@
 export {
   applySyncBootstrapPage,
   applySyncPullPage,
+  commitSyncBootstrapSnapshot,
 } from './applier';
 export {
   materializeSyncOperation,

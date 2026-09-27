@@ -2546,6 +2546,26 @@ export const MIGRATIONS: Migration[] = [
         ON outbox_operations(store_id, status, next_attempt_at, lease_expires_at, created_at);`,
     ],
   },
+  {
+    version: 19,
+    name: 'offline_sync_bootstrap_staging',
+    statements: [
+      `CREATE TABLE sync_bootstrap_entities (
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+        bootstrap_id TEXT NOT NULL,
+        snapshot_revision INTEGER NOT NULL CHECK (snapshot_revision >= 0),
+        server_revision INTEGER NOT NULL CHECK (server_revision >= 0),
+        entity_type TEXT NOT NULL,
+        entity_id TEXT NOT NULL,
+        entity_version INTEGER NOT NULL CHECK (entity_version >= 0),
+        payload TEXT NOT NULL,
+        PRIMARY KEY (store_id, bootstrap_id, entity_type, entity_id),
+        FOREIGN KEY (store_id) REFERENCES sync_bootstrap_state(store_id) ON DELETE CASCADE
+      );`,
+      `CREATE INDEX idx_sync_bootstrap_entities_order
+        ON sync_bootstrap_entities(store_id, bootstrap_id, server_revision, entity_type, entity_id);`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

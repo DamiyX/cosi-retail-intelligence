@@ -1,10 +1,9 @@
 # PROJECT_STATE — COSI
 
-Last updated: 2026-09-19  
-Current milestone: M7 offline-sync source implementation handoff complete;
-acceptance is blocked by the required real non-production Supabase integration
-environment and independent audit. Founder has deferred M8 scanner planning
-until this coordinator task is explicitly switched to Astra.
+Last updated: 2026-09-27  
+Current milestone: M7 independent audit in progress; source acceptance is
+blocked by bootstrap reconstruction and missing app integration, with the
+PostgreSQL test gate deferred. M8 scanner work remains deferred.
 
 ## Current status
 
@@ -12,10 +11,10 @@ M0–M6 source and automated scope is independently accepted. M1 acceptance uses
 an explicit device waiver. Physical/release-readiness checks carried from M3–M6
 remain pending and are not implied by source acceptance.
 
-M7 source work is implemented sequentially in commits `66507e6` through
-`e9ef793` (M7-01 through M7-08). Source acceptance is intentionally not
-claimed: the local Docker/Postgres gate could not start on this laptop and the
-independent audit has not yet run.
+M7 initial source work is in commits `66507e6` through `e9ef793` (M7-01
+through M7-08). Independent audit found two blocking source gaps; see
+`M7_INDEPENDENT_AUDIT.md`. Audit corrections are present but not yet
+PostgreSQL-verified. Source acceptance is not claimed.
 
 M5 closed at coordinator correction `9ba4801` with additive migration 15 durable
 reorder-threshold history. M6 implementation commits are `86e526b`, `1cce732`,
@@ -72,10 +71,10 @@ legacy plus extended sale/purchase envelopes, M5 batch/reconciliation/config
 facts and M6 expense/withdrawal transactions without inventing feature-specific
 sync protocols. M7 does not implement Scan, staff workflows or price signals.
 
-M8 product planning is complex and remains coordinator/Astra-owned. On
-2026-09-19 the founder explicitly deferred that planning until this task is
-switched to Astra. Production M8 integration begins after M7 source acceptance;
-M9 follows M8 in the core app. Recognition Track B research may run in parallel
+M8 product planning is complex and remains coordinator/Astra-owned. The founder
+continues to defer M8. D-043 permits route-local M9 work after M7 acceptance
+while M8 is deferred, provided M9 does not alter scanner/navigation contracts.
+Recognition Track B research may run in parallel
 behind stable contracts and feature flags only after it is deliberately started.
 Concurrent writers must not edit shared catalogue, package-unit, sync or
 recognition contracts.
@@ -83,21 +82,27 @@ recognition contracts.
 ## M7 implementation handoff
 
 `M7_OFFLINE_SYNC_PLAN.md` and `tickets.md` define eight sequential vertical
-tickets. Source implementation covers every canonical M2–M6 outbox operation,
-authenticated store/device enrolment, PostgreSQL idempotency/revisions,
-push/pull, durable conflicts, M5 batch/reconciliation/attention behavior, M6
-money-out facts and a consistent second-device bootstrap.
+tickets. Initial source covers the M2–M6 operation families and server
+protocol, but its fresh-device bootstrap and app integration do not yet meet
+the milestone contract. See `M7_INDEPENDENT_AUDIT.md`.
 
-Local evidence: 51 suites/484 tests passed; root typecheck and zero-warning lint
-passed; Expo Doctor passed 21/21; Expo dependency check and Android export
-passed. The M7 sync suite is 7/7 and the contracts suite is 5/5.
+Initial handoff evidence was 51 suites/484 tests, typecheck, lint, Expo Doctor,
+dependency check and Android export. After audit corrections, `npm run
+validate` passed typecheck, zero-warning lint and 492 tests across 51 suites;
+the focused M7 sync suite passed 14/14. These checks do not close the source
+findings or prove PostgreSQL behavior.
 
-Supabase CLI 2.117.0 is available, but Docker is not installed and no isolated
-hosted development project is linked. `supabase db lint --local --fail-on
-error` and `supabase test db --local supabase/tests/m7_sync.sql` both failed to
-connect to `127.0.0.1:54322`; no database/RLS/function acceptance is claimed.
-Mocks remain supporting evidence only. The branch is ready for independent
-audit after the environment gate is satisfied.
+Expo Doctor initially found two patch-version mismatches; after aligning
+`expo-linking` and `expo-router`, it passed 21/21. Post-update typecheck,
+zero-warning lint, focused navigation/startup/sync tests (23/23), and Android
+export passed.
+
+Supabase CLI 2.117.0 and Docker Desktop are installed. BIOS virtualization is
+enabled and WSL is updated to 2.7.13, but Docker Desktop fails during startup
+with stale Unix socket rename errors; `docker info` cannot connect to the
+engine. The founder deferred further Docker troubleshooting on 2026-09-27.
+No database/RLS/function acceptance is claimed. The source audit is underway;
+the current blocking findings are documented in `M7_INDEPENDENT_AUDIT.md`.
 
 ## Carried readiness gates
 
@@ -112,13 +117,11 @@ audit after the environment gate is satisfied.
 
 ## Next action
 
-Establish Docker-backed local Supabase or an explicitly authorized isolated
-hosted development project, run the migration/lint/pgTAP and endpoint evidence,
-then perform the independent M7 source audit. Do not resume M8 planning until
-the founder switches this coordinator task to Astra. M9 planning may be
-prepared separately while M7 runs, but production M9 code remains after
-accepted M8 because both milestones touch navigation/catalogue selection
-contracts.
+Correct the two M7 source blockers in `M7_INDEPENDENT_AUDIT.md` and rerun local
+checks. PostgreSQL migration/lint/pgTAP and endpoint evidence remain an open
+gate while Docker is on hold. Finalize M9 planning in the isolated worktree,
+then stop before creating an M9 implementation task so the founder can choose
+whether to resume Docker or begin M9. Do not start M8.
 
 A continuing agent must first read `AGENTS.md`, this file,
 `MULTI_AGENT_WORKFLOW.md`, `IMPLEMENTATION_AUDIT_WORKFLOW.md`, the workflow
