@@ -4,12 +4,14 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "active",
-  "current_state": "m9-03-implemented-verification-blocked-on-local-dependencies",
+  "current_state": "m9-04-handoff-recorded-m7-and-local-validation-blocked",
   "completed_states": [
     "m9-existing-price-observation-contract-inspected",
     "m9-product-data-design-reviewed",
     "m9-plan-tickets-prepared",
-    "m9-local-execution-exception-authorized"
+    "m9-local-execution-exception-authorized",
+    "m9-01-through-m9-03-implemented-locally-verification-blocked",
+    "m9-04-local-boundaries-and-evidence-recorded"
   ],
   "owner": {
     "agent": "coordinating-planner-independent-auditor",
@@ -82,6 +84,24 @@
       "limitations": [
         "Command: npm run test --workspace @retail/mobile -- --runTestsByPath __tests__/m6Home.test.tsx --runInBand.",
         "The authored tests have not executed. No locked dependency installation was authorized or performed."
+      ]
+    },
+    {
+      "kind": "implementation",
+      "claim": "M9-04 moves product-detail full purchase history behind the same OWNER-scoped PersonalPriceClient as comparisons and removes the legacy history method from CatalogueClient. It adds a corrupt-rational recovery regression while preserving the no-migration, no-sync-write design.",
+      "path": "apps/mobile/src/priceIntelligence/client.ts; apps/mobile/src/catalogue/client.ts; apps/mobile/src/screens/products/ProductDetailScreen.tsx; apps/mobile/__tests__/m9ProductDetail.test.tsx",
+      "observed_at": "2026-09-27T16:47:51Z"
+    },
+    {
+      "kind": "verification",
+      "claim": "Environment check, diff check, workflow JSON/index/artifact path checks passed; migration source is unchanged from the M9 branch base. Focused tests, typecheck, lint, full validate, Expo Doctor, dependency check and Android export were attempted but could not execute because locked dependencies and Expo CLIs are absent.",
+      "path": "tickets.md; docs/engineering/PROJECT_STATE.md",
+      "observed_at": "2026-09-27T16:47:51Z",
+      "limitations": [
+        "npm run check:environment passed Node 24.21.0, npm 11.19.0 and git checks; adb and Docker were available, optional Java was missing.",
+        "Focused domain and mobile suites failed before execution because jest is not recognized. npm run typecheck failed because tsc is not recognized; npm run lint failed because eslint is not recognized. npm run validate passed the environment check then stopped at missing tsc.",
+        "npm run mobile:doctor failed because expo-doctor is not recognized. npm run mobile:export failed because expo is not recognized. npm exec --workspace @retail/mobile --no -- expo install --check was cancelled due missing packages and no YES option; no packages were installed.",
+        "No physical-device or airplane-mode evidence was collected. M7 pull/echo/replay compatibility remains unverified because this checkout contains no M7 pull applier and M7 acceptance remains deferred."
       ]
     }
   ],
@@ -242,6 +262,8 @@
     "docs/product/PRODUCT_CHANGE_BACKLOG.md",
     "apps/mobile/src/db/repositories/priceObservations.ts",
     "apps/mobile/src/priceIntelligence/client.ts",
+    "apps/mobile/src/catalogue/client.ts",
+    "apps/mobile/src/screens/sales/SellScreen.tsx",
     "apps/mobile/src/screens/products/PersonalPriceChangesScreen.tsx",
     "apps/mobile/app/(tabs)/products/price-changes.tsx",
     "apps/mobile/app/(tabs)/today.tsx",
@@ -250,6 +272,7 @@
     "packages/domain/__tests__/personalPriceChanges.test.ts",
     "apps/mobile/__tests__/m9PersonalPriceClient.test.ts",
     "apps/mobile/__tests__/m9ProductDetail.test.tsx",
+    "apps/mobile/__tests__/products.test.tsx",
     "apps/mobile/__tests__/m9PersonalPriceChanges.test.tsx",
     "apps/mobile/src/screens/products/ProductDetailScreen.tsx",
     "apps/mobile/src/screens/home/HomeScreen.tsx"
@@ -274,10 +297,11 @@
   ],
   "blockers": [
     "M7 independent audit has open source blockers and PostgreSQL/endpoint/device acceptance remains deferred; this M9 exception does not satisfy M7 acceptance or verify pull/echo behavior.",
-    "M9 tests, typecheck and lint are blocked until the founder authorizes installing the lockfile-pinned workspace dependencies in this checkout."
+    "M9 tests, typecheck, lint, Expo Doctor, dependency check and Android export are blocked until the founder authorizes installing the lockfile-pinned workspace dependencies in this checkout.",
+    "No physical-device or airplane-mode verification was performed."
   ],
-  "next_action": "Continue M9-04 offline, session, corrupt-row and evidence hardening on this branch only under the recorded exception. Rerun M9 focused tests, typecheck and lint after the locked dependencies are authorized and available. Preserve M7 pull/echo as an unverified integration gate.",
+  "next_action": "Independent coordinator audit of this local M9 branch and evidence. After locked dependencies are authorized and available, rerun M9 focused tests and full validation. After M7 pull source and acceptance are available, verify pull/echo/replay compatibility. Do not start M8 or M10.",
   "created_at": "2026-09-19T03:24:42Z",
-  "updated_at": "2026-09-27T16:33:39Z",
+  "updated_at": "2026-09-27T16:47:51Z",
   "archived": false
 }

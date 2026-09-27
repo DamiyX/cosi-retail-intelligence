@@ -58,9 +58,9 @@ function load(client: CatalogueClient, productId: string): DetailState {
   }
 }
 
-function loadPriceHistory(client: CatalogueClient, productId: string): PriceHistoryState {
+function loadPriceHistory(client: PersonalPriceClient, productId: string): PriceHistoryState {
   try {
-    return { rows: client.getPurchasePriceHistory(productId), failure: null };
+    return { rows: client.getProductPurchasePriceHistory(productId) ?? [], failure: null };
   } catch (error) {
     return {
       rows: [],
@@ -77,8 +77,8 @@ function loadScreen(
   const detail = load(client, productId);
   return {
     detail,
-    priceHistory: detail.detail
-      ? loadPriceHistory(client, detail.detail.product.id)
+    priceHistory: detail.detail && priceClient
+      ? loadPriceHistory(priceClient, detail.detail.product.id)
       : { rows: [], failure: null },
     priceComparison: detail.detail && priceClient
       ? loadPriceComparison(priceClient, detail.detail.product.id)
@@ -146,14 +146,14 @@ export default function ProductDetailScreen({
     setScreen(loadScreen(client, productId, priceClient));
   }, [client, productId, priceClient]);
   const retryPriceHistory = useCallback((): void => {
-    if (!detail) {
+    if (!detail || !priceClient) {
       return;
     }
     setScreen((current) => ({
       ...current,
-      priceHistory: loadPriceHistory(client, detail.product.id),
+      priceHistory: loadPriceHistory(priceClient, detail.product.id),
     }));
-  }, [client, detail]);
+  }, [detail, priceClient]);
   const retryPriceComparison = useCallback((): void => {
     if (!detail || !priceClient) return;
     setScreen((current) => ({
@@ -645,51 +645,53 @@ export default function ProductDetailScreen({
             )}
             {onOpenPriceChanges ? <SecondaryButton title="Personal price changes" onPress={onOpenPriceChanges} /> : null}
           </View>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Purchase price history</Text>
-            <Text style={styles.line}>Store-private original purchase prices. Later product or package edits do not rewrite these facts.</Text>
-            {priceHistory.failure !== null ? (
-              <ErrorPanel
-                title="Purchase price history unavailable"
-                message="The saved purchase prices could not be read from this device."
-                onRetry={retryPriceHistory}
-              />
-            ) : priceHistory.rows.length === 0 ? (
-              <Text style={styles.line}>No purchase price history yet.</Text>
-            ) : (
-              priceHistory.rows.map((entry) => (
-              <View key={entry.id} style={styles.historyRow}>
-                  <Text style={styles.line}>{entry.productNameSnapshot}</Text>
-                  <Text style={styles.line}>
-                    {formatQuantityMicros(entry.quantityPackagesMicros)} {entry.packageNameSnapshot} · 1 package = {formatQuantityMicros(entry.conversionToBaseSnapshotMicros)} base units
-                  </Text>
-                  <Text style={styles.line}>Entered {entry.costBasis.toLowerCase()} cost: {displayMoney(entry.enteredCostMinor, entry.currencyCode)}</Text>
-                  <Text style={styles.line}>Purchase total: {displayMoney(entry.totalPurchaseCostMinor, entry.currencyCode)}</Text>
-                  <Text style={styles.line}>
-                    Receipt cost estimate: {displayRationalMinorPerBaseUnit(
-                      entry.baseUnitCostNumerator,
-                      entry.baseUnitCostDenominator,
-                      entry.currencyCode,
-                    ) ?? 'Unavailable'} per base unit (display rounded to the nearest {currencyMinorUnitLabel(entry.currencyCode)})
-                  </Text>
-                  <Text style={styles.line}>
-                    Current cost availability: {isUsableCurrentCost({
-                      coverageStatus: entry.currentCostCoverageStatus,
-                      quantityCostedBaseMicros: entry.currentCostQuantityCostedBaseMicros,
-                      averageUnitCost: entry.currentCostAverageUnitCostNumerator && entry.currentCostAverageUnitCostDenominator
-                        ? {
-                            numerator: entry.currentCostAverageUnitCostNumerator,
-                            denominator: entry.currentCostAverageUnitCostDenominator,
-                          }
-                        : null,
-                    }) ? 'Estimated cost available for current stock' : 'Unavailable for current stock; do not infer profit'}
-                  </Text>
-                  <Text style={styles.line}>Supplier: {entry.supplierNameSnapshot ?? 'Not recorded'}</Text>
-                  <Text style={styles.line}>Observed: {new Date(entry.occurredAt).toLocaleString()} · Contribution: off</Text>
-                </View>
-              ))
-            )}
-          </View>
+          {priceClient ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Purchase price history</Text>
+              <Text style={styles.line}>Store-private original purchase prices. Later product or package edits do not rewrite these facts.</Text>
+              {priceHistory.failure !== null ? (
+                <ErrorPanel
+                  title="Purchase price history unavailable"
+                  message="The saved purchase prices could not be read from this device."
+                  onRetry={retryPriceHistory}
+                />
+              ) : priceHistory.rows.length === 0 ? (
+                <Text style={styles.line}>No purchase price history yet.</Text>
+              ) : (
+                priceHistory.rows.map((entry) => (
+                  <View key={entry.id} style={styles.historyRow}>
+                    <Text style={styles.line}>{entry.productNameSnapshot}</Text>
+                    <Text style={styles.line}>
+                      {formatQuantityMicros(entry.quantityPackagesMicros)} {entry.packageNameSnapshot} · 1 package = {formatQuantityMicros(entry.conversionToBaseSnapshotMicros)} base units
+                    </Text>
+                    <Text style={styles.line}>Entered {entry.costBasis.toLowerCase()} cost: {displayMoney(entry.enteredCostMinor, entry.currencyCode)}</Text>
+                    <Text style={styles.line}>Purchase total: {displayMoney(entry.totalPurchaseCostMinor, entry.currencyCode)}</Text>
+                    <Text style={styles.line}>
+                      Receipt cost estimate: {displayRationalMinorPerBaseUnit(
+                        entry.baseUnitCostNumerator,
+                        entry.baseUnitCostDenominator,
+                        entry.currencyCode,
+                      ) ?? 'Unavailable'} per base unit (display rounded to the nearest {currencyMinorUnitLabel(entry.currencyCode)})
+                    </Text>
+                    <Text style={styles.line}>
+                      Current cost availability: {isUsableCurrentCost({
+                        coverageStatus: entry.currentCostCoverageStatus,
+                        quantityCostedBaseMicros: entry.currentCostQuantityCostedBaseMicros,
+                        averageUnitCost: entry.currentCostAverageUnitCostNumerator && entry.currentCostAverageUnitCostDenominator
+                          ? {
+                              numerator: entry.currentCostAverageUnitCostNumerator,
+                              denominator: entry.currentCostAverageUnitCostDenominator,
+                            }
+                          : null,
+                      }) ? 'Estimated cost available for current stock' : 'Unavailable for current stock; do not infer profit'}
+                    </Text>
+                    <Text style={styles.line}>Supplier: {entry.supplierNameSnapshot ?? 'Not recorded'}</Text>
+                    <Text style={styles.line}>Observed: {new Date(entry.occurredAt).toLocaleString()} · Contribution: off</Text>
+                  </View>
+                ))
+              )}
+            </View>
+          ) : null}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Product status</Text>
             {detail.product.isTemporary ? (

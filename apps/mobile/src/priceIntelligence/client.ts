@@ -33,6 +33,7 @@ export interface PersonalPriceClient {
   readonly storeId: string;
   readonly userId: string;
   getProductPriceComparison(storeProductId: string): PersonalPriceComparisonRecord | null;
+  getProductPurchasePriceHistory(storeProductId: string): PurchasePriceHistoryRow[] | null;
   listPriceChanges(options?: { includeUnchanged?: boolean }): PersonalPriceChangeRow[];
   getOverview(): PersonalPriceOverview;
 }
@@ -112,6 +113,13 @@ export function createDatabasePersonalPriceClient(
       if (!product || product.storeId !== storeId) return null;
       const rows = listPurchasePriceHistoryByStoreProduct(adapter, storeId, id);
       return comparisonForRows(storeId, id, product.productVariantId, rows);
+    },
+    getProductPurchasePriceHistory(storeProductId: string): PurchasePriceHistoryRow[] | null {
+      assertActiveOwner(adapter, storeId, userId);
+      const id = requireId(storeProductId);
+      const product = getStoreProductById(adapter, id);
+      if (!product || product.storeId !== storeId) return null;
+      return listPurchasePriceHistoryByStoreProduct(adapter, storeId, id);
     },
     listPriceChanges(optionsForList: { includeUnchanged?: boolean } = {}): PersonalPriceChangeRow[] {
       assertActiveOwner(adapter, storeId, userId);

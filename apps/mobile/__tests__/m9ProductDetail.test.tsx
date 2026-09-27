@@ -124,6 +124,7 @@ describe('M9 product detail purchase cost comparison', () => {
       userId: context.fixture.context.owner.id,
       getProductPriceComparison,
       listPriceChanges: jest.fn(() => []),
+      getProductPurchasePriceHistory: jest.fn(() => []),
     } as unknown as PersonalPriceClient;
     try {
       render(<ProductDetailScreen
@@ -142,6 +143,40 @@ describe('M9 product detail purchase cost comparison', () => {
     }
   });
 
+  it('fails closed on a corrupt stored rational and preserves the raw history view', () => {
+    const context = renderProductDetail([100, 150]);
+    try {
+      const latest = context.fixture.adapter.getFirstRow<{ id: string }>(
+        `SELECT id FROM price_observations
+         WHERE store_id = ?
+         ORDER BY observed_at DESC, created_at DESC, id DESC
+         LIMIT 1;`,
+        [context.fixture.context.store.id],
+      );
+      if (!latest) throw new Error('Test restock did not create a price observation.');
+      context.fixture.adapter.run('DROP TRIGGER trg_price_observations_immutable_update;');
+      context.fixture.adapter.run(
+        'UPDATE price_observations SET package_cost_denominator = ?, base_unit_cost_denominator = ? WHERE id = ?;',
+        ['0', '0', latest.id],
+      );
+
+      render(<ProductDetailScreen
+        client={context.catalogueClient}
+        priceClient={context.priceClient}
+        productId={context.product.storeProduct.id}
+        onBack={() => undefined}
+        onAddPackage={() => undefined}
+        onEditPackage={() => undefined}
+      />);
+      expect(screen.getByText('Purchase cost change unavailable')).toBeTruthy();
+      expect(screen.getByText(/A saved cost could not be compared safely/)).toBeTruthy();
+      expect(screen.getByText('Purchase price history')).toBeTruthy();
+      expect(screen.getAllByText(/Receipt cost estimate: Unavailable per base unit/)).toHaveLength(1);
+    } finally {
+      context.fixture.closeAndDelete();
+    }
+  });
+
   it('shows an explicit owner boundary message when no authorized price client is available', () => {
     const context = renderProductDetail([]);
     try {
@@ -155,6 +190,7 @@ describe('M9 product detail purchase cost comparison', () => {
         onEditPackage={() => undefined}
       />);
       expect(screen.getByText('Only an active store owner can read personal purchase costs.')).toBeTruthy();
+      expect(screen.queryByText('Purchase price history')).toBeNull();
     } finally {
       context.fixture.closeAndDelete();
     }

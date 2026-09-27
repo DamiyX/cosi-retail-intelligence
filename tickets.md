@@ -21,9 +21,10 @@ restock-cost change entirely from local data.
   latest/previous observations, prioritizes the same package/currency, uses the
   labelled base-unit fallback only when valid, and handles increase, decrease,
   unchanged and zero-denominator cases without floating-point authority.
-- [x] Add a store-scoped OWNER-authorized repository/client read returning
-  immutable price/snapshot/supplier/date facts. Direct IDs, STAFF context and
-  cross-store rows must not bypass the boundary.
+- [x] Add store-scoped OWNER-authorized comparison and full-history reads
+  returning immutable price/snapshot/supplier/date facts. Direct IDs, STAFF
+  context and cross-store rows must not bypass the boundary. The generic
+  catalogue client no longer exposes purchase-price history.
 - [x] Add the product-detail **Purchase cost change** section with latest,
   previous, basis, direction/percentage, dates, supplier and honest zero/one/
   invalid/error states. Preserve the existing full raw history.
@@ -35,7 +36,7 @@ restock-cost change entirely from local data.
   lint. **Blocked:** `jest`, `tsc` and `eslint` are not installed in this clean
   checkout. No dependencies or lockfile have been changed.
 
-**Evidence:** authored test paths: `packages/domain/__tests__/personalPriceChanges.test.ts`, `apps/mobile/__tests__/m9PersonalPriceClient.test.ts`, and `apps/mobile/__tests__/m9ProductDetail.test.tsx`. Attempted commands failed before test/check execution because the locked workspace dependencies are absent. `git diff --check` passed.
+**Evidence:** authored test paths: `packages/domain/__tests__/personalPriceChanges.test.ts`, `apps/mobile/__tests__/m9PersonalPriceClient.test.ts`, and `apps/mobile/__tests__/m9ProductDetail.test.tsx`. Comparison and full-history reads both use the owner-scoped client; the generic catalogue client no longer exposes purchase-price history. Attempted commands failed before test/check execution because the locked workspace dependencies are absent. `git diff --check` passed.
 
 **Out of scope:** store-wide ranking, Home, market data, contribution consent,
 selling-price recommendations.
@@ -108,19 +109,34 @@ scanner/navigation redesign.
 
 ## M9-04 — Prove offline/sync compatibility and stop for audit
 
-**Status:** Planned. **Dependency:** M9-01 through M9-03.  
+**Status:** Incomplete; handoff for independent audit after local evidence update. **Dependency:** M9-01 through M9-03.  
 **Delivers:** a recoverable M9 handoff whose claims match actual evidence.
 
 - [ ] Verify M7-pulled immutable purchase observations produce the same personal
   signal as locally originated observations, echo/replay creates no duplicates,
   pending local work is not hidden and pre-M4 missing history remains absent.
-- [ ] Exercise zero/one/many observations, app restart, airplane-mode local
-  reads, account/session pause, cross-store/STAFF denial and corrupt-row failure
-  behavior. Record physical-device evidence only when performed.
-- [ ] Run focused suites, full `npm run validate`, Expo Doctor, dependency check,
-  Android export, workflow/index/migration/artifact checks and `git diff --check`.
-- [ ] Update tickets, PROJECT_STATE and the M9 workflow with actual commits,
-  commands, results, limitations and clean branch/HEAD/status. Stop for
+  **Blocked:** this checkout has no M7 pull applier, and M7 PostgreSQL/endpoint/
+  device acceptance remains deferred.
+- [x] Author regression coverage for zero/one/many observations, app database
+  restart, account/session pause, cross-store/STAFF denial, deactivated-package
+  snapshots, corrupt-rational failure and OWNER-only full-history access. The
+  corrupt-row test uses a disposable local fixture and removes the immutability
+  trigger only inside that test.
+- [ ] Perform physical airplane-mode/device checks. No device evidence was
+  collected.
+- [ ] Execute focused suites, full `npm run validate`, Expo Doctor, dependency
+  check and Android export. **Blocked:** focused Jest commands failed before
+  execution (`jest` not recognized); typecheck failed (`tsc` not recognized);
+  lint failed (`eslint` not recognized); `npm run validate` passed the
+  environment check then stopped at missing `tsc`; Expo Doctor and Android
+  export failed (`expo-doctor`/`expo` not recognized). `npm exec --workspace
+  @retail/mobile --no -- expo install --check` was cancelled by npm because the
+  packages are absent; no packages were installed. `npm run check:environment`
+  passed required Node 24.21.0, npm 11.19.0 and git checks (`adb` and Docker
+  available; optional Java missing). `git diff --check`, workflow JSON/index/
+  artifact checks passed, and migration source is unchanged from the branch base.
+- [x] Update tickets, PROJECT_STATE and workflow with actual commits, commands,
+  results and limitations. The branch remains local and unpushed. Stop for
   independent coordinator audit; do not start M10 or M8.
 
 **Out of scope:** production deployment, hosted-service changes, physical-device

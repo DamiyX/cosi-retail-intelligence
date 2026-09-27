@@ -1,8 +1,10 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-27  
-Current milestone: M9 planning complete in an isolated worktree. M7 independent
-audit remains open in the canonical checkout; M8 is deferred by the founder.
+Current milestone: M9 local implementation in an isolated worktree under the
+founder's narrow exception. M9-01 through M9-03 are committed but unverified;
+M9-04 and independent audit remain open. M7 acceptance remains unmet; M8 is
+deferred by the founder.
 
 ## Current status
 
@@ -26,7 +28,9 @@ currency wording. See `M5_AUDIT_CORRECTIONS.md` and `M6_AUDIT_CORRECTIONS.md`.
 - M7 Luna Max implementation task: `01a0b7a8-a799-7e42-a762-4f046ff34cfe`
   (initial source handoff complete; coordinator auditing in `COSI-m0`)
 - M9 planning worktree: `C:\Users\doyew\Documents\DEV 2\COSI-m9-planning`
-  on `plan/m9-price-intelligence`; planning/docs only
+  on `plan/m9-price-intelligence`; local implementation exception. Commits:
+  `ead4679` (M9-01), `c758a35` (M9-02), `a67b9e0` (M9-02 state clarification),
+  and `1db780d` (M9-03). Work remains local and unpushed.
 - M6 Luna Max implementation task: `01a0b72e-5fdf-7022-afc8-2e1796f49b66`
   (completed and stopped)
 - M6 workflow: `.agents/workflows/m6-expenses-business-summary.json` (archived)
@@ -95,13 +99,22 @@ integration acceptance; mocks remain supporting evidence only.
 
 ## M9 planning checkpoint
 
-`M9_PERSONAL_PRICE_INTELLIGENCE_PLAN.md`, M9-01 through M9-04 and D-043 are
-prepared in the isolated M9 worktree. Inspection confirms M4 already stores the
-immutable exact price observations required, so no new business write, outbox
-operation or schema migration is planned. Only `VALID` observations produce
-exact change claims; estimated/unavailable rows remain in raw history. M9 is
-unimplemented and its M7 observation/pull dependency must be revalidated
-against the final M7 baseline before production edits.
+`M9_PERSONAL_PRICE_INTELLIGENCE_PLAN.md` and tickets M9-01 through M9-04 are the
+active execution record in the isolated worktree. Under the founder's
+2026-09-27 exception, M9-01 through M9-03 now add exact store-private product
+comparisons, a store-wide Personal price changes route and a compact Home card.
+They read existing immutable M4 observations; no business write, outbox
+operation or schema migration was added. Both comparison and full purchase
+history reads use the OWNER-scoped price client; the generic catalogue client no
+longer exposes raw purchase-price history. Only `VALID` observations produce
+exact change claims; estimated/unavailable rows remain in raw history.
+
+M9-04 is incomplete. The checkout contains no M7 pull applier, so M7 pull/echo
+and replay compatibility cannot be verified here. M7 PostgreSQL/endpoint/device
+acceptance remains open. Focused and full test/check commands are blocked before
+execution because the locked workspace dependencies are absent; no install was
+authorized. `npm run check:environment` and `git diff --check` passed. No
+physical-device or airplane-mode evidence was collected. M9 is not accepted.
 
 ## Carried readiness gates
 
@@ -116,11 +129,11 @@ against the final M7 baseline before production edits.
 
 ## Next action
 
-Keep M7 open for the source findings and deferred PostgreSQL gate. Present the
-completed M9 plan to the founder before creating an M9 implementation task;
-they will choose whether to resume Docker or proceed with M9. If M9 proceeds,
-revalidate its M7 dependency against the then-current baseline. Do not start
-M8 or M9 implementation from this planning checkpoint.
+Keep M7 open for the source findings and deferred PostgreSQL gate. The next
+action is an independent coordinator audit of the local M9 branch and its actual
+test/evidence limits. After the locked dependencies are authorized and available,
+rerun M9 validation; after M7 source and acceptance are available, verify pull,
+echo and replay compatibility. Do not start M8 or M10.
 
 A continuing agent must first read `AGENTS.md`, this file,
 `MULTI_AGENT_WORKFLOW.md`, `IMPLEMENTATION_AUDIT_WORKFLOW.md`, the workflow

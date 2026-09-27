@@ -121,6 +121,7 @@ function personalPriceClient(rows: PersonalPriceChangeRow[]): PersonalPriceClien
     storeId: '00000000-0000-4000-8000-000000000010',
     userId: '00000000-0000-4000-8000-000000000099',
     getProductPriceComparison: () => null,
+    getProductPurchasePriceHistory: () => [],
     listPriceChanges: jest.fn(() => rows),
     getOverview: () => ({ oneObservationProductCount: 0, unchangedComparisonCount: 0 }),
   };
@@ -238,6 +239,7 @@ describe('HomeScreen', () => {
       storeId: '00000000-0000-4000-8000-000000000010',
       userId: '00000000-0000-4000-8000-000000000099',
       getProductPriceComparison: () => null,
+      getProductPurchasePriceHistory: () => [],
       listPriceChanges: jest.fn(() => currentChanges),
       getOverview: () => ({ oneObservationProductCount: 0, unchangedComparisonCount: 0 }),
     } satisfies PersonalPriceClient;
@@ -282,6 +284,7 @@ describe('HomeScreen', () => {
       storeId: '00000000-0000-4000-8000-000000000010',
       userId: '00000000-0000-4000-8000-000000000099',
       getProductPriceComparison: () => null,
+      getProductPurchasePriceHistory: () => [],
       listPriceChanges,
       getOverview: () => ({ oneObservationProductCount: 0, unchangedComparisonCount: 0 }),
     } satisfies PersonalPriceClient;

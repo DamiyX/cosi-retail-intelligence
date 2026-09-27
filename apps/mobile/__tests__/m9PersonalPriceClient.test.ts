@@ -60,6 +60,7 @@ describe('M9 personal price client', () => {
       });
       expect(result.latest?.packageCostNumerator).toBe('150');
       expect(result.previous?.packageCostNumerator).toBe('100');
+      expect(client.getProductPurchasePriceHistory(product.storeProduct.id)).toHaveLength(2);
       expect(client.listPriceChanges()).toHaveLength(1);
       expect(countRows(fixture.adapter, 'price_observations')).toBe(observationCount);
       expect(countRows(fixture.adapter, 'outbox_operations')).toBe(outboxCount);
@@ -106,6 +107,7 @@ describe('M9 personal price client', () => {
         storeId: fixture.context.store.id, userId: fixture.context.owner.id,
       });
       expect(ownerClient.getProductPriceComparison(otherProduct.storeProduct.id)).toBeNull();
+      expect(ownerClient.getProductPurchasePriceHistory(otherProduct.storeProduct.id)).toBeNull();
       expect(ownerClient.listPriceChanges()).toEqual([]);
       expect(() => createDatabasePersonalPriceClient(fixture.adapter, {
         storeId: fixture.context.store.id, userId: otherStore.owner.id,
@@ -140,6 +142,7 @@ describe('M9 personal price client', () => {
         ['INACTIVE', fixture.context.store.id, fixture.context.owner.id],
       );
       expect(() => client.listPriceChanges()).toThrow(/active store owner/i);
+      expect(() => client.getProductPurchasePriceHistory(testId(2500))).toThrow(/active store owner/i);
     } finally {
       fixture.closeAndDelete();
     }

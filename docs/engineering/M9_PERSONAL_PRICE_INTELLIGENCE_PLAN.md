@@ -69,6 +69,10 @@ Purchase costs and supplier relationships are store-private. M9 management and
 summary reads require an active OWNER in the first slice. UI hiding is not the
 authorization boundary. M11 may later add explicit staff permissions.
 
+Both the comparison and full purchase-history reads use the owner-scoped
+PersonalPriceClient and recheck active membership on every read. The generic
+catalogue client does not expose purchase-price history.
+
 Every query requires the active `storeId`. Cross-store observations, suppliers
 and products must never be returned, even when an ID is supplied directly.
 
