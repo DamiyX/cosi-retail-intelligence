@@ -4,14 +4,15 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "active",
-  "current_state": "m9-04-handoff-recorded-m7-and-local-validation-blocked",
+  "current_state": "m9-audit-corrections-committed-full-validation-pass-expo-sdk-mismatch-m7-device-gates-open",
   "completed_states": [
     "m9-existing-price-observation-contract-inspected",
     "m9-product-data-design-reviewed",
     "m9-plan-tickets-prepared",
     "m9-local-execution-exception-authorized",
     "m9-01-through-m9-03-implemented-locally-verification-blocked",
-    "m9-04-local-boundaries-and-evidence-recorded"
+    "m9-04-local-boundaries-and-evidence-recorded",
+    "m9-independent-audit-findings-corrected-and-full-validation-run"
   ],
   "owner": {
     "agent": "coordinating-planner-independent-auditor",
@@ -102,6 +103,23 @@
         "Focused domain and mobile suites failed before execution because jest is not recognized. npm run typecheck failed because tsc is not recognized; npm run lint failed because eslint is not recognized. npm run validate passed the environment check then stopped at missing tsc.",
         "npm run mobile:doctor failed because expo-doctor is not recognized. npm run mobile:export failed because expo is not recognized. npm exec --workspace @retail/mobile --no -- expo install --check was cancelled due missing packages and no YES option; no packages were installed.",
         "No physical-device or airplane-mode evidence was collected. M7 pull/echo/replay compatibility remains unverified because this checkout contains no M7 pull applier and M7 acceptance remains deferred."
+      ]
+    },
+    {
+      "kind": "implementation",
+      "claim": "Independent-audit corrections are committed as 414b4dc: the base-unit fallback fixture now asserts unchanged costs, the corrupt-rational test uses malformed nonzero text accepted by SQLite's literal-zero check, Product detail separates purchase quantity from per-package conversion, both navigation/shell test route maps include Personal price changes, and focus refresh remounts the route rather than setting screen state in an effect.",
+      "path": "packages/domain/__tests__/personalPriceChanges.test.ts; apps/mobile/src/screens/products/PersonalPriceChangesScreen.tsx; apps/mobile/app/(tabs)/products/price-changes.tsx; apps/mobile/src/screens/products/ProductDetailScreen.tsx; apps/mobile/__tests__/m9ProductDetail.test.tsx; apps/mobile/__tests__/navigation.test.tsx; apps/mobile/__tests__/shell.test.tsx",
+      "observed_at": "2026-09-27T21:15:34Z"
+    },
+    {
+      "kind": "verification",
+      "claim": "Focused tests pass (7 domain tests; 28 M9/Product detail/navigation/shell mobile tests). npm run validate passes both typechecks, zero-warning lint, and all 501 tests across 53 suites. Android export passes with 1,408 modules and a 3.6 MB Hermes bundle. git diff --check and workflow JSON/index/artifact checks pass; migration source is unchanged from the M9 base.",
+      "path": "tickets.md; docs/engineering/PROJECT_STATE.md; apps/mobile/__tests__/navigation.test.tsx; apps/mobile/__tests__/m9ProductDetail.test.tsx",
+      "observed_at": "2026-09-27T21:15:34Z",
+      "limitations": [
+        "The coordinator installed exact lockfile dependencies using npm ci (exit 0; no tracked changes) before validation.",
+        "npm exec --workspace @retail/mobile -- expo install --check and npm run mobile:doctor fail only the Expo SDK patch-version check: expo-linking 57.0.10 is below ~57.0.11 and expo-router 57.0.22 is below ~57.0.23. No dependency or lockfile changes were made.",
+        "npm run check:environment passes Node 24.21.0, npm 11.19.0 and git; adb and Docker are available and optional Java is missing. No physical-device or airplane-mode evidence was collected. M7 pull/echo/replay remains unverified because this checkout contains no M7 pull applier and M7 acceptance remains deferred."
       ]
     }
   ],
@@ -273,6 +291,8 @@
     "apps/mobile/__tests__/m9PersonalPriceClient.test.ts",
     "apps/mobile/__tests__/m9ProductDetail.test.tsx",
     "apps/mobile/__tests__/products.test.tsx",
+    "apps/mobile/__tests__/navigation.test.tsx",
+    "apps/mobile/__tests__/shell.test.tsx",
     "apps/mobile/__tests__/m9PersonalPriceChanges.test.tsx",
     "apps/mobile/src/screens/products/ProductDetailScreen.tsx",
     "apps/mobile/src/screens/home/HomeScreen.tsx"
@@ -297,11 +317,11 @@
   ],
   "blockers": [
     "M7 independent audit has open source blockers and PostgreSQL/endpoint/device acceptance remains deferred; this M9 exception does not satisfy M7 acceptance or verify pull/echo behavior.",
-    "M9 tests, typecheck, lint, Expo Doctor, dependency check and Android export are blocked until the founder authorizes installing the lockfile-pinned workspace dependencies in this checkout.",
+    "Expo dependency validation and Doctor fail because expo-linking@57.0.10 and expo-router@57.0.22 are below the installed Expo SDK's expected ~57.0.11 and ~57.0.23; no dependency updates were included in the audit-fix scope.",
     "No physical-device or airplane-mode verification was performed."
   ],
-  "next_action": "Independent coordinator audit of this local M9 branch and evidence. After locked dependencies are authorized and available, rerun M9 focused tests and full validation. After M7 pull source and acceptance are available, verify pull/echo/replay compatibility. Do not start M8 or M10.",
+  "next_action": "Independent coordinator re-audit of the current local M9 branch. Decide whether to align the two Expo patch versions and rerun Expo dependency validation/Doctor after any authorized dependency change. Keep M7 pull/echo/replay and physical-device/airplane-mode gates open; do not start M8 or M10.",
   "created_at": "2026-09-19T03:24:42Z",
-  "updated_at": "2026-09-27T17:01:01Z",
+  "updated_at": "2026-09-27T21:15:34Z",
   "archived": false
 }

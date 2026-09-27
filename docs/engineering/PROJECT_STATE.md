@@ -2,9 +2,10 @@
 
 Last updated: 2026-09-27  
 Current milestone: M9 local implementation in an isolated worktree under the
-founder's narrow exception. M9-01 through M9-03 are committed but unverified;
-M9-04 and independent audit remain open. M7 acceptance remains unmet; M8 is
-deferred by the founder.
+founder's narrow exception. M9 source and audit corrections are committed and
+full automated validation passes. M9-04 sync/device evidence and independent
+audit remain open; Expo Doctor and dependency validation report two SDK patch
+mismatches. M7 acceptance remains unmet; M8 is deferred by the founder.
 
 ## Current status
 
@@ -30,8 +31,8 @@ currency wording. See `M5_AUDIT_CORRECTIONS.md` and `M6_AUDIT_CORRECTIONS.md`.
 - M9 planning worktree: `C:\Users\doyew\Documents\DEV 2\COSI-m9-planning`
   on `plan/m9-price-intelligence`; local implementation exception. Commits:
   `ead4679` (M9-01), `c758a35` (M9-02), `a67b9e0` (M9-02 state clarification),
-  `1db780d` (M9-03), and `7273eeb` (M9-04 owner-scoped history correction).
-  Work remains local and unpushed.
+  `1db780d` (M9-03), `7273eeb` (M9-04 owner-scoped history correction), and
+  `414b4dc` (independent-audit corrections). Work remains local and unpushed.
 - M6 Luna Max implementation task: `01a0b72e-5fdf-7022-afc8-2e1796f49b66`
   (completed and stopped)
 - M6 workflow: `.agents/workflows/m6-expenses-business-summary.json` (archived)
@@ -112,9 +113,15 @@ exact change claims; estimated/unavailable rows remain in raw history.
 
 M9-04 is incomplete. The checkout contains no M7 pull applier, so M7 pull/echo
 and replay compatibility cannot be verified here. M7 PostgreSQL/endpoint/device
-acceptance remains open. Focused and full test/check commands are blocked before
-execution because the locked workspace dependencies are absent; no install was
-authorized. `npm run check:environment` and `git diff --check` passed. No
+acceptance remains open. Independent-audit corrections fix the base-unit
+fallback fixture, malformed-rational regression setup, route map coverage,
+multi-package conversion wording and the focus-refresh lint finding. Full
+`npm run validate` passes typecheck, zero-warning lint and 501 tests (157 domain
+and 344 mobile across 53 suites). Focused M9/domain/navigation tests pass. The
+Android export passes with 1,408 modules and a 3.6 MB Hermes bundle. Expo
+dependency validation and Doctor fail their SDK-version check because the lock
+contains `expo-linking@57.0.10` and `expo-router@57.0.22`, while the installed
+SDK expects `~57.0.11` and `~57.0.23`; dependency files were not changed. No
 physical-device or airplane-mode evidence was collected. M9 is not accepted.
 
 ## Carried readiness gates
@@ -131,10 +138,11 @@ physical-device or airplane-mode evidence was collected. M9 is not accepted.
 ## Next action
 
 Keep M7 open for the source findings and deferred PostgreSQL gate. The next
-action is an independent coordinator audit of the local M9 branch and its actual
-test/evidence limits. After the locked dependencies are authorized and available,
-rerun M9 validation; after M7 source and acceptance are available, verify pull,
-echo and replay compatibility. Do not start M8 or M10.
+action is an independent coordinator re-audit of the local M9 branch. Decide
+whether to align the two Expo patch versions, then rerun dependency validation
+and Doctor after any authorized dependency change. After M7 source and acceptance
+are available, verify pull/echo/replay compatibility and perform device checks.
+Do not start M8 or M10.
 
 A continuing agent must first read `AGENTS.md`, this file,
 `MULTI_AGENT_WORKFLOW.md`, `IMPLEMENTATION_AUDIT_WORKFLOW.md`, the workflow

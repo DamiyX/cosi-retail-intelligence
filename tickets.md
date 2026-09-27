@@ -13,7 +13,7 @@ coordinator for this milestone.
 
 ## M9-01 — Show an exact personal cost comparison on product detail
 
-**Status:** Implemented locally; automated verification blocked pending locked dependency installation. **Dependency:** founder-approved M9 local execution exception; M7 acceptance remains unmet.  
+**Status:** Implemented locally; focused and full automated validation pass. **Dependency:** founder-approved M9 local execution exception; M7 acceptance remains unmet.  
 **Delivers:** an owner can open one product and understand its latest comparable
 restock-cost change entirely from local data.
 
@@ -32,18 +32,17 @@ restock-cost change entirely from local data.
   deterministic tie, package-priority/fallback, currency/store/product mismatch,
   zero/one/empty, STAFF, restart, deactivated-package and read-failure cases to
   domain/repository/component tests.
-- [ ] Execute focused domain/mobile tests, strict typecheck and zero-warning
-  lint. **Blocked:** `jest`, `tsc` and `eslint` are not installed in this clean
-  checkout. No dependencies or lockfile have been changed.
+- [x] Execute focused domain/mobile tests, strict typecheck and zero-warning
+  lint. Focused tests and full `npm run validate` pass after the audit fixes.
 
-**Evidence:** authored test paths: `packages/domain/__tests__/personalPriceChanges.test.ts`, `apps/mobile/__tests__/m9PersonalPriceClient.test.ts`, and `apps/mobile/__tests__/m9ProductDetail.test.tsx`. Comparison and full-history reads both use the owner-scoped client; the generic catalogue client no longer exposes purchase-price history. Attempted commands failed before test/check execution because the locked workspace dependencies are absent. `git diff --check` passed.
+**Evidence:** authored tests in `packages/domain/__tests__/personalPriceChanges.test.ts`, `apps/mobile/__tests__/m9PersonalPriceClient.test.ts`, and `apps/mobile/__tests__/m9ProductDetail.test.tsx` pass. Comparison and full-history reads both use the owner-scoped client; the generic catalogue client no longer exposes purchase-price history. `npm run validate` passes strict typecheck, zero-warning lint, and the full domain/mobile suites. The owner-history correction is in `7273eeb`; subsequent audit fixes are in `414b4dc`.
 
 **Out of scope:** store-wide ranking, Home, market data, contribution consent,
 selling-price recommendations.
 
 ## M9-02 — Add the store-wide Personal price changes view
 
-**Status:** Implemented locally; automated verification blocked pending locked dependency installation. **Dependency:** M9-01.  
+**Status:** Implemented locally; focused and full automated validation pass. **Dependency:** M9-01.  
 **Delivers:** the owner can review all recent personal restock-cost changes and
 open the affected product without relying on network participation.
 
@@ -65,21 +64,18 @@ open the affected product without relying on network participation.
 **Evidence:** `apps/mobile/src/priceIntelligence/client.ts` returns one store-scoped
 comparison per store product with stable newest-observation ordering and an
 explicit unchanged-comparison view; the route is nested in the Products stack
-and opens from Product detail. Focused UI/client tests were authored, including
-inactive products, one observation, owner restriction, read failure, offline
-restart, supplier/date/basis rendering and history navigation. Test/typecheck/
-lint execution remains blocked by missing locked workspace dependencies;
-`npm run test --workspace @retail/mobile -- --runTestsByPath
-__tests__/m9PersonalPriceClient.test.ts __tests__/m9ProductDetail.test.tsx
-__tests__/m9PersonalPriceChanges.test.tsx --runInBand` failed before test
-execution because `jest` is not recognized. `git diff --check` passed.
+and opens from Product detail. Focused UI/client tests pass, including inactive
+products, one observation, owner restriction, read failure, offline restart,
+supplier/date/basis rendering and history navigation. The router maps include the
+price-changes route and exercise navigation from Product detail into that route.
+The focused suites and full `npm run validate` pass.
 
 **Out of scope:** global tab changes, scanner entry, network aggregation,
 notifications or price-change snooze.
 
 ## M9-03 — Surface recent personal changes calmly on Home
 
-**Status:** Implemented locally; automated verification blocked pending locked dependency installation. **Dependency:** M9-02.  
+**Status:** Implemented locally; focused and full automated validation pass. **Dependency:** M9-02.  
 **Delivers:** Home answers what recently changed in replacement cost without
 becoming a dense analytics or alert dashboard.
 
@@ -95,14 +91,14 @@ becoming a dense analytics or alert dashboard.
   from inventory attention. Home text uses the existing scalable theme sizes.
 - [x] Keep the M9 entry points inside the existing Today and Products routes;
   the M8 global Scan/tab contracts are unchanged in this diff.
-- [ ] Execute the focused Home test, typecheck and lint. **Blocked:** workspace
-  dependencies are absent; no installation was authorized.
+- [x] Execute the focused Home test, typecheck and lint. Focused and full
+  validation pass.
 
 **Evidence:** `HomeScreen` reads the owner-scoped local client and shows no more
 than three newest changes, package/base-unit basis and observed date. It refreshes
 on Home focus/foreground return, including return from the completed restock
-route. Focused tests are authored in `apps/mobile/__tests__/m6Home.test.tsx`;
-they could not execute because Jest is missing. `git diff --check` passed.
+route. Focused tests in `apps/mobile/__tests__/m6Home.test.tsx` pass as part of
+the full mobile suite and `npm run validate`.
 
 **Out of scope:** market signals, push notifications, automatic repricing,
 scanner/navigation redesign.
@@ -113,7 +109,8 @@ scanner/navigation redesign.
 **Delivers:** a recoverable M9 handoff whose claims match actual evidence.
 
 The OWNER-scoped product-history correction is committed locally as `7273eeb`;
-the branch remains unpushed.
+independent-audit corrections are committed as `414b4dc`. The branch remains
+unpushed.
 
 - [ ] Verify M7-pulled immutable purchase observations produce the same personal
   signal as locally originated observations, echo/replay creates no duplicates,
@@ -127,20 +124,24 @@ the branch remains unpushed.
   trigger only inside that test.
 - [ ] Perform physical airplane-mode/device checks. No device evidence was
   collected.
-- [ ] Execute focused suites, full `npm run validate`, Expo Doctor, dependency
-  check and Android export. **Blocked:** focused Jest commands failed before
-  execution (`jest` not recognized); typecheck failed (`tsc` not recognized);
-  lint failed (`eslint` not recognized); `npm run validate` passed the
-  environment check then stopped at missing `tsc`; Expo Doctor and Android
-  export failed (`expo-doctor`/`expo` not recognized). `npm exec --workspace
-  @retail/mobile --no -- expo install --check` was cancelled by npm because the
-  packages are absent; no packages were installed. `npm run check:environment`
-  passed required Node 24.21.0, npm 11.19.0 and git checks (`adb` and Docker
-  available; optional Java missing). `git diff --check`, workflow JSON/index/
-  artifact checks passed, and migration source is unchanged from the branch base.
+- [x] Execute focused suites, full `npm run validate`, Expo Doctor, dependency
+  check and Android export. Focused domain tests pass (7 tests); focused M9,
+  Product detail, navigation and shell suites pass (28 tests). `npm run validate`
+  passes environment checks, both typechecks, zero-warning lint, 157 domain
+  tests and 344 mobile tests (501 total across 53 suites). The coordinator ran
+  `npm ci` from the lockfile with exit 0 and no tracked changes. `npm exec
+  --workspace @retail/mobile -- expo install --check` and `npm run mobile:doctor`
+  fail only the Expo SDK patch check: `expo-linking@57.0.10` and
+  `expo-router@57.0.22` are installed, expected `~57.0.11` and `~57.0.23`.
+  `npm run mobile:export` passes with 1,408 Android modules and a 3.6 MB Hermes
+  bundle. No dependency or lockfile changes were made. `git diff --check`,
+  workflow JSON/index/artifact checks pass, and migration source is unchanged
+  from the branch base.
 - [x] Update tickets, PROJECT_STATE and workflow with actual commits, commands,
-  results and limitations. The branch remains local and unpushed. Stop for
-  independent coordinator audit; do not start M10 or M8.
+  results and limitations. No physical-device or airplane-mode evidence was
+  collected; M7 pull/echo/replay remains unverified. The branch remains local
+  and unpushed. Stop for independent coordinator re-audit; do not start M10 or
+  M8.
 
 **Out of scope:** production deployment, hosted-service changes, physical-device
 release acceptance, M10 market infrastructure.
