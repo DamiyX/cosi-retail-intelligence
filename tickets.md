@@ -112,6 +112,9 @@ scanner/navigation redesign.
 **Status:** Incomplete; handoff for independent audit after local evidence update. **Dependency:** M9-01 through M9-03.  
 **Delivers:** a recoverable M9 handoff whose claims match actual evidence.
 
+The OWNER-scoped product-history correction is committed locally as `7273eeb`;
+the branch remains unpushed.
+
 - [ ] Verify M7-pulled immutable purchase observations produce the same personal
   signal as locally originated observations, echo/replay creates no duplicates,
   pending local work is not hidden and pre-M4 missing history remains absent.

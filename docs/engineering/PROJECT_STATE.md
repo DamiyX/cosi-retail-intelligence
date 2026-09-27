@@ -30,7 +30,8 @@ currency wording. See `M5_AUDIT_CORRECTIONS.md` and `M6_AUDIT_CORRECTIONS.md`.
 - M9 planning worktree: `C:\Users\doyew\Documents\DEV 2\COSI-m9-planning`
   on `plan/m9-price-intelligence`; local implementation exception. Commits:
   `ead4679` (M9-01), `c758a35` (M9-02), `a67b9e0` (M9-02 state clarification),
-  and `1db780d` (M9-03). Work remains local and unpushed.
+  `1db780d` (M9-03), and `7273eeb` (M9-04 owner-scoped history correction).
+  Work remains local and unpushed.
 - M6 Luna Max implementation task: `01a0b72e-5fdf-7022-afc8-2e1796f49b66`
   (completed and stopped)
 - M6 workflow: `.agents/workflows/m6-expenses-business-summary.json` (archived)
