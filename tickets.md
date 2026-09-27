@@ -78,21 +78,30 @@ notifications or price-change snooze.
 
 ## M9-03 — Surface recent personal changes calmly on Home
 
-**Status:** Planned. **Dependency:** M9-02.  
+**Status:** Implemented locally; automated verification blocked pending locked dependency installation. **Dependency:** M9-02.  
 **Delivers:** Home answers what recently changed in replacement cost without
 becoming a dense analytics or alert dashboard.
 
-- [ ] Add one **Purchase cost changes** Home card with no more than three recent
+- [x] Add one **Purchase cost changes** Home card with no more than three recent
   nonzero personal changes and a **See all** path to M9-02. Do not merge these
   into inventory `Needs attention` or invent urgency/materiality scores.
-- [ ] Refresh from local truth on focus/foreground and after completed restocks;
+- [x] Refresh from local truth on focus/foreground and after completed restocks;
   preserve Home summary/attention behavior and keep the view usable offline.
-- [ ] Show observed date/basis and honest empty/error states. Old observations
+- [x] Show observed date/basis and honest empty/error states. Old observations
   remain dated historical facts rather than live market claims.
-- [ ] Verify compact limits, refresh, navigation, accessibility/text scale and
-  that M8's deferred global Scan/tab contracts are unchanged.
+- [x] Author focused Home tests for the three-row limit, focus refresh,
+  navigation, screen-reader labels, retryable local-read errors and separation
+  from inventory attention. Home text uses the existing scalable theme sizes.
+- [x] Keep the M9 entry points inside the existing Today and Products routes;
+  the M8 global Scan/tab contracts are unchanged in this diff.
+- [ ] Execute the focused Home test, typecheck and lint. **Blocked:** workspace
+  dependencies are absent; no installation was authorized.
 
-**Evidence:** focused Home/navigation/accessibility tests, typecheck and lint.
+**Evidence:** `HomeScreen` reads the owner-scoped local client and shows no more
+than three newest changes, package/base-unit basis and observed date. It refreshes
+on Home focus/foreground return, including return from the completed restock
+route. Focused tests are authored in `apps/mobile/__tests__/m6Home.test.tsx`;
+they could not execute because Jest is missing. `git diff --check` passed.
 
 **Out of scope:** market signals, push notifications, automatic repricing,
 scanner/navigation redesign.

@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import type { AttentionOverview } from '../src/inventory/attention';
 import type { InventoryClient } from '../src/inventory/client';
 import type { BusinessSummary, FinanceClient } from '../src/finance';
+import type { PersonalPriceChangeRow, PersonalPriceClient } from '../src/priceIntelligence/client';
 import HomeScreen from '../src/screens/home/HomeScreen';
 
 function summary(): BusinessSummary {
@@ -60,6 +61,71 @@ function attention(): AttentionOverview {
   };
 }
 
+function priceChange(index: number): PersonalPriceChangeRow {
+  const id = `00000000-0000-4000-8000-${String(index).padStart(12, '0')}`;
+  const observation = {
+    id,
+    storeId: '00000000-0000-4000-8000-000000000010',
+    purchaseItemId: id,
+    productVariantId: id,
+    packageUnitId: id,
+    supplierId: null,
+    costBasis: 'TOTAL' as const,
+    enteredCostMinor: 100,
+    observedPriceMinor: 100,
+    totalPurchaseCostMinor: 100,
+    quantityPackagesMicros: 1_000_000,
+    conversionToBaseSnapshotMicros: 1_000_000,
+    quantityBaseMicros: 1_000_000,
+    packageCostNumerator: '100',
+    packageCostDenominator: '1',
+    baseUnitCostNumerator: '100',
+    baseUnitCostDenominator: '1',
+    currencyCode: 'NGN',
+    sourceType: 'RETAILER_PURCHASE' as const,
+    sourceId: id,
+    validationStatus: 'VALID' as const,
+    contributionConsent: false,
+    observedAt: `2026-09-${String(20 - index).padStart(2, '0')}T10:00:00.000Z`,
+    createdAt: `2026-09-${String(20 - index).padStart(2, '0')}T10:00:00.000Z`,
+    storeProductId: id,
+    purchaseId: id,
+    occurredAt: `2026-09-${String(20 - index).padStart(2, '0')}T10:00:00.000Z`,
+    productNameSnapshot: `Price product ${index}`,
+    packageNameSnapshot: 'bag',
+    supplierNameSnapshot: 'Local supplier',
+    currentCostCoverageStatus: 'KNOWN' as const,
+    currentCostQuantityCostedBaseMicros: 1_000_000,
+    currentCostAverageUnitCostNumerator: '100',
+    currentCostAverageUnitCostDenominator: '1',
+  };
+  return {
+    storeProductId: id,
+    productVariantId: id,
+    historyCount: 2,
+    previous: { ...observation, id: `${id}-previous`, packageCostNumerator: '80', baseUnitCostNumerator: '80' },
+    latest: observation,
+    comparison: {
+      kind: 'comparison',
+      latestId: id,
+      previousId: `${id}-previous`,
+      basis: 'PACKAGE',
+      direction: 'INCREASE',
+      percentageTenths: '250',
+    },
+  };
+}
+
+function personalPriceClient(rows: PersonalPriceChangeRow[]): PersonalPriceClient {
+  return {
+    storeId: '00000000-0000-4000-8000-000000000010',
+    userId: '00000000-0000-4000-8000-000000000099',
+    getProductPriceComparison: () => null,
+    listPriceChanges: jest.fn(() => rows),
+    getOverview: () => ({ oneObservationProductCount: 0, unchangedComparisonCount: 0 }),
+  };
+}
+
 describe('HomeScreen', () => {
   it('shows live summary facts, one real attention preview, and the approved next actions', () => {
     const getBusinessSummary = jest.fn(() => summary());
@@ -72,10 +138,14 @@ describe('HomeScreen', () => {
     const onRecordExpense = jest.fn();
     const onOpenSummary = jest.fn();
     const onSeeAttention = jest.fn();
+    const onSeePriceChanges = jest.fn();
+    const onOpenPriceProduct = jest.fn();
+    const priceClient = personalPriceClient([priceChange(1), priceChange(2), priceChange(3), priceChange(4)]);
 
     render(<HomeScreen
       financeClient={financeClient}
       inventoryClient={inventoryClient}
+      personalPriceClient={priceClient}
       isFocused={false}
       onSell={onSell}
       onRestock={onRestock}
@@ -83,6 +153,8 @@ describe('HomeScreen', () => {
       onRecordExpense={onRecordExpense}
       onOpenSummary={onOpenSummary}
       onSeeAttention={onSeeAttention}
+      onSeePriceChanges={onSeePriceChanges}
+      onOpenPriceProduct={onOpenPriceProduct}
     />);
 
     expect(screen.getByText('Home')).toBeTruthy();
@@ -95,7 +167,15 @@ describe('HomeScreen', () => {
     expect(screen.getByText('1 current condition')).toBeTruthy();
     expect(screen.queryByText('Reports')).toBeNull();
     expect(screen.queryByText('Scan')).toBeNull();
+    expect(screen.getByText('Purchase cost changes')).toBeTruthy();
+    expect(screen.getByText('Price product 1')).toBeTruthy();
+    expect(screen.getByLabelText(/Price product 1/)).toBeTruthy();
+    expect(screen.getByText('Price product 2')).toBeTruthy();
+    expect(screen.getByText('Price product 3')).toBeTruthy();
+    expect(screen.queryByText('Price product 4')).toBeNull();
 
+    fireEvent.press(screen.getByText('Price product 1'));
+    fireEvent.press(screen.getByText('See all price changes'));
     fireEvent.press(screen.getByText('Sell'));
     fireEvent.press(screen.getByText('Restock'));
     fireEvent.press(screen.getByText('Stock checks'));
@@ -108,6 +188,8 @@ describe('HomeScreen', () => {
     expect(onRecordExpense).toHaveBeenCalledTimes(1);
     expect(onOpenSummary).toHaveBeenCalledTimes(1);
     expect(onSeeAttention).toHaveBeenCalledTimes(1);
+    expect(onSeePriceChanges).toHaveBeenCalledTimes(1);
+    expect(onOpenPriceProduct).toHaveBeenCalledWith(priceChange(1).storeProductId);
   });
 
   it('refreshes summary and attention when the focused view returns', async () => {
@@ -119,6 +201,7 @@ describe('HomeScreen', () => {
     const view = render(<HomeScreen
       financeClient={financeClient}
       inventoryClient={inventoryClient}
+      personalPriceClient={personalPriceClient([])}
       isFocused={false}
       onSell={() => undefined}
       onRestock={() => undefined}
@@ -126,11 +209,14 @@ describe('HomeScreen', () => {
       onRecordExpense={() => undefined}
       onOpenSummary={() => undefined}
       onSeeAttention={() => undefined}
+      onSeePriceChanges={() => undefined}
+      onOpenPriceProduct={() => undefined}
     />);
     currentSummary = { ...currentSummary, salesValueMinor: 300000 };
     view.rerender(<HomeScreen
       financeClient={financeClient}
       inventoryClient={inventoryClient}
+      personalPriceClient={personalPriceClient([])}
       isFocused
       onSell={() => undefined}
       onRestock={() => undefined}
@@ -138,9 +224,86 @@ describe('HomeScreen', () => {
       onRecordExpense={() => undefined}
       onOpenSummary={() => undefined}
       onSeeAttention={() => undefined}
+      onSeePriceChanges={() => undefined}
+      onOpenPriceProduct={() => undefined}
     />);
     await waitFor(() => expect(screen.getByText('₦3,000.00')).toBeTruthy());
     expect(getBusinessSummary).toHaveBeenCalled();
     expect(getAttentionOverview).toHaveBeenCalled();
+  });
+
+  it('refreshes local price changes when Home regains focus after a restock', async () => {
+    let currentChanges: PersonalPriceChangeRow[] = [];
+    const priceClient = {
+      storeId: '00000000-0000-4000-8000-000000000010',
+      userId: '00000000-0000-4000-8000-000000000099',
+      getProductPriceComparison: () => null,
+      listPriceChanges: jest.fn(() => currentChanges),
+      getOverview: () => ({ oneObservationProductCount: 0, unchangedComparisonCount: 0 }),
+    } satisfies PersonalPriceClient;
+    const financeClient = { storeName: 'Funke Provisions', getBusinessSummary: jest.fn(() => summary()) } as unknown as FinanceClient;
+    const inventoryClient = { getAttentionOverview: jest.fn(() => attention()) } as unknown as InventoryClient;
+    const view = render(<HomeScreen
+      financeClient={financeClient}
+      inventoryClient={inventoryClient}
+      personalPriceClient={priceClient}
+      isFocused={false}
+      onSell={() => undefined}
+      onRestock={() => undefined}
+      onStockChecks={() => undefined}
+      onRecordExpense={() => undefined}
+      onOpenSummary={() => undefined}
+      onSeeAttention={() => undefined}
+      onSeePriceChanges={() => undefined}
+      onOpenPriceProduct={() => undefined}
+    />);
+    currentChanges = [priceChange(5)];
+    view.rerender(<HomeScreen
+      financeClient={financeClient}
+      inventoryClient={inventoryClient}
+      personalPriceClient={priceClient}
+      isFocused
+      onSell={() => undefined}
+      onRestock={() => undefined}
+      onStockChecks={() => undefined}
+      onRecordExpense={() => undefined}
+      onOpenSummary={() => undefined}
+      onSeeAttention={() => undefined}
+      onSeePriceChanges={() => undefined}
+      onOpenPriceProduct={() => undefined}
+    />);
+    await waitFor(() => expect(screen.getByText('Price product 5')).toBeTruthy());
+    expect(priceClient.listPriceChanges).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows a retryable local-read error without mixing price changes into inventory attention', () => {
+    const listPriceChanges = jest.fn(() => { throw new Error('local read failed'); });
+    const priceClient = {
+      storeId: '00000000-0000-4000-8000-000000000010',
+      userId: '00000000-0000-4000-8000-000000000099',
+      getProductPriceComparison: () => null,
+      listPriceChanges,
+      getOverview: () => ({ oneObservationProductCount: 0, unchangedComparisonCount: 0 }),
+    } satisfies PersonalPriceClient;
+    const financeClient = { storeName: 'Funke Provisions', getBusinessSummary: jest.fn(() => summary()) } as unknown as FinanceClient;
+    const inventoryClient = { getAttentionOverview: jest.fn(() => attention()) } as unknown as InventoryClient;
+    render(<HomeScreen
+      financeClient={financeClient}
+      inventoryClient={inventoryClient}
+      personalPriceClient={priceClient}
+      isFocused={false}
+      onSell={() => undefined}
+      onRestock={() => undefined}
+      onStockChecks={() => undefined}
+      onRecordExpense={() => undefined}
+      onOpenSummary={() => undefined}
+      onSeeAttention={() => undefined}
+      onSeePriceChanges={() => undefined}
+      onOpenPriceProduct={() => undefined}
+    />);
+    expect(screen.getByText('Purchase cost changes unavailable')).toBeTruthy();
+    expect(screen.getByText('Rice: low recorded stock')).toBeTruthy();
+    fireEvent.press(screen.getByText('Try again'));
+    expect(listPriceChanges).toHaveBeenCalledTimes(2);
   });
 });

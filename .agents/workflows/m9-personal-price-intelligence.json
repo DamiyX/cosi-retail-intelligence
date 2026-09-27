@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "active",
-  "current_state": "m9-02-implemented-verification-blocked-on-local-dependencies",
+  "current_state": "m9-03-implemented-verification-blocked-on-local-dependencies",
   "completed_states": [
     "m9-existing-price-observation-contract-inspected",
     "m9-product-data-design-reviewed",
@@ -65,6 +65,22 @@
       "observed_at": "2026-09-27T16:30:09Z",
       "limitations": [
         "Command: npm run test --workspace @retail/mobile -- --runTestsByPath __tests__/m9PersonalPriceClient.test.ts __tests__/m9ProductDetail.test.tsx __tests__/m9PersonalPriceChanges.test.tsx --runInBand.",
+        "The authored tests have not executed. No locked dependency installation was authorized or performed."
+      ]
+    },
+    {
+      "kind": "implementation",
+      "claim": "M9-03 adds a separate Home Purchase cost changes card limited to the three newest nonzero local comparisons, with observed dates, basis, product navigation and a See all route. Home refreshes on focus and foreground return; inventory Needs attention remains a separate read and card.",
+      "path": "apps/mobile/src/screens/home/HomeScreen.tsx; apps/mobile/app/(tabs)/today.tsx",
+      "observed_at": "2026-09-27T16:33:39Z"
+    },
+    {
+      "kind": "verification",
+      "claim": "Focused Home tests were authored for the three-row limit, navigation, screen-reader labels, focus refresh after a restock flow, retryable read failure and separation from inventory attention. The Home test command failed before execution because jest is not recognized; git diff --check passed.",
+      "path": "apps/mobile/__tests__/m6Home.test.tsx; tickets.md",
+      "observed_at": "2026-09-27T16:33:39Z",
+      "limitations": [
+        "Command: npm run test --workspace @retail/mobile -- --runTestsByPath __tests__/m6Home.test.tsx --runInBand.",
         "The authored tests have not executed. No locked dependency installation was authorized or performed."
       ]
     }
@@ -228,6 +244,8 @@
     "apps/mobile/src/priceIntelligence/client.ts",
     "apps/mobile/src/screens/products/PersonalPriceChangesScreen.tsx",
     "apps/mobile/app/(tabs)/products/price-changes.tsx",
+    "apps/mobile/app/(tabs)/today.tsx",
+    "apps/mobile/__tests__/m6Home.test.tsx",
     "packages/domain/src/personalPriceChanges.ts",
     "packages/domain/__tests__/personalPriceChanges.test.ts",
     "apps/mobile/__tests__/m9PersonalPriceClient.test.ts",
@@ -258,8 +276,8 @@
     "M7 independent audit has open source blockers and PostgreSQL/endpoint/device acceptance remains deferred; this M9 exception does not satisfy M7 acceptance or verify pull/echo behavior.",
     "M9 tests, typecheck and lint are blocked until the founder authorizes installing the lockfile-pinned workspace dependencies in this checkout."
   ],
-  "next_action": "Continue M9-03 on this branch only under the recorded exception. Rerun M9 focused tests, typecheck and lint after the locked dependencies are authorized and available. Preserve M7 pull/echo as an unverified integration gate.",
+  "next_action": "Continue M9-04 offline, session, corrupt-row and evidence hardening on this branch only under the recorded exception. Rerun M9 focused tests, typecheck and lint after the locked dependencies are authorized and available. Preserve M7 pull/echo as an unverified integration gate.",
   "created_at": "2026-09-19T03:24:42Z",
-  "updated_at": "2026-09-27T16:30:09Z",
+  "updated_at": "2026-09-27T16:33:39Z",
   "archived": false
 }
