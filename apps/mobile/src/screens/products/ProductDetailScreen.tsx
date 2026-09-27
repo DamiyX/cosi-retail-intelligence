@@ -1,4 +1,4 @@
-import { DomainError, formatQuantityMicros, parseQuantityDecimal } from '@retail/domain';
+import { DomainError, formatQuantityMicros, MICROS_PER_UNIT, parseQuantityDecimal } from '@retail/domain';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -619,7 +619,7 @@ export default function ProductDetailScreen({
                 </Text>
                 {priceComparison.record.comparison.basis === 'BASE_UNIT' ? (
                   <Text style={styles.line}>
-                    Receipt packages: {formatQuantityMicros(priceComparison.record.previous.quantityPackagesMicros)} {priceComparison.record.previous.packageNameSnapshot} = {formatQuantityMicros(priceComparison.record.previous.conversionToBaseSnapshotMicros)} base units; then {formatQuantityMicros(priceComparison.record.latest.quantityPackagesMicros)} {priceComparison.record.latest.packageNameSnapshot} = {formatQuantityMicros(priceComparison.record.latest.conversionToBaseSnapshotMicros)} base units.
+                    Observed package conversions: {formatQuantityMicros(priceComparison.record.previous.quantityPackagesMicros)} {priceComparison.record.previous.packageNameSnapshot} purchased (1 package = {formatQuantityMicros(priceComparison.record.previous.conversionToBaseSnapshotMicros)} {priceComparison.record.previous.conversionToBaseSnapshotMicros === MICROS_PER_UNIT ? 'base unit' : 'base units'}); then {formatQuantityMicros(priceComparison.record.latest.quantityPackagesMicros)} {priceComparison.record.latest.packageNameSnapshot} purchased (1 package = {formatQuantityMicros(priceComparison.record.latest.conversionToBaseSnapshotMicros)} {priceComparison.record.latest.conversionToBaseSnapshotMicros === MICROS_PER_UNIT ? 'base unit' : 'base units'}).
                   </Text>
                 ) : null}
                 <Text style={styles.changeDirection}>
@@ -662,7 +662,7 @@ export default function ProductDetailScreen({
                   <View key={entry.id} style={styles.historyRow}>
                     <Text style={styles.line}>{entry.productNameSnapshot}</Text>
                     <Text style={styles.line}>
-                      {formatQuantityMicros(entry.quantityPackagesMicros)} {entry.packageNameSnapshot} · 1 package = {formatQuantityMicros(entry.conversionToBaseSnapshotMicros)} base units
+                      Quantity: {formatQuantityMicros(entry.quantityPackagesMicros)} {entry.packageNameSnapshot} · 1 package = {formatQuantityMicros(entry.conversionToBaseSnapshotMicros)} {entry.conversionToBaseSnapshotMicros === MICROS_PER_UNIT ? 'base unit' : 'base units'}
                     </Text>
                     <Text style={styles.line}>Entered {entry.costBasis.toLowerCase()} cost: {displayMoney(entry.enteredCostMinor, entry.currencyCode)}</Text>
                     <Text style={styles.line}>Purchase total: {displayMoney(entry.totalPurchaseCostMinor, entry.currencyCode)}</Text>

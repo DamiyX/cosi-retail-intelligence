@@ -9,7 +9,7 @@ import { recordPurchase } from '../src/purchases/recordPurchase';
 import ProductDetailScreen from '../src/screens/products/ProductDetailScreen';
 import { deterministicIds, openCatalogueFixture, testId } from './catalogueSupport';
 
-function renderProductDetail(costs: number[]) {
+function renderProductDetail(costs: number[], quantityPackagesMicros = MICROS_PER_UNIT) {
   const fixture = openCatalogueFixture();
   const product = createTemporaryProduct(
     fixture.adapter,
@@ -26,7 +26,7 @@ function renderProductDetail(costs: number[]) {
       lines: [{
         storeProductId: product.storeProduct.id,
         packageUnitId: base.id,
-        quantityPackagesMicros: MICROS_PER_UNIT,
+        quantityPackagesMicros,
         enteredCostMinor: costMinor,
       }],
     }, { generateId: deterministicIds(5100 + index * 100), operationId: testId(5101 + index * 100) });
@@ -77,6 +77,44 @@ describe('M9 product detail purchase cost comparison', () => {
       expect(screen.getByText('Latest supplier: Not recorded')).toBeTruthy();
       expect(screen.getByText('Purchase price history')).toBeTruthy();
       expect(screen.getAllByText(/Observed: .* · Contribution: off/)).toHaveLength(2);
+    } finally {
+      context.fixture.closeAndDelete();
+    }
+  });
+
+  it('separates a multi-package receipt quantity from per-package base-unit conversion', () => {
+    const context = renderProductDetail([100]);
+    try {
+      const carton = context.catalogueClient.createPackage({
+        storeProductId: context.product.storeProduct.id,
+        name: 'carton',
+        conversionText: '12',
+      });
+      recordPurchase(context.fixture.adapter, {
+        storeId: context.fixture.context.store.id,
+        deviceId: context.fixture.context.device.id,
+        userId: context.fixture.context.owner.id,
+        occurredAt: '2026-04-02T10:00:00.000Z',
+        lines: [{
+          storeProductId: context.product.storeProduct.id,
+          packageUnitId: carton.packageUnit.id,
+          quantityPackagesMicros: 2 * MICROS_PER_UNIT,
+          enteredCostMinor: 2400,
+        }],
+      }, { generateId: deterministicIds(5300), operationId: testId(5301) });
+
+      render(<ProductDetailScreen
+        client={context.catalogueClient}
+        priceClient={context.priceClient}
+        productId={context.product.storeProduct.id}
+        onBack={() => undefined}
+        onAddPackage={() => undefined}
+        onEditPackage={() => undefined}
+      />);
+
+      expect(screen.getByText(
+        'Observed package conversions: 1 piece purchased (1 package = 1 base unit); then 2 carton purchased (1 package = 12 base units).',
+      )).toBeTruthy();
     } finally {
       context.fixture.closeAndDelete();
     }
@@ -156,8 +194,8 @@ describe('M9 product detail purchase cost comparison', () => {
       if (!latest) throw new Error('Test restock did not create a price observation.');
       context.fixture.adapter.run('DROP TRIGGER trg_price_observations_immutable_update;');
       context.fixture.adapter.run(
-        'UPDATE price_observations SET package_cost_denominator = ?, base_unit_cost_denominator = ? WHERE id = ?;',
-        ['0', '0', latest.id],
+        'UPDATE price_observations SET package_cost_denominator = ? WHERE id = ?;',
+        ['malformed-nonzero', latest.id],
       );
 
       render(<ProductDetailScreen
@@ -171,7 +209,24 @@ describe('M9 product detail purchase cost comparison', () => {
       expect(screen.getByText('Purchase cost change unavailable')).toBeTruthy();
       expect(screen.getByText(/A saved cost could not be compared safely/)).toBeTruthy();
       expect(screen.getByText('Purchase price history')).toBeTruthy();
-      expect(screen.getAllByText(/Receipt cost estimate: Unavailable per base unit/)).toHaveLength(1);
+      expect(screen.getByText('Receipt cost estimate: ₦1.50 per base unit (display rounded to the nearest kobo)')).toBeTruthy();
+    } finally {
+      context.fixture.closeAndDelete();
+    }
+  });
+
+  it('shows per-package conversion separately from a multi-package purchase quantity', () => {
+    const context = renderProductDetail([200], 3 * MICROS_PER_UNIT);
+    try {
+      render(<ProductDetailScreen
+        client={context.catalogueClient}
+        priceClient={context.priceClient}
+        productId={context.product.storeProduct.id}
+        onBack={() => undefined}
+        onAddPackage={() => undefined}
+        onEditPackage={() => undefined}
+      />);
+      expect(screen.getByText('Quantity: 3 piece · 1 package = 1 base unit')).toBeTruthy();
     } finally {
       context.fixture.closeAndDelete();
     }

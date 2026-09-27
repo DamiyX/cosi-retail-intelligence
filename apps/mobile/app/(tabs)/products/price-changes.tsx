@@ -1,5 +1,5 @@
-import { useIsFocused, useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { useCatalogueClient } from '../../../src/catalogue/CatalogueContext';
@@ -9,7 +9,8 @@ import PersonalPriceChangesScreen from '../../../src/screens/products/PersonalPr
 
 export default function PersonalPriceChangesRoute() {
   const router = useRouter();
-  const focused = useIsFocused();
+  const [focusCount, setFocusCount] = useState(0);
+  useFocusEffect(useCallback(() => setFocusCount((count) => count + 1), []));
   const catalogueClient = useCatalogueClient();
   const adapter = useDatabase();
   const priceAccess = useMemo(() => {
@@ -27,9 +28,9 @@ export default function PersonalPriceChangesRoute() {
   return (
     <View style={styles.fill}>
       <PersonalPriceChangesScreen
+        key={focusCount}
         client={priceAccess.client}
         clientFailure={priceAccess.failure}
-        isFocused={focused}
         onOpenProduct={(storeProductId) => router.push(`/products/${storeProductId}`)}
         onOpenPurchaseHistory={() => router.push('/purchase-history')}
       />

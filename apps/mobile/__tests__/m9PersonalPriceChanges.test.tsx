@@ -69,7 +69,6 @@ describe('PersonalPriceChangesScreen', () => {
       ]);
       render(<PersonalPriceChangesScreen
         client={client}
-        isFocused={false}
         onOpenProduct={onOpenProduct}
         onOpenPurchaseHistory={onOpenPurchaseHistory}
       />);
@@ -94,7 +93,6 @@ describe('PersonalPriceChangesScreen', () => {
     render(<PersonalPriceChangesScreen
       client={null}
       clientFailure="Only an active store owner can read personal purchase costs."
-      isFocused={false}
       onOpenProduct={() => undefined}
       onOpenPurchaseHistory={() => undefined}
     />);
@@ -115,7 +113,6 @@ describe('PersonalPriceChangesScreen', () => {
       });
       render(<PersonalPriceChangesScreen
         client={client}
-        isFocused={false}
         onOpenProduct={() => undefined}
         onOpenPurchaseHistory={() => undefined}
       />);
@@ -139,7 +136,6 @@ describe('PersonalPriceChangesScreen', () => {
     } as unknown as PersonalPriceClient;
     render(<PersonalPriceChangesScreen
       client={client}
-      isFocused={false}
       onOpenProduct={() => undefined}
       onOpenPurchaseHistory={() => undefined}
     />);
@@ -188,7 +184,6 @@ describe('PersonalPriceChangesScreen', () => {
     } as unknown as PersonalPriceClient;
     render(<PersonalPriceChangesScreen
       client={client}
-      isFocused={false}
       onOpenProduct={() => undefined}
       onOpenPurchaseHistory={() => undefined}
     />);

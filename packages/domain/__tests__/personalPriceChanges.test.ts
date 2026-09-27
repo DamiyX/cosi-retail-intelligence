@@ -50,7 +50,7 @@ describe('selectPersonalPriceComparison', () => {
       id: 'pack-newer', packageUnitId: 'pack', observedAt: '2026-01-02T10:00:00.000Z', packageCostNumerator: '60', baseUnitCostNumerator: '6',
     });
     const latest = observation({
-      id: 'latest', packageUnitId: 'piece', observedAt: '2026-01-03T10:00:00.000Z', packageCostNumerator: '7', baseUnitCostNumerator: '7',
+      id: 'latest', packageUnitId: 'piece', observedAt: '2026-01-03T10:00:00.000Z', packageCostNumerator: '7', baseUnitCostNumerator: '5',
     });
     expect(selectPersonalPriceComparison({
       storeId: 'store-1', productVariantId: 'variant-1', observations: [base, moreRecentDifferentPackage, latest],

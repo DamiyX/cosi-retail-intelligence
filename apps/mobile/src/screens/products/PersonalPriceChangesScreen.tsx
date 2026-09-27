@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { PersonalPriceChangeRow, PersonalPriceClient, PersonalPriceOverview } from '../../priceIntelligence/client';
@@ -10,7 +10,6 @@ import { theme } from '../../ui/theme';
 interface PersonalPriceChangesScreenProps {
   client: PersonalPriceClient | null;
   clientFailure?: string | null;
-  isFocused?: boolean;
   onOpenProduct: (storeProductId: string) => void;
   onOpenPurchaseHistory: () => void;
 }
@@ -78,7 +77,6 @@ function emptyDescription(overview: PersonalPriceOverview, includeUnchanged: boo
 export default function PersonalPriceChangesScreen({
   client,
   clientFailure,
-  isFocused = true,
   onOpenProduct,
   onOpenPurchaseHistory,
 }: PersonalPriceChangesScreenProps) {
@@ -87,10 +85,6 @@ export default function PersonalPriceChangesScreen({
   const refresh = useCallback(() => {
     setState(read(client, includeUnchanged, clientFailure));
   }, [client, clientFailure, includeUnchanged]);
-
-  useEffect(() => {
-    if (isFocused) refresh();
-  }, [isFocused, refresh]);
 
   const toggleUnchanged = (): void => {
     const next = !includeUnchanged;
