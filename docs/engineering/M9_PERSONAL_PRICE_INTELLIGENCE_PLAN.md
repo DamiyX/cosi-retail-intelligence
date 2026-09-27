@@ -1,8 +1,18 @@
 # M9 Personal Restock-Price Intelligence Plan
 
-**Status:** Coordinator planning complete; implementation decision awaits the founder and the M7 boundary.  
+**Status:** Local M9 implementation authorized under a narrow founder exception; independent audit pending. M7 acceptance remains unmet.  
 **Branch:** `plan/m9-price-intelligence`  
 **Scope:** one retailer's own immutable purchase observations, available offline.  
+
+## Execution exception — 2026-09-27
+
+The founder authorized M9 local implementation while M7 PostgreSQL, endpoint,
+and device acceptance remains deferred. This exception permits only the four
+M9 tickets on the existing M9 branch. It does not mark M7 accepted, verify its
+pull/echo path, authorize hosted services, or permit M7/M8/M10 work, deploy,
+merge, or push. The isolated M9 checkout contains the M4 observation storage
+contract but no M7 pull applier; actual M7 pull/replay compatibility remains an
+open evidence gate for independent audit.
 
 ## Outcome
 

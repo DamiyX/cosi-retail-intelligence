@@ -3,12 +3,13 @@
   "task_id": "m9-personal-price-intelligence",
   "workflow_id": "build-feature",
   "mode": "implement",
-  "status": "pending",
-  "current_state": "m9-plan-reviewed-awaiting-founder-execution-choice",
+  "status": "active",
+  "current_state": "m9-01-implemented-verification-blocked-on-local-dependencies",
   "completed_states": [
     "m9-existing-price-observation-contract-inspected",
     "m9-product-data-design-reviewed",
-    "m9-plan-tickets-prepared"
+    "m9-plan-tickets-prepared",
+    "m9-local-execution-exception-authorized"
   ],
   "owner": {
     "agent": "coordinating-planner-independent-auditor",
@@ -35,6 +36,21 @@
       "claim": "Four sequential vertical tickets cover exact product comparison, store-wide changes, compact Home promotion and offline/sync/evidence hardening without changing M8 scanner or primary-navigation contracts.",
       "path": "tickets.md",
       "observed_at": "2026-09-19T03:24:42Z"
+    },
+    {
+      "kind": "implementation",
+      "claim": "M9-01 adds exact personal comparison selection, read-only owner/store-scoped purchase observation reads, and the Product detail purchase cost change section without migrations or sync writes.",
+      "path": "packages/domain/src/personalPriceChanges.ts; apps/mobile/src/priceIntelligence/client.ts; apps/mobile/src/screens/products/ProductDetailScreen.tsx",
+      "observed_at": "2026-09-27T16:11:28Z"
+    },
+    {
+      "kind": "verification",
+      "claim": "M9-01 focused domain/mobile test, typecheck and lint commands were attempted but did not execute because Jest, TypeScript and ESLint dependencies are missing from the clean checkout; git diff --check passed.",
+      "path": "tickets.md",
+      "observed_at": "2026-09-27T16:11:28Z",
+      "limitations": [
+        "No locked dependency installation was authorized or performed; M9-01 remains unverified until these checks execute."
+      ]
     }
   ],
   "acceptance_gates": [
@@ -51,8 +67,38 @@
         "success_condition": "M7 is accepted and its observation contract is stable for M9 reads."
       },
       "evidence": [],
-      "limitations": [],
-      "blocker": "M7 independent audit found source blockers and PostgreSQL integration remains deferred; M9 implementation has not been authorized in this checkpoint.",
+      "limitations": [
+        "This gate remains unmet throughout the M9 local implementation.",
+        "The isolated M9 checkout has no M7 pull applier, so M7 pull/echo compatibility cannot be claimed from this branch."
+      ],
+      "blocker": "M7 independent audit found source blockers and PostgreSQL/endpoint/device acceptance remains deferred. The founder's 2026-09-27 exception permits local M9 implementation only and does not satisfy this gate.",
+      "waiver": null
+    },
+    {
+      "id": "m9-local-execution-exception",
+      "claim": "Founder authorizes local M9 implementation while M7 PostgreSQL/endpoint/device acceptance remains deferred.",
+      "owner": "founder",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "m9-plan-tickets-reviewed"
+      ],
+      "verification": {
+        "kind": "approval",
+        "procedure": "Use the founder's explicit 2026-09-27 implementation instruction in the delegated task.",
+        "success_condition": "Only M9-01 through M9-04 are implemented locally on the existing M9 branch; M7 remains unaccepted and M7/M8/M10, deployment, merge, and push remain out of scope."
+      },
+      "evidence": [
+        {
+          "result": "Founder authorized starting M9 local implementation while M7 PostgreSQL/endpoint/device acceptance remains deferred.",
+          "source": "Founder implementation instruction received 2026-09-27",
+          "observed_at": "2026-09-27T15:52:18Z"
+        }
+      ],
+      "limitations": [
+        "This exception permits source implementation and local validation only; it does not waive M7 acceptance or authorize external effects."
+      ],
+      "blocker": null,
       "waiver": null
     },
     {
@@ -107,21 +153,29 @@
     },
     {
       "id": "m9-implementation-assigned",
-      "claim": "One separate implementation task owns M9-01 through M9-04 after M7 acceptance.",
+      "claim": "One implementation task owns M9-01 through M9-04 under the founder's local execution exception; M7 sync remains outside this task.",
       "owner": "coordinator",
       "required": true,
-      "status": "pending",
+      "status": "met",
       "depends_on": [
-        "m7-independent-accepted",
+        "m9-local-execution-exception",
         "m9-plan-tickets-reviewed"
       ],
       "verification": {
         "kind": "review",
-        "procedure": "Create one implementation task from the accepted M7 baseline and record its task ID/branch.",
-        "success_condition": "One writer owns M9 implementation and stops for independent audit."
+        "procedure": "Implement M9 on the existing plan/m9-price-intelligence branch under the founder's explicit local exception.",
+        "success_condition": "One writer owns M9 implementation and stops for independent audit without claiming M7 acceptance."
       },
-      "evidence": [],
-      "limitations": [],
+      "evidence": [
+        {
+          "result": "Delegated M9 implementation is active on the existing plan/m9-price-intelligence checkout; the checkout was clean at 1b3799617533fae3874db104c03387638061cf23 before implementation.",
+          "source": "Git status and founder implementation instruction",
+          "observed_at": "2026-09-27T15:52:18Z"
+        }
+      ],
+      "limitations": [
+        "M7 PostgreSQL/endpoint/device acceptance is still unmet."
+      ],
       "blocker": null,
       "waiver": null
     },
@@ -155,10 +209,19 @@
     "docs/decisions/DECISION_LOG.md",
     "docs/product/PRODUCT_CHANGE_BACKLOG.md",
     "apps/mobile/src/db/repositories/priceObservations.ts",
+    "apps/mobile/src/priceIntelligence/client.ts",
+    "packages/domain/src/personalPriceChanges.ts",
+    "packages/domain/__tests__/personalPriceChanges.test.ts",
+    "apps/mobile/__tests__/m9PersonalPriceClient.test.ts",
+    "apps/mobile/__tests__/m9ProductDetail.test.tsx",
     "apps/mobile/src/screens/products/ProductDetailScreen.tsx",
     "apps/mobile/src/screens/home/HomeScreen.tsx"
   ],
   "approvals": [
+    {
+      "date": "2026-09-27",
+      "scope": "Founder explicitly authorizes local M9-01 through M9-04 implementation on plan/m9-price-intelligence while M7 PostgreSQL/endpoint/device acceptance remains deferred. This is not M7 acceptance and does not authorize M7/M8/M10 work, hosted services, deployment, merge, or push."
+    },
     {
       "date": "2026-09-19",
       "scope": "Founder explicitly deferred all M8 planning/implementation until this coordinator task is switched to Astra and directed the coordinator to proceed autonomously through M9 while unavailable."
@@ -173,10 +236,11 @@
     }
   ],
   "blockers": [
-    "M7 independent audit has open source blockers and a deferred PostgreSQL gate; M9 observation-contract revalidation and founder execution choice remain open."
+    "M7 independent audit has open source blockers and PostgreSQL/endpoint/device acceptance remains deferred; this M9 exception does not satisfy M7 acceptance or verify pull/echo behavior.",
+    "M9-01 tests, typecheck and lint are blocked until the founder authorizes installing the lockfile-pinned workspace dependencies in this checkout."
   ],
-  "next_action": "Present the reviewed M9 plan and M7 audit state to the founder. Do not create an M9 implementation task until they choose the next route. Before M9 production edits, revalidate the final M7 observation/pull contract and use an isolated baseline.",
+  "next_action": "Continue M9-02 on this branch only under the recorded exception; rerun M9-01 focused tests, typecheck and lint after the locked dependencies are authorized and available. Preserve M7 pull/echo as an unverified integration gate.",
   "created_at": "2026-09-19T03:24:42Z",
-  "updated_at": "2026-09-27T14:39:00Z",
+  "updated_at": "2026-09-27T16:11:28Z",
   "archived": false
 }

@@ -2,34 +2,40 @@
 
 M9 turns the retailer's own immutable purchase observations into useful offline
 cost-change information. It follows
-`docs/engineering/M9_PERSONAL_PRICE_INTELLIGENCE_PLAN.md`, starts only after
-accepted M7 and does not touch M8 scanner/navigation contracts.
+`docs/engineering/M9_PERSONAL_PRICE_INTELLIGENCE_PLAN.md`. M9 normally depends
+on accepted M7. On 2026-09-27 the founder authorized a narrow exception for
+local M9 implementation while M7 PostgreSQL/endpoint/device acceptance remains
+deferred. This does not claim M7 acceptance or verify M7 pull/echo behavior.
+M9 does not touch M7 sync code or M8 scanner/navigation contracts.
 
 The founder has delegated ticket granularity and dependency judgment to the
 coordinator for this milestone.
 
 ## M9-01 — Show an exact personal cost comparison on product detail
 
-**Status:** Planned. **Dependency:** M7 independently accepted.  
+**Status:** Implemented locally; automated verification blocked pending locked dependency installation. **Dependency:** founder-approved M9 local execution exception; M7 acceptance remains unmet.  
 **Delivers:** an owner can open one product and understand its latest comparable
 restock-cost change entirely from local data.
 
-- [ ] Add a pure exact-rational comparison module that deterministically selects
+- [x] Add a pure exact-rational comparison module that deterministically selects
   latest/previous observations, prioritizes the same package/currency, uses the
   labelled base-unit fallback only when valid, and handles increase, decrease,
   unchanged and zero-denominator cases without floating-point authority.
-- [ ] Add a store-scoped OWNER-authorized repository/client read returning
+- [x] Add a store-scoped OWNER-authorized repository/client read returning
   immutable price/snapshot/supplier/date facts. Direct IDs, STAFF context and
   cross-store rows must not bypass the boundary.
-- [ ] Add the product-detail **Purchase cost change** section with latest,
+- [x] Add the product-detail **Purchase cost change** section with latest,
   previous, basis, direction/percentage, dates, supplier and honest zero/one/
   invalid/error states. Preserve the existing full raw history.
-- [ ] Cover exact fractional values, display rounding, malformed rationals,
-  deterministic ties, repeated receipt lines, deactivated packages, `ESTIMATED`
-  and `UNAVAILABLE` history without an exact change claim, restart and offline
-  reads with domain/repository/component tests.
+- [x] Add exact fractional values, display rounding, malformed rational,
+  deterministic tie, package-priority/fallback, currency/store/product mismatch,
+  zero/one/empty, STAFF, restart, deactivated-package and read-failure cases to
+  domain/repository/component tests.
+- [ ] Execute focused domain/mobile tests, strict typecheck and zero-warning
+  lint. **Blocked:** `jest`, `tsc` and `eslint` are not installed in this clean
+  checkout. No dependencies or lockfile have been changed.
 
-**Evidence:** focused M9-01 tests, strict typecheck and zero-warning lint.
+**Evidence:** authored test paths: `packages/domain/__tests__/personalPriceChanges.test.ts`, `apps/mobile/__tests__/m9PersonalPriceClient.test.ts`, and `apps/mobile/__tests__/m9ProductDetail.test.tsx`. Attempted commands failed before test/check execution because the locked workspace dependencies are absent. `git diff --check` passed.
 
 **Out of scope:** store-wide ranking, Home, market data, contribution consent,
 selling-price recommendations.

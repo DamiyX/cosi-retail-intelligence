@@ -198,6 +198,7 @@ export type { CreatePurchaseItemInput, PurchaseItemRow } from './purchaseItems';
 export {
   createPriceObservation,
   getPriceObservationById,
+  listPurchasePriceHistoryByStore,
   listPurchasePriceHistoryByStoreProduct,
   listPriceObservationsByPurchaseItemId,
   listPriceObservationsByStoreProduct,
