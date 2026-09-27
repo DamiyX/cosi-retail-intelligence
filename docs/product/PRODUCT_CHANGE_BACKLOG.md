@@ -36,7 +36,7 @@ catalogue/inventory enrichment must preserve immediate sell-first value.
 | PC-05a | Review unresolved discrepancies rather than leave resolved history urgent | M5 list/M6 Home; accurate progress and check dates, no business/report “100% accurate” badge or report lock |
 | PC-05b | Expiry attention from surviving recorded stock, not old receipt reminders | Approved first-pilot M5 list, M6 Home; inferred remaining wording, month/day precision, unknown coverage, actual removal/reconciliation actions |
 | PC-06 | Multiple expiry groups per product; optional printed numbers, internal IDs, automatic assumed FEFO without ordinary checkout confirmation | Approved D-039; M5 receipt/sale extension, unknown residual, progressive physical classification; costing stays D-027/D-038/D-040 |
-| PC-07 | Important replacement-cost/personal/market movements on Home | M9 personal/M10 market; real comparable observations, coverage/freshness/consent; no simulation in M5/M6 |
+| PC-07 | Important replacement-cost/personal/market movements on Home | M9 personal plan prepared under D-043: exact private observations, dated comparison and at most three Home changes; M10 owns consented market signals. No simulation in M5/M6 |
 
 ## M4 impact — resolved
 
@@ -100,10 +100,12 @@ schema/UX details live in approved authorities, not copied into this backlog.
   coordinator task is explicitly switched to Astra. When resumed, any parallel
   Recognition Track B work uses separate branches/worktrees and does not edit
   shared schema or contracts concurrently.
-- Production M8 and M9 remain sequential in the core app. Recognition R&D is the
-  parallel track; M9 must not begin in the same checkout while M8 is changing
-  navigation, catalogue or scanner contracts.
+- Under D-043, route-local M9 may proceed after M7 independent acceptance while
+  M8 remains founder-deferred. It may not change scanner, camera,
+  RecognitionService or primary-navigation contracts. M8 remains required
+  before M12/beta and later shared Home/Product edits use one writer.
 
-M7 tickets are now published and include every accepted M5/M6 envelope. Next:
-establish the non-production Supabase integration environment and assign M7
-implementation. Do not implement PC-02, PC-04 or PC-07 inside M7.
+M7 implementation is assigned to a separate Luna Max task and local Docker
+Desktop setup is in progress. M9 tickets are prepared in an isolated planning
+worktree but production waits for M7 independent acceptance. Do not implement
+PC-02, PC-04 or PC-07 inside M7.

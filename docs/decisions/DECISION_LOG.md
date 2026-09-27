@@ -111,6 +111,9 @@ When a major decision changes, update the affected source-of-truth document too.
 | D-038 | M4 exact cost basis, provisional COGS rounding and conservative coverage | ACTIVE |
 | D-039 | Pilot batch awareness, automatic assumed FEFO and first-class unknown stock | ACTIVE |
 | D-040 | Blind owner checks, sourced adjustment costing and durable attention | ACTIVE |
+| D-041 | M6 money-out capture and truthful daily summary | ACTIVE |
+| D-042 | M7 authenticated sync and PostgreSQL application boundary | ACTIVE |
+| D-043 | M9 exact private comparison may proceed while M8 is founder-deferred | ACTIVE |
 
 ---
 
@@ -1398,6 +1401,59 @@ without rewriting actor history or prematurely deciding final onboarding UX.
 Revisit D-011 and evaluate a managed sync engine if the M7 sale spike cannot
 demonstrate safe idempotent retry, per-store ordering, RLS isolation and
 recoverable pull without disproportionate complexity.
+
+---
+
+## D-043 — M9 Exact Private Comparison While M8 Is Deferred
+
+**Status:** ACTIVE product/engineering contract.  
+**Date:** 2026-09-19.  
+**Approval:** Founder explicitly deferred M8 planning/implementation until this
+coordinator task is switched to Astra and directed the coordinator to proceed
+autonomously through M9 while unavailable.
+
+### Decision
+
+- M9 derives personal restock-cost signals from the immutable store-private M4
+  `RETAILER_PURCHASE` observations. It adds no authoritative price transaction,
+  duplicate history table, consent change or new outbox operation.
+- Compare the newest observation to the newest earlier same-currency observation
+  for the same package first. If absent, compare exact normalized base-unit
+  rationals for the same product variant and label the cross-package basis.
+  Different currencies, invalid values or a missing predecessor produce no
+  change claim.
+- Calculate direction and percentage from exact rational inputs. Round only the
+  displayed percentage to one decimal. A zero prior value has no percentage
+  denominator; do not coerce it to zero or infinity.
+- Purchase observations describe the last recorded replacement cost. They are
+  distinct from the D-038 moving weighted-average value of current stock and do
+  not determine financial COGS, selling price, profit or market price.
+- Initial M9 reads are active-OWNER and store scoped because purchase costs and
+  supplier relationships are private. M11 owns later staff permissions.
+- M9 may enter production after M7 independent acceptance while M8 remains
+  deferred, provided M9 uses route-local Home/Product entry points and does not
+  define or edit scanner, camera, RecognitionService or primary-navigation
+  contracts. M8 remains required before M12 and beta hardening.
+
+### Rationale
+
+M4 already captured the exact facts necessary for useful single-retailer price
+intelligence, eliminating cold-start and migration risk. A derived projection
+preserves one historical source of truth. Route-local entry points let the
+founder postpone the complex scanner plan without delaying the product's core
+price-value hypothesis.
+
+### Consequences and rejected alternatives
+
+The implementation must revalidate the final M7 observation/pull contract before
+starting. Pre-M4 history stays absent instead of being fabricated. M9 Home shows
+at most three dated personal changes and does not treat them as inventory alerts.
+
+A persisted rounded trend table is rejected because it duplicates reconstructable
+facts and can drift. Comparing unlike package sticker prices is rejected because
+it misleads; the exact base-unit fallback must be named. Using current weighted-
+average cost as the latest purchase price is rejected because the two answer
+different questions.
 
 ---
 

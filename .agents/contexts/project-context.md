@@ -24,9 +24,10 @@ M0–M6 source/automated scope is independently accepted. M5 added minimal
 batch-aware expiry, assumed FEFO, blind reconciliation, guided owner checks and
 attention. M6 added owner-only expenses/withdrawals and truthful Home/Today.
 Physical/release gates remain carried and native/release readiness is not yet
-approved. M7 planning is active on `feat/m7-offline-sync`; no M7 runtime code is
-claimed. Coordinator task `01a098ef-d830-7531-bca7-2d66b0a5b587` owns tickets
-and independent acceptance.
+approved. M7 implementation is assigned on `feat/m7-offline-sync`; completion
+and independent acceptance are not yet claimed. Coordinator task
+`01a098ef-d830-7531-bca7-2d66b0a5b587` owns tickets and independent acceptance.
+M9 planning is isolated on `plan/m9-price-intelligence`.
 
 ## Product Snapshot
 
@@ -88,9 +89,9 @@ partial measure, never full profit or P&L.
 3. Continue validating useful retailer workflows early instead of building all
    future infrastructure at once.
 4. Keep M8 scanner/recognition planning coordinator/Astra-owned. Founder
-   explicitly deferred it until this task is switched to Astra. Production M8
-   and shared contract edits wait for accepted M7; production M9 remains after
-   accepted M8.
+   explicitly deferred it until this task is switched to Astra. Under D-043,
+   route-local M9 may begin after accepted M7 without changing M8 scanner or
+   primary-navigation contracts; M8 remains required before M12/beta.
 
 ## Decision Budget
 
@@ -109,9 +110,9 @@ partial measure, never full profit or P&L.
 
 - main is the canonical accepted branch; task branches carry active work.
 - The temporary codename may change, so domain names remain brand-neutral.
-- EAS cloud builds are linked. M7 needs either Docker-backed local Supabase or an
-  explicitly authorized isolated hosted development project; neither is active
-  at this checkpoint.
+- EAS cloud builds are linked. Founder selected Docker-backed local Supabase for
+  M7; Docker Desktop installation has been initiated and real integration
+  evidence remains required before acceptance.
 - M0 screens are a technical navigation shell, not approved product design.
 - The deferred second-laptop setup check remains required before external beta
   readiness.

@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "task_id": "m9-personal-price-intelligence",
+  "workflow_id": "build-feature",
+  "mode": "implement",
+  "status": "pending",
+  "current_state": "m9-plan-reviewed-awaiting-founder-execution-choice",
+  "completed_states": [
+    "m9-existing-price-observation-contract-inspected",
+    "m9-product-data-design-reviewed",
+    "m9-plan-tickets-prepared"
+  ],
+  "owner": {
+    "agent": "coordinating-planner-independent-auditor",
+    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
+    "worktree": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m9-planning"
+  },
+  "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m9-planning",
+  "lease": null,
+  "evidence": [
+    {
+      "kind": "inspection",
+      "claim": "M4 already stores immutable store-private price observations with exact rational package/base-unit costs, currency, purchase-line, supplier and observed-time references; current product detail exposes raw local history.",
+      "path": "apps/mobile/src/db/migrations.ts; apps/mobile/src/db/repositories/priceObservations.ts; apps/mobile/src/screens/products/ProductDetailScreen.tsx",
+      "observed_at": "2026-09-19T03:24:42Z"
+    },
+    {
+      "kind": "architecture",
+      "claim": "M9 is a derived local read model over immutable observations. No new authoritative write, outbox operation or migration is planned; M7 remains responsible for synchronizing purchase observations.",
+      "path": "docs/engineering/M9_PERSONAL_PRICE_INTELLIGENCE_PLAN.md",
+      "observed_at": "2026-09-19T03:24:42Z"
+    },
+    {
+      "kind": "planning",
+      "claim": "Four sequential vertical tickets cover exact product comparison, store-wide changes, compact Home promotion and offline/sync/evidence hardening without changing M8 scanner or primary-navigation contracts.",
+      "path": "tickets.md",
+      "observed_at": "2026-09-19T03:24:42Z"
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "m7-independent-accepted",
+      "claim": "M7 offline sync, including immutable purchase observations, is independently accepted before M9 production edits.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "blocked",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Read the final M7 workflow and independent audit; confirm purchase-observation push/pull/replay behavior and clean accepted baseline.",
+        "success_condition": "M7 is accepted and its observation contract is stable for M9 reads."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": "M7 independent audit found source blockers and PostgreSQL integration remains deferred; M9 implementation has not been authorized in this checkpoint.",
+      "waiver": null
+    },
+    {
+      "id": "m9-plan-tickets-reviewed",
+      "claim": "M9 scope, exact comparison semantics, UX states and ticket dependencies are recorded against the actual M4-M6 implementation.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Inspect M4 observations/costing, Product detail, Home, PRD, domain model and decisions D-015/D-016/D-027/D-038/D-041.",
+        "success_condition": "Plan uses existing immutable observations, preserves exact/private semantics and has binary acceptance criteria."
+      },
+      "evidence": [
+        {
+          "result": "M9 plan and tickets M9-01 through M9-04 prepared in an isolated worktree.",
+          "source": "docs/engineering/M9_PERSONAL_PRICE_INTELLIGENCE_PLAN.md; tickets.md",
+          "observed_at": "2026-09-19T03:24:42Z"
+        }
+      ],
+      "limitations": [
+        "Planning evidence only; no M9 production implementation is claimed."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m8-contract-preserved",
+      "claim": "M9 proceeds without implementing or redefining the founder-deferred M8 scanner/navigation contract.",
+      "owner": "coordinator-and-implementer",
+      "required": true,
+      "status": "met",
+      "depends_on": [],
+      "verification": {
+        "kind": "inspection",
+        "procedure": "Keep M9 entry points route-local to existing Home and Product surfaces; inspect diffs for scanner, camera, RecognitionService and primary-tab changes.",
+        "success_condition": "Planning introduces no M8 implementation or durable scanner/navigation decision."
+      },
+      "evidence": [
+        {
+          "result": "M9 plan explicitly excludes scanner, camera, recognition and primary-tab changes.",
+          "source": "docs/engineering/M9_PERSONAL_PRICE_INTELLIGENCE_PLAN.md; tickets.md",
+          "observed_at": "2026-09-19T03:24:42Z"
+        }
+      ],
+      "limitations": [
+        "Astra will plan M8 later and may refine navigation after M9."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m9-implementation-assigned",
+      "claim": "One separate implementation task owns M9-01 through M9-04 after M7 acceptance.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m7-independent-accepted",
+        "m9-plan-tickets-reviewed"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Create one implementation task from the accepted M7 baseline and record its task ID/branch.",
+        "success_condition": "One writer owns M9 implementation and stops for independent audit."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m9-independent-audit",
+      "claim": "Coordinator independently verifies exactness, privacy, offline behavior, UI truthfulness and M8 non-interference.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m9-implementation-assigned"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Inspect implementation and rerun critical exact-rational, authorization, restart, sync and UI tests plus full validation.",
+        "success_condition": "No blocking finding; source acceptance remains distinct from device/release evidence."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    }
+  ],
+  "artifacts": [
+    "tickets.md",
+    "docs/engineering/M9_PERSONAL_PRICE_INTELLIGENCE_PLAN.md",
+    "docs/engineering/PROJECT_STATE.md",
+    "docs/engineering/BUILD_PLAN.md",
+    "docs/design/DESIGN.md",
+    "docs/architecture/DOMAIN_DATA_MODEL.md",
+    "docs/decisions/DECISION_LOG.md",
+    "docs/product/PRODUCT_CHANGE_BACKLOG.md",
+    "apps/mobile/src/db/repositories/priceObservations.ts",
+    "apps/mobile/src/screens/products/ProductDetailScreen.tsx",
+    "apps/mobile/src/screens/home/HomeScreen.tsx"
+  ],
+  "approvals": [
+    {
+      "date": "2026-09-19",
+      "scope": "Founder explicitly deferred all M8 planning/implementation until this coordinator task is switched to Astra and directed the coordinator to proceed autonomously through M9 while unavailable."
+    },
+    {
+      "date": "2026-09-19",
+      "scope": "Founder previously delegated milestone ticket granularity, dependency design and routine implementation decisions to the coordinator."
+    },
+    {
+      "date": "2026-09-27",
+      "scope": "Founder requested M9 planning be finalized after the M7 audit and an explicit pause before creating any M9 implementation agent, so the founder can choose Docker setup or M9 execution."
+    }
+  ],
+  "blockers": [
+    "M7 independent audit has open source blockers and a deferred PostgreSQL gate; M9 observation-contract revalidation and founder execution choice remain open."
+  ],
+  "next_action": "Present the reviewed M9 plan and M7 audit state to the founder. Do not create an M9 implementation task until they choose the next route. Before M9 production edits, revalidate the final M7 observation/pull contract and use an isolated baseline.",
+  "created_at": "2026-09-19T03:24:42Z",
+  "updated_at": "2026-09-27T14:39:00Z",
+  "archived": false
+}

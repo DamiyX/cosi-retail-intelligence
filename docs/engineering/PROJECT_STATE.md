@@ -1,10 +1,8 @@
 # PROJECT_STATE — COSI
 
-Last updated: 2026-09-19  
-Current milestone: M7 offline-sync planning checkpoint complete; implementation
-awaits assignment and a real non-production Supabase integration environment.
-Founder has deferred M8 scanner planning until this coordinator task is
-explicitly switched to Astra.
+Last updated: 2026-09-27  
+Current milestone: M9 planning complete in an isolated worktree. M7 independent
+audit remains open in the canonical checkout; M8 is deferred by the founder.
 
 ## Current status
 
@@ -25,6 +23,10 @@ currency wording. See `M5_AUDIT_CORRECTIONS.md` and `M6_AUDIT_CORRECTIONS.md`.
 - Canonical remote: `https://github.com/DamiyX/cosi-retail-intelligence`
 - Current branch: `feat/m7-offline-sync`
 - Coordinator task: `01a098ef-d830-7531-bca7-2d66b0a5b587`
+- M7 Luna Max implementation task: `01a0b7a8-a799-7e42-a762-4f046ff34cfe`
+  (initial source handoff complete; coordinator auditing in `COSI-m0`)
+- M9 planning worktree: `C:\Users\doyew\Documents\DEV 2\COSI-m9-planning`
+  on `plan/m9-price-intelligence`; planning/docs only
 - M6 Luna Max implementation task: `01a0b72e-5fdf-7022-afc8-2e1796f49b66`
   (completed and stopped)
 - M6 workflow: `.agents/workflows/m6-expenses-business-summary.json` (archived)
@@ -68,26 +70,38 @@ facts and M6 expense/withdrawal transactions without inventing feature-specific
 sync protocols. M7 does not implement Scan, staff workflows or price signals.
 
 M8 product planning is complex and remains coordinator/Astra-owned. On
-2026-09-19 the founder explicitly deferred that planning until this task is
-switched to Astra. Production M8 integration begins after M7 source acceptance;
-M9 follows M8 in the core app. Recognition Track B research may run in parallel
-behind stable contracts and feature flags only after it is deliberately started.
-Concurrent writers must not edit shared catalogue, package-unit, sync or
-recognition contracts.
+2026-09-19 the founder explicitly deferred it until this task is switched to
+Astra. D-043 allows M9 after M7 acceptance while M8 is deferred because M9 uses
+existing Home/Product stack routes and may not alter scanner, camera,
+RecognitionService or primary-navigation contracts. M8 remains required before
+M12 and beta hardening. Concurrent writers must not edit overlapping shared
+catalogue, package-unit, sync or recognition contracts.
 
 ## M7 planning checkpoint
 
-`M7_OFFLINE_SYNC_PLAN.md` and `tickets.md` define eight sequential vertical
+`M7_OFFLINE_SYNC_PLAN.md` and the M7 workflow define eight sequential vertical
 tickets. They cover every canonical M2–M6 outbox operation, authenticated
 store/device enrolment, PostgreSQL idempotency/revisions, push/pull, durable
 conflicts, M5 batch/reconciliation/attention behavior, M6 money-out facts and a
-consistent second-device bootstrap. No M7 runtime code exists at this checkpoint.
+consistent second-device bootstrap. Implementation task
+`01a0b7a8-a799-7e42-a762-4f046ff34cfe` now owns the canonical checkout; this
+planning branch does not claim its completion.
 
-Supabase CLI 2.117.0 is available, but Docker is not installed and no isolated
-hosted development project is linked. M7 may not be independently accepted until
-PostgreSQL migrations, RLS, functions and retry/conflict behavior run against a
-real disposable non-production Supabase environment. Mocks are supporting
-evidence only.
+The M7 source audit found blocking bootstrap-reconstruction and app-integration
+gaps; see `docs/engineering/M7_INDEPENDENT_AUDIT.md` in the canonical checkout.
+Docker Desktop is installed but its engine does not start. The founder deferred
+further Docker troubleshooting. M7 has not received source or PostgreSQL
+integration acceptance; mocks remain supporting evidence only.
+
+## M9 planning checkpoint
+
+`M9_PERSONAL_PRICE_INTELLIGENCE_PLAN.md`, M9-01 through M9-04 and D-043 are
+prepared in the isolated M9 worktree. Inspection confirms M4 already stores the
+immutable exact price observations required, so no new business write, outbox
+operation or schema migration is planned. Only `VALID` observations produce
+exact change claims; estimated/unavailable rows remain in raw history. M9 is
+unimplemented and its M7 observation/pull dependency must be revalidated
+against the final M7 baseline before production edits.
 
 ## Carried readiness gates
 
@@ -102,12 +116,11 @@ evidence only.
 
 ## Next action
 
-Commit the M7 planning checkpoint. Establish Docker-backed local Supabase or an
-explicitly authorized isolated hosted development project, then assign M7-01
-through M7-08 to one Luna Max implementation task. Do not resume M8 planning
-until the founder switches this coordinator task to Astra. M9 planning may be
-prepared separately while M7 runs, but production M9 code remains after accepted
-M8 because both milestones touch navigation/catalogue selection contracts.
+Keep M7 open for the source findings and deferred PostgreSQL gate. Present the
+completed M9 plan to the founder before creating an M9 implementation task;
+they will choose whether to resume Docker or proceed with M9. If M9 proceeds,
+revalidate its M7 dependency against the then-current baseline. Do not start
+M8 or M9 implementation from this planning checkpoint.
 
 A continuing agent must first read `AGENTS.md`, this file,
 `MULTI_AGENT_WORKFLOW.md`, `IMPLEMENTATION_AUDIT_WORKFLOW.md`, the workflow

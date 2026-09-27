@@ -424,6 +424,42 @@ coverage and why the values are not a complete P&L. Use labels such as **Tracked
 gross margin** and **Recorded expenses**. Do not display **Net profit**, **cash
 balance**, **100% accurate**, or equivalent certainty.
 
+## M9 Personal Restock-Price Intelligence
+
+M9 preserves the current shell while M8 is deferred. It adds ordinary stack
+routes from Home and Product detail; it does not add a tab, camera action or
+scanner contract.
+
+### Product detail
+
+Place **Purchase cost change** before the existing raw purchase history. Show
+latest and previous prices, comparison basis, increase/decrease/unchanged,
+percentage when defined, both dates and latest supplier when known. If the
+comparison crosses package sizes, say **Per base unit comparison** and retain
+the original package facts nearby. With zero or one usable observation, explain
+what record is missing rather than inventing a trend.
+
+### Personal price changes
+
+The owner-only list shows one latest signal per store product, with the most
+recent changed observation first. Rows contain product, prior/latest restock
+cost, package or base-unit basis, direction/percentage, observation date and
+supplier where known. Selecting a row opens its Product detail/history. Provide
+empty, loading, read-error/retry and unchanged/history paths.
+
+### Home
+
+Add one compact **Purchase cost changes** card below the operational summary and
+inventory attention. Preview no more than three recent nonzero personal changes
+and provide **See all**. Keep dates visible. Do not classify every cost movement
+as urgent or merge it into `Needs attention`; M9 has no snooze/notification rule.
+
+Use **purchase cost**, **restock cost**, **latest recorded** and dated wording.
+Avoid **market price**, **current price**, **profit**, **recommended selling
+price** or any implication that another retailer supplied the fact. All states
+must work from local data, wrap under large text and expose direction in text as
+well as color.
+
 ## Gates for Later Milestones
 
 Before each substantial UI milestone, add its screen sequence, states, recovery

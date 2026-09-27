@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-19T02:59:49.0107167Z",
+  "updated_at": "2026-09-19T03:24:42Z",
   "tasks": {
     "m1-domain-local-database": "m1-domain-local-database.json",
     "m2-catalogue-package-units": "m2-catalogue-package-units.json",
@@ -8,6 +8,7 @@
     "m4-restocking-costing": "m4-restocking-costing.json",
     "m5-inventory-reconciliation": "m5-inventory-reconciliation.json",
     "m6-expenses-business-summary": "m6-expenses-business-summary.json",
-    "m7-offline-sync": "m7-offline-sync.json"
+    "m7-offline-sync": "m7-offline-sync.json",
+    "m9-personal-price-intelligence": "m9-personal-price-intelligence.json"
   }
 }

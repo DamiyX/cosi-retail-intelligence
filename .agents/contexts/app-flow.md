@@ -151,11 +151,15 @@ The product must distinguish operating expense from owner/personal withdrawal.
 
 ## Price Intelligence
 
-The retailer first sees their own previous and latest restock prices and the
-change by package. Personal history must work offline. Later shared market
-signals require consent, privacy controls, sufficient local data density, and
-honest confidence. A shared observation must never expose another store's
-private sales, margin, stock, or supplier relationship.
+The owner first sees their own previous and latest comparable restock prices,
+exact change by package, or a clearly labelled normalized base-unit comparison
+when package sizes differ. Product detail retains full history; one store-wide
+view and a compact Home preview expose recent personal changes. Dates stay
+visible, personal history works offline and a missing/zero comparison never
+becomes an invented percentage. Later shared market signals require consent,
+privacy controls, sufficient local data density, and honest confidence. A shared
+observation must never expose another store's private sales, margin, stock, or
+supplier relationship.
 
 ## Scanner and Recognition
 

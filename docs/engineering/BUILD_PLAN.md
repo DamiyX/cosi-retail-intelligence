@@ -719,12 +719,12 @@ Offline:
 
 ## Parallel-planning boundary
 
-The coordinator may prepare M8 scanner contracts, UX states, tickets and the
-Recognition Track B evaluation plan while a separate task implements M7. Keep
-that planning in a separate branch/worktree and avoid concurrent edits to shared
-catalogue, package-unit, sync or recognition contracts. Production M8 integration
-starts only after M7 source acceptance; core-app M9 follows M8. Recognition R&D
-may continue independently behind the stable contract and feature flags.
+The founder deferred M8 scanner planning until this coordinator task is switched
+to Astra. M9 planning may proceed in a separate worktree while a separate task
+implements M7. Production M9 may begin after M7 independent acceptance only if
+it remains route-local to existing Home/Product surfaces and does not define or
+edit scanner, camera, RecognitionService or primary-navigation contracts. M8
+must still be accepted before M12 recognition integration and beta hardening.
 
 ---
 
@@ -736,17 +736,29 @@ Deliver useful price intelligence without network effects.
 
 ## Build
 
-- latest purchase price;
-- previous price;
-- percentage change;
-- package basis;
-- base-unit comparison where valid;
-- price-history view;
-- freshness/date.
+- exact latest/previous comparison from immutable M4 purchase observations;
+- same-package comparison first, with an explicitly labelled normalized
+  base-unit fallback only when currency/product/basis are valid;
+- increase/decrease/unchanged and a one-decimal display percentage calculated
+  from exact rationals, with an unavailable state for a zero prior value;
+- package basis, supplier when known, observation date and full local history;
+- OWNER-only store-wide personal changes view, available offline;
+- one compact Home preview with at most three recent nonzero changes and a
+  See All path;
+- honest zero/one-observation, invalid-data, error/retry and stale-history states.
+
+## Important
+
+M9 is a derived read experience. It does not create a new business transaction,
+rewrite M4 observations, enable contribution consent or claim market price,
+profit, recommended selling price or accounting truth. M7 owns observation sync.
+M9 must not change the founder-deferred M8 scanner/navigation contracts.
 
 ## Acceptance
 
-One retailer with no network participants can still see meaningful purchase-cost change.
+One owner with no network participants can see an exact, dated, offline
+purchase-cost change derived from their own recorded restocks, while cross-store
+and non-owner access is denied.
 
 ---
 
@@ -1597,8 +1609,6 @@ FIRST REAL WORKFLOW TEST
        ↓
 M7 OFFLINE SYNC
        ↓
-M8 BARCODE / SCANNER SHELL
-       ↓
 M9 PERSONAL PRICE INTELLIGENCE
        ↓
 M10 MARKET PRICE INFRASTRUCTURE
@@ -1611,6 +1621,11 @@ M13 BETA HARDENING
        ↓
 CONTROLLED RETAILER PILOT
 ```
+
+M8 BARCODE / SCANNER SHELL is founder-deferred for Astra planning. It may be
+inserted after accepted M7 without blocking route-local M9/M10/M11 work, but it
+must be independently accepted before M12 and beta hardening. Coordinate any
+later shared Home, Product or primary-navigation edits through one writer.
 
 Parallel:
 

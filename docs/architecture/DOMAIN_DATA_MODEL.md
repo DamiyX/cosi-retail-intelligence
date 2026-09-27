@@ -1146,6 +1146,25 @@ A retailer's own purchase observation may be private locally while a sanitized/a
 
 The implementation should not assume that raw private purchase records are themselves directly exposed as shared network data.
 
+### M9 personal comparison projection — D-043
+
+M9 does not add another authoritative price table. It derives one store-private
+personal signal from immutable `RETAILER_PURCHASE` observations already recorded
+with M4 purchase lines. The active store and OWNER membership are mandatory read
+boundaries.
+
+For one product, order eligible observations by `observedAt`, `createdAt`, then
+`id` descending. Compare the newest observation with the newest earlier
+same-currency observation for the same package first. If none exists, an exact
+normalized base-unit comparison across packages is allowed only for the same
+product variant and must be labelled as such. Different currency, invalid data
+or a missing predecessor produces no comparison claim.
+
+Direction and percentage use exact rational inputs. Percentage is a display
+projection and is never stored as authoritative money; a zero previous value has
+no percentage denominator. One store-wide signal per store product is sufficient
+for the M9 list/Home preview. Raw history remains independently readable.
+
 ---
 
 ## 13.2 MarketPriceSignal

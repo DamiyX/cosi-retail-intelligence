@@ -1,217 +1,110 @@
-# Tickets: M7 Offline Sync
+# Tickets: M9 Personal Restock-Price Intelligence
 
-M7 implements the controlled custom sync protocol in
-`docs/engineering/M7_OFFLINE_SYNC_PLAN.md`. The accepted M1–M6 local-write-first
-behavior remains authoritative. Do not start M8 production integration.
+M9 turns the retailer's own immutable purchase observations into useful offline
+cost-change information. It follows
+`docs/engineering/M9_PERSONAL_PRICE_INTELLIGENCE_PLAN.md`, starts only after
+accepted M7 and does not touch M8 scanner/navigation contracts.
 
-## M7-01 — Establish the secure protocol and server transaction spine
+The founder has delegated ticket granularity and dependency judgment to the
+coordinator for this milestone.
 
-**Status:** Planned. **Basis:** M6 source/automated scope independently accepted.
-**Delivers:** versioned protocol contracts and a testable authenticated Supabase
-boundary capable of one atomic, revisioned store operation.
+## M9-01 — Show an exact personal cost comparison on product detail
 
-- [ ] Add provider-independent push/pull/bootstrap DTOs with explicit protocol
-  and payload versions, bounded request/page sizes, canonical decimal strings,
-  typed acknowledgements/errors and runtime validation. Reject unknown versions.
-- [ ] Add imperative Supabase migrations for auth-subject mapping, stores,
-  memberships, devices, per-store sync state, applied operations, change log and
-  the minimum normalized domain foundation. Use UUID/timestamptz, exact numeric
-  quantity/rational values and integer minor-money types, plus constraints,
-  foreign-key/query indexes and deterministic lock order.
-- [ ] Add authenticated Edge Function shells and one transactional PostgreSQL
-  application boundary. Verify JWT, active membership, device/store relation,
-  operation permission and cross-store references; serialize each store revision
-  and keep service credentials server-only.
-- [ ] Revoke ambient access, use explicit grants, enable RLS on exposed tables,
-  pin privileged-function search paths and add positive/negative pgTAP policy
-  tests. Adopt current explicit Data API grants rather than platform defaults.
-- [ ] Add repeatable database/function test scripts and CI integration. A real
-  PostgreSQL run is required; absence of Docker/authorized dev project blocks
-  completion rather than becoming a waiver.
+**Status:** Planned. **Dependency:** M7 independently accepted.  
+**Delivers:** an owner can open one product and understand its latest comparable
+restock-cost change entirely from local data.
 
-**Evidence:** focused contract tests, clean Supabase reset/migration, database
-lint/advisors where available, pgTAP RLS suite, function tests, typecheck and
-zero-warning lint.
+- [ ] Add a pure exact-rational comparison module that deterministically selects
+  latest/previous observations, prioritizes the same package/currency, uses the
+  labelled base-unit fallback only when valid, and handles increase, decrease,
+  unchanged and zero-denominator cases without floating-point authority.
+- [ ] Add a store-scoped OWNER-authorized repository/client read returning
+  immutable price/snapshot/supplier/date facts. Direct IDs, STAFF context and
+  cross-store rows must not bypass the boundary.
+- [ ] Add the product-detail **Purchase cost change** section with latest,
+  previous, basis, direction/percentage, dates, supplier and honest zero/one/
+  invalid/error states. Preserve the existing full raw history.
+- [ ] Cover exact fractional values, display rounding, malformed rationals,
+  deterministic ties, repeated receipt lines, deactivated packages, `ESTIMATED`
+  and `UNAVAILABLE` history without an exact change claim, restart and offline
+  reads with domain/repository/component tests.
 
-**Out of scope:** business aggregate coverage beyond a tracer fixture, final Auth
-screens, production project linking/deployment.
+**Evidence:** focused M9-01 tests, strict typecheck and zero-warning lint.
 
-## M7-02 — Enrol a local store and add crash-safe client sync state
+**Out of scope:** store-wide ranking, Home, market data, contribution consent,
+selling-price recommendations.
 
-**Status:** Planned. **Dependency:** M7-01.
-**Delivers:** an authenticated owner can bind one existing local-only store safely,
-and the app can retain retry/cursor/conflict state across restart.
+## M9-02 — Add the store-wide Personal price changes view
 
-- [ ] Add an idempotent first-owner enrolment transaction for the existing
-  domain user/store/owner-member/device IDs. Bind verified auth subject exactly
-  once; reject attempts to claim an already-bound store or inject another store.
-- [ ] Add additive SQLite migration(s) for store cursor/bootstrap state, remote
-  versions, durable conflicts and outbox lease/retry metadata without rewriting
-  migrations 1–17 or pending envelopes.
-- [ ] Build an injected authenticated-session/transport boundary and worker with
-  one-active-run guard, stale-lease recovery, bounded batches/backoff/jitter,
-  acknowledgement handling and permanent versus retryable errors.
-- [ ] Build paginated pull application transactions: validate page, preserve
-  pending local work, apply echo safely, persist conflicts and advance cursor
-  only after commit.
-- [ ] Add honest compact sync status/diagnostics and manual retry without exposing
-  outbox/revision jargon in ordinary flows. Offline or expired tokens pause cloud
-  work but never local completion.
+**Status:** Planned. **Dependency:** M9-01.  
+**Delivers:** the owner can review all recent personal restock-cost changes and
+open the affected product without relying on network participation.
 
-**Evidence:** fresh/populated-v17 migration tests, restart/lease/ack/pull crash
-checks, enrolment replay and hostile ownership tests, component status tests,
-typecheck and zero-warning lint.
+- [ ] Add a store-wide projection that emits at most one current signal per
+  store product, includes only comparable same-currency observations, orders
+  changed products by latest observation time with stable ties and retains an
+  explicit path to unchanged/history information.
+- [ ] Add a route-level **Personal price changes** screen reached from product
+  detail/ordinary stack navigation. Show product, comparison basis, previous and
+  latest prices, exact direction/percentage display, freshness and supplier when
+  known.
+- [ ] Add accessible loading/empty/one-observation/read-failure/refresh states.
+  Copy must say purchase/restock cost and must not say market price, profit,
+  recommended selling price or live/current price without the observation date.
+- [ ] Verify store isolation, OWNER authorization, deterministic ordering,
+  mixed packages/currencies, deactivated products and offline restart.
 
-**Out of scope:** final onboarding/invitation/multi-store UI.
+**Evidence:** focused repository/component/navigation tests, typecheck and lint.
 
-## M7-03 — Synchronize completed Sale end to end
+**Out of scope:** global tab changes, scanner entry, network aggregation,
+notifications or price-change snooze.
 
-**Status:** Planned. **Dependencies:** M7-01 and M7-02.
-**Delivers:** one offline completed sale reaches the server once and returns by
-pull/echo without duplicating inventory or financial effects.
+## M9-03 — Surface recent personal changes calmly on Home
 
-- [ ] Add normalized server sale, items, payment, optional customer/receivable,
-  inventory-event, batch-allocation and immutable cost-snapshot application from
-  versioned sale envelopes. Revalidate exact arithmetic, immutable snapshots,
-  store ownership and package/product references server-side.
-- [ ] Apply sale graph, inventory/batch/cost effects, applied-operation result,
-  revision and change records in one PostgreSQL transaction.
-- [ ] Make identical operation/entity replay return `ALREADY_APPLIED`; reject
-  different immutable content under reused IDs. Preserve two genuine concurrent
-  offline sales and a negative/discrepancy projection where required by D-013.
-- [ ] Pull/echo into a second local database without rerunning sale effects or
-  overwriting local pending work.
+**Status:** Planned. **Dependency:** M9-02.  
+**Delivers:** Home answers what recently changed in replacement cost without
+becoming a dense analytics or alert dashboard.
 
-**Evidence:** offline push, timeout-after-commit retry, two-device final-stock,
-cross-store/tampered payload, echo/restart and immutable-content conflict tests;
-typecheck and zero-warning lint.
+- [ ] Add one **Purchase cost changes** Home card with no more than three recent
+  nonzero personal changes and a **See all** path to M9-02. Do not merge these
+  into inventory `Needs attention` or invent urgency/materiality scores.
+- [ ] Refresh from local truth on focus/foreground and after completed restocks;
+  preserve Home summary/attention behavior and keep the view usable offline.
+- [ ] Show observed date/basis and honest empty/error states. Old observations
+  remain dated historical facts rather than live market claims.
+- [ ] Verify compact limits, refresh, navigation, accessibility/text scale and
+  that M8's deferred global Scan/tab contracts are unchanged.
 
-**Out of scope:** voids, returns, split tender, receivable settlement.
+**Evidence:** focused Home/navigation/accessibility tests, typecheck and lint.
 
-## M7-04 — Synchronize Purchase, inventory, batch and costing facts
+**Out of scope:** market signals, push notifications, automatic repricing,
+scanner/navigation redesign.
 
-**Status:** Planned. **Dependency:** M7-03.
-**Delivers:** a completed restock and its accepted M5 batch/cost extensions move
-atomically between devices without changing historical meaning.
+## M9-04 — Prove offline/sync compatibility and stop for audit
 
-- [ ] Apply completed purchase, items, optional supplier, inventory events,
-  private price observations, batch groups/operations/entries and immutable cost
-  movements/snapshots atomically from legacy/current envelope versions.
-- [ ] Preserve exact D-034 quantities and D-038 rational cost values. FEFO batch
-  projection remains separate from financial costing; unknown stock and negative
-  stock remain valid first-class states.
-- [ ] Define deterministic server projection/rebuild ordering for accepted
-  immutable movements and surface unresolved cost/batch coverage instead of
-  inventing certainty after concurrent device work.
-- [ ] Pull purchases and dependent reference/fact rows in safe dependency order;
-  replay and echo never duplicate inventory, observations or cost.
+**Status:** Planned. **Dependency:** M9-01 through M9-03.  
+**Delivers:** a recoverable M9 handoff whose claims match actual evidence.
 
-**Evidence:** legacy/current envelope, replay, timeout, two-device purchase/sale,
-unknown-batch, rational-cost, cross-store and rebuild tests; typecheck and lint.
-
-**Out of scope:** payables, batch financial costing, strict traceability.
-
-## M7-05 — Synchronize mutable catalogue, package and store configuration
-
-**Status:** Planned. **Dependency:** M7-04.
-**Delivers:** catalogue/config edits use explicit versions and visible conflicts
-instead of last-write-wins.
-
-- [ ] Cover product creation/identity/lifecycle, identifier addition, package
-  create/update/deactivation, preferred store package, reorder level/history and
-  supplier metadata under the approved ownership and cross-symbology uniqueness
-  rules.
-- [ ] Populate and require `baseServerVersion` for existing mutable records.
-  Apply only compatible edits; return current record/version on conflict and
-  retain the original local operation plus durable conflict.
-- [ ] Protect immutable package conversions/historical snapshots and stale-cart
-  sales. Concurrent deactivation or metadata change cannot erase a genuine
-  completed transaction.
-- [ ] Add bounded conflict review/resolution that creates a new operation against
-  the latest version. Owner-only high-impact settings remain enforced.
-
-**Evidence:** concurrent price/name/package/reorder edits, stale deactivation
-versus sale, barcode ownership collision, conflict restart/resolution, store
-isolation and authorization tests; typecheck and lint.
-
-**Out of scope:** shared-catalogue consolidation, staff permission management.
-
-## M7-06 — Synchronize M5 reconciliation, checks and attention
-
-**Status:** Planned. **Dependency:** M7-05.
-**Delivers:** batch classification, adjustments, blind checks and attention state
-retain their audit meaning across devices.
-
-- [ ] Apply inventory adjustments, batch classifications and finalized
-  reconciliation graphs with actor/source links, immutable submissions,
-  inventory/batch/cost effects and one applied operation.
-- [ ] Recheck inventory-event and batch-operation watermarks. A stale physical
-  count becomes a conflict and never overwrites intervening work.
-- [ ] Synchronize check and attention settings with optimistic versions;
-  synchronize assignments, attempts and snoozes as auditable facts with stable
-  idempotency and owner authorization.
-- [ ] Preserve inferred-versus-physical evidence labels, unknown composition,
-  actual expired removal and condition-driven attention semantics on pull.
-
-**Evidence:** concurrent sale-versus-count, classification-versus-count, expired
-removal, duplicate attempts, settings conflict, snooze/worsening, restart and
-cross-store tests; typecheck and lint.
-
-**Out of scope:** M11 staff assignment/reviewer policy, background notifications.
-
-## M7-07 — Synchronize money-out and prove consistent bootstrap
-
-**Status:** Planned. **Dependency:** M7-06.
-**Delivers:** expenses/withdrawals deduplicate and a newly authorized installation
-can reconstruct the accepted M1–M6 private store state.
-
-- [ ] Apply expenses and owner withdrawals as immutable owner-authorized facts;
-  preserve exact store currency, actor/device/time and separation from purchases
-  or each other.
-- [ ] Build a consistent paginated bootstrap snapshot with its matching revision.
-  Restore dependencies, immutable history, current projections, mutable versions
-  and sync metadata into a fresh SQLite database, then start incremental pull.
-- [ ] Register a later device only for an authorized member. Interrupted
-  bootstrap restarts safely; a failed snapshot never becomes the active store.
-- [ ] Protect unsynced local work during full resync/logout/reset paths and state
-  clearly that only server-acknowledged records are recoverable after uninstall.
-
-**Evidence:** expense/withdrawal retry/isolation, concurrent bootstrap mutation,
-interrupted bootstrap, fresh second database, subsequent incremental pull,
-pending-work protection and derived Home-summary parity tests.
-
-**Out of scope:** final multi-store selector, invitation UI, production recovery
-support process.
-
-## M7-08 — Harden, validate and stop for independent audit
-
-**Status:** Planned. **Dependency:** M7-01 through M7-07.
-**Delivers:** a recoverable M7 handoff with actual server integration evidence.
-
-- [ ] Run all required scenarios in `OFFLINE_SYNC.md`: restart/crash boundaries,
-  commit-before-ack, pagination, unsupported versions, revoked user/device,
-  tampered cross-store IDs, duplicate/reused IDs and two-device conflicts.
-- [ ] Run Supabase reset/migrations, database lint/advisors where available,
-  pgTAP/RLS and Edge Function integration tests against local Docker or an
-  explicitly authorized isolated hosted development project. Do not substitute
-  mocks for this gate.
+- [ ] Verify M7-pulled immutable purchase observations produce the same personal
+  signal as locally originated observations, echo/replay creates no duplicates,
+  pending local work is not hidden and pre-M4 missing history remains absent.
+- [ ] Exercise zero/one/many observations, app restart, airplane-mode local
+  reads, account/session pause, cross-store/STAFF denial and corrupt-row failure
+  behavior. Record physical-device evidence only when performed.
 - [ ] Run focused suites, full `npm run validate`, Expo Doctor, dependency check,
-  Android export, workflow/index/artifact/migration checks and `git diff --check`.
-- [ ] Update tickets, PROJECT_STATE and M7 workflow with actual commits/commands,
-  server migrations, residual risks and clean branch/HEAD/status. Stop for
-  independent audit; do not start M8, push, deploy or claim physical-device work.
+  Android export, workflow/index/migration/artifact checks and `git diff --check`.
+- [ ] Update tickets, PROJECT_STATE and the M9 workflow with actual commits,
+  commands, results, limitations and clean branch/HEAD/status. Stop for
+  independent coordinator audit; do not start M10 or M8.
 
-**Out of scope:** production Supabase migration, App Store/Play deployment,
-physical-device release acceptance, M8 code.
+**Out of scope:** production deployment, hosted-service changes, physical-device
+release acceptance, M10 market infrastructure.
 
 ## Dependency frontier
 
 ```text
-M6 accepted -> M7-01 -> M7-02 -> M7-03 -> M7-04
-            -> M7-05 -> M7-06 -> M7-07 -> M7-08 -> independent audit
+accepted M7 -> M9-01 -> M9-02 -> M9-03 -> M9-04 -> independent audit
 ```
 
-The coordinator owns plan/ticket decisions and independent acceptance. One M7
-implementation task owns this checkout sequentially. M8 planning may occur in a
-separate worktree, but production M8 and shared-contract edits wait for accepted
-M7.
+M8 remains deferred to Astra. M9 implementation uses route-local Home/Product
+entry points and may not change primary scanner/navigation contracts.
