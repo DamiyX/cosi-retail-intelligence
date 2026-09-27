@@ -120,8 +120,10 @@ describe('PersonalPriceChangesScreen', () => {
         onOpenPurchaseHistory={() => undefined}
       />);
       expect(screen.getByText('No purchase cost changes yet')).toBeTruthy();
+      expect(screen.getByText(/1 product has one validated restock/)).toBeTruthy();
       fireEvent.press(screen.getByText('Show unchanged comparisons'));
       expect(screen.getByText('No comparable purchase costs yet')).toBeTruthy();
+      expect(screen.getByText(/1 product has one validated restock/)).toBeTruthy();
     } finally {
       secondFixture.closeAndDelete();
     }

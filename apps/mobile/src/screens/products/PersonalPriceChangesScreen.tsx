@@ -61,6 +61,20 @@ function comparisonLabel(row: PersonalPriceChangeRow): string {
   return `${basis} · ${change}`;
 }
 
+function emptyDescription(overview: PersonalPriceOverview, includeUnchanged: boolean): string {
+  const notes: string[] = [];
+  if (!includeUnchanged && overview.unchangedComparisonCount > 0) {
+    notes.push(`${overview.unchangedComparisonCount} comparable product${overview.unchangedComparisonCount === 1 ? ' has' : 's have'} stayed at the same recorded purchase cost. Show unchanged comparisons to review them.`);
+  }
+  if (overview.oneObservationProductCount > 0) {
+    notes.push(`${overview.oneObservationProductCount} product${overview.oneObservationProductCount === 1 ? ' has' : 's have'} one validated restock. Record another comparable restock to see whether its purchase cost changed.`);
+  }
+  if (notes.length > 0) return notes.join(' ');
+  return includeUnchanged
+    ? 'Products appear after two validated restocks with a comparable package or base-unit cost in the same currency.'
+    : 'Products appear here after a comparable recorded restock changes replacement cost. Show unchanged comparisons to review costs that stayed the same.';
+}
+
 export default function PersonalPriceChangesScreen({
   client,
   clientFailure,
@@ -107,15 +121,7 @@ export default function PersonalPriceChangesScreen({
               <Text accessibilityRole="header" style={styles.emptyTitle}>
                 {includeUnchanged ? 'No comparable purchase costs yet' : 'No purchase cost changes yet'}
               </Text>
-              <Text style={styles.body}>
-                {includeUnchanged
-                  ? 'Products appear after two validated restocks with a comparable package or base-unit cost in the same currency.'
-                  : state.overview.unchangedComparisonCount > 0
-                    ? `${state.overview.unchangedComparisonCount} comparable product${state.overview.unchangedComparisonCount === 1 ? ' has' : 's have'} stayed at the same recorded purchase cost. Show unchanged comparisons to review them.`
-                    : state.overview.oneObservationProductCount > 0
-                      ? `${state.overview.oneObservationProductCount} product${state.overview.oneObservationProductCount === 1 ? ' has' : 's have'} one validated restock. Record another comparable restock to see whether its purchase cost changed.`
-                      : 'Products appear here after a comparable recorded restock changes replacement cost. Show unchanged comparisons to review costs that stayed the same.'}
-              </Text>
+              <Text style={styles.body}>{emptyDescription(state.overview, includeUnchanged)}</Text>
             </View>
           ) : null}
           {!state.failure && state.rows.length > 0 ? (
