@@ -30,3 +30,23 @@ jobs:
         env:
           EXPO_PUBLIC_APP_ENV: preview
       - run: git diff --exit-code
+
+  supabase-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm exec -- supabase start
+      - run: npm exec -- supabase db reset --local
+      - run: npm exec -- supabase test db --local
+      - run: npm exec -- supabase db lint --local --schema public,sync_private --level warning --fail-on error
+      - run: npm exec -- supabase db advisors --local --type security --level warn --fail-on error
+      - run: npm run test:sync:local
+      - name: Stop local Supabase
+        if: always()
+        run: npm exec -- supabase stop --no-backup

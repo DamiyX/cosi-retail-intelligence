@@ -26,6 +26,7 @@ import ExpenseHistoryRoute from '../app/expenses';
 import OwnerWithdrawalEntryRoute from '../app/withdrawal';
 import OwnerWithdrawalHistoryRoute from '../app/withdrawals';
 import BusinessSummaryRoute from '../app/summary';
+import CloudSyncRoute from '../app/sync';
 import type { IsolatedDatabase } from '../src/db/testing';
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
 import { openIsolatedDatabase } from '../src/db/testing';
@@ -71,6 +72,7 @@ const ROUTES = {
   withdrawal: OwnerWithdrawalEntryRoute,
   withdrawals: OwnerWithdrawalHistoryRoute,
   summary: BusinessSummaryRoute,
+  sync: CloudSyncRoute,
 } as never;
 
 describe('M2 tab navigation', () => {
@@ -93,6 +95,13 @@ describe('M2 tab navigation', () => {
   afterEach(() => {
     mockDatabase?.closeAndDelete();
     mockDatabase = null;
+  });
+
+  it('opens the owner cloud-sync status from More without affecting local navigation', async () => {
+    const router = renderRouter(ROUTES, { initialUrl: '/more' });
+    fireEvent.press(await screen.findByText('Cloud sync'));
+    expect(router.getPathname()).toBe('/sync');
+    expect(await screen.findByText('Cloud sync is not configured in this build')).toBeTruthy();
   });
 
   it('opens the promoted Home operating surface by default', async () => {

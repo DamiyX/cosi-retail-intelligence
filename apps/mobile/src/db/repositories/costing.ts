@@ -677,7 +677,7 @@ export function listCostMovementsByStoreProduct(adapter: DatabaseAdapter, storeP
       `SELECT id, store_id, store_product_id, movement_type, source_id, source_line_id, application_order,
               quantity_base_delta_micros, costed_quantity_delta_micros, value_numerator, value_denominator,
               coverage_status, unit_cost_numerator, unit_cost_denominator, method, method_version, created_at
-       FROM cost_movements WHERE store_product_id = ? ORDER BY application_order ASC;`,
+       FROM cost_movements WHERE store_product_id = ? ORDER BY application_order ASC, id ASC;`,
       [requireId(storeProductId)],
     )
     .map(mapMovement);
@@ -699,7 +699,7 @@ export function listCostMovementsBySource(
     .map(mapMovement);
 }
 
-/** Rebuild a projection from immutable, explicitly ordered movement rows. */
+/** Rebuild from immutable movements; IDs provide a stable tie-break for equal local orders. */
 export function rebuildCostStateFromMovements(adapter: DatabaseAdapter, storeProductId: string): CostState {
   const movements = listCostMovementsByStoreProduct(adapter, storeProductId);
   let state = initialCostState();
@@ -761,4 +761,21 @@ export function rebuildCostStateFromMovements(adapter: DatabaseAdapter, storePro
     }
   }
   return state;
+}
+
+/** Rebuild and persist the mutable cost projection after new movement facts arrive. */
+export function rebuildAndPersistCostStateFromMovements(
+  adapter: DatabaseAdapter,
+  storeProductId: string,
+): CostStateRow | null {
+  const movements = listCostMovementsByStoreProduct(adapter, storeProductId);
+  const lastMovement = movements.at(-1);
+  if (!lastMovement) return null;
+  return upsertCostState(adapter, {
+    storeProductId,
+    storeId: lastMovement.storeId,
+    state: rebuildCostStateFromMovements(adapter, storeProductId),
+    movementId: lastMovement.id,
+    updatedAt: lastMovement.createdAt,
+  });
 }

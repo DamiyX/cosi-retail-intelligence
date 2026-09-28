@@ -3,8 +3,8 @@ import {
   MAX_PULL_CHANGES,
   MAX_PUSH_OPERATIONS,
   parseSyncOperationEnvelope,
-  type SyncEntityType,
   type SyncBootstrapRequest,
+  type SyncReferenceContextRequest,
   type SyncPullRequest,
   type SyncPushRequest,
   type SyncPushResponse,
@@ -336,6 +336,7 @@ export class OfflineSyncWorker {
             localPayload: operation.payload,
             serverPayload: asServerPayload(ack.error),
             serverVersion: ack.serverVersion,
+            serverRevision: ack.serverRevision,
             createdAt: now,
           });
           markOutboxConflict(adapter, {
@@ -378,10 +379,13 @@ export class OfflineSyncWorker {
       let response;
       try {
         response = await this.options.transport.pull(request);
+        const referenceContext = response.changes.length > 0
+          ? await this.options.transport.referenceContext({ protocolVersion: 1, storeId, deviceId })
+          : undefined;
         const result = applySyncPullPage(adapter, response, { storeId, options: {
           now,
           conflictIdFactory: this.options.idFactory,
-        } });
+        }, referenceContext });
         pulled += result.applied + result.echoes;
         conflicts += result.conflicts;
       } catch (error) {
@@ -432,27 +436,44 @@ export class OfflineSyncWorker {
   private async bootstrapOwned(): Promise<SyncCycleResult> {
     const { adapter, storeId, deviceId } = this.options;
     const now = this.options.now();
-    ensureSyncStoreState(adapter, { storeId, deviceId, now });
     const session = await this.options.sessionProvider.getSession();
     if (!session?.accessToken) {
-      updateSyncStoreState(adapter, { storeId, status: 'PAUSED_AUTH', lastAttemptAt: now, updatedAt: now });
+      if (getSyncStoreState(adapter, storeId)) {
+        updateSyncStoreState(adapter, { storeId, status: 'PAUSED_AUTH', lastAttemptAt: now, updatedAt: now });
+      }
       return { status: 'PAUSED_AUTH', pushed: 0, pulled: 0, conflicts: 0, retryableErrors: 0, permanentErrors: 0 };
     }
 
-    const existing = getSyncBootstrapState(adapter, storeId);
-    const bootstrapId = existing?.status === 'IN_PROGRESS' ? existing.bootstrapId : this.options.idFactory();
-    const bootstrapState = existing?.status === 'IN_PROGRESS'
-      ? existing
-      : beginSyncBootstrap(adapter, { storeId, deviceId, bootstrapId, startedAt: now });
-    let cursor: SyncBootstrapRequest['cursor'] = bootstrapState.snapshotRevision !== null &&
-      bootstrapState.snapshotAfterEntityType !== null && bootstrapState.snapshotAfterEntityId !== null
-      ? {
-        snapshotRevision: bootstrapState.snapshotRevision,
-        afterEntityType: bootstrapState.snapshotAfterEntityType as SyncEntityType,
-        afterEntityId: bootstrapState.snapshotAfterEntityId,
-      }
-      : null;
+    let bootstrapState = getSyncBootstrapState(adapter, storeId);
     try {
+      if (
+        !bootstrapState ||
+        bootstrapState.status !== 'IN_PROGRESS' ||
+        bootstrapState.deviceId !== deviceId ||
+        bootstrapState.snapshotRevision === null
+      ) {
+        const request: SyncReferenceContextRequest = { protocolVersion: 1, storeId, deviceId };
+        const referenceContext = await this.options.transport.referenceContext(request);
+        if (referenceContext.store.id !== storeId) {
+          throw new SyncTransportError(
+            'INVALID_RESPONSE',
+            'Sync reference context belongs to another store.',
+            { retryable: false },
+          );
+        }
+        bootstrapState = beginSyncBootstrap(adapter, {
+          storeId,
+          deviceId,
+          bootstrapId: this.options.idFactory(),
+          referenceContext,
+          startedAt: now,
+        });
+      }
+      let cursor: SyncBootstrapRequest['cursor'] = {
+        snapshotRevision: bootstrapState.snapshotRevision as number,
+        afterRevision: bootstrapState.snapshotCursorRevision,
+        afterChangeIndex: bootstrapState.snapshotCursorChangeIndex,
+      };
       for (let page = 0; page < MAX_BOOTSTRAP_PAGES_PER_RUN; page += 1) {
         const response = await this.options.transport.bootstrap({
           protocolVersion: 1,

@@ -4,7 +4,27 @@ M7 implements the controlled custom sync protocol in
 `docs/engineering/M7_OFFLINE_SYNC_PLAN.md`. The accepted M1–M6 local-write-first
 behavior remains authoritative. Do not start M8 production integration.
 
-## Implementation handoff and independent audit — 2026-09-27
+## Implementation handoff and independent audit — 2026-09-28
+
+Local Docker/Supabase reset, 81 pgTAP assertions, scoped lint, security
+advisors and live Auth/Edge Function/PostgreSQL integration now pass. The
+earlier Docker blocker described below is resolved. The server now rejects a
+physical reconciliation made stale by another device's inventory/batch
+operation under D-044. The Galaxy A15 check installed the rebuilt development
+APK in place, enrolled against local Supabase, retained a queued restock through
+a cold-started connection failure, then synchronized it after reconnection.
+Purchase/sale pull graph corrections passed root validation (505 tests across
+52 suites). Additive migration 22 and the cost-projection rebuild then allowed
+concurrent same-product local orders without losing either sale. Two independent
+SQLite databases converged on final stock, batch and cost state. Delegated root
+validation passed 507 tests across 52 suites; coordinator focused tests,
+typecheck and lint passed after final stock/batch assertions. The cost
+correction and M5 pull parity passed independent review. Local database CI is
+configured but has not run on GitHub. M7-07 historical actor/device bootstrap
+and later pull pass local source checks under D-045. Audit corrections still need a clean
+Git handoff. No physical sale or two-phone convergence was performed in the
+M7 device run.
+See `docs/engineering/M7_INDEPENDENT_AUDIT.md`.
 
 M7-01 through M7-08 source work is committed sequentially on
 `feat/m7-offline-sync`: `66507e6`, `74b2053`, `6a15692`, `f411b0c`,
@@ -13,19 +33,16 @@ SQLite sync state/worker, authenticated Supabase transport, server migrations,
 RLS/grants, Edge Function shells, operation projections, conflict records and
 bootstrap cursor handling are present.
 
-Local evidence is green: 51 suites/484 tests, root typecheck, zero-warning
-lint, environment check, Expo dependency check, Expo Doctor 21/21 and Android
-export. The required database evidence is still blocked: both
-`supabase db lint --local --fail-on error` and `supabase test db --local`
-refused at `127.0.0.1:54322` because Docker is unavailable. M7 is therefore
-not source-accepted. Independent audit found two additional source blockers:
-fresh-device bootstrap can omit creation data after an edit, and the app has
-no integrated enrolment/sync/retry/conflict path. See
-`docs/engineering/M7_INDEPENDENT_AUDIT.md`. No M8 work is authorized.
+The initial implementation handoff passed 51 suites/484 tests while Docker
+was unavailable. That is superseded by the local PostgreSQL and phone evidence
+above. Independent audit corrected operation-history bootstrap, pilot sync
+entry, sale/purchase pull materialization and concurrent-device costing. See
+`docs/engineering/M7_INDEPENDENT_AUDIT.md`. No M8 work
+is authorized.
 
 ## M7-01 — Establish the secure protocol and server transaction spine
 
-**Status:** Implemented; real PostgreSQL integration gate blocked. **Basis:** M6 source/automated scope independently accepted.
+**Status:** Implemented; local PostgreSQL, Auth and endpoint checks passed. **Basis:** M6 source/automated scope independently accepted.
 **Delivers:** versioned protocol contracts and a testable authenticated Supabase
 boundary capable of one atomic, revisioned store operation.
 
@@ -44,24 +61,25 @@ boundary capable of one atomic, revisioned store operation.
 - [x] Revoke ambient access, use explicit grants, enable RLS on exposed tables,
   pin privileged-function search paths and add positive/negative pgTAP policy
   tests. Adopt current explicit Data API grants rather than platform defaults.
-- [ ] Add repeatable database/function test scripts and CI integration. A real
+- [x] Add repeatable database/function test scripts and CI integration. A real
   PostgreSQL run is required; absence of Docker/authorized dev project blocks
   completion rather than becoming a waiver.
 
-**Evidence:** contract suite 5/5, root typecheck/lint and structural pgTAP
-files are present. Supabase lint/pgTAP execution is blocked by the missing
-Docker-backed database.
+**Evidence:** local Supabase reset, 81 pgTAP assertions, scoped lint, security
+advisors and Auth/Edge/Postgres integration passed. The dedicated Ubuntu CI
+job is configured in `.github/workflows/validate.yml`; no remote CI run is
+claimed until the branch is pushed.
 
 **Out of scope:** business aggregate coverage beyond a tracer fixture, final Auth
 screens, production project linking/deployment.
 
 ## M7-02 — Enrol a local store and add crash-safe client sync state
 
-**Status:** Local state/worker implemented; app integration, pilot enrolment, UI status and real transport evidence remain open. **Dependency:** M7-01.
+**Status:** First-owner pilot app path implemented; local Auth/transport and one-phone queued retry passed. **Dependency:** M7-01.
 **Delivers:** an authenticated owner can bind one existing local-only store safely,
 and the app can retain retry/cursor/conflict state across restart.
 
-- [ ] Add an idempotent first-owner enrolment transaction for the existing
+- [x] Add an idempotent first-owner enrolment transaction for the existing
   domain user/store/owner-member/device IDs. Bind verified auth subject exactly
   once; reject attempts to claim an already-bound store or inject another store.
 - [x] Add additive SQLite migration(s) for store cursor/bootstrap state, remote
@@ -73,19 +91,21 @@ and the app can retain retry/cursor/conflict state across restart.
 - [x] Build paginated pull application transactions: validate page, preserve
   pending local work, apply echo safely, persist conflicts and advance cursor
   only after commit.
-- [ ] Add honest compact sync status/diagnostics and manual retry without exposing
+- [x] Add honest compact sync status/diagnostics and manual retry without exposing
   outbox/revision jargon in ordinary flows. Offline or expired tokens pause cloud
   work but never local completion.
 
-**Evidence:** M7 sync suite 7/7 covers v17 upgrade, leases, echo, ack, conflict,
-FK boundary and resumable bootstrap; root typecheck/lint pass. UI status/manual
-retry and real enrolment authorization tests remain pending.
+**Evidence:** More → Cloud sync invokes the worker, shows waiting work/conflicts
+and offers retry; the pilot integration test proves owner IDs reach enrolment and
+the worker. Local Auth/Edge/Postgres tests passed idempotent first-owner
+enrollment and denial of a different owner; the Galaxy local-backend run
+enrolled and retried a queued restock.
 
 **Out of scope:** final onboarding/invitation/multi-store UI.
 
 ## M7-03 — Synchronize completed Sale end to end
 
-**Status:** Implemented in source; real server integration gate blocked. **Dependencies:** M7-01 and M7-02.
+**Status:** Implemented; local server integration and two-database concurrent-sale checks passed. **Dependencies:** M7-01 and M7-02.
 **Delivers:** one offline completed sale reaches the server once and returns by
 pull/echo without duplicating inventory or financial effects.
 
@@ -109,7 +129,7 @@ pending the integration environment.
 
 ## M7-04 — Synchronize Purchase, inventory, batch and costing facts
 
-**Status:** Implemented in source; real server integration gate blocked. **Dependency:** M7-03.
+**Status:** Implemented; local server integration, remote purchase pull and cost/batch reconstruction checks passed. **Dependency:** M7-03.
 **Delivers:** a completed restock and its accepted M5 batch/cost extensions move
 atomically between devices without changing historical meaning.
 
@@ -133,7 +153,7 @@ pending.
 
 ## M7-05 — Synchronize mutable catalogue, package and store configuration
 
-**Status:** Implemented in source; conflict-review UI and real server evidence remain open. **Dependency:** M7-04.
+**Status:** Pilot conflict review/resolution implemented; local server stale-edit evidence passed. **Dependency:** M7-04.
 **Delivers:** catalogue/config edits use explicit versions and visible conflicts
 instead of last-write-wins.
 
@@ -147,18 +167,20 @@ instead of last-write-wins.
 - [x] Protect immutable package conversions/historical snapshots and stale-cart
   sales. Concurrent deactivation or metadata change cannot erase a genuine
   completed transaction.
-- [ ] Add bounded conflict review/resolution that creates a new operation against
+- [x] Add bounded conflict review/resolution that creates a new operation against
   the latest version. Owner-only high-impact settings remain enforced.
 
 **Evidence:** catalogue history, conversion snapshots and durable conflict
-storage are present; conflict-resolution UI and real authorization/isolation
+storage are present. Owner pilot tests prove explicit cloud/local choice,
+versioned re-enqueue, rejected-operation preservation, newer-version refusal
+and quarantine of a pending local edit. Real server authorization/isolation
 tests are pending.
 
 **Out of scope:** shared-catalogue consolidation, staff permission management.
 
 ## M7-06 — Synchronize M5 reconciliation, checks and attention
 
-**Status:** Implemented in source; real server semantic tests remain open. **Dependency:** M7-05.
+**Status:** Implemented; local stale-reconciliation server tests passed. **Dependency:** M7-05.
 **Delivers:** batch classification, adjustments, blind checks and attention state
 retain their audit meaning across devices.
 
@@ -170,62 +192,78 @@ retain their audit meaning across devices.
 - [x] Synchronize check and attention settings with optimistic versions;
   synchronize assignments, attempts and snoozes as auditable facts with stable
   idempotency and owner authorization.
-- [ ] Preserve inferred-versus-physical evidence labels, unknown composition,
+- [x] Preserve inferred-versus-physical evidence labels, unknown composition,
   actual expired removal and condition-driven attention semantics on pull.
 
-**Evidence:** M5 fact validation/projection migration and local persistence
-boundaries are present; concurrent watermark, cross-store and semantic parity
-tests require the real database gate.
+**Evidence:** local server stale-count tests passed. The M5 pull regression
+materializes receipt and physical groups, unknown residual, attention snooze
+and expired-stock removal as a real inventory event. A required materializer
+dependency-order correction passed a failing-before/passing-after test.
 
 **Out of scope:** M11 staff assignment/reviewer policy, background notifications.
 
 ## M7-07 — Synchronize money-out and prove consistent bootstrap
 
-**Status:** Bootstrap source has a blocking reconstruction defect; fresh-database and real server evidence remain open. **Dependency:** M7-06.
+**Status:** Source and local-server restore checks pass under D-045; Git handoff and release checks remain. **Dependency:** M7-06.
 **Delivers:** expenses/withdrawals deduplicate and a newly authorized installation
 can reconstruct the accepted M1–M6 private store state.
 
 - [x] Apply expenses and owner withdrawals as immutable owner-authorized facts;
   preserve exact store currency, actor/device/time and separation from purchases
   or each other.
-- [ ] Build a consistent paginated bootstrap snapshot with its matching revision.
+- [x] Build a consistent paginated bootstrap snapshot with its matching revision.
   Restore dependencies, immutable history, current projections, mutable versions
   and sync metadata into a fresh SQLite database, then start incremental pull.
-  The current latest-document query loses earlier creation facts after edits.
+  The former latest-document query lost earlier creation facts after edits;
+  operation-history pagination now preserves them in local source tests.
 - [x] Register a later device only for an authorized member. Interrupted
   bootstrap restarts safely; a failed snapshot never becomes the active store.
 - [x] Protect unsynced local work during full resync/logout/reset paths and state
   clearly that only server-acknowledged records are recoverable after uninstall.
 
-**Evidence:** finance/bootstrap migrations, audit metadata and the local
-resumable two-page bootstrap test are present; fresh second-database,
-concurrent-mutation and server authorization tests are pending.
+**Evidence:** D-045 server-authoritative reference context and additive SQLite
+staging, a different-device multi-page M1–M6 restore, interrupted/rollback
+tests, delayed pull from newly registered and later-revoked origins, 92 pgTAP
+assertions, and live local Auth/Edge/Postgres checks passed. See
+`docs/engineering/M7_INDEPENDENT_AUDIT.md` for the independent trace and
+physical limits.
 
 **Out of scope:** final multi-store selector, invitation UI, production recovery
 support process.
 
 ## M7-08 — Harden, validate and stop for independent audit
 
-**Status:** Handoff audited; source blockers open and real PostgreSQL gate deferred. **Dependency:** M7-01 through M7-07.
+**Status:** D-045 source correction verified; M7-08 scenario ledger and clean Git handoff remain. Physical two-phone checks remain release gates. **Dependency:** M7-01 through M7-07.
 **Delivers:** a recoverable M7 handoff with actual server integration evidence.
 
-- [ ] Run all required scenarios in `OFFLINE_SYNC.md`: restart/crash boundaries,
+- [x] Run source and local-server scenarios in `OFFLINE_SYNC.md`: restart/crash boundaries,
   commit-before-ack, pagination, unsupported versions, revoked user/device,
   tampered cross-store IDs, duplicate/reused IDs and two-device conflicts.
-- [ ] Run Supabase reset/migrations, database lint/advisors where available,
+- [x] Run Supabase reset/migrations, database lint/advisors where available,
   pgTAP/RLS and Edge Function integration tests against local Docker or an
   explicitly authorized isolated hosted development project. Do not substitute
   mocks for this gate.
 - [x] Run focused suites, full `npm run validate`, Expo Doctor, dependency check,
   Android export, workflow/index/artifact/migration checks and `git diff --check`.
-- [x] Update tickets, PROJECT_STATE and M7 workflow with actual commits/commands,
+- [ ] Update tickets, PROJECT_STATE and M7 workflow with actual commits/commands,
   server migrations, residual risks and clean branch/HEAD/status. Stop for
   independent audit; do not start M8, push, deploy or claim physical-device work.
 
-**Handoff evidence:** full local validation passed; the two required Supabase
-commands were attempted and both stopped at the unavailable local Postgres
-port. The branch is ready for independent source audit once a disposable
-integration environment is supplied.
+**Current evidence:** coordinator `npm run validate` passed 515 tests across
+57 suites, strict typecheck and zero-warning lint. `npm run test:sync:local`
+and `npx supabase test db` passed (92 assertions/10 files). Prior Expo Doctor
+21/21, dependency check and Android export passed. Local database lint and
+security advisors passed in Luna's D-045 handoff; remote CI has not run.
+Galaxy A15 local-backend enrollment, queued-restock retention and retry passed
+earlier; the installed app's later failure to open needs diagnosis. A physical
+sale and second-device phone pull remain unverified.
+The scenario ledger is supported by `m7Sync.test.ts` (lease/restart, pull
+cursor, interrupted bootstrap, conflicts), contract version tests,
+`m7ConcurrentCosting.test.ts` (two independent local databases),
+`m7PullReferences.test.ts` (late origins), pgTAP authorization/snapshot tests
+and the live local script (identical replay, conflicting ID reuse, cross-store
+denial, stale cross-device reconciliation). These are automated source/local
+server checks, not physical two-phone or release evidence.
 
 **Out of scope:** production Supabase migration, App Store/Play deployment,
 physical-device release acceptance, M8 code.

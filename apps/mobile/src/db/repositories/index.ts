@@ -31,6 +31,7 @@ export {
   releaseExpiredOutboxLeases,
   markOutboxApplied,
   markOutboxConflict,
+  quarantineOutboxConflict,
   markOutboxEchoApplied,
   markOutboxPermanent,
   markOutboxRetryable,

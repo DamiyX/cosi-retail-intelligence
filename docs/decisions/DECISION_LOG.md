@@ -111,6 +111,10 @@ When a major decision changes, update the affected source-of-truth document too.
 | D-038 | M4 exact cost basis, provisional COGS rounding and conservative coverage | ACTIVE |
 | D-039 | Pilot batch awareness, automatic assumed FEFO and first-class unknown stock | ACTIVE |
 | D-040 | Blind owner checks, sourced adjustment costing and durable attention | ACTIVE |
+| D-041 | M6 money-out and truthful daily summary | ACTIVE |
+| D-042 | M7 authenticated sync and PostgreSQL application boundary | ACTIVE |
+| D-044 | Reject cross-device stale physical reconciliations | ACTIVE |
+| D-045 | Restore authoritative historical actor and device references before bootstrap replay | ACTIVE |
 
 ---
 
@@ -1398,6 +1402,65 @@ without rewriting actor history or prematurely deciding final onboarding UX.
 Revisit D-011 and evaluate a managed sync engine if the M7 sale spike cannot
 demonstrate safe idempotent retry, per-store ordering, RLS isolation and
 recoverable pull without disproportionate complexity.
+
+---
+
+## D-044 — Reject Cross-Device Stale Physical Reconciliations
+
+**Status:** ACTIVE  
+**Date:** 2026-09-28  
+**Approval:** The founder authorized completion of the M7 correction and phone
+verification before M9 integration after the independent audit explained the
+missing cross-device guard.
+
+### Decision
+
+Retain local blind-count and same-device inventory/batch watermark checks.
+Each new finalized reconciliation also carries the last server revision fully
+materialized on that device and a bounded set of the device's local inventory/
+batch operation IDs already reflected in the counted projection. The server
+checks that baseline under the store revision lock. It accepts later product
+movements only when they are verified predecessors from the same device;
+another device's later movement or batch change yields a durable `CONFLICT`.
+Counts queued before this baseline existed fail closed for manual review.
+The authenticated caller must retain an active OWNER membership to submit a
+physical reconciliation; a payload role claim cannot grant this authority.
+No conflict silently mutates the server inventory ledger. Genuine concurrent
+sales remain append-only under D-013.
+
+### Rationale
+
+SQLite row IDs and local batch application order cannot compare state across
+devices. A stale adjustment could otherwise overwrite the meaning of a real
+sale. The server revision and operation IDs already exist in M7, so the guard
+extends the canonical reconciliation envelope without a new queue or stock
+system. A conflict keeps local evidence visible for review/recount.
+
+### Revisit if
+
+The pilot needs automatic cross-device count resolution, stronger device
+cloning defenses, or counts with more than 5,000 unsynchronized product
+predecessors. Those require separate UX and protocol evidence.
+
+---
+
+## D-045 — Restore Historical Identity References Before Bootstrap Replay
+
+**Status:** ACTIVE  
+**Date:** 2026-09-28  
+**Approval:** The founder approved the bounded M7 fresh-device restore correction after the independent audit reproduced failure with a new device ID.
+
+### Decision
+
+An authenticated, membership-checked, store-scoped server contract supplies authoritative store, user, membership and device reference context for later-device bootstrap. The client stages that context with the paginated operation snapshot and exposes the restored store only after complete, validated replay. It preserves original actor, membership and device IDs in immutable facts, including references to devices or members whose access was later revoked or suspended. Historical-fact replay must validate same-store identity relationships without treating current ACTIVE status as a prerequisite. An atomic replay may temporarily satisfy legacy ACTIVE insert triggers if no intermediate state is exposed and authoritative statuses are restored before commit. New local business commands and server push still require current authorization under D-042; historical restore cannot reactivate access or authorize a new write. Do not synthesize identities from transaction envelopes or rewrite provenance. An incomplete restore must leave existing local and pending work intact and must not expose a partial store.
+
+### Rationale
+
+The existing bootstrap replays operations but omits the identity rows required by local purchase and other fact constraints. A fresh device with its own ID cannot replay a legitimate historical purchase from the originating device. Historical validity and current permission are different questions. Supplying server-authoritative references preserves provenance and permits later revocation without blocking restore.
+
+### Verification boundary
+
+Test a different new-device ID, later-revoked or suspended origin identities, multi-page M1–M6 facts, interrupted restore, and cross-store denial. This decision does not settle final invitation, sign-in or recovery UI.
 
 ---
 

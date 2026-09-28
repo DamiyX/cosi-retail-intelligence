@@ -93,6 +93,49 @@ material, and server secrets stay out of the app and Git.
 Environment files, credentials.json, native directories, APKs, and keystores
 are ignored.
 
+## M7 pilot cloud sync setup
+
+For disposable local server verification, start Docker Desktop and run from
+the repository root:
+
+```powershell
+npm exec -- supabase start --yes
+npm exec -- supabase db reset --local --no-seed --yes
+npm exec -- supabase test db --local
+npm exec -- supabase db lint --local --schema public,sync_private --fail-on error
+npm exec -- supabase db advisors --local --type security --level warn --fail-on error
+npm run test:sync:local
+```
+
+The last command creates disposable local Auth users and exercises the live
+sync endpoints. It reads the local publishable key from Supabase status without
+printing it. These checks do not modify the hosted development project. Keep
+the server running while testing; local data may be reset. The cross-device
+physical-reconciliation and Android-native gates in `M7_INDEPENDENT_AUDIT.md`
+remain separate.
+
+The app's More → Cloud sync route is an optional first-owner pilot connection.
+Local sales, purchases and other business writes remain available with no cloud
+configuration. For an isolated development Supabase project, copy
+`apps/mobile/.env.example` to an ignored `apps/mobile/.env.local` and set
+`EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to that
+project's **public** values. Never put a service-role/secret key in the app or
+commit an environment file. A real server run also requires the M7 migrations,
+functions and email authentication to be configured in the development project;
+this has not yet been performed or verified.
+
+Install from the committed lockfile with `npm ci`. `expo-secure-store` is an
+Android native dependency for the pilot auth session, so rebuild the
+development/preview APK after adding it; a JavaScript-only reload of an older
+development client is insufficient. Open Products to create the local owner and
+store, then More → Cloud sync to create/sign into the matching owner account.
+The server binds the verified auth subject to those existing local IDs. A cloud
+sign-out does not delete pending local transactions. The app retries while in
+the foreground and offers Sync now, waiting-work status and explicit mutable
+conflict review. Other staff accounts, invitation, store switching, second-
+device discovery and recovery UX remain later work. Do not test with real shop
+data until PostgreSQL authorization, migration and endpoint tests pass.
+
 ## EAS builds
 
 Run the root scripts; they enter the mobile workspace automatically:
@@ -128,6 +171,7 @@ A successful Android JS export alone does not prove a native build is valid.
 | `npm run mobile:start` | Metro for development client |
 | `npm run mobile:build:development` | EAS development APK |
 | `npm run mobile:build:preview` | EAS standalone preview APK |
+| `npm run test:sync:local` | Disposable local Auth/Edge Function/PostgreSQL sync integration |
 
 Pinned EAS, Expo Doctor and Supabase CLIs are dev dependencies, not required global
 installs. From the mobile workspace, `npm exec -- eas whoami` checks authentication.

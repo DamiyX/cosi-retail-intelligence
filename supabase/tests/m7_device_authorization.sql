@@ -1,6 +1,6 @@
 begin;
 
-select plan(7);
+select plan(13);
 
 insert into public.app_users (id, auth_subject, display_name)
 values
@@ -124,6 +124,59 @@ select throws_ok(
   'Store membership or device authorization failed.',
   'member cannot bootstrap with another member device'
 );
+
+set local role postgres;
+update public.store_members set role = 'STAFF'
+where user_id = '10000000-0000-4000-8000-000000000002';
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000002', true);
+
+select is(
+  public.sync_push(
+    '{"protocolVersion":1,"payloadVersion":1,"storeId":"30000000-0000-4000-8000-000000000001","deviceId":"50000000-0000-4000-8000-000000000002","operations":[{"payloadVersion":1,"operationType":"EXPENSE_CREATED","operationId":"60000000-0000-4000-8000-000000000003","storeId":"30000000-0000-4000-8000-000000000001","deviceId":"50000000-0000-4000-8000-000000000002","entityType":"EXPENSE","entityId":"70000000-0000-4000-8000-000000000003","baseServerVersion":null,"occurredAt":"2026-09-19T00:00:00.000Z","entities":{"expense":{"id":"70000000-0000-4000-8000-000000000003","storeId":"30000000-0000-4000-8000-000000000001","deviceId":"50000000-0000-4000-8000-000000000002","createdByUserId":"10000000-0000-4000-8000-000000000001","amountMinor":500,"currencyCode":"NGN","occurredAt":"2026-09-19T00:00:00.000Z"}}}]}'::jsonb
+  )->'acks'->0->>'status',
+  'REJECTED_PERMANENT',
+  'staff cannot submit a money-out fact by naming the owner in its payload'
+);
+
+set local role postgres;
+select is((select count(*)::integer from sync_private.finance_fact_history
+  where fact_id = '70000000-0000-4000-8000-000000000003'),
+  0, 'forged money-out fact leaves no finance history');
+
+select set_config('request.jwt.claim.sub', '20000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select is(
+  public.sync_push(
+    '{"protocolVersion":1,"payloadVersion":1,"storeId":"30000000-0000-4000-8000-000000000001","deviceId":"50000000-0000-4000-8000-000000000001","operations":[{"payloadVersion":1,"operationType":"EXPENSE_CREATED","operationId":"60000000-0000-4000-8000-000000000004","storeId":"30000000-0000-4000-8000-000000000001","deviceId":"50000000-0000-4000-8000-000000000001","entityType":"EXPENSE","entityId":"70000000-0000-4000-8000-000000000004","baseServerVersion":null,"occurredAt":"2026-09-19T00:00:00.000Z","entities":{"expense":{"id":"70000000-0000-4000-8000-000000000004","storeId":"30000000-0000-4000-8000-000000000001","deviceId":"50000000-0000-4000-8000-000000000001","createdByUserId":"10000000-0000-4000-8000-000000000001","amountMinor":500,"currencyCode":"NGN","occurredAt":"2026-09-19T00:00:00.000Z"}}}]}'::jsonb
+  )->'acks'->0->>'status',
+  'APPLIED',
+  'authenticated owner can synchronize their own expense'
+);
+set local role postgres;
+select is((select count(*)::integer from sync_private.finance_fact_history
+  where fact_id = '70000000-0000-4000-8000-000000000004'),
+  1, 'owner expense creates one immutable finance fact');
+
+update public.devices set status = 'REVOKED'
+where id = '50000000-0000-4000-8000-000000000001';
+set local role authenticated;
+
+select throws_ok(
+  $$
+    select public.sync_enroll_store(
+      '{"protocolVersion":1,"storeId":"30000000-0000-4000-8000-000000000001","userId":"10000000-0000-4000-8000-000000000001","storeMemberId":"40000000-0000-4000-8000-000000000001","deviceId":"50000000-0000-4000-8000-000000000001","storeName":"Authorization test store","currencyCode":"NGN","countryCode":"NG","timezone":"Africa/Lagos","displayName":"Owner one"}'::jsonb
+    )
+  $$,
+  '42501',
+  'Revoked device cannot be re-enrolled.',
+  'enrolment cannot reactivate a revoked device'
+);
+
+set local role postgres;
+select is((select status from public.devices
+  where id = '50000000-0000-4000-8000-000000000001'),
+  'REVOKED', 'revoked device state stays revoked');
 
 select * from finish();
 rollback;

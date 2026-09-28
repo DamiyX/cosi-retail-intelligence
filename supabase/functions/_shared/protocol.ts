@@ -30,8 +30,8 @@ const entityTypes = [
 const cursor = z.object({ revision: z.number().int().nonnegative(), changeIndex: z.number().int().nonnegative() }).strict();
 const bootstrapCursor = z.object({
   snapshotRevision: z.number().int().nonnegative(),
-  afterEntityType: z.enum(entityTypes),
-  afterEntityId: id,
+  afterRevision: z.number().int().nonnegative(),
+  afterChangeIndex: z.number().int().nonnegative(),
 }).strict();
 
 const operation = z.object({
@@ -80,8 +80,15 @@ export const enrollmentRequest = z.object({
   deviceId: id,
   storeName: z.string().trim().min(1).max(200),
   currencyCode: z.string().regex(/^[A-Z]{3}$/),
+  countryCode: z.string().regex(/^[A-Z]{2}$/).optional(),
   timezone: z.string().trim().min(1).max(100),
   displayName: z.string().trim().min(1).max(200),
+}).strict();
+
+export const referenceContextRequest = z.object({
+  protocolVersion: z.literal(PROTOCOL_VERSION),
+  storeId: id,
+  deviceId: id,
 }).strict();
 
 export const bootstrapRequest = z.object({
@@ -109,6 +116,10 @@ export function assertPullRequest(value: unknown) {
 
 export function assertEnrollmentRequest(value: unknown) {
   return enrollmentRequest.parse(value);
+}
+
+export function assertReferenceContextRequest(value: unknown) {
+  return referenceContextRequest.parse(value);
 }
 
 export function assertBootstrapRequest(value: unknown) {

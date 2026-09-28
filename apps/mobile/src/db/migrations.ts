@@ -2566,6 +2566,166 @@ export const MIGRATIONS: Migration[] = [
         ON sync_bootstrap_entities(store_id, bootstrap_id, server_revision, entity_type, entity_id);`,
     ],
   },
+  {
+    version: 20,
+    name: 'offline_sync_bootstrap_operation_history',
+    statements: [
+      `CREATE TABLE sync_bootstrap_operations (
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+        bootstrap_id TEXT NOT NULL,
+        snapshot_revision INTEGER NOT NULL CHECK (snapshot_revision >= 0),
+        server_revision INTEGER NOT NULL CHECK (server_revision > 0),
+        change_index INTEGER NOT NULL CHECK (change_index >= 0),
+        operation_id TEXT NOT NULL,
+        entity_type TEXT NOT NULL,
+        entity_id TEXT NOT NULL,
+        entity_version INTEGER NOT NULL CHECK (entity_version >= 0),
+        payload TEXT NOT NULL,
+        PRIMARY KEY (store_id, bootstrap_id, server_revision, change_index),
+        UNIQUE (store_id, bootstrap_id, operation_id),
+        FOREIGN KEY (store_id) REFERENCES sync_bootstrap_state(store_id) ON DELETE CASCADE
+      );`,
+      `UPDATE sync_bootstrap_state SET status = 'FAILED',
+        last_error_code = 'BOOTSTRAP_PROTOCOL_UPGRADED'
+        WHERE status = 'IN_PROGRESS';`,
+      `UPDATE sync_store_state SET status = 'ERROR_RETRYABLE',
+        last_error_code = 'BOOTSTRAP_PROTOCOL_UPGRADED'
+        WHERE status = 'BOOTSTRAPPING';`,
+    ],
+  },
+  {
+    version: 21,
+    name: 'offline_sync_conflict_server_revision',
+    statements: [
+      `ALTER TABLE sync_conflicts ADD COLUMN server_revision INTEGER NULL
+        CHECK (server_revision IS NULL OR server_revision >= 0);`,
+    ],
+  },
+  {
+    version: 22,
+    name: 'allow_concurrent_cost_movement_orders',
+    statements: [
+      'DROP TRIGGER trg_cost_movements_product_store_insert;',
+      'DROP TRIGGER trg_cost_movements_source_insert;',
+      'DROP TRIGGER trg_cost_movements_immutable_update;',
+      'DROP TRIGGER trg_cost_movements_immutable_delete;',
+      'DROP INDEX idx_cost_movements_store_product_order;',
+      'DROP INDEX idx_cost_movements_source;',
+      'ALTER TABLE cost_movements RENAME TO cost_movements_before_concurrent_order;',
+      `CREATE TABLE cost_movements (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT NOT NULL REFERENCES store_products(id) ON DELETE RESTRICT,
+        movement_type TEXT NOT NULL CHECK (movement_type IN ('PURCHASE', 'SALE', 'ADJUSTMENT')),
+        source_id TEXT NOT NULL,
+        source_line_id TEXT NOT NULL,
+        application_order INTEGER NOT NULL CHECK (application_order > 0),
+        quantity_base_delta_micros INTEGER NOT NULL,
+        costed_quantity_delta_micros INTEGER NOT NULL,
+        value_numerator TEXT NOT NULL,
+        value_denominator TEXT NOT NULL CHECK (value_denominator <> '0'),
+        coverage_status TEXT NOT NULL CHECK (coverage_status IN ('KNOWN', 'UNKNOWN', 'UNAVAILABLE')),
+        unit_cost_numerator TEXT,
+        unit_cost_denominator TEXT,
+        method TEXT NOT NULL DEFAULT 'MOVING_WEIGHTED_AVERAGE',
+        method_version TEXT NOT NULL DEFAULT 'M4-MWA-1',
+        created_at TEXT NOT NULL,
+        UNIQUE (movement_type, source_line_id)
+      );`,
+      `INSERT INTO cost_movements
+        (id, store_id, store_product_id, movement_type, source_id, source_line_id,
+         application_order, quantity_base_delta_micros, costed_quantity_delta_micros,
+         value_numerator, value_denominator, coverage_status, unit_cost_numerator,
+         unit_cost_denominator, method, method_version, created_at)
+       SELECT id, store_id, store_product_id, movement_type, source_id, source_line_id,
+              application_order, quantity_base_delta_micros, costed_quantity_delta_micros,
+              value_numerator, value_denominator, coverage_status, unit_cost_numerator,
+              unit_cost_denominator, method, method_version, created_at
+       FROM cost_movements_before_concurrent_order;`,
+      'DROP TABLE cost_movements_before_concurrent_order;',
+      'CREATE INDEX idx_cost_movements_store_product_order ON cost_movements(store_product_id, application_order, id);',
+      'CREATE INDEX idx_cost_movements_source ON cost_movements(movement_type, source_id);',
+      `CREATE TRIGGER trg_cost_movements_product_store_insert
+        BEFORE INSERT ON cost_movements
+        WHEN NOT EXISTS (
+          SELECT 1 FROM store_products sp
+          WHERE sp.id = NEW.store_product_id AND sp.store_id = NEW.store_id
+        )
+        BEGIN SELECT RAISE(ABORT, 'cost movement product does not belong to store'); END;`,
+      `CREATE TRIGGER trg_cost_movements_source_insert
+        BEFORE INSERT ON cost_movements
+        WHEN (NEW.movement_type = 'PURCHASE' AND NOT EXISTS (
+          SELECT 1 FROM purchase_items pi
+          JOIN purchases p ON p.id = pi.purchase_id
+          WHERE pi.id = NEW.source_line_id AND p.id = NEW.source_id
+            AND pi.store_id = NEW.store_id AND pi.store_product_id = NEW.store_product_id
+        ))
+        OR (NEW.movement_type = 'SALE' AND NOT EXISTS (
+          SELECT 1 FROM sale_items si
+          JOIN sales s ON s.id = si.sale_id
+          WHERE si.id = NEW.source_line_id AND s.id = NEW.source_id
+            AND si.store_product_id = NEW.store_product_id AND s.store_id = NEW.store_id
+        ))
+        OR (NEW.movement_type = 'ADJUSTMENT' AND NOT EXISTS (
+          SELECT 1 FROM inventory_adjustment_lines ial
+          JOIN inventory_adjustments ia ON ia.id = ial.adjustment_id
+          WHERE ial.id = NEW.source_line_id AND ia.id = NEW.source_id
+            AND ial.store_id = NEW.store_id AND ial.store_product_id = NEW.store_product_id
+        ))
+        BEGIN SELECT RAISE(ABORT, 'cost movement source does not match product and store'); END;`,
+      `CREATE TRIGGER trg_cost_movements_immutable_update
+        BEFORE UPDATE ON cost_movements
+        BEGIN SELECT RAISE(ABORT, 'cost movements are append-only'); END;`,
+      `CREATE TRIGGER trg_cost_movements_immutable_delete
+        BEFORE DELETE ON cost_movements
+        BEGIN SELECT RAISE(ABORT, 'cost movements are append-only'); END;`,
+    ],
+  },
+  {
+    version: 23,
+    name: 'offline_sync_later_device_restore_staging',
+    statements: [
+      `CREATE TABLE sync_bootstrap_restore_state (
+        store_id TEXT PRIMARY KEY,
+        device_id TEXT NOT NULL,
+        bootstrap_id TEXT NOT NULL UNIQUE,
+        status TEXT NOT NULL CHECK (status IN ('IN_PROGRESS', 'COMMITTED', 'FAILED')),
+        reference_context TEXT NOT NULL,
+        snapshot_revision INTEGER NOT NULL CHECK (snapshot_revision >= 0),
+        snapshot_cursor_revision INTEGER NOT NULL DEFAULT 0 CHECK (snapshot_cursor_revision >= 0),
+        snapshot_cursor_change_index INTEGER NOT NULL DEFAULT 0 CHECK (snapshot_cursor_change_index >= 0),
+        started_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        last_error_code TEXT NULL,
+        last_error_message TEXT NULL
+      );`,
+      `CREATE TABLE sync_bootstrap_restore_operations (
+        store_id TEXT NOT NULL,
+        bootstrap_id TEXT NOT NULL,
+        snapshot_revision INTEGER NOT NULL CHECK (snapshot_revision >= 0),
+        server_revision INTEGER NOT NULL CHECK (server_revision > 0),
+        change_index INTEGER NOT NULL CHECK (change_index >= 0),
+        operation_id TEXT NOT NULL,
+        entity_type TEXT NOT NULL,
+        entity_id TEXT NOT NULL,
+        entity_version INTEGER NOT NULL CHECK (entity_version >= 0),
+        payload TEXT NOT NULL,
+        PRIMARY KEY (store_id, bootstrap_id, server_revision, change_index),
+        UNIQUE (store_id, bootstrap_id, operation_id),
+        FOREIGN KEY (store_id) REFERENCES sync_bootstrap_restore_state(store_id) ON DELETE CASCADE
+      );`,
+      `CREATE INDEX idx_sync_bootstrap_restore_operations_order
+        ON sync_bootstrap_restore_operations(store_id, bootstrap_id, server_revision, change_index);`,
+      `UPDATE sync_bootstrap_state SET status = 'FAILED', updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
+        last_error_code = 'D045_RESTART_REQUIRED',
+        last_error_message = 'Bootstrap will restart with an authoritative reference context.'
+        WHERE status = 'IN_PROGRESS';`,
+      `UPDATE sync_store_state SET status = 'ERROR_RETRYABLE', updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now'),
+        last_error_code = 'D045_RESTART_REQUIRED',
+        last_error_message = 'Bootstrap will restart with an authoritative reference context.'
+        WHERE status = 'BOOTSTRAPPING';`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

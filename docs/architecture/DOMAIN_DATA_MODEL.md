@@ -1005,6 +1005,12 @@ Costed quantity is integer base micro-units. Remaining value is exact; rounded
 sale COGS is never fed back into average calculations. State is a store-private
 projection rebuildable from immutable purchase/sale cost movements and explicit
 local application order; timestamps alone do not define that order.
+M7 retains that order as a local fact, not a globally unique sequence: two
+offline devices can create movements with the same order for one product.
+Sync preserves both immutable movements and completed cost snapshots, uses a
+stable ID tie-break for equal local orders, and rebuilds the mutable cost
+projection from accepted movements. A sender's cost-state projection cannot
+overwrite the receiver's concurrent work.
 
 Positive stock with unknown coverage has unavailable average/COGS. A receipt
 crossing a zero/negative balance into positive stock initializes only the

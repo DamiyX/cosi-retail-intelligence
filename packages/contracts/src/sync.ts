@@ -221,6 +221,7 @@ export const syncEnrollmentRequestSchema = z
     deviceId: idSchema,
     storeName: z.string().trim().min(1).max(200),
     currencyCode: z.string().regex(/^[A-Z]{3}$/),
+    countryCode: z.string().regex(/^[A-Z]{2}$/).optional(),
     timezone: z.string().trim().min(1).max(100),
     displayName: z.string().trim().min(1).max(200),
   })
@@ -242,6 +243,93 @@ export const syncEnrollmentResponseSchema = z
 
 export type SyncEnrollmentResponse = z.infer<typeof syncEnrollmentResponseSchema>;
 
+export const syncReferenceContextRequestSchema = z.object({
+  protocolVersion: z.literal(SYNC_PROTOCOL_VERSION),
+  storeId: idSchema,
+  deviceId: idSchema,
+}).strict();
+
+export type SyncReferenceContextRequest = z.infer<typeof syncReferenceContextRequestSchema>;
+
+const syncReferenceStoreSchema = z.object({
+  id: idSchema,
+  name: z.string().min(1).max(200),
+  currencyCode: z.string().regex(/^[A-Z]{3}$/),
+  countryCode: z.string().regex(/^[A-Z]{2}$/).nullable(),
+  timezone: z.string().min(1).max(100),
+  status: z.enum(['ACTIVE', 'SUSPENDED']),
+  createdByUserId: idSchema,
+  createdAt: timestampSchema,
+  updatedAt: timestampSchema,
+}).strict();
+
+const syncReferenceUserSchema = z.object({
+  id: idSchema,
+  displayName: z.string().min(1).max(200),
+  status: z.enum(['ACTIVE', 'SUSPENDED']),
+  createdAt: timestampSchema,
+  updatedAt: timestampSchema,
+}).strict();
+
+const syncReferenceMemberSchema = z.object({
+  id: idSchema,
+  storeId: idSchema,
+  userId: idSchema,
+  role: z.enum(['OWNER', 'ADMIN', 'STAFF']),
+  status: z.enum(['ACTIVE', 'SUSPENDED']),
+  joinedAt: timestampSchema,
+  createdAt: timestampSchema,
+  updatedAt: timestampSchema,
+}).strict();
+
+const syncReferenceDeviceSchema = z.object({
+  id: idSchema,
+  storeId: idSchema,
+  userId: idSchema.nullable(),
+  platform: z.enum(['ANDROID', 'IOS', 'OTHER']),
+  deviceLabel: z.string().max(200).nullable(),
+  appVersion: z.string().max(64),
+  status: z.enum(['ACTIVE', 'REVOKED']),
+  createdAt: timestampSchema,
+}).strict();
+
+export const syncReferenceContextSchema = z.object({
+  protocolVersion: z.literal(SYNC_PROTOCOL_VERSION),
+  payloadVersion: z.literal(SYNC_PAYLOAD_VERSION),
+  serverRevision: nonNegativeIntegerSchema,
+  store: syncReferenceStoreSchema,
+  users: z.array(syncReferenceUserSchema),
+  members: z.array(syncReferenceMemberSchema),
+  devices: z.array(syncReferenceDeviceSchema),
+}).strict().superRefine((context, issueContext) => {
+  const unique = (values: string[]) => new Set(values).size === values.length;
+  const userIds = new Set(context.users.map((user) => user.id));
+  if (!unique(context.users.map((user) => user.id))) {
+    issueContext.addIssue({ code: 'custom', path: ['users'], message: 'Reference users must be unique.' });
+  }
+  if (!unique(context.members.map((member) => member.id))) {
+    issueContext.addIssue({ code: 'custom', path: ['members'], message: 'Reference memberships must be unique.' });
+  }
+  if (!unique(context.devices.map((device) => device.id))) {
+    issueContext.addIssue({ code: 'custom', path: ['devices'], message: 'Reference devices must be unique.' });
+  }
+  if (!userIds.has(context.store.createdByUserId)) {
+    issueContext.addIssue({ code: 'custom', path: ['users'], message: 'Store creator is missing from reference users.' });
+  }
+  context.members.forEach((member, index) => {
+    if (member.storeId !== context.store.id || !userIds.has(member.userId)) {
+      issueContext.addIssue({ code: 'custom', path: ['members', index], message: 'Membership reference is outside the store context.' });
+    }
+  });
+  context.devices.forEach((device, index) => {
+    if (device.storeId !== context.store.id || (device.userId !== null && !userIds.has(device.userId))) {
+      issueContext.addIssue({ code: 'custom', path: ['devices', index], message: 'Device reference is outside the store context.' });
+    }
+  });
+});
+
+export type SyncReferenceContext = z.infer<typeof syncReferenceContextSchema>;
+
 export const syncBootstrapRequestSchema = z
   .object({
     protocolVersion: z.literal(SYNC_PROTOCOL_VERSION),
@@ -251,8 +339,8 @@ export const syncBootstrapRequestSchema = z
     cursor: z
       .object({
         snapshotRevision: nonNegativeIntegerSchema,
-        afterEntityType: z.enum(SYNC_ENTITY_TYPES),
-        afterEntityId: idSchema,
+        afterRevision: nonNegativeIntegerSchema,
+        afterChangeIndex: nonNegativeIntegerSchema,
       })
       .strict()
       .nullable(),
@@ -264,11 +352,13 @@ export type SyncBootstrapRequest = z.infer<typeof syncBootstrapRequestSchema>;
 
 export const syncBootstrapEntitySchema = z
   .object({
+    operationId: idSchema,
     storeId: idSchema,
     entityType: z.enum(SYNC_ENTITY_TYPES),
     entityId: idSchema,
     entityVersion: nonNegativeIntegerSchema,
     serverRevision: nonNegativeIntegerSchema,
+    changeIndex: nonNegativeIntegerSchema,
     payloadVersion: z.literal(SYNC_PAYLOAD_VERSION),
     payload: jsonObjectSchema,
   })
@@ -348,6 +438,14 @@ export function parseSyncEnrollmentRequest(value: unknown): SyncEnrollmentReques
 
 export function parseSyncEnrollmentResponse(value: unknown): SyncEnrollmentResponse {
   return syncEnrollmentResponseSchema.parse(value);
+}
+
+export function parseSyncReferenceContextRequest(value: unknown): SyncReferenceContextRequest {
+  return syncReferenceContextRequestSchema.parse(value);
+}
+
+export function parseSyncReferenceContext(value: unknown): SyncReferenceContext {
+  return syncReferenceContextSchema.parse(value);
 }
 
 export function parseSyncBootstrapRequest(value: unknown): SyncBootstrapRequest {

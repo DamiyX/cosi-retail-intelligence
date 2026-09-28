@@ -31,6 +31,7 @@ import {
   getInventoryCheckAssignmentById,
   getStoreById,
   getStoreProductById,
+  getSyncStoreState,
   listBatchInventoryEntriesByOperation,
   listBatchInventoryOperationsByEvent,
   listBatchInventoryOperationsByStoreProduct,
@@ -609,6 +610,36 @@ export function submitInventoryReconciliation(
   });
 }
 
+/** The pull cursor is the last server state actually materialized locally.
+ * Own product mutations after that cursor are explicit causal predecessors;
+ * the server verifies them before accepting a physical-count adjustment. */
+function reconciliationSyncBaseline(
+  adapter: DatabaseAdapter,
+  storeId: string,
+  deviceId: string,
+  storeProductId: string,
+): { serverRevision: number; predecessorOperationIds: string[]; incomplete: boolean } {
+  const serverRevision = getSyncStoreState(adapter, storeId)?.cursorRevision ?? 0;
+  const rows = adapter.getAllRows<{ operation_id: string }>(
+    `SELECT operation_id FROM outbox_operations
+     WHERE store_id = ? AND device_id = ?
+       AND (server_revision IS NULL OR server_revision > ?)
+       AND operation_type IN (
+         'COMPLETED_SALE_CREATED', 'COMPLETED_PURCHASE_CREATED',
+         'BATCH_CLASSIFICATION_CREATED', 'INVENTORY_ADJUSTMENT_CREATED',
+         'RECONCILIATION_FINALIZED'
+       )
+       AND instr(payload, ?) > 0
+     ORDER BY rowid ASC LIMIT 5001;`,
+    [storeId, deviceId, serverRevision, storeProductId],
+  );
+  return {
+    serverRevision,
+    predecessorOperationIds: rows.slice(0, 5000).map((row) => row.operation_id),
+    incomplete: rows.length > 5000,
+  };
+}
+
 export function finalizeInventoryReconciliation(
   adapter: DatabaseAdapter,
   rawInput: FinalizeInventoryReconciliationInput,
@@ -635,6 +666,7 @@ export function finalizeInventoryReconciliation(
     if (currentProjection.inventoryWatermark !== latest.inventoryWatermark || currentProjection.batchWatermark !== latest.batchWatermark) {
       throw new DomainError('INVALID_VALUE', 'Inventory changed while this count was open. Refresh and recount before finalizing.');
     }
+    const syncBaseline = reconciliationSyncBaseline(adapter, input.storeId, input.deviceId, line.storeProductId);
     const physical = canonicalInteger(latest.physicalBaseUnits, 'physicalBaseUnits', true);
     const recorded = canonicalInteger(latest.recordedBaseUnitsSnapshot, 'recordedBaseUnitsSnapshot');
     const difference = physical - recorded;
@@ -853,6 +885,7 @@ export function finalizeInventoryReconciliation(
         batchTrackingVersion: 1,
         reconciliationVersion: 1,
         request: fingerprint(input),
+        syncBaseline,
         reconciliation: completed,
         line,
         submissions: listInventoryReconciliationSubmissionsByLine(adapter, line.id),

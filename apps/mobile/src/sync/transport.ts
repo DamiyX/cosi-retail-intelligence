@@ -3,6 +3,7 @@ import {
   parseSyncEnrollmentResponse,
   parseSyncPullResponse,
   parseSyncPushResponse,
+  parseSyncReferenceContext,
   type SyncBootstrapRequest,
   type SyncBootstrapResponse,
   type SyncEnrollmentRequest,
@@ -11,6 +12,8 @@ import {
   type SyncPullResponse,
   type SyncPushRequest,
   type SyncPushResponse,
+  type SyncReferenceContext,
+  type SyncReferenceContextRequest,
 } from '@retail/contracts';
 
 export interface AuthenticatedSession {
@@ -27,6 +30,7 @@ export interface SyncTransport {
   push(request: SyncPushRequest): Promise<SyncPushResponse>;
   pull(request: SyncPullRequest): Promise<SyncPullResponse>;
   bootstrap(request: SyncBootstrapRequest): Promise<SyncBootstrapResponse>;
+  referenceContext(request: SyncReferenceContextRequest): Promise<SyncReferenceContext>;
 }
 
 export type SyncTransportErrorCode =
@@ -138,5 +142,6 @@ export function createHttpSyncTransport(options: HttpSyncTransportOptions): Sync
     push: (request) => post('sync-push', request, parseSyncPushResponse),
     pull: (request) => post('sync-pull', request, parseSyncPullResponse),
     bootstrap: (request) => post('sync-bootstrap', request, parseSyncBootstrapResponse),
+    referenceContext: (request) => post('sync-reference-context', request, parseSyncReferenceContext),
   };
 }

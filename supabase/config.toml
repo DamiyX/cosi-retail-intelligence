@@ -393,6 +393,9 @@ verify_jwt = true
 [functions.sync-enroll]
 verify_jwt = true
 
+[functions.sync-reference-context]
+verify_jwt = true
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 

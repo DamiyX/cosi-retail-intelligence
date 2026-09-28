@@ -1252,6 +1252,13 @@ begin incremental sync
 
 Bootstrap must establish a cursor consistent with the snapshot.
 
+For M7, reconstruction pages the immutable operation/change history through a
+fixed store revision, then stages and replays the complete ordered history in
+one local commit before activating that cursor. Taking only the latest document
+per entity is insufficient when a creation operation contains dependent rows
+that later edits omit. A failed page cannot expose a partial reconstructed
+store or advance its active cursor.
+
 ---
 
 # 53. Consistent Bootstrap
@@ -1759,6 +1766,17 @@ deduplicate physical observations by overwriting others, or silently recompute
 historical assumed allocations/COGS. Those server/conflict contracts remain M7
 gates before coordinated multi-device claims; M5 prepares immutable local facts.
 
+Under D-044, `RECONCILIATION_FINALIZED` carries `entities.syncBaseline`:
+`serverRevision` is the last fully applied pull cursor, and
+`predecessorOperationIds` names this device's product inventory/batch operations
+already reflected in the count but not covered by that cursor. The server
+checks product inventory movements and batch facts after the baseline under
+the store revision lock. It permits only verified same-device predecessors;
+another change, a missing/invalid baseline or an incomplete predecessor list
+returns a visible conflict without committing the reconciliation. Legacy
+queued counts require manual review rather than silent acceptance. Device-local
+watermarks still protect the time between count submission and local finalization.
+
 ---
 
 ## M6 Expense / Withdrawal Envelope Compatibility — D-041
@@ -1793,6 +1811,22 @@ Supabase platform defaults for Data API exposure are not an authorization model.
 The active operation registry and detailed vertical acceptance evidence live in
 `M7_OFFLINE_SYNC_PLAN.md` and `tickets.md`. A disposable real PostgreSQL/Supabase
 integration run is mandatory before accepting M7.
+
+## Later-device historical restore — D-045
+
+After authenticated store selection and registration of the new device, the
+server supplies authoritative, store-scoped store/user/member/device reference
+context to an active member on an active registered device. The client stages these references and the
+paginated operation history, validates the complete reconstruction, and only
+then exposes the store. Immutable facts retain their original actor and device
+IDs, even if those identities were later suspended or revoked. Historical
+same-store references do not imply current permission: new local commands and
+server push continue to require active authorization. Failed or interrupted
+restore must not expose partial history or discard pre-existing pending work.
+Subsequent non-empty pull pages refresh authoritative references and apply
+them with facts in one local transaction; no identity is inferred from an
+operation envelope. Legacy ACTIVE insert checks may be satisfied inside that
+transaction only, with authoritative statuses restored before commit.
 
 ---
 
