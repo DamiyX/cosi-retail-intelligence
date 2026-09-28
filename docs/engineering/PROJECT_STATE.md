@@ -1,7 +1,7 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-28 15:52 UTC  
-Current milestone: M7 independent source acceptance. The reviewed Git handoff is committed; M8 remains deferred by founder direction, and isolated M9 work must not be integrated before M7 acceptance.
+Current milestone: M7 local source accepted; M8 planning is next at the founder's renewed request. M9 integration remains a separate isolated task.
 
 ## Where we are
 
@@ -19,8 +19,8 @@ D-044 rejects cross-device stale physical reconciliations. D-045 restores server
 
 ## Current boundaries and next action
 
-M7-07 source restore and pull checks pass. M7 is **not yet closed**: independent coordinator source acceptance remains. The reviewed source handoff is commit `9c230f1d641edc4b8aae5dc05a7f54977fec4edc`; the working tree has no staged or unstaged changes, with only generated root `app.json` untracked. Remote GitHub CI has not run. Physical M3–M7 workflows, two-phone checks, the app-opening issue and second-laptop reproduction remain release-readiness gates rather than passing evidence. No production Supabase project or remote service was modified. The staged diff check noted an extra blank line at EOF in `apps/mobile/__tests__/m7Pilot.test.ts`.
+M7 local source acceptance is complete after the independent review of committed handoff `9c230f1d641edc4b8aae5dc05a7f54977fec4edc` and docs commit `c696dd1f0d6e2d3f0a1fc41f496e06503fe7afe6`. The working tree has no staged or unstaged changes, with only generated root `app.json` untracked. Remote GitHub CI has not run. Physical M3–M7 workflows, two-phone checks, the app-opening issue and second-laptop reproduction remain release-readiness gates rather than passing evidence. No production Supabase project or remote service was modified. The committed source diff has one extra blank line at EOF in `apps/mobile/__tests__/m7Pilot.test.ts`; it is a non-blocking formatting issue.
 
-After M7 source acceptance, reconcile isolated M9 branch `plan/m9-price-intelligence` in `C:\Users\doyew\Documents\DEV 2\COSI-m9-planning` against the final M7 contracts, then audit M9 pull/echo and M9-04. Do not start M8 until the founder resumes its Astra-led planning.
+Start Astra-led M8 scanner planning from the approved recognition documents and final M7 contracts. Keep its implementation isolated from the M9 branch and coordinate any shared catalogue/package/sync contract edits. M9 branch `plan/m9-price-intelligence` in `C:\Users\doyew\Documents\DEV 2\COSI-m9-planning` still needs reconciliation against final M7, then M9 pull/echo and M9-04 audit. M9 completion is not a prerequisite for M8 planning.
 
 Read `AGENTS.md`, `MULTI_AGENT_WORKFLOW.md`, `tickets.md`, `.agents/workflows/m7-offline-sync.json`, the M7 plan and audit, relevant architecture/decisions, and Git status/diff before editing this checkout.

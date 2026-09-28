@@ -243,3 +243,13 @@ M7-08 scenario ledger and clean Git handoff; generated root `app.json` is not
 part of the change. The user reports that the installed Galaxy app no longer
 opens, so phone readiness is not claimed. A physical sale, two-phone
 convergence, broader M3–M6 Galaxy flows and second-laptop setup remain open.
+
+## Independent source decision
+
+The coordinator accepted M7's local source scope after reviewing commits
+`9c230f1` and `c696dd1`, rerunning 515 tests/57 suites, typecheck, lint,
+local Auth/Edge/PostgreSQL integration and 92 pgTAP assertions. The remaining
+single extra blank line at EOF in `m7Pilot.test.ts` is formatting only and
+does not block source acceptance. This is not remote CI, physical two-phone,
+standalone APK, or external beta acceptance. No M9 merge or M8 code is part
+of this decision.

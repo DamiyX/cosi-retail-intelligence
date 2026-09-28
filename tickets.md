@@ -236,7 +236,7 @@ support process.
 
 ## M7-08 — Harden, validate and stop for independent audit
 
-**Status:** D-045 source correction and Git handoff verified; commit `9c230f1d641edc4b8aae5dc05a7f54977fec4edc` awaits independent source acceptance. Physical two-phone checks remain release gates. **Dependency:** M7-01 through M7-07.
+**Status:** Independently accepted for local source scope after committed D-045 correction and Git handoff `9c230f1d641edc4b8aae5dc05a7f54977fec4edc`. Remote CI and physical two-phone checks remain release gates. **Dependency:** M7-01 through M7-07.
 **Delivers:** a recoverable M7 handoff with actual server integration evidence.
 
 - [x] Run source and local-server scenarios in `OFFLINE_SYNC.md`: restart/crash boundaries,
