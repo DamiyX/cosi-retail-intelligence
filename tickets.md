@@ -21,9 +21,12 @@ validation passed 507 tests across 52 suites; coordinator focused tests,
 typecheck and lint passed after final stock/batch assertions. The cost
 correction and M5 pull parity passed independent review. Local database CI is
 configured but has not run on GitHub. M7-07 historical actor/device bootstrap
-and later pull pass local source checks under D-045. Audit corrections still need a clean
-Git handoff. No physical sale or two-phone convergence was performed in the
-M7 device run.
+and later pull pass local source checks under D-045. The reviewed audit
+corrections are committed as
+`9c230f1d641edc4b8aae5dc05a7f54977fec4edc` on `feat/m7-offline-sync`; there
+are no staged or unstaged changes. Generated root `app.json` remains untracked
+and excluded. Independent source acceptance remains with the coordinator. No
+physical sale or two-phone convergence was performed in the M7 device run.
 See `docs/engineering/M7_INDEPENDENT_AUDIT.md`.
 
 M7-01 through M7-08 source work is committed sequentially on
@@ -204,7 +207,7 @@ dependency-order correction passed a failing-before/passing-after test.
 
 ## M7-07 — Synchronize money-out and prove consistent bootstrap
 
-**Status:** Source and local-server restore checks pass under D-045; Git handoff and release checks remain. **Dependency:** M7-06.
+**Status:** Source and local-server restore checks pass under D-045; handoff commit `9c230f1d641edc4b8aae5dc05a7f54977fec4edc` is awaiting independent source acceptance. Physical release checks remain. **Dependency:** M7-06.
 **Delivers:** expenses/withdrawals deduplicate and a newly authorized installation
 can reconstruct the accepted M1–M6 private store state.
 
@@ -233,7 +236,7 @@ support process.
 
 ## M7-08 — Harden, validate and stop for independent audit
 
-**Status:** D-045 source correction verified; M7-08 scenario ledger and clean Git handoff remain. Physical two-phone checks remain release gates. **Dependency:** M7-01 through M7-07.
+**Status:** D-045 source correction and Git handoff verified; commit `9c230f1d641edc4b8aae5dc05a7f54977fec4edc` awaits independent source acceptance. Physical two-phone checks remain release gates. **Dependency:** M7-01 through M7-07.
 **Delivers:** a recoverable M7 handoff with actual server integration evidence.
 
 - [x] Run source and local-server scenarios in `OFFLINE_SYNC.md`: restart/crash boundaries,
@@ -245,12 +248,16 @@ support process.
   mocks for this gate.
 - [x] Run focused suites, full `npm run validate`, Expo Doctor, dependency check,
   Android export, workflow/index/artifact/migration checks and `git diff --check`.
-- [ ] Update tickets, PROJECT_STATE and M7 workflow with actual commits/commands,
+- [x] Update tickets, PROJECT_STATE and M7 workflow with actual commits/commands,
   server migrations, residual risks and clean branch/HEAD/status. Stop for
   independent audit; do not start M8, push, deploy or claim physical-device work.
 
-**Current evidence:** coordinator `npm run validate` passed 515 tests across
-57 suites, strict typecheck and zero-warning lint. `npm run test:sync:local`
+**Current evidence:** audited source handoff committed as
+`9c230f1d641edc4b8aae5dc05a7f54977fec4edc` on `feat/m7-offline-sync`; the
+working tree has no staged or unstaged changes except generated root
+`app.json`, which remains untracked and excluded. Coordinator
+`npm run validate` passed 515 tests across 57 suites, strict typecheck and
+zero-warning lint. `npm run test:sync:local`
 and `npx supabase test db` passed (92 assertions/10 files). Prior Expo Doctor
 21/21, dependency check and Android export passed. Local database lint and
 security advisors passed in Luna's D-045 handoff; remote CI has not run.
@@ -264,6 +271,9 @@ cursor, interrupted bootstrap, conflicts), contract version tests,
 and the live local script (identical replay, conflicting ID reuse, cross-store
 denial, stale cross-device reconciliation). These are automated source/local
 server checks, not physical two-phone or release evidence.
+The staged `git diff --cached --check` reported one extra blank line at EOF in
+`apps/mobile/__tests__/m7Pilot.test.ts`; it was preserved with the reviewed
+source change and did not alter test behavior.
 
 **Out of scope:** production Supabase migration, App Store/Play deployment,
 physical-device release acceptance, M8 code.
