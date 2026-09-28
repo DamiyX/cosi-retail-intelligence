@@ -25,7 +25,7 @@ and later pull pass local source checks under D-045. The reviewed audit
 corrections are committed as
 `9c230f1d641edc4b8aae5dc05a7f54977fec4edc` on `feat/m7-offline-sync`; there
 are no staged or unstaged changes. Generated root `app.json` remains untracked
-and excluded. Independent source acceptance remains with the coordinator. No
+and excluded. Independent source acceptance is complete. No
 physical sale or two-phone convergence was performed in the M7 device run.
 See `docs/engineering/M7_INDEPENDENT_AUDIT.md`.
 
@@ -207,7 +207,7 @@ dependency-order correction passed a failing-before/passing-after test.
 
 ## M7-07 — Synchronize money-out and prove consistent bootstrap
 
-**Status:** Source and local-server restore checks pass under D-045; handoff commit `9c230f1d641edc4b8aae5dc05a7f54977fec4edc` is awaiting independent source acceptance. Physical release checks remain. **Dependency:** M7-06.
+**Status:** Source and local-server restore checks pass under D-045; handoff commit `9c230f1d641edc4b8aae5dc05a7f54977fec4edc` has independent source acceptance. Physical release checks remain. **Dependency:** M7-06.
 **Delivers:** expenses/withdrawals deduplicate and a newly authorized installation
 can reconstruct the accepted M1–M6 private store state.
 
