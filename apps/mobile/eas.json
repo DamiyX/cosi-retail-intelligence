@@ -4,6 +4,13 @@
     "appVersionSource": "local"
   },
   "build": {
+    "scanner-verification": {
+      "extends": "development",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "scanner-verification",
+        "COSI_SCANNER_VERIFICATION": "1"
+      }
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",

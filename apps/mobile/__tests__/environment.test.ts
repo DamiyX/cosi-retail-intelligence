@@ -5,7 +5,7 @@ jest.mock('expo-constants', () => ({
   default: { expoConfig: { extra: { appEnvironment: 'development' } } },
 }));
 
-it.each(['development', 'preview', 'production'] as const)('accepts the %s environment', (value) => {
+it.each(['development', 'preview', 'production', 'scanner-verification'] as const)('accepts the %s environment', (value) => {
   expect(parseEnvironment(value)).toBe(value);
 });
 

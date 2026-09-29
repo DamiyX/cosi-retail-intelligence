@@ -4,11 +4,16 @@ const variants = {
   development: { name: 'COSI Dev', suffix: '.dev' },
   preview: { name: 'COSI Preview', suffix: '.preview' },
   production: { name: 'COSI', suffix: '' },
+  'scanner-verification': { name: 'COSI Scanner Verification', suffix: '.scannerverification' },
 } as const;
 
 const environment = process.env.EXPO_PUBLIC_APP_ENV ?? 'development';
 if (!Object.hasOwn(variants, environment)) {
-  throw new Error('EXPO_PUBLIC_APP_ENV must be development, preview, or production.');
+  throw new Error('Unknown EXPO_PUBLIC_APP_ENV.');
+}
+const scannerVerification = process.env.COSI_SCANNER_VERIFICATION === '1';
+if (scannerVerification !== (environment === 'scanner-verification')) {
+  throw new Error('Scanner verification requires both its isolated app environment and explicit opt-in.');
 }
 const variant = variants[environment as keyof typeof variants];
 const projectId = process.env.EAS_PROJECT_ID ?? '737ed99c-2c20-4612-ac80-a8a868b827cb';
@@ -30,6 +35,7 @@ const config: ExpoConfig = {
   plugins: ['expo-router', 'expo-dev-client', 'expo-secure-store', ['expo-camera', { recordAudioAndroid: false, microphonePermission: false, barcodeScannerEnabled: true }], ['expo-audio', { recordAudioAndroid: false, microphonePermission: false, enableBackgroundPlayback: false, enableBackgroundRecording: false }]],
   extra: {
     appEnvironment: environment,
+    scannerVerificationBuild: scannerVerification,
     ...(projectId ? { eas: { projectId } } : {}),
   },
   ...(owner ? { owner } : {}),

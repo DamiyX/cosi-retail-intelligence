@@ -172,16 +172,28 @@ export default function SellScreen({
   // transition cannot bypass its own local dirty-form confirmation.
   const [quickAddDiscard, setQuickAddDiscard] = useState<(() => void) | null>(null);
 
+  // Cancel/discard ends the unresolved scan intent, not the existing basket.
+  // Search -> selection and saved Quick Add deliberately do not use this exit.
+  const endScanIntent = useCallback(() => {
+    scanSession.cancel();
+    setScanning(false);
+    setScanIdentifier(undefined);
+    setScanLine(false);
+    setResumeScanner(false);
+  }, [scanSession]);
+
   const closeLineConfiguration = useCallback((): void => {
+    endScanIntent();
     setConfiguringProduct(null);
     setEditingLineId(null);
     setLineFormDirty(false);
-  }, []);
+  }, [endScanIntent]);
 
   const closeQuickAdd = useCallback((): void => {
+    endScanIntent();
     setQuickAddDiscard(null);
     setViewMode('cart');
-  }, [setViewMode]);
+  }, [endScanIntent, setViewMode]);
 
   const discardSaleDraft = useCallback((): void => {
     // If Quick Add is open, let it leave its local form before this screen
@@ -189,13 +201,14 @@ export default function SellScreen({
     quickAddDiscard?.();
     setQuickAddDiscard(null);
     setLines([]);
+    scanSession.repeatExplicitly();
     closeLineConfiguration();
     setCustomerName('');
     setSelectedCustomerId(null);
     setCustomerMatches([]);
     setPaymentMethod('CASH');
     setSubmitError(null);
-  }, [closeLineConfiguration, quickAddDiscard]);
+  }, [closeLineConfiguration, quickAddDiscard, scanSession]);
 
   const draftExit = useMemo<SaleDraftExit | null>(() => {
     if (quickAddDiscard) {
@@ -285,7 +298,7 @@ export default function SellScreen({
       return;
     }
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (scanning) { scanSession.cancel(); setScanning(false); return true; }
+      if (scanning) { endScanIntent(); return true; }
       if (viewMode === 'detail') {
         setViewMode('history');
         return true;
@@ -318,7 +331,7 @@ export default function SellScreen({
     lines.length,
     viewMode,
     scanning,
-    scanSession,
+    endScanIntent,
   ]);
 
   // Open line configuration for a product
@@ -681,6 +694,7 @@ export default function SellScreen({
       });
 
       setCompletedSale(graph);
+      endScanIntent();
       setLines([]);
       setCustomerName('');
       setSelectedCustomerId(null);
@@ -766,7 +780,7 @@ export default function SellScreen({
       onUndo={() => setLines(current => current.slice(0, -1))}
       onCandidate={configureScannedCandidate} onSearch={keepDetection}
       onCreate={detection => { keepDetection(detection); setViewMode('quick_add'); }}
-      onCancel={() => setScanning(false)} />;
+      onCancel={endScanIntent} />;
   }
   if (viewMode === 'quick_add') {
     return (
@@ -845,6 +859,8 @@ export default function SellScreen({
           <PrimaryButton
             title="New sale"
             onPress={() => {
+              endScanIntent();
+              scanSession.repeatExplicitly();
               setCompletedSale(null);
               setViewMode('cart');
             }}
@@ -1004,7 +1020,7 @@ export default function SellScreen({
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       {/* Top Header */}
       <View style={styles.topHeader}>
-        {scannerEnabled && client.recognition ? <SecondaryButton title="Scan next item" onPress={() => setScanning(true)} /> : null}
+        {scannerEnabled && client.recognition ? <SecondaryButton title="Scan next item" onPress={() => { endScanIntent(); setScanning(true); }} /> : null}
         <View style={styles.titleArea}>
           <Text accessibilityRole="header" style={styles.title}>
             Sell

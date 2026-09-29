@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { useIsFocused, useLocalSearchParams, useNavigation } from 'expo-router';
+import Constants from 'expo-constants';
+import { isScannerVerificationBuild } from '../src/features/scanning/verificationBuild';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { SalesProvider, useSales } from '../src/sales/SalesContext';
@@ -55,6 +57,7 @@ function SellContent() {
   const { availability, catalogueClient, client, failure, retryLocalStore } = useSales();
   const navigation = useNavigation();
   const isFocused = useIsFocused();
+  const scannerVerification = isScannerVerificationBuild(Constants.expoConfig);
   const params = useLocalSearchParams<{ scan?: string }>();
   const draftRef = useRef<SaleDraftExit | null>(null);
   const [dirty, setDirty] = useState(false);
@@ -87,12 +90,14 @@ function SellContent() {
   }
   return (
     <View style={styles.fill}>
+      {scannerVerification ? <Text accessibilityRole="alert">Scanner verification build — automatic basket additions enabled</Text> : null}
       <SellScreen
         client={client}
         catalogueClient={catalogueClient ?? undefined}
         onDirtyDraftChange={handleDirtyDraftChange}
         isFocused={isFocused}
         initialScan={params.scan === '1'}
+        automaticScanAdditionVerified={scannerVerification}
       />
     </View>
   );
