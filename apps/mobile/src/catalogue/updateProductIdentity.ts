@@ -6,6 +6,8 @@ import {
   createProductIdentifier,
   enqueueOutboxOperation,
   findExpectedOutboxReplay,
+  findOutboxOperation,
+  listProductIdentifiers,
   getPackageUnitById,
   getProductIdentifierById,
   getProductVariantById,
@@ -94,6 +96,7 @@ export function updateProductIdentity(
 }
 
 export interface AddProductIdentifierInput {
+  operationId?: string;
   storeId: string;
   deviceId: string;
   storeProductId: string;
@@ -117,7 +120,7 @@ export function addProductIdentifier(
   const generateId = options.generateId ?? generateMobileId;
   const storeId = requireId(input.storeId);
   const deviceId = requireId(input.deviceId);
-  const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
+  const operationId = options.operationId === undefined ? (input.operationId ?? generateId()) : requireId(options.operationId);
 
   const replayed = findExpectedOutboxReplay(adapter, {
     operationId,
@@ -133,9 +136,26 @@ export function addProductIdentifier(
   const occurredAt = nowIso();
   return adapter.transaction(() => {
     const storeProduct = requireOwnedProduct(adapter, storeId, input.storeProductId);
+    const variant = getProductVariantById(adapter, storeProduct.productVariantId);
+    if (storeProduct.status !== 'ACTIVE' || !variant || variant.status !== 'ACTIVE' ||
+        (variant.identityScope === 'STORE_LOCAL' && variant.ownerStoreId !== storeId)) {
+      throw new DomainError('INVALID_VALUE', 'This product is not active in this store.');
+    }
+    const already = listProductIdentifiers(adapter, variant.id).find(identifier =>
+      identifier.status === 'ACTIVE' && identifier.type === input.type && identifier.value === input.value &&
+      identifier.packageUnitId === (input.packageUnitId ?? null));
+    if (already) {
+      const original = adapter.getFirstRow<{ operation_id: string }>(
+        "SELECT operation_id FROM outbox_operations WHERE store_id = ? AND json_extract(payload, '$.entities.identifier.id') = ? LIMIT 1;",
+        [storeId, already.id],
+      );
+      const outbox = original ? findOutboxOperation(adapter, original.operation_id) : null;
+      if (outbox) return { storeProduct, identifier: already, outbox };
+      throw new DomainError('INVALID_VALUE', 'This code is already saved for this product.');
+    }
     if (input.packageUnitId) {
       const packageUnit = getPackageUnitById(adapter, input.packageUnitId);
-      if (!packageUnit || packageUnit.productVariantId !== storeProduct.productVariantId) {
+      if (!packageUnit || packageUnit.status !== 'ACTIVE' || packageUnit.productVariantId !== storeProduct.productVariantId) {
         throw new DomainError('INVALID_VALUE', 'Package unit does not belong to this product.');
       }
     }

@@ -18,9 +18,10 @@ import {
 } from 'react-native';
 
 import type { CatalogueClient } from '../../catalogue/client';
-import type { RecognitionCandidate } from '@retail/contracts';
+import type { BarcodeInput, RecognitionCandidate } from '@retail/contracts';
 import ScannerPanel from '../../features/scanning/ScannerPanel';
 import { ScanSession } from '../../features/scanning/session';
+import { generateMobileId } from '../../crypto/mobileIds';
 import type { CustomerAccountRow, PaymentMethod } from '../../db/repositories';
 import type {
   CompletedSaleGraph,
@@ -65,6 +66,7 @@ interface SellScreenProps {
   scannerEnabled?: boolean;
   /** Inject only in verification until the physical fast-add gate is accepted. */
   automaticScanAdditionVerified?: boolean;
+  scanAssociationsVerified?: boolean;
 }
 
 type ViewMode = 'cart' | 'quick_add' | 'history' | 'detail' | 'confirmation';
@@ -105,11 +107,22 @@ export default function SellScreen({
   initialScan = false,
   scannerEnabled = process.env.EXPO_PUBLIC_SCANNER_ENABLED !== 'false',
   automaticScanAdditionVerified = false,
+  scanAssociationsVerified = false,
 }: SellScreenProps) {
   const [scanning, setScanning] = useState(initialScan);
   const [scanSession] = useState(() => new ScanSession());
   const [basketMode, setBasketMode] = useState(false);
   const [resumeScanner, setResumeScanner] = useState(false);
+  const [scanIdentifier, setScanIdentifier] = useState<{ value: string; type: 'EAN' | 'UPC' | 'QR' }>();
+  const [associationOperationId, setAssociationOperationId] = useState(generateMobileId);
+  const keepDetection = (detection?: Pick<BarcodeInput, 'symbology' | 'value'>) => {
+    setAssociationOperationId(generateMobileId());
+    setScanIdentifier(detection ? { value: detection.value,
+      type: detection.symbology === 'qr' ? 'QR' : detection.symbology === 'upc_a' ? 'UPC' : 'EAN' } : undefined);
+    setResumeScanner(basketMode);
+    setScanning(false);
+    setSearchQuery('');
+  };
   // Navigation & Subscreen Mode
   const [viewMode, setViewMode] = useState<ViewMode>('cart');
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
@@ -163,7 +176,7 @@ export default function SellScreen({
   const closeQuickAdd = useCallback((): void => {
     setQuickAddDiscard(null);
     setViewMode('cart');
-  }, []);
+  }, [setViewMode]);
 
   const discardSaleDraft = useCallback((): void => {
     // If Quick Add is open, let it leave its local form before this screen
@@ -365,6 +378,7 @@ export default function SellScreen({
         return true;
       }
       startConfiguringLine(hit);
+      setScanIdentifier(undefined);
       setResumeScanner(basketMode);
       setSelectedPackage(exact ?? null);
       setUnitPriceText(exact?.sellingPriceMinor === null || exact?.sellingPriceMinor === undefined ? '' : formatMinorForEdit(exact.sellingPriceMinor));
@@ -551,6 +565,7 @@ export default function SellScreen({
     }
 
     setLines(candidateLines);
+    setScanIdentifier(undefined);
     if (resumeScanner) { setScanning(true); setResumeScanner(false); }
 
     setConfiguringProduct(null);
@@ -688,7 +703,7 @@ export default function SellScreen({
       );
       return;
     }
-    const createdHit = allHits.find((hit) => hit.storeProductId === newProductId);
+    const createdHit = client.getProductById?.(newProductId) ?? allHits.find((hit) => hit.storeProductId === newProductId);
     if (createdHit) {
       startConfiguringLine(createdHit);
       return;
@@ -696,7 +711,7 @@ export default function SellScreen({
     setQuickAddSavedNotice(
       'Product saved on this device. It is not currently available to add to this sale; refresh the catalogue and try again.',
     );
-  }, [loadProducts, startConfiguringLine]);
+  }, [client, loadProducts, startConfiguringLine]);
 
   // Quick Add proxy client if needed
   const effectiveCatalogueClient: CatalogueClient = catalogueClient ?? {
@@ -739,13 +754,18 @@ export default function SellScreen({
       basketMode={basketMode} onModeChange={setBasketMode}
       summary={`${lines.length} lines · ${displayMoney(totals.totalMinor, client.storeCurrencyCode)}${lines.length ? ` · Last added: ${lines[lines.length - 1]!.productName}` : ''}`}
       onUndo={() => setLines(current => current.slice(0, -1))}
-      onCandidate={configureScannedCandidate} onSearch={() => setScanning(false)} onCancel={() => setScanning(false)} />;
+      onCandidate={configureScannedCandidate} onSearch={keepDetection}
+      onCreate={detection => { keepDetection(detection); setViewMode('quick_add'); }}
+      onCancel={() => setScanning(false)} />;
   }
   if (viewMode === 'quick_add') {
     return (
       <QuickAddProductScreen
         client={effectiveCatalogueClient}
         initialName={searchQuery.trim()}
+        initialIdentifier={scanIdentifier}
+        allowScannedAssociation={scanAssociationsVerified}
+        requireSellingPrice={resumeScanner || scanIdentifier !== undefined}
         onSaved={handleQuickAddSaved}
         onCancel={closeQuickAdd}
         onDirtyDraftChange={handleQuickAddDraftChange}
@@ -842,6 +862,20 @@ export default function SellScreen({
           {editingLineId ? 'Edit line' : 'Add to sale'}
         </Text>
         <Text style={styles.productNameHeading}>{configuringProduct.productName}</Text>
+        {scanIdentifier ? <View>
+          <Text>Scanned {scanIdentifier.type}: {scanIdentifier.value}</Text>
+          {scanAssociationsVerified && catalogueClient ? <SecondaryButton title="Save barcode for this product and selected package" onPress={() => {
+            try {
+              catalogueClient.addProductIdentifier({ storeProductId: configuringProduct.storeProductId,
+                type: scanIdentifier.type, value: scanIdentifier.value,
+                packageUnitId: selectedPackage?.id ?? null, operationId: associationOperationId });
+              setScanIdentifier(undefined);
+              setQuickAddSavedNotice('Barcode saved on this device. The sale is not completed yet.');
+            } catch (error) {
+              setLineErrors({ general: error instanceof Error ? error.message : 'Barcode could not be saved. Your sale is preserved.' });
+            }
+          }} /> : <Text>Barcode saving is awaiting sync verification. Manual selling remains available.</Text>}
+        </View> : null}
         {configuringProduct.recordedBaseMicros !== undefined ? <Text>Recorded stock: {configuringProduct.recordedBaseMicros / 1000000} base units</Text> : null}
 
         {availablePackages.length > 1 || (availablePackages.length === 1 && selectedPackage === null) ? (

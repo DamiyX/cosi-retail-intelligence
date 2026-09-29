@@ -18,3 +18,7 @@ Device: adb devices -l returned no connected devices. Docker 29.8.0 is available
 ## M8-02
 
 Moved /sell from tabs to the root stack, using the established usePreventRemove guard. Global Scan is allowlisted to Today/Products/More and hidden for keyboard/focused routes; its reserved layout space avoids obscuring content. Added manual selling from More. Navigation tests 10/10 passed; shell/startup tests 7/7 passed in the prior combined run; typecheck and zero-warning lint passed. Native header/system behavior remains unverified without a device.
+
+## M8-03
+
+Typed Quick Add reuses payloadVersion 1 and existing atomic envelope, with explicit retry ID and optional selling price. QR raw payload is retained, valid UPC/EAN alias collisions are rejected locally, active product/package association checked. Unknown entry pauses/resumes the basket; saved temporary identity remains enrichable. Scanner association stays disabled pending M8-04. Catalogue/sale regression 52 tests passed; new typed creation/replay/restart/rollback and unknown panel tests 5 passed. Typecheck and focused zero-warning lint passed after correcting a button prop and memo dependency. Product-detail scanning is present but disabled by the same pending verification gate.

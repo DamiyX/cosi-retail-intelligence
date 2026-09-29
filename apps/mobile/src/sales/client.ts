@@ -223,8 +223,11 @@ export function createDatabaseSalesClient(
         baseUnitSymbol: input.baseUnitSymbol,
         localSku: input.localSku,
         barcode: input.barcode,
+        barcodeType: input.barcodeType,
+        barcodeForBasePackage: input.barcodeForBasePackage,
+        defaultSellingPriceMinor: input.defaultSellingPriceMinor,
       };
-      return createTemporaryProduct(adapter, operation, { generateId });
+      return createTemporaryProduct(adapter, operation, { generateId, operationId: input.operationId });
     },
 
     completeSale(input: CompleteSaleScreenInput): CompletedSaleGraph {

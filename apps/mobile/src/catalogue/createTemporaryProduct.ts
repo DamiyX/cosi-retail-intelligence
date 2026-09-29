@@ -54,6 +54,10 @@ export interface CreateTemporaryProductInput {
    * correct it from product detail if it follows another standard.
    */
   barcode?: string | null;
+  barcodeType?: 'EAN' | 'UPC' | 'QR';
+  /** Explicit confirmation that the detected code names this base package. */
+  barcodeForBasePackage?: boolean;
+  defaultSellingPriceMinor?: number | null;
 }
 
 export interface TemporaryProductGraph {
@@ -117,15 +121,17 @@ export function createTemporaryProduct(
       localSku: input.localSku,
       preferredPackageUnitId: basePackage.id,
       isTemporary: true,
+      defaultSellingPriceMinor: input.defaultSellingPriceMinor,
     });
-    const rawBarcode = input.barcode === undefined || input.barcode === null ? '' : input.barcode.trim();
+    const rawBarcode = input.barcode == null ? '' : input.barcodeType === 'QR' ? input.barcode : input.barcode.trim();
     const identifier =
       rawBarcode.length === 0
         ? null
         : createProductIdentifier(adapter, {
             id: generateId(),
             productVariantId: variant.id,
-            type: 'EAN',
+            type: input.barcodeType ?? 'EAN',
+            packageUnitId: input.barcodeForBasePackage ? basePackage.id : null,
             value: rawBarcode,
           });
     const outbox = enqueueOutboxOperation(adapter, {

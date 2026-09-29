@@ -7,6 +7,9 @@ import type { IdentifierType, PurchasePriceHistoryRow } from '../../db/repositor
 import { ErrorPanel, Field, PrimaryButton, SecondaryButton, StatusNote } from '../../ui/components';
 import { currencyMinorUnitLabel, displayMoney, displayRationalMinorPerBaseUnit, isUsableCurrentCost } from '../../ui/money';
 import { theme } from '../../ui/theme';
+import ScannerPanel from '../../features/scanning/ScannerPanel';
+import { ScanSession } from '../../features/scanning/session';
+import { generateMobileId } from '../../crypto/mobileIds';
 
 interface ProductDetailScreenProps {
   client: CatalogueClient;
@@ -88,6 +91,9 @@ export default function ProductDetailScreen({
   const [nameError, setNameError] = useState<string | null>(null);
   const [skuError, setSkuError] = useState<string | null>(null);
   const [identifierValue, setIdentifierValue] = useState('');
+  const [associating, setAssociating] = useState(false);
+  const [scanSession] = useState(() => new ScanSession());
+  const [identifierOperationId, setIdentifierOperationId] = useState(generateMobileId);
   const [identifierType, setIdentifierType] = useState<IdentifierType>('EAN');
   const [identifierError, setIdentifierError] = useState<string | null>(null);
   const [reorderText, setReorderText] = useState('');
@@ -312,11 +318,13 @@ export default function ProductDetailScreen({
     setFailure(null);
     try {
       client.addProductIdentifier({
+        operationId: identifierOperationId,
         storeProductId: detail.product.id,
         type: identifierType,
-        value: identifierValue.trim(),
+        value: identifierType === 'QR' ? identifierValue : identifierValue.trim(),
       });
       setIdentifierValue('');
+      setIdentifierOperationId(generateMobileId());
       setIdentifierError(null);
       refresh();
     } catch (error) {
@@ -329,6 +337,17 @@ export default function ProductDetailScreen({
       setSaving(false);
     }
   };
+
+  if (associating && client.recognition) return <ScannerPanel service={client.recognition}
+    session={scanSession} active onCandidate={() => false} onSearch={() => setAssociating(false)}
+    onCancel={() => setAssociating(false)} basketMode={false} onModeChange={() => undefined}
+    summary="Scan a code, then explicitly save it on this product." onUndo={() => undefined}
+    onUseCode={detection => {
+      setIdentifierValue(detection.value);
+      setIdentifierType(detection.symbology === 'qr' ? 'QR' : detection.symbology === 'upc_a' ? 'UPC' : 'EAN');
+      setIdentifierOperationId(generateMobileId());
+      setAssociating(false);
+    }} />;
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -401,6 +420,7 @@ export default function ProductDetailScreen({
           {failure !== null ? <ErrorPanel title="Not saved" message={failure} /> : null}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Codes</Text>
+            {client.recognition ? <PrimaryButton title="Associate barcode (awaiting sync verification)" disabled onPress={() => setAssociating(true)} /> : null}
             {detail.identifiers.length === 0 ? (
               <Text style={styles.line}>No barcode or store code yet.</Text>
             ) : (

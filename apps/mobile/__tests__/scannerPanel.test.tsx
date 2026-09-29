@@ -36,3 +36,15 @@ it('keeps read failure distinct from unknown with manual fallback', async () => 
   expect(search).toHaveBeenCalledTimes(1);
 });
 
+it('offers unknown-code creation with the detected type/value and explicit user action', async () => {
+  const create = jest.fn();
+  render(<ScannerPanel service={{ recognize: async () => ({ status: 'UNKNOWN', reason: 'NOT_FOUND' }) }}
+    session={new ScanSession()} active onCandidate={jest.fn()} onSearch={jest.fn()} onCreate={create} onCancel={jest.fn()}
+    basketMode onModeChange={jest.fn()} summary="2 items" onUndo={jest.fn()} />);
+  const trigger = await screen.findByText('Camera test event');
+  await act(async () => { fireEvent.press(trigger); });
+  expect(create).not.toHaveBeenCalled();
+  fireEvent.press(screen.getByText('Add product'));
+  expect(create).toHaveBeenCalledWith({ symbology: 'upc_a', value: '036000291452' });
+});
+

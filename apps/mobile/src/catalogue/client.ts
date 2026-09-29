@@ -1,4 +1,6 @@
 import { generateMobileId } from '../crypto/mobileIds';
+import type { RecognitionService } from '@retail/contracts';
+import { createRecognitionService } from '../features/scanning/resolver';
 import type { DatabaseAdapter } from '../db/adapter';
 import {
   createTemporaryProduct,
@@ -70,6 +72,10 @@ export interface QuickAddInput {
   baseUnitSymbol?: string | null;
   localSku?: string | null;
   barcode?: string | null;
+  barcodeType?: 'EAN' | 'UPC' | 'QR';
+  barcodeForBasePackage?: boolean;
+  defaultSellingPriceMinor?: number | null;
+  operationId?: string;
 }
 
 export interface ProductDetail {
@@ -94,6 +100,7 @@ export interface ProductReorderLevelInput {
 }
 
 export interface CatalogueClient {
+  recognition?: RecognitionService;
   readonly storeId: string;
   readonly storeName: string;
   readonly storeCurrencyCode: string;
@@ -149,6 +156,7 @@ export function createCatalogueClient(
   const catalogueUserId = resolveCatalogueUser(adapter, store.id, device);
   return {
     storeId: store.id,
+    recognition: createRecognitionService(adapter, store.id),
     storeName: store.name,
     storeCurrencyCode: store.currencyCode,
     listProducts(query: string, filter: ProductLifecycleFilter = 'ALL'): ProductSearchHit[] {
@@ -163,8 +171,11 @@ export function createCatalogueClient(
         baseUnitSymbol: input.baseUnitSymbol,
         localSku: input.localSku,
         barcode: input.barcode,
+        barcodeType: input.barcodeType,
+        barcodeForBasePackage: input.barcodeForBasePackage,
+        defaultSellingPriceMinor: input.defaultSellingPriceMinor,
       };
-      return createTemporaryProduct(adapter, operation, { generateId });
+      return createTemporaryProduct(adapter, operation, { generateId, operationId: input.operationId });
     },
     getProductDetail(productId: string): ProductDetail | null {
       const product = getStoreProductById(adapter, productId);

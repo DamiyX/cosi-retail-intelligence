@@ -3,12 +3,17 @@ import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { CatalogueClient } from '../../catalogue/client';
+import { generateMobileId } from '../../crypto/mobileIds';
+import { parseMajorUnitsToMinor } from '../../ui/money';
 import { ErrorPanel, Field, PrimaryButton, SecondaryButton } from '../../ui/components';
 import { theme } from '../../ui/theme';
 
 interface QuickAddProductScreenProps {
   client: CatalogueClient;
   initialName?: string;
+  initialIdentifier?: { value: string; type: 'EAN' | 'UPC' | 'QR' };
+  requireSellingPrice?: boolean;
+  allowScannedAssociation?: boolean;
   onSaved: (productId: string) => void;
   onCancel: () => void;
   /** Lets a host guard tab/navigation exit without persisting a draft. */
@@ -44,7 +49,12 @@ export default function QuickAddProductScreen({
   onCancel,
   onDirtyDraftChange,
   isFocused = true,
+  initialIdentifier,
+  requireSellingPrice = false,
+  allowScannedAssociation = false,
 }: QuickAddProductScreenProps) {
+  const [operationId] = useState(generateMobileId);
+  const [sellingPrice, setSellingPrice] = useState('');
   const [name, setName] = useState(initialName);
   const [baseUnitName, setBaseUnitName] = useState('piece');
   const [showMore, setShowMore] = useState(false);
@@ -54,7 +64,7 @@ export default function QuickAddProductScreen({
   const [saving, setSaving] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const dirty =
-    name !== initialName || baseUnitName !== 'piece' || localSku.length > 0 || barcode.length > 0;
+    name !== initialName || baseUnitName !== 'piece' || localSku.length > 0 || barcode.length > 0 || sellingPrice.length > 0;
 
   const cancel = useCallback((): void => {
     if (!dirty) {
@@ -105,10 +115,13 @@ export default function QuickAddProductScreen({
     setFailure(null);
     try {
       const graph = client.createTemporaryProduct({
+        operationId,
         name: name.trim(),
         baseUnitName: baseUnitName.trim().length === 0 ? 'piece' : baseUnitName.trim(),
         localSku: localSku.trim().length === 0 ? null : localSku.trim(),
-        barcode: barcode.trim().length === 0 ? null : barcode.trim(),
+        barcode: initialIdentifier ? (allowScannedAssociation ? initialIdentifier.value : null) : barcode.trim().length === 0 ? null : barcode.trim(),
+        barcodeType: initialIdentifier && allowScannedAssociation ? initialIdentifier.type : undefined,
+        defaultSellingPriceMinor: requireSellingPrice ? parseMajorUnitsToMinor(sellingPrice, client.storeCurrencyCode) : undefined,
       });
       onSaved(graph.storeProduct.id);
     } catch (error) {
@@ -133,7 +146,9 @@ export default function QuickAddProductScreen({
       <Text accessibilityRole="header" style={styles.title}>
         Add product
       </Text>
-      <Text style={styles.note}>Only a name is required. The product saves on this device.</Text>
+      <Text style={styles.note}>{requireSellingPrice ? 'Enter a short name, selling price and unit to keep selling.' : 'Only a name is required.'} The product saves on this device.</Text>
+      {initialIdentifier ? <Text>Scanned {initialIdentifier.type}: {initialIdentifier.value}{!allowScannedAssociation ? '\nBarcode saving is awaiting sync verification. You can save and sell this product without attaching the code.' : ''}</Text> : null}
+      {requireSellingPrice ? <Field label="Selling price" value={sellingPrice} onChangeText={setSellingPrice} keyboardType="decimal-pad" testID="quick-add-price" /> : null}
       <Field
         label="Product name"
         value={name}

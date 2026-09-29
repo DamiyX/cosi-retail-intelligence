@@ -21,7 +21,9 @@ export interface ScannerPanelProps {
   session: ScanSession;
   active: boolean;
   onCandidate(candidate: RecognitionCandidate): boolean;
-  onSearch(): void;
+  onSearch(detection?: Pick<BarcodeInput, 'symbology' | 'value'>): void;
+  onCreate?(detection?: Pick<BarcodeInput, 'symbology' | 'value'>): void;
+  onUseCode?(detection: Pick<BarcodeInput, 'symbology' | 'value'>): void;
   onCancel(): void;
   basketMode: boolean;
   onModeChange(basket: boolean): void;
@@ -29,7 +31,8 @@ export interface ScannerPanelProps {
   onUndo(): void;
 }
 
-export default function ScannerPanel({ service, session, active, onCandidate, onSearch, onCancel, basketMode, onModeChange, summary, onUndo }: ScannerPanelProps) {
+export default function ScannerPanel({ service, session, active, onCandidate, onSearch, onCreate, onUseCode, onCancel, basketMode, onModeChange, summary, onUndo }: ScannerPanelProps) {
+  const [detection, setDetection] = useState<Pick<BarcodeInput, 'symbology' | 'value'>>();
   const [result, setResult] = useState<RecognitionResult | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -44,6 +47,7 @@ export default function ScannerPanel({ service, session, active, onCandidate, on
     const generation = session.begin(key);
     if (generation === null) return;
     setBusy(true);
+    setDetection(barcodeIdentityKey(detection.symbology, detection.value) ? detection : undefined);
     setFailure(null);
     void service.recognize({ ...detection, sessionId: 'sale', requestId: String(generation) }).then(next => {
       if (!alive.current || !session.isCurrent(generation)) return;
@@ -66,9 +70,12 @@ export default function ScannerPanel({ service, session, active, onCandidate, on
     {busy ? <Text>Looking up this code…</Text> : null}
     {failure ? <Text accessibilityRole="alert">{failure}</Text> : null}
     {result?.status === 'UNKNOWN' ? <Text>No safe product match. Search products to continue selling.</Text> : null}
+    {result?.status === 'UNKNOWN' && detection ? <Text>{detection.symbology}: {detection.value}</Text> : null}
     {result?.status === 'AMBIGUOUS' ? <Text>This code has conflicting mappings. Search and choose the product manually.</Text> : null}
-    <SecondaryButton title="Scan again" onPress={() => { session.repeatExplicitly(); setResult(null); setFailure(null); }} />
-    <SecondaryButton title="Search products" onPress={onSearch} />
+    {onUseCode && detection ? <SecondaryButton title="Use this code for association" onPress={() => onUseCode(detection)} /> : null}
+    <SecondaryButton title="Scan again" onPress={() => { session.repeatExplicitly(); setResult(null); setFailure(null); setDetection(undefined); }} />
+    <SecondaryButton title="Search products" onPress={() => onSearch(detection)} />
+    {onCreate ? <SecondaryButton title="Add product" onPress={() => onCreate(detection)} /> : null}
     <SecondaryButton title="Undo last addition" onPress={onUndo} />
     <SecondaryButton title="Back to basket" onPress={onCancel} />
   </ScrollView>;

@@ -5,6 +5,7 @@ import {
   fromBoolean,
   nowIso,
   optionalId,
+  optionalMoneyMinor,
   requireId,
   toBoolean,
 } from './common';
@@ -33,6 +34,7 @@ export interface CreateStoreProductInput {
   localSku?: string | null;
   preferredPackageUnitId?: string | null;
   isTemporary?: boolean;
+  defaultSellingPriceMinor?: number | null;
 }
 
 type StoreProductRecord = Record<string, string | number | null>;
@@ -109,13 +111,14 @@ export function createStoreProduct(
       (id, store_id, product_variant_id, local_sku, preferred_package_unit_id,
        default_selling_price_minor, minimum_selling_price_minor, reorder_level_base_micros,
        is_temporary, status, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, ?, 'ACTIVE', ?, ?);`,
+     VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, ?, 'ACTIVE', ?, ?);`,
     [
       id,
       storeId,
       productVariantId,
       localSku,
       preferredPackageUnitId,
+      optionalMoneyMinor(input.defaultSellingPriceMinor, 'Selling price'),
       fromBoolean(input.isTemporary ?? true),
       timestamp,
       timestamp,

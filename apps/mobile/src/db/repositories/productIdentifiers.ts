@@ -1,4 +1,5 @@
 import { DomainError } from '@retail/domain';
+import { barcodeIdentityKey } from '@retail/contracts';
 
 import type { DatabaseAdapter } from '../adapter';
 import { nowIso, optionalId, optionalText, requireId, requireText } from './common';
@@ -90,7 +91,8 @@ export function createProductIdentifier(
   if (!IDENTIFIER_TYPES.includes(input.type)) {
     throw new DomainError('INVALID_VALUE', 'Unknown product identifier type.');
   }
-  const value = requireText(input.value, 'identifier value', 128).trim();
+  const raw = requireText(input.value, 'identifier value', 128);
+  const value = input.type === 'QR' ? raw : raw.trim();
   const normalizedValue = normalizeIdentifierValue(value);
   const countryMarket = optionalText(input.countryMarket, 'country market', 8);
   if (EXACT_TYPES.includes(input.type)) {
@@ -103,6 +105,16 @@ export function createProductIdentifier(
         'INVALID_VALUE',
         'That barcode is already attached to another product; merge or correct it instead of duplicating.',
       );
+    }
+    const key = input.type === 'UPC' ? barcodeIdentityKey('upc_a', value)
+      : input.type === 'EAN' ? barcodeIdentityKey(value.length === 8 ? 'ean8' : 'ean13', value) : null;
+    if (key) {
+      const aliases = adapter.getAllRows<{ type: string; value: string }>(
+        "SELECT type, value FROM product_identifiers WHERE status = 'ACTIVE' AND type IN ('EAN', 'UPC');",
+      );
+      if (aliases.some(row => barcodeIdentityKey(row.type === 'UPC' ? 'upc_a' : row.value.length === 8 ? 'ean8' : 'ean13', row.value) === key)) {
+        throw new DomainError('INVALID_VALUE', 'That barcode already has an equivalent UPC/EAN association.');
+      }
     }
   } else {
     const clash = findActiveVariantIdentifier(adapter, productVariantId, input.type, normalizedValue);
