@@ -1,73 +1,32 @@
 # PROJECT_STATE — COSI
 
-Last updated: 2026-09-29  
-Current milestone: M8 approved (D-046); assigning a separate Astra low implementation chat.
+Last updated: 2026-09-29
+Current milestone: M8 source implementation submitted for independent audit; native acceptance blocked.
 
 ## Active work
 
-- Checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m8-planning`.
-- Branch: `plan/m8-unified-scanner`, fast-forwarded from its unused M7-planning
-  baseline to accepted M7 commit `c817edb`; no history rewritten or new clone.
-- Coordinator: `01a098ef-d830-7531-bca7-2d66b0a5b587`.
-- Read `M8_SCANNER_PLAN.md`, active `tickets.md`, proposed M8 section of
-  `docs/design/DESIGN.md`, and `.agents/workflows/m8-unified-scanner.json`.
-- Five proposed tickets cover known barcode -> sale, global Scan/navigation,
-  unknown code creation/association, identifier sync safety and Android evidence.
-  Ticket sizing is coordinator-reviewed under founder delegation; implementation
-  and the new native/contract/design boundaries are approved 2026-09-29.
-  Implementer: gpt-6-astra, low effort; its chat ID will be recorded in workflow.
+- Checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m8-planning`; branch `plan/m8-unified-scanner`.
+- Accepted M7 base: `c817edb`; approved M8 planning preserved at `4105618` (D-046).
+- Implementer chat: `01a0ec1c-578c-7c41-b151-e803c9e5c548`. Coordinator: `01a098ef-d830-7531-bca7-2d66b0a5b587`.
+- M8 adds a local barcode resolver, guarded camera/session, full-screen Sell and global Scan, typed temporary creation, optional beep/mute, and recoverable identifier conflicts. No visual recognition, OCR or M9 work.
+- See `M8_IMPLEMENTATION_EVIDENCE.md`, `M8_ANDROID_VERIFICATION.md`, active `tickets.md` and `.agents/workflows/m8-unified-scanner.json`. Final stopped-work handoff is `M8_IMPLEMENTATION_HANDOFF.md`.
 
-Founder scanner clarification is preserved as PC-08 in PRODUCT_CHANGE_BACKLOG.
-The proposal now includes single-item/basket modes, safe continuous exact-code
-addition, unknown-item pause/resume, optional beep/torch, zero-stock identity and
-temporary-product completion later. Guided visual enrollment/OCR remain Track B
-and M12. The first draft's confirm-every-item flow is superseded; no runtime
-implementation or camera evidence is claimed.
+## Source evidence and rollout
 
-Planning checks passed: workflow/index JSON schemas, acyclic gate dependencies,
-artifact paths, five pending tickets, exact M7 archive content and
-`git diff --check`. All changes are documentation/workflow files; no runtime
-checks are claimed. Planning changes are uncommitted on the branch above.
+Six real PostgreSQL/two-SQLite collision cases reproduce the original gap and now pass rejection, quarantine, owner recovery, dependent-sale preservation, cursor progress, replay, fresh bootstrap and authorization checks. SQLite migration 24 and server migration `20260929092623_m8_identifier_claim_guard.sql` are additive. The server migration was tested inside rollback-only transactions, not deployed.
 
-## Accepted baseline and evidence limits
+New scanner associations default off (`EXPO_PUBLIC_SCANNER_ASSOCIATIONS_ENABLED`); enable only for a reviewed build whose backend has the migration. Automatic basket addition stays off pending physical camera evidence and independent review. Manual selling and confirmed scanner additions remain usable. Optional beep uses playback only; native camera/audio require a rebuilt APK.
 
-M0–M7 local source/automated scope is independently accepted. M7 evidence and
-limitations remain in `M7_INDEPENDENT_AUDIT.md`, archived
-`tickets/M7_OFFLINE_SYNC.md` and `.agents/workflows/m7-offline-sync.json`.
-Prior coordinator evidence includes 515 tests/57 suites, strict typecheck,
-zero-warning lint, live local Auth/Edge/PostgreSQL checks and 92 pgTAP assertions.
-Those are baseline results, not reruns or M8 evidence.
+Android export and Expo Doctor 21/21 passed. Existing local pgTAP 92 assertions and Auth/Edge/PostgreSQL checks passed; the pgTAP files also passed with M8 migration injected transactionally. Exact final typecheck/lint/test results are recorded in the evidence document. Automated checks are not physical acceptance.
 
-Physical M3–M7 workflows, two-phone verification, the reported Galaxy A15 app-
-opening failure, remote GitHub CI and second-laptop reproduction remain release
-readiness gates. A previous A15 development-build restock survived restart and
-synced; it did not prove physical sale or two-phone convergence. M8 planning
-neither clears these gates nor requires another phone to begin.
+## Blockers and carried limits
 
-## M8 findings and boundaries
+No Android device is connected and Java is unavailable in this environment. No APK was built or installed; the Galaxy A15 launch issue could not be reproduced or diagnosed. Camera permissions/lifecycle, first-use offline detection, beep/torch, 200% text/TalkBack, standalone preview and completed-sale force-stop behavior still require the device procedure.
 
-Existing identifier rows, catalogue commands and sale domain can support the
-barcode slice. The proposal handles typed Quick Add, package confirmation,
-UPC/EAN representation differences, QR exactness, permission/camera failure and
-cart-safe navigation. Source inspection found no server barcode-value claim
-check corresponding to the SQLite uniqueness rule; M8-04 must reproduce and
-correct that bounded sync risk before scanner-created associations are accepted.
-No runtime bug reproduction, dependency install, native build or database
-mutation was performed in planning. New runtime checks remain pending.
+M0–M7 local source remains independently accepted. M3–M7 physical flows, two-phone verification, remote CI and second-laptop reproduction remain release gates. Prior M7 audit/evidence is preserved in `M7_INDEPENDENT_AUDIT.md` and `tickets/M7_OFFLINE_SYNC.md`.
 
-The M7 implementation checkout `COSI-m0` remains on `feat/m7-offline-sync`.
-Its generated root `app.json` was not copied into this clean M8 worktree.
-M9 work remains isolated on `plan/m9-price-intelligence` in `COSI-m9-planning`;
-final accepted-M7 reconciliation, pull/echo integration and M9-04 audit remain
-separate. M9 completion is not a prerequisite for M8 planning. Coordinate any
-shared catalogue/sync changes before integration.
+Known source limits for review: association rollout is disabled; previously acknowledged historical identifier collisions require support and are not silently repaired. The migration refuses deployment over historical accepted collisions. No production readiness or performance claim is made.
 
 ## Next action
 
-Assigned Astra low implementer executes M8-01 through M8-05 sequentially in this
-checkout. It records its chat ID in the workflow, writes M8_IMPLEMENTATION_HANDOFF.md,
-stops all edits, then sends the coordinator a final notification. Coordinator
-ends its dispatch turn and performs no implementation/audit in parallel. After
-handoff, coordinator independently audits and returns corrections to the same
-chat. Medium coordinator effort is a user-controlled setting. M9/M10 and visual
-model selection remain outside this assignment. No push/deployment is authorized.
+Coordinator independently reviews the stopped implementer handoff and returns corrections to the same chat. Then schedule the physical Android procedure and authorize any backend deployment/build separately. The implementer does not accept its own work, deploy, push, merge or start M9. Existing M9 work remains separate in its own checkout; coordinate shared sync/catalogue boundaries before integration.

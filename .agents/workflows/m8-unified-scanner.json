@@ -3,18 +3,23 @@
   "task_id": "m8-unified-scanner",
   "workflow_id": "build-feature",
   "mode": "implement",
-  "status": "in_progress",
-  "current_state": "approved-awaiting-implementer-start",
+  "status": "blocked",
+  "current_state": "source-handoff-native-device-blocked",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
     "scanner-and-navigation-impact-reviewed",
     "ticket-granularity-and-dependencies-reviewed",
-    "founder-m8-plan-approved"
+    "founder-m8-plan-approved",
+    "m8-01-source-implemented",
+    "m8-02-source-implemented",
+    "m8-03-source-implemented",
+    "m8-04-collision-reproduced-and-corrected",
+    "m8-05-android-export-and-doctor-checked"
   ],
   "owner": {
-    "agent": "coordinating-planner-independent-auditor",
-    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
+    "agent": "implementer-awaiting-independent-audit",
+    "thread": "01a0ec1c-578c-7c41-b151-e803c9e5c548",
     "worktree": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning"
   },
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
@@ -49,6 +54,12 @@
       "result": "PC-08 records scan-while-selling, single/basket modes, safe continuous additions, unknown-item pause/resume, temporary-product completion, beep/torch and zero-stock identity. Guided visual multi-view enrollment/OCR stays Track B/M12. Plan/design/tickets updated; no implementation approval inferred.",
       "source": "docs/product/PRODUCT_CHANGE_BACKLOG.md; docs/engineering/M8_SCANNER_PLAN.md; tickets.md",
       "observed_at": "2026-09-28T17:55:15Z"
+    },
+    {
+      "kind": "implementation-verification",
+      "result": "Root validate exited 0: 530 tests, strict typecheck and zero-warning lint. Six PostgreSQL scanner cases passed separately; 92 pgTAP assertions and existing local Auth/Edge sync checks passed. Expo Doctor 21/21, dependency check and Android export passed. No physical device; gates remain pending coordinator acceptance.",
+      "observed_at": "2026-09-29T10:39:57.3224818Z",
+      "source": "e10ca70; docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md"
     }
   ],
   "acceptance_gates": [
@@ -116,8 +127,15 @@
         "procedure": "Run ticket-focused contract, SQLite, UI/navigation tests and root validation.",
         "success_condition": "All specified source acceptance criteria pass with actual command evidence."
       },
-      "evidence": [],
-      "limitations": [],
+      "evidence": [
+        {
+          "source": "docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md",
+          "result": "Implementation and verification trace available for independent review; implementer does not accept this gate."
+        }
+      ],
+      "limitations": [
+        "Rollout disabled pending review and backend migration; physical evidence separate."
+      ],
       "blocker": null,
       "waiver": null
     },
@@ -135,8 +153,15 @@
         "procedure": "Run M8-04 collision reproduction/regressions with actual PostgreSQL and two SQLite clients.",
         "success_condition": "Conflicts are explicit, unrelated sync progresses, valid mappings survive replay/bootstrap."
       },
-      "evidence": [],
-      "limitations": [],
+      "evidence": [
+        {
+          "source": "docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md",
+          "result": "Implementation and verification trace available for independent review; implementer does not accept this gate."
+        }
+      ],
+      "limitations": [
+        "Rollout disabled pending review and backend migration; physical evidence separate."
+      ],
       "blocker": null,
       "waiver": null
     },
@@ -145,7 +170,7 @@
       "claim": "Barcode camera and offline sale journey work on the physical Galaxy A15.",
       "owner": "coordinator",
       "required": true,
-      "status": "pending",
+      "status": "blocked",
       "depends_on": [
         "m8-source",
         "m8-sync-safety"
@@ -157,7 +182,7 @@
       },
       "evidence": [],
       "limitations": [],
-      "blocker": null,
+      "blocker": "adb devices -l: no device; no rebuilt native APK. See M8_ANDROID_VERIFICATION.md.",
       "waiver": null
     },
     {
@@ -186,7 +211,10 @@
     "tickets.md",
     "docs/design/DESIGN.md",
     "docs/engineering/PROJECT_STATE.md",
-    "docs/engineering/tickets/M7_OFFLINE_SYNC.md"
+    "docs/engineering/tickets/M7_OFFLINE_SYNC.md",
+    "docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md",
+    "docs/engineering/M8_ANDROID_VERIFICATION.md",
+    "docs/engineering/M8_IMPLEMENTATION_HANDOFF.md"
   ],
   "approvals": [
     {
@@ -209,10 +237,11 @@
     }
   ],
   "blockers": [
-    "Carried Galaxy launch failure must be resolved or isolated before M8 physical acceptance; it does not block planning."
+    "No Android device connected; Java unavailable; no rebuilt APK or physical acceptance.",
+    "Independent coordinator review pending; automatic basket addition and new association rollout remain disabled."
   ],
-  "next_action": "Assigned gpt-6-astra low implementer records its chat ID and works M8-01..05. Stop edits, save handoff, notify coordinator 01a098ef-d830-7531-bca7-2d66b0a5b587 and stop. Coordinator does not work/poll alongside implementation.",
+  "next_action": "Coordinator 01a098ef-d830-7531-bca7-2d66b0a5b587 independently audits the stopped implementer handoff. Device/build session follows; no M9 or deployment.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-09-29T07:38:35.786Z",
+  "updated_at": "2026-09-29T10:39:57.3469366Z",
   "archived": false
 }

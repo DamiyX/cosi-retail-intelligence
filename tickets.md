@@ -1,10 +1,10 @@
 # Tickets: M8 Unified Scanner + Barcode
 
-**Status:** Founder approved 2026-09-29 (D-046); implementation ready.
+**Status:** Source implementation submitted for independent audit; physical acceptance blocked.
 **Plan:** `docs/engineering/M8_SCANNER_PLAN.md` is the scope/boundary specification.
 **Workflow:** `.agents/workflows/m8-unified-scanner.json`.
 **Baseline:** `c817edb` accepted M7 local source; carried device/release gates remain open.
-**Execution:** sequential, one implementer, one ticket at a time. M8-01 source work in progress; physical and sound gates pending.
+**Execution:** One implementer; M8-01..04 source changes and M8-05 checks recorded. See M8_IMPLEMENTATION_EVIDENCE.md and M8_ANDROID_VERIFICATION.md. Unchecked criteria remain unaccepted, including physical rollout.
 
 The M7 ledger is preserved verbatim in `docs/engineering/tickets/M7_OFFLINE_SYNC.md`.
 Sources: BUILD_PLAN M8, PC-02, proposed DESIGN M8 states, SCANNING_ARCHITECTURE,
@@ -14,13 +14,13 @@ Every ticket needs focused tests, strict typecheck and zero-warning lint before 
 
 ## M8-01 — Scan a known item into the correct sale line
 
-**Status:** Ready for assigned implementation. **Blocked by:** None; founder M8 plan/native/contract approval granted 2026-09-29.
+**Status:** Source implemented; independent audit and physical fast-add gate pending.
 **Delivers:** an existing Sell flow can open the barcode camera, resolve a local
 product/package offline and configure a line, with usable manual fallback.
 **Likely modules:** contracts, scanning adapter/session/resolver, local identifier
 queries, Sell screen, mobile config/dependencies and focused tests.
 
-- [ ] A provider-independent result contract supports STRONG, AMBIGUOUS and
+- [x] A provider-independent result contract supports STRONG, AMBIGUOUS and
   UNKNOWN; errors/cancellation remain distinct. Contract tests exercise real
   invalid states, not only TypeScript compilation. No speculative enrollment API.
 - [ ] Expo Camera is confined to one adapter; only camera permission is requested.
@@ -57,11 +57,11 @@ queries, Sell screen, mobile config/dependencies and focused tests.
 **Non-goals:** global navigation replacement, new catalogue mutations, visual model,
 OCR, image storage, automatic sale completion, any new financial/inventory rules.
 **Risk:** barcode aliases and legacy normalization; use safe fallback on ambiguity.
-**Evidence:** Initial contract/resolver/session/scanner tests pass (6 tests), existing sale UI passes (21 tests), typecheck and focused zero-warning lint pass. See M8_IMPLEMENTATION_EVIDENCE.md. Automatic rollout and audible feedback remain pending; ticket not accepted.
+**Evidence:** Initial contract/resolver/session/scanner tests pass (6 tests), existing sale UI passes (21 tests), typecheck and focused zero-warning lint pass. See M8_IMPLEMENTATION_EVIDENCE.md. Audible feedback is now implemented and tested at source level; native feedback and automatic rollout remain pending. Ticket not accepted.
 
 ## M8-02 — Reach Scan globally without losing a sale
 
-**Status:** Ready for assigned implementation. **Blocked by:** M8-01.
+**Status:** Source implemented; independent navigation/accessibility audit pending.
 **Delivers:** one labelled floating Scan on Today, Products list and More, and
 full-screen selling with protected drafts and a clear manual entry.
 **Likely modules:** root/tab routes, sale route/draft guards, Home/More/product list
@@ -87,11 +87,11 @@ entry, scanning presentation and navigation/accessibility tests. No migration.
 **Non-goals:** Reports tab redesign, global Add product action, scanner on every
 screen, M9 price UI or a new visual identity.
 **Risk:** existing sale state and draft guards are coupled to the Sell tab.
-**Evidence:** none yet.
+**Evidence:** See docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md for executed checks and exact limitations.
 
 ## M8-03 — Keep selling when the code is unknown
 
-**Status:** Ready for assigned implementation. **Blocked by:** M8-01. Execute after M8-02 by convention.
+**Status:** Source implemented; association rollout disabled by default pending backend migration and review.
 **Delivers:** unknown scan can link an existing owned product/package or quickly
 create a typed provisional product, return to the sale, and survive restart.
 **Likely modules:** scanning fallback, Quick Add, catalogue application/client,
@@ -104,7 +104,7 @@ product-detail association, existing outbox commands and repository/UI tests.
   status, and never rebinds a claimed value silently. A variant-only association
   remains valid but requires package choice on future sale. A known association
   to the same target is a safe no-op/replay rather than duplicate rows.
-- [ ] Typed optional identifier input preserves EAN/UPC/QR for new scanner callers;
+- [x] Typed optional identifier input preserves EAN/UPC/QR for new scanner callers;
   legacy Quick Add input remains compatible. New product plus optional identifier
   plus one PRODUCT_CREATED envelope is atomic. Existing-product link plus one
   PRODUCT_IDENTIFIER_ADDED envelope is atomic. Reuse operation ID on retries.
@@ -130,18 +130,18 @@ product-detail association, existing outbox commands and repository/UI tests.
 **Non-goals:** shared catalogue discovery/publishing, image enrollment, product
 merging, deletion/reassignment of existing identifiers, manufacturer batch parsing.
 **Risk:** legacy Quick Add currently hardcodes EAN; preserve existing envelopes.
-**Evidence:** none yet.
+**Evidence:** See docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md for executed checks and exact limitations.
 
 ## M8-04 — Conflicting barcode assignments do not break synchronization
 
-**Status:** Ready for assigned implementation. **Blocked by:** M8-03.
+**Status:** Collision correction implemented and integration-tested; independent audit pending.
 **Delivers:** two devices' new catalogue mappings converge or surface a recoverable
 conflict; safe manual sales and unrelated synchronization remain available.
 **Likely modules:** local sync materialization/conflict display, scanner exclusion
 of disputed mappings, existing server apply boundary, additive migration if needed,
 pgTAP and live Auth/Edge/PostgreSQL plus two-SQLite-client tests.
 
-- [ ] First reproduce the source-inspected gap with two offline same-store clients:
+- [x] First reproduce the source-inspected gap with two offline same-store clients:
   different product/identifier IDs claim one raw value, a UPC/EAN equivalent, or a
   legacy-normalized QR collision. Exercise PRODUCT_CREATED and
   PRODUCT_IDENTIFIER_ADDED. Record observed result before any correction.
@@ -174,16 +174,16 @@ pgTAP and live Auth/Edge/PostgreSQL plus two-SQLite-client tests.
 product merges or a general conflict-resolution product.
 **Risk:** unsafe ambiguity can propagate into stock/price; source inspection alone
 is insufficient evidence that the server or pull path handles it correctly.
-**Evidence:** none yet.
+**Evidence:** See docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md for executed checks and exact limitations.
 
 ## M8-05 — Verify the scanner on Android and return it for independent audit
 
-**Status:** Ready for assigned implementation. **Blocked by:** M8-01, M8-02, M8-03, M8-04.
+**Status:** Source checks recorded; physical verification blocked by unavailable device/native build.
 **Delivers:** a reproducible handoff with explicit source and physical acceptance.
 **Likely modules:** focused failure regression tests, device procedure/evidence,
 plan/ticket/workflow state. No unrelated features.
 
-- [ ] Root validation, Expo dependency check/Doctor and Android export pass. Run
+- [x] Root validation, Expo dependency check/Doctor and Android export pass. Run
   local pgTAP/live-sync checks for M8-04. Record commands/results and exact source;
   retain baseline M2–M7 tests and explain any legitimate fixture changes.
 - [ ] Resolve or precisely isolate the carried Galaxy A15 launch issue without
@@ -203,7 +203,7 @@ plan/ticket/workflow state. No unrelated features.
   controls not covered by keyboard/system UI, camera release and usable manual
   flow with scanner disabled. Record speed/size observations honestly; compare
   product-selection time with manual search rather than inventing benchmarks.
-- [ ] If device/build/tooling is unavailable, mark its gate pending/blocked and
+- [x] If device/build/tooling is unavailable, mark its gate pending/blocked and
   return source evidence promptly. Do not claim complete physical acceptance or
   keep repeating unchanged waits. No second phone is implied by a two-client test.
 - [ ] Update tickets, PROJECT_STATE and workflow, send a concise final handoff to
@@ -212,7 +212,7 @@ plan/ticket/workflow state. No unrelated features.
   does not accept its own work or begin another milestone.
 
 **Non-goals:** M9 integration, M10, M12 production visual recognition, release.
-**Evidence:** none yet.
+**Evidence:** See docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md for executed checks and exact limitations.
 
 ## Dependency and approval review
 
@@ -221,5 +221,4 @@ M8-01 -> {M8-02, M8-03}; M8-03 -> M8-04; all four -> M8-05. Serial execution
 is an ownership policy, not an invented dependency between M8-02 and M8-03.
 Founder delegated ticket granularity and approved the clarified scanner/native/
 contract/navigation plan on 2026-09-29. Implementer: Astra low in one separate
-chat; coordinator reviews only after handoff. No ticket is completed yet.
-
+chat; coordinator reviews only after handoff. No ticket is independently accepted yet; source work is available for coordinator review.
