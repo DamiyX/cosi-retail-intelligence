@@ -4,7 +4,7 @@
 **Plan:** `docs/engineering/M8_SCANNER_PLAN.md` is the scope/boundary specification.
 **Workflow:** `.agents/workflows/m8-unified-scanner.json`.
 **Baseline:** `c817edb` accepted M7 local source; carried device/release gates remain open.
-**Execution:** sequential, one implementer, one ticket at a time. No implementation yet.
+**Execution:** sequential, one implementer, one ticket at a time. M8-01 source work in progress; physical and sound gates pending.
 
 The M7 ledger is preserved verbatim in `docs/engineering/tickets/M7_OFFLINE_SYNC.md`.
 Sources: BUILD_PLAN M8, PC-02, proposed DESIGN M8 states, SCANNING_ARCHITECTURE,
@@ -57,7 +57,7 @@ queries, Sell screen, mobile config/dependencies and focused tests.
 **Non-goals:** global navigation replacement, new catalogue mutations, visual model,
 OCR, image storage, automatic sale completion, any new financial/inventory rules.
 **Risk:** barcode aliases and legacy normalization; use safe fallback on ambiguity.
-**Evidence:** none yet.
+**Evidence:** Initial contract/resolver/session/scanner tests pass (6 tests), existing sale UI passes (21 tests), typecheck and focused zero-warning lint pass. See M8_IMPLEMENTATION_EVIDENCE.md. Automatic rollout and audible feedback remain pending; ticket not accepted.
 
 ## M8-02 — Reach Scan globally without losing a sale
 
@@ -222,3 +222,4 @@ is an ownership policy, not an invented dependency between M8-02 and M8-03.
 Founder delegated ticket granularity and approved the clarified scanner/native/
 contract/navigation plan on 2026-09-29. Implementer: Astra low in one separate
 chat; coordinator reviews only after handoff. No ticket is completed yet.
+

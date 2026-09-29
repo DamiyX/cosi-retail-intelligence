@@ -27,7 +27,7 @@ const config: ExpoConfig = {
     package: 'com.damiyx.retailintelligence' + variant.suffix,
     versionCode: 1,
   },
-  plugins: ['expo-router', 'expo-dev-client', 'expo-secure-store'],
+  plugins: ['expo-router', 'expo-dev-client', 'expo-secure-store', ['expo-camera', { recordAudioAndroid: false, microphonePermission: false, barcodeScannerEnabled: true }]],
   extra: {
     appEnvironment: environment,
     ...(projectId ? { eas: { projectId } } : {}),

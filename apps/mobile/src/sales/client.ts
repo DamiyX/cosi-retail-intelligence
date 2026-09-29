@@ -1,4 +1,6 @@
 import type { QuickAddInput } from '../catalogue/client';
+import type { RecognitionService } from '@retail/contracts';
+import { createRecognitionService } from '../features/scanning/resolver';
 import {
   createTemporaryProduct,
   type CreateTemporaryProductInput,
@@ -8,6 +10,7 @@ import { generateMobileId } from '../crypto/mobileIds';
 import type { DatabaseAdapter } from '../db/adapter';
 import {
   getDeviceById,
+  getInventoryBalanceByStoreProduct,
   getProductVariantById,
   getStoreById,
   getStoreProductById,
@@ -48,6 +51,7 @@ export interface SellableProductHit {
   localSku: string | null;
   preferredPackage: SellablePackageOption | null;
   isTemporary: boolean;
+  recordedBaseMicros?: number;
 }
 
 export interface CompleteSaleScreenInput {
@@ -71,6 +75,8 @@ export interface SalesClient {
   readonly userId: string;
 
   searchProducts(query: string): SellableProductHit[];
+  getProductById?(storeProductId: string): SellableProductHit | null;
+  recognition?: RecognitionService;
   getProductPackages(storeProductId: string): SellablePackageOption[];
   searchCustomers(query: string): CustomerAccountRow[];
   createTemporaryProduct(input: QuickAddInput): TemporaryProductGraph;
@@ -165,6 +171,19 @@ export function createDatabaseSalesClient(
     storeCurrencyCode: store.currencyCode,
     deviceId: device.id,
     userId,
+
+    recognition: createRecognitionService(adapter, store.id),
+    getProductById(storeProductId) {
+      const product = getStoreProductById(adapter, storeProductId);
+      if (!product || product.storeId !== store.id || product.status !== 'ACTIVE') return null;
+      const variant = getProductVariantById(adapter, product.productVariantId);
+      if (!variant || variant.status !== 'ACTIVE' || (variant.identityScope === 'STORE_LOCAL' && variant.ownerStoreId !== store.id)) return null;
+      const packages = getPackagesForProduct(product.id);
+      return { storeProductId: product.id, variantId: variant.id, productName: variant.name,
+        localSku: product.localSku, isTemporary: product.isTemporary,
+        recordedBaseMicros: getInventoryBalanceByStoreProduct(adapter, product.id),
+        preferredPackage: packages.find(p => p.id === product.preferredPackageUnitId) ?? null };
+    },
 
     searchProducts(query: string): SellableProductHit[] {
       const hits = searchStoreProducts(adapter, store.id, query, 'ACTIVE');

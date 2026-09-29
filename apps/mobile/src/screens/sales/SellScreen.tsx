@@ -18,6 +18,9 @@ import {
 } from 'react-native';
 
 import type { CatalogueClient } from '../../catalogue/client';
+import type { RecognitionCandidate } from '@retail/contracts';
+import ScannerPanel from '../../features/scanning/ScannerPanel';
+import { ScanSession } from '../../features/scanning/session';
 import type { CustomerAccountRow, PaymentMethod } from '../../db/repositories';
 import type {
   CompletedSaleGraph,
@@ -58,6 +61,10 @@ interface SellScreenProps {
   onDirtyDraftChange?: (draft: SaleDraftExit | null) => void;
   /** Provided by the route so global Back never belongs to a blurred Sell tab. */
   isFocused?: boolean;
+  initialScan?: boolean;
+  scannerEnabled?: boolean;
+  /** Inject only in verification until the physical fast-add gate is accepted. */
+  automaticScanAdditionVerified?: boolean;
 }
 
 type ViewMode = 'cart' | 'quick_add' | 'history' | 'detail' | 'confirmation';
@@ -95,7 +102,14 @@ export default function SellScreen({
   catalogueClient,
   onDirtyDraftChange,
   isFocused = true,
+  initialScan = false,
+  scannerEnabled = process.env.EXPO_PUBLIC_SCANNER_ENABLED !== 'false',
+  automaticScanAdditionVerified = false,
 }: SellScreenProps) {
+  const [scanning, setScanning] = useState(initialScan);
+  const [scanSession] = useState(() => new ScanSession());
+  const [basketMode, setBasketMode] = useState(false);
+  const [resumeScanner, setResumeScanner] = useState(false);
   // Navigation & Subscreen Mode
   const [viewMode, setViewMode] = useState<ViewMode>('cart');
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
@@ -253,6 +267,7 @@ export default function SellScreen({
       return;
     }
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (scanning) { scanSession.cancel(); setScanning(false); return true; }
       if (viewMode === 'detail') {
         setViewMode('history');
         return true;
@@ -284,6 +299,8 @@ export default function SellScreen({
     isFocused,
     lines.length,
     viewMode,
+    scanning,
+    scanSession,
   ]);
 
   // Open line configuration for a product
@@ -327,6 +344,39 @@ export default function SellScreen({
   }, [client]);
 
   // Change selected package in line configuration
+  const configureScannedCandidate = (candidate: RecognitionCandidate) => {
+    try {
+      const hit = client.getProductById?.(candidate.storeProductId);
+      if (!hit || hit.variantId !== candidate.productVariantId) throw new Error('Product unavailable');
+      const packages = client.getProductPackages(hit.storeProductId);
+      const exact = candidate.packageUnitId === null ? null : packages.find(p => p.id === candidate.packageUnitId);
+      if (candidate.packageUnitId !== null && !exact) throw new Error('Package unavailable');
+      if (basketMode && automaticScanAdditionVerified && exact && exact.sellingPriceMinor !== null) {
+        const calculated = calculateSaleLine({ quantityPackagesMicros: 1000000,
+          conversionToBaseMicros: exact.conversionToBaseMicros, unitPriceMinor: exact.sellingPriceMinor, discountAmountMinor: 0 });
+        const line: CartLine = { id: `scan-${Date.now()}-${Math.random()}`, storeProductId: hit.storeProductId,
+          productVariantId: hit.variantId, packageUnitId: exact.id, productName: hit.productName,
+          packageName: exact.name, conversionToBaseMicros: exact.conversionToBaseMicros,
+          quantityPackagesMicros: 1000000, quantityText: '1', unitPriceMinor: exact.sellingPriceMinor,
+          unitPriceText: formatMinorForEdit(exact.sellingPriceMinor), discountAmountMinor: 0, discountText: '',
+          lineTotalMinor: calculated.netTotalMinor, calculated };
+        calculateSaleTotals([...lines, line].map(item => item.calculated));
+        setLines(current => [...current, line]);
+        return true;
+      }
+      startConfiguringLine(hit);
+      setResumeScanner(basketMode);
+      setSelectedPackage(exact ?? null);
+      setUnitPriceText(exact?.sellingPriceMinor === null || exact?.sellingPriceMinor === undefined ? '' : formatMinorForEdit(exact.sellingPriceMinor));
+      setScanning(false);
+      return false;
+    } catch {
+      setQuickAddSavedNotice('This scanned product could not be loaded safely. Search products or retry. Your basket is preserved.');
+      setScanning(false);
+      return false;
+    }
+  };
+
   const handleSelectPackage = (pkg: SellablePackageOption) => {
     if (pkg.id !== selectedPackage?.id) {
       setLineFormDirty(true);
@@ -501,6 +551,7 @@ export default function SellScreen({
     }
 
     setLines(candidateLines);
+    if (resumeScanner) { setScanning(true); setResumeScanner(false); }
 
     setConfiguringProduct(null);
     setEditingLineId(null);
@@ -683,6 +734,13 @@ export default function SellScreen({
   };
 
   // Subscreen: Quick Add
+  if (scannerEnabled && scanning && client.recognition) {
+    return <ScannerPanel service={client.recognition} session={scanSession} active={isFocused}
+      basketMode={basketMode} onModeChange={setBasketMode}
+      summary={`${lines.length} lines · ${displayMoney(totals.totalMinor, client.storeCurrencyCode)}${lines.length ? ` · Last added: ${lines[lines.length - 1]!.productName}` : ''}`}
+      onUndo={() => setLines(current => current.slice(0, -1))}
+      onCandidate={configureScannedCandidate} onSearch={() => setScanning(false)} onCancel={() => setScanning(false)} />;
+  }
   if (viewMode === 'quick_add') {
     return (
       <QuickAddProductScreen
@@ -784,8 +842,9 @@ export default function SellScreen({
           {editingLineId ? 'Edit line' : 'Add to sale'}
         </Text>
         <Text style={styles.productNameHeading}>{configuringProduct.productName}</Text>
+        {configuringProduct.recordedBaseMicros !== undefined ? <Text>Recorded stock: {configuringProduct.recordedBaseMicros / 1000000} base units</Text> : null}
 
-        {availablePackages.length > 1 ? (
+        {availablePackages.length > 1 || (availablePackages.length === 1 && selectedPackage === null) ? (
           <View>
             <Text style={styles.fieldLabel}>Package</Text>
             <View accessibilityRole="radiogroup" style={styles.packageChoices}>
@@ -901,6 +960,7 @@ export default function SellScreen({
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       {/* Top Header */}
       <View style={styles.topHeader}>
+        {scannerEnabled && client.recognition ? <SecondaryButton title="Scan next item" onPress={() => setScanning(true)} /> : null}
         <View style={styles.titleArea}>
           <Text accessibilityRole="header" style={styles.title}>
             Sell
