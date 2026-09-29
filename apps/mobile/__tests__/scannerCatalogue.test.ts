@@ -1,6 +1,7 @@
 import { parseSyncOperationEnvelope } from '@retail/contracts';
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
 import { addProductIdentifier } from '../src/catalogue/updateProductIdentity';
+import { materializeSyncOperation } from '../src/sync/materialize';
 import { deterministicIds, openCatalogueFixture, testId, countRows, reopenDatabase } from './catalogueSupport';
 import { getStoreProductById, listProductIdentifiers } from '../src/db/repositories';
 
@@ -24,6 +25,22 @@ it('atomically preserves typed QR, price and identity across replay and restart'
       expect(listProductIdentifiers(reopened, first.variant.id)[0]?.value).toBe(input.barcode);
     } finally { reopened.close(); }
   } finally { fixture.closeAndDelete(); }
+});
+
+it('treats the same association received from another device as a no-op', () => {
+  const source = openCatalogueFixture();
+  const receiver = openCatalogueFixture();
+  try {
+    const graph = createTemporaryProduct(source.adapter, { storeId: source.context.store.id,
+      deviceId: source.context.device.id, name: 'Remote item', barcode: 'remote-code', barcodeType: 'QR' },
+    { generateId: deterministicIds(5000) });
+    receiver.adapter.transaction(() => materializeSyncOperation(receiver.adapter, parseSyncOperationEnvelope(JSON.parse(graph.outbox.payload))));
+    const result = addProductIdentifier(receiver.adapter, { storeId: receiver.context.store.id,
+      deviceId: receiver.context.device.id, storeProductId: graph.storeProduct.id, type: 'QR', value: 'remote-code' });
+    expect(result.identifier.id).toBe(graph.identifier?.id);
+    expect(result.outbox).toBeNull();
+    expect(countRows(receiver.adapter, 'outbox_operations')).toBe(0);
+  } finally { source.closeAndDelete(); receiver.closeAndDelete(); }
 });
 
 it('rolls back duplicate equivalent barcode creation and replays an explicit association', () => {

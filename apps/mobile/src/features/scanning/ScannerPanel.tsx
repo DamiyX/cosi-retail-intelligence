@@ -29,9 +29,11 @@ export interface ScannerPanelProps {
   onModeChange(basket: boolean): void;
   summary: string;
   onUndo(): void;
+  muted?: boolean;
+  onToggleSound?(): void;
 }
 
-export default function ScannerPanel({ service, session, active, onCandidate, onSearch, onCreate, onUseCode, onCancel, basketMode, onModeChange, summary, onUndo }: ScannerPanelProps) {
+export default function ScannerPanel({ service, session, active, onCandidate, onSearch, onCreate, onUseCode, onCancel, basketMode, onModeChange, summary, onUndo, muted, onToggleSound }: ScannerPanelProps) {
   const [detection, setDetection] = useState<Pick<BarcodeInput, 'symbology' | 'value'>>();
   const [result, setResult] = useState<RecognitionResult | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
@@ -62,8 +64,9 @@ export default function ScannerPanel({ service, session, active, onCandidate, on
   return <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
     <Text accessibilityRole="header">Scan a product</Text>
     <Text accessibilityLiveRegion="polite">{summary}</Text>
+    {onToggleSound ? <SecondaryButton title={muted ? 'Sound off — enable beep' : 'Sound on — mute beep'} onPress={onToggleSound} /> : null}
     <SecondaryButton title={basketMode ? 'Mode: Basket — switch to Single item' : 'Mode: Single item — switch to Basket'} onPress={() => onModeChange(!basketMode)} />
-    {basketMode ? <Text>Confirm each item while automatic basket scanning awaits device verification.</Text> : null}
+    {basketMode ? <Text>Scan items into one basket. Review the basket before payment.</Text> : null}
     <CameraFailureBoundary><Suspense fallback={<Text>Opening camera…</Text>}>
       <BarcodeCamera active={active && !busy && result === null && failure === null} onDetection={detect} />
     </Suspense></CameraFailureBoundary>

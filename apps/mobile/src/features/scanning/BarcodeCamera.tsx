@@ -20,6 +20,8 @@ export default function BarcodeCamera({ active, onDetection }: BarcodeCameraProp
   const [captureGeneration, setCaptureGeneration] = useState(0);
   const currentActive = useRef(active);
   useLayoutEffect(() => {
+    generation.current++;
+    setCaptureGeneration(generation.current);
     currentActive.current = active;
     return () => { currentActive.current = false; };
   }, [active]);

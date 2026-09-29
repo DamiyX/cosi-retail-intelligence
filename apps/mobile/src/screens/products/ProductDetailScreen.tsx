@@ -420,7 +420,7 @@ export default function ProductDetailScreen({
           {failure !== null ? <ErrorPanel title="Not saved" message={failure} /> : null}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Codes</Text>
-            {client.recognition ? <PrimaryButton title="Associate barcode (awaiting sync verification)" disabled onPress={() => setAssociating(true)} /> : null}
+            {client.recognition ? <PrimaryButton title="Associate barcode" disabled={process.env.EXPO_PUBLIC_SCANNER_ASSOCIATIONS_ENABLED !== 'true'} onPress={() => setAssociating(true)} /> : null}
             {detail.identifiers.length === 0 ? (
               <Text style={styles.line}>No barcode or store code yet.</Text>
             ) : (

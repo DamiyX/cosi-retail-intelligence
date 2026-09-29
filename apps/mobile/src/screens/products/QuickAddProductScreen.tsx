@@ -147,7 +147,7 @@ export default function QuickAddProductScreen({
         Add product
       </Text>
       <Text style={styles.note}>{requireSellingPrice ? 'Enter a short name, selling price and unit to keep selling.' : 'Only a name is required.'} The product saves on this device.</Text>
-      {initialIdentifier ? <Text>Scanned {initialIdentifier.type}: {initialIdentifier.value}{!allowScannedAssociation ? '\nBarcode saving is awaiting sync verification. You can save and sell this product without attaching the code.' : ''}</Text> : null}
+      {initialIdentifier ? <Text>Scanned {initialIdentifier.type}: {initialIdentifier.value}{!allowScannedAssociation ? '\nBarcode saving is unavailable in this build. You can save and sell this product without attaching the code.' : ''}</Text> : null}
       {requireSellingPrice ? <Field label="Selling price" value={sellingPrice} onChangeText={setSellingPrice} keyboardType="decimal-pad" testID="quick-add-price" /> : null}
       <Field
         label="Product name"

@@ -237,7 +237,7 @@ describe('M2-02 product identifiers', () => {
       );
       expect(result.identifier.normalizedValue).toBe('600123456789');
       expect(result.identifier.value).toBe('6001 2345-6789');
-      expect(result.outbox.operationType).toBe('PRODUCT_IDENTIFIER_ADDED');
+      expect(result.outbox?.operationType).toBe('PRODUCT_IDENTIFIER_ADDED');
       const hits = searchStoreProducts(fixture.adapter, fixture.context.store.id, '600123456789');
       expect(hits.map((hit) => hit.variantName)).toEqual(['Milo 400g']);
       expect(listProductIdentifiers(fixture.adapter, graph.variant.id)).toHaveLength(1);

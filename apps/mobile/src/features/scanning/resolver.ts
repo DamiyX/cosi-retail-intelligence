@@ -29,7 +29,9 @@ export function createRecognitionService(adapter: DatabaseAdapter, storeId: stri
         JOIN product_variants v ON v.id = i.product_variant_id
         JOIN store_products sp ON sp.product_variant_id = v.id
         LEFT JOIN package_units p ON p.id = i.package_unit_id
-        WHERE sp.store_id = ? AND sp.status = 'ACTIVE' AND v.status = 'ACTIVE' AND i.status = 'ACTIVE'
+        WHERE sp.store_id = ? AND sp.status = 'ACTIVE' AND v.status = 'ACTIVE'
+          AND (i.status = 'ACTIVE' OR EXISTS (SELECT 1 FROM scanner_identifier_quarantine q
+            WHERE q.store_id = sp.store_id AND q.identifier_id = i.id AND q.resolved_at IS NULL))
           AND (v.identity_scope = 'PLATFORM' OR v.owner_store_id = ?)
           AND (i.package_unit_id IS NULL OR (p.product_variant_id = v.id AND p.status = 'ACTIVE' AND p.is_sellable = 1));
       `, [storeId, storeId]);

@@ -5,6 +5,7 @@ import { parseSyncOperationEnvelope, type SyncReferenceContext } from '@retail/c
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
 import { addProductIdentifier } from '../src/catalogue/updateProductIdentity';
 import { materializeSyncOperation } from '../src/sync/materialize';
+import { quarantineLocalIdentifier } from '../src/sync/identifierQuarantine';
 import { applySyncPullPage, applySyncBootstrapPage, commitSyncBootstrapSnapshot } from '../src/sync/applier';
 import { beginSyncBootstrap, ensureSyncStoreState, getSyncStoreState } from '../src/db/repositories';
 import { MIGRATIONS } from '../src/db';
@@ -36,6 +37,7 @@ describe('M8 real PostgreSQL + two offline SQLite clients', () => {
           const productB = createTemporaryProduct(b.adapter, { ...commonB, name: 'B', ...(nested ? { barcode: valueB, barcodeType: typeB } : {}) }, { generateId: deterministicIds(2000) });
           const opA = nested ? productA.outbox : addProductIdentifier(a.adapter, { ...commonA, storeProductId: productA.storeProduct.id, type: typeA, value: valueA }, { generateId: deterministicIds(3000) }).outbox;
           const opB = nested ? productB.outbox : addProductIdentifier(b.adapter, { ...commonB, storeProductId: productB.storeProduct.id, type: typeB, value: valueB }, { generateId: deterministicIds(4000) }).outbox;
+          if (!opA || !opB) throw new Error('New assignments must enqueue their operations.');
           const sale = createDatabaseSalesClient(b.adapter, { deviceId: deviceB, generateId: deterministicIds(5000) }).completeSale({
             lines: [{ storeProductId: productB.storeProduct.id, packageUnitId: productB.basePackage.id, quantityPackagesMicros: 1000000, unitPriceMinor: 12500 }],
             payment: { method: 'CASH' },
@@ -63,6 +65,12 @@ describe('M8 real PostgreSQL + two offline SQLite clients', () => {
           expect(statuses.at(-1)).toBe(process.env.M8_REPRODUCE_BASELINE === '1' ? 'APPLIED' : 'CONFLICT');
           if (process.env.M8_REPRODUCE_BASELINE === '1') return;
           const incoming = parseSyncOperationEnvelope(JSON.parse(opA.payload));
+          if (nested) {
+            b.adapter.transaction(() => quarantineLocalIdentifier(b.adapter, parseSyncOperationEnvelope(JSON.parse(opB.payload)), incoming));
+            expect(await createRecognitionService(b.adapter, store.id).recognize({ sessionId: 'ack', requestId: '1',
+              symbology: typeB === 'QR' ? 'qr' : typeB === 'EAN' ? 'ean13' : 'upc_a', value: valueB,
+            })).toMatchObject({ status: 'AMBIGUOUS', reason: 'SYNC_CONFLICT' });
+          }
           const unrelated = createTemporaryProduct(a.adapter, { ...commonA, name: 'Unrelated' }, { generateId: deterministicIds(6000) });
           const pulled = [...(!nested ? [productA.outbox] : []), opA, unrelated.outbox];
           const referenceContext: SyncReferenceContext = {
@@ -96,7 +104,11 @@ describe('M8 real PostgreSQL + two offline SQLite clients', () => {
           expect(b.adapter.getFirstRow<{ id: string }>('SELECT id FROM store_products WHERE id = ?', [productB.storeProduct.id])).not.toBeNull();
           const lookup = { symbology: typeA === 'QR' ? 'qr' as const : 'upc_a' as const, value: valueA, requestId: 'r', sessionId: 's' };
           expect(await createRecognitionService(b.adapter, b.context.store.id).recognize(lookup)).toMatchObject({ status: 'AMBIGUOUS' });
+          b.adapter.run("UPDATE store_members SET role = 'STAFF' WHERE id = ?", [membership.id]);
+          expect(() => recoverIdentifierConflict(b.adapter, conflict!.id, deterministicIds(8000))).toThrow('Only the active owner');
+          b.adapter.run("UPDATE store_members SET role = 'OWNER' WHERE id = ?", [membership.id]);
           recoverIdentifierConflict(b.adapter, conflict!.id, deterministicIds(8000));
+          expect(() => recoverIdentifierConflict(b.adapter, conflict!.id, deterministicIds(8100))).toThrow('no longer available');
           expect(await createRecognitionService(b.adapter, b.context.store.id).recognize(lookup)).toMatchObject({ status: 'STRONG' });
           const fresh = openIsolatedDatabase(MIGRATIONS);
           try {
@@ -106,7 +118,7 @@ describe('M8 real PostgreSQL + two offline SQLite clients', () => {
               snapshotRevision: pulled.length, nextCursor: null, hasMore: false,
               entities: pulled.map((operation, index) => ({ operationId: operation.operationId, storeId: store.id,
                 entityType: operation.entityType, entityId: operation.entityId, entityVersion: index + 1,
-                serverRevision: index + 1, changeIndex: 0, payload: parseSyncOperationEnvelope(JSON.parse(operation.payload)) })),
+                serverRevision: index + 1, changeIndex: 0, payloadVersion: 1 as const, payload: parseSyncOperationEnvelope(JSON.parse(operation.payload)) })),
             }, { storeId: store.id, options });
             commitSyncBootstrapSnapshot(fresh.adapter, { storeId: store.id, snapshotRevision: pulled.length, options });
             expect(await createRecognitionService(fresh.adapter, store.id).recognize(lookup)).toMatchObject({ status: 'STRONG', candidate: { storeProductId: productA.storeProduct.id } });
@@ -117,6 +129,15 @@ describe('M8 real PostgreSQL + two offline SQLite clients', () => {
           const chain = execFileSync('docker', ['exec', '-i', 'supabase_db_retail-intelligence', 'psql', '-U', 'postgres', '-d', 'postgres', '-Atq', '-v', 'ON_ERROR_STOP=1'], { input: chainSql, encoding: 'utf8', timeout: 30000 }).trim().split(/\r?\n/);
           expect(chain.at(-1)).toBe(nested ? 'APPLIED' : 'ALREADY_APPLIED');
           if (nested) expect(chain.at(-3)).toBe('REJECTED_RETRYABLE');
+          const securitySql = sql.replace('ROLLBACK;', `${apply(opA.payload)} SELECT set_config('request.jwt.claim.sub','${testId(9998)}',true);
+            DO $denial$ BEGIN ${apply(opB.payload).replace(/^SELECT/, 'PERFORM')}
+              RAISE EXCEPTION 'Unexpected authorization';
+              EXCEPTION WHEN insufficient_privilege THEN
+                IF SQLERRM <> 'Store membership or device authorization failed.' THEN RAISE; END IF;
+            END $denial$; SELECT 'FORBIDDEN_WITHOUT_PAYLOAD'; ROLLBACK;`);
+          const securityResult = execFileSync('docker', ['exec', '-i', 'supabase_db_retail-intelligence', 'psql', '-U', 'postgres', '-d', 'postgres', '-Atq', '-v', 'ON_ERROR_STOP=1'], { input: securitySql, encoding: 'utf8', timeout: 30000 }).trim().split(/\r?\n/);
+          expect(securityResult.at(-3)).toBe('ALREADY_APPLIED');
+          expect(securityResult.at(-1)).toBe('FORBIDDEN_WITHOUT_PAYLOAD');
           const restarted = reopenDatabase(b.path);
           try {
             expect(getSyncStoreState(restarted, store.id)?.cursorRevision).toBe(pulled.length);

@@ -21,6 +21,7 @@ import type { CatalogueClient } from '../../catalogue/client';
 import type { BarcodeInput, RecognitionCandidate } from '@retail/contracts';
 import ScannerPanel from '../../features/scanning/ScannerPanel';
 import { ScanSession } from '../../features/scanning/session';
+import { useScanFeedback } from '../../features/scanning/useScanFeedback';
 import { generateMobileId } from '../../crypto/mobileIds';
 import type { CustomerAccountRow, PaymentMethod } from '../../db/repositories';
 import type {
@@ -107,15 +108,19 @@ export default function SellScreen({
   initialScan = false,
   scannerEnabled = process.env.EXPO_PUBLIC_SCANNER_ENABLED !== 'false',
   automaticScanAdditionVerified = false,
-  scanAssociationsVerified = false,
+  scanAssociationsVerified = process.env.EXPO_PUBLIC_SCANNER_ASSOCIATIONS_ENABLED === 'true',
 }: SellScreenProps) {
   const [scanning, setScanning] = useState(initialScan);
+  const [muted, setMuted] = useState(false);
+  const playScanFeedback = useScanFeedback(scannerEnabled && !muted && isFocused);
   const [scanSession] = useState(() => new ScanSession());
   const [basketMode, setBasketMode] = useState(false);
   const [resumeScanner, setResumeScanner] = useState(false);
+  const [scanLine, setScanLine] = useState(false);
   const [scanIdentifier, setScanIdentifier] = useState<{ value: string; type: 'EAN' | 'UPC' | 'QR' }>();
   const [associationOperationId, setAssociationOperationId] = useState(generateMobileId);
   const keepDetection = (detection?: Pick<BarcodeInput, 'symbology' | 'value'>) => {
+    setScanLine(true);
     setAssociationOperationId(generateMobileId());
     setScanIdentifier(detection ? { value: detection.value,
       type: detection.symbology === 'qr' ? 'QR' : detection.symbology === 'upc_a' ? 'UPC' : 'EAN' } : undefined);
@@ -375,9 +380,11 @@ export default function SellScreen({
           lineTotalMinor: calculated.netTotalMinor, calculated };
         calculateSaleTotals([...lines, line].map(item => item.calculated));
         setLines(current => [...current, line]);
+        playScanFeedback();
         return true;
       }
       startConfiguringLine(hit);
+      setScanLine(true);
       setScanIdentifier(undefined);
       setResumeScanner(basketMode);
       setSelectedPackage(exact ?? null);
@@ -565,6 +572,8 @@ export default function SellScreen({
     }
 
     setLines(candidateLines);
+    if (scanLine || resumeScanner) playScanFeedback();
+    setScanLine(false);
     setScanIdentifier(undefined);
     if (resumeScanner) { setScanning(true); setResumeScanner(false); }
 
@@ -751,6 +760,7 @@ export default function SellScreen({
   // Subscreen: Quick Add
   if (scannerEnabled && scanning && client.recognition) {
     return <ScannerPanel service={client.recognition} session={scanSession} active={isFocused}
+      muted={muted} onToggleSound={() => setMuted(value => !value)}
       basketMode={basketMode} onModeChange={setBasketMode}
       summary={`${lines.length} lines · ${displayMoney(totals.totalMinor, client.storeCurrencyCode)}${lines.length ? ` · Last added: ${lines[lines.length - 1]!.productName}` : ''}`}
       onUndo={() => setLines(current => current.slice(0, -1))}

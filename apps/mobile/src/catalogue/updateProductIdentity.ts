@@ -108,7 +108,8 @@ export interface AddProductIdentifierInput {
 export interface AddProductIdentifierResult {
   storeProduct: StoreProductRow;
   identifier: ProductIdentifierRow;
-  outbox: OutboxOperationRow;
+  /** Null when an already accepted remote association needs no local write. */
+  outbox: OutboxOperationRow | null;
 }
 
 /** Attach one identifier plus exactly one PRODUCT_IDENTIFIER_ADDED envelope. */
@@ -150,8 +151,7 @@ export function addProductIdentifier(
         [storeId, already.id],
       );
       const outbox = original ? findOutboxOperation(adapter, original.operation_id) : null;
-      if (outbox) return { storeProduct, identifier: already, outbox };
-      throw new DomainError('INVALID_VALUE', 'This code is already saved for this product.');
+      return { storeProduct, identifier: already, outbox };
     }
     if (input.packageUnitId) {
       const packageUnit = getPackageUnitById(adapter, input.packageUnitId);
