@@ -9,6 +9,10 @@ export default function MoreScreen() {
         More
       </Text>
       <Text style={styles.body}>Keep purchases and receipts available on this device, even without internet.</Text>
+      <Pressable accessibilityRole="button" onPress={() => router.navigate('/sell')} style={styles.action}>
+        <Text style={styles.actionTitle}>Sell manually</Text>
+        <Text style={styles.actionBody}>Search products or open sale history</Text>
+      </Pressable>
       <Pressable accessibilityRole="button" onPress={() => router.push('/restock')} style={styles.action}>
         <Text style={styles.actionTitle}>Restock</Text>
         <Text style={styles.actionBody}>Record a purchase and increase stock</Text>

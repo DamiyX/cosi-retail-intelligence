@@ -14,3 +14,7 @@ Initial evidence: npm ci passed; camera install passed; workspace typecheck pass
 Barcode additions currently require confirmation. Basket mode resumes the same scanner after line entry. Automatic addition remains disabled pending required physical verification; this is incomplete fast-path scope, not an acceptance claim.
 
 Device: adb devices -l returned no connected devices. Docker 29.8.0 is available. No physical check or A15 launch diagnosis performed. Local Supabase is running; no database changes made yet.
+
+## M8-02
+
+Moved /sell from tabs to the root stack, using the established usePreventRemove guard. Global Scan is allowlisted to Today/Products/More and hidden for keyboard/focused routes; its reserved layout space avoids obscuring content. Added manual selling from More. Navigation tests 10/10 passed; shell/startup tests 7/7 passed in the prior combined run; typecheck and zero-warning lint passed. Native header/system behavior remains unverified without a device.

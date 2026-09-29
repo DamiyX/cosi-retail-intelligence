@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useIsFocused, useNavigation } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
+import { useIsFocused, useLocalSearchParams, useNavigation } from 'expo-router';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { SalesProvider, useSales } from '../../src/sales/SalesContext';
-import { useSaleDraftNavigation } from '../../src/sales/SaleDraftNavigationContext';
-import { saleDraftExitCopy, type SaleDraftExit } from '../../src/sales/draftExit';
-import SellScreen from '../../src/screens/sales/SellScreen';
-import { ErrorPanel, Field, PrimaryButton } from '../../src/ui/components';
-import { theme } from '../../src/ui/theme';
+import { SalesProvider, useSales } from '../src/sales/SalesContext';
+import { usePreventRemove } from 'expo-router/build/react-navigation/core';
+import { saleDraftExitCopy, type SaleDraftExit } from '../src/sales/draftExit';
+import SellScreen from '../src/screens/sales/SellScreen';
+import { ErrorPanel, Field, PrimaryButton } from '../src/ui/components';
+import { theme } from '../src/ui/theme';
 
 function MissingStore() {
   const { setupLocalStore } = useSales();
@@ -51,69 +51,34 @@ function LocalStoreUnavailable({ failure, onRetry }: { failure: string; onRetry:
   );
 }
 
-interface BeforeRemoveEvent {
-  preventDefault(): void;
-  data: { action: unknown };
-}
-
-interface SellRouteNavigation {
-  addListener(eventName: 'beforeRemove', listener: (event: BeforeRemoveEvent) => void): () => void;
-  dispatch(action: unknown): void;
-}
-
 function SellContent() {
   const { availability, catalogueClient, client, failure, retryLocalStore } = useSales();
-  const navigation = useNavigation<SellRouteNavigation>();
+  const navigation = useNavigation();
   const isFocused = useIsFocused();
-  const { clearDraft, getDraft, setDraft } = useSaleDraftNavigation();
-  const allowNavigationRef = useRef(false);
-
-  const handleDirtyDraftChange = useCallback((draft: SaleDraftExit | null): void => {
-    setDraft(draft);
-  }, [setDraft]);
-
-  const confirmExit = useCallback(
-    (draft: SaleDraftExit, continueNavigation: () => void): void => {
-      const copy = saleDraftExitCopy(draft.reason);
-      Alert.alert(copy.title, copy.message, [
-        { text: 'Keep editing', style: 'cancel' },
-        {
-          text: 'Discard',
-          style: 'destructive',
-          onPress: () => {
-            allowNavigationRef.current = true;
-            clearDraft();
-            draft.discard();
-            try {
-              continueNavigation();
-            } finally {
-              allowNavigationRef.current = false;
-            }
-          },
-        },
-      ]);
-    },
-    [clearDraft],
-  );
-
-  useEffect(() => {
-    const removeBeforeRemoveListener = navigation.addListener('beforeRemove', (event) => {
-      if (allowNavigationRef.current) {
-        return;
-      }
-      const draft = getDraft();
-      if (!draft) {
-        return;
-      }
-      event.preventDefault();
-      confirmExit(draft, () => navigation.dispatch(event.data.action));
-    });
-
-    return () => {
-      removeBeforeRemoveListener();
-    };
-  }, [confirmExit, getDraft, navigation]);
-
+  const params = useLocalSearchParams<{ scan?: string }>();
+  const draftRef = useRef<SaleDraftExit | null>(null);
+  const [dirty, setDirty] = useState(false);
+  const [allowNavigation, setAllowNavigation] = useState(false);
+  const handleDirtyDraftChange = useCallback((draft: SaleDraftExit | null) => {
+    draftRef.current = draft;
+    setDirty(draft !== null);
+  }, []);
+  usePreventRemove(isFocused && dirty && !allowNavigation, ({ data }) => {
+    const draft = draftRef.current;
+    if (!draft) return;
+    const copy = saleDraftExitCopy(draft.reason);
+    Alert.alert(copy.title, copy.message, [
+      { text: 'Keep editing', style: 'cancel' },
+      { text: 'Discard', style: 'destructive', onPress: () => {
+        setAllowNavigation(true);
+        draft.discard();
+        requestAnimationFrame(() => {
+          navigation.dispatch(data.action);
+          setAllowNavigation(false);
+        });
+      } },
+    ]);
+  });
   if (availability === 'failure') {
     return <LocalStoreUnavailable failure={failure ?? 'The local store is unavailable.'} onRetry={retryLocalStore} />;
   }
@@ -127,6 +92,7 @@ function SellContent() {
         catalogueClient={catalogueClient ?? undefined}
         onDirtyDraftChange={handleDirtyDraftChange}
         isFocused={isFocused}
+        initialScan={params.scan === '1'}
       />
     </View>
   );

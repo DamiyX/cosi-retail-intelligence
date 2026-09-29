@@ -1,3 +1,4 @@
+import { router as appRouter } from 'expo-router';
 import { act, fireEvent, renderRouter, screen, testRouter } from 'expo-router/testing-library';
 import { Alert, BackHandler } from 'react-native';
 
@@ -10,7 +11,7 @@ import ProductsIndexRoute from '../app/(tabs)/products/index';
 import QuickAddRoute from '../app/(tabs)/products/new';
 import NewPackageRoute from '../app/(tabs)/products/[id]/packages/new';
 import EditPackageRoute from '../app/(tabs)/products/[id]/packages/[packageId]';
-import SellScreen from '../app/(tabs)/sell';
+import SellScreen from '../app/sell';
 import TabsLayout from '../app/(tabs)/_layout';
 import TodayScreen from '../app/(tabs)/today';
 import RestockRoute from '../app/restock';
@@ -51,7 +52,7 @@ const ROUTES = {
   index: IndexRoute,
   '(tabs)/_layout': TabsLayout,
   '(tabs)/today': TodayScreen,
-  '(tabs)/sell': SellScreen,
+  'sell': SellScreen,
   '(tabs)/more': MoreScreen,
   '(tabs)/products/_layout': ProductsLayout,
   '(tabs)/products/index': ProductsIndexRoute,
@@ -76,6 +77,18 @@ const ROUTES = {
 } as never;
 
 describe('M2 tab navigation', () => {
+  it('offers global Scan only on overview routes and retains manual full-screen selling', async () => {
+    const router = renderRouter(ROUTES, { initialUrl: '/products' });
+    expect(await screen.findByText('Scan')).toBeTruthy();
+    testRouter.push('/products/new');
+    expect(await screen.findByTestId('quick-add-name')).toBeTruthy();
+    expect(screen.queryByText('Scan')).toBeNull();
+    testRouter.replace('/sell');
+    expect(await screen.findByPlaceholderText('Search name, local SKU, or barcode')).toBeTruthy();
+    expect(screen.queryByLabelText(/Sell, tab/)).toBeNull();
+    expect(screen.queryByText('Scan')).toBeNull();
+    expect(router.getPathname()).toBe('/sell');
+  });
   beforeEach(() => {
     mockDatabase = openIsolatedDatabase(MIGRATIONS);
     provisionStoreContext(
@@ -114,11 +127,11 @@ describe('M2 tab navigation', () => {
     const router = renderRouter(ROUTES, { initialUrl: '/products' });
     expect(await screen.findByText('No products yet')).toBeTruthy();
 
-    fireEvent.press(screen.getByLabelText(/Sell, tab/));
+    testRouter.push('/sell');
     expect(await screen.findByPlaceholderText('Search name, local SKU, or barcode')).toBeTruthy();
     expect(router.getPathname()).toBe('/sell');
 
-    fireEvent.press(screen.getByLabelText(/Today, tab/));
+    act(() => appRouter.replace('/today'));
     expect(await screen.findByText('Live today')).toBeTruthy();
 
     fireEvent.press(screen.getByLabelText(/More, tab/));
@@ -144,7 +157,7 @@ describe('M2 tab navigation', () => {
     expect(router.getPathname()).toBe('/sell');
   });
 
-  it('requires confirmation before a dirty in-memory cart can leave through a tab', async () => {
+  it('requires confirmation before a dirty in-memory cart can leave the full-screen route', async () => {
     if (!mockDatabase) {
       throw new Error('Test database is not open.');
     }
@@ -167,7 +180,7 @@ describe('M2 tab navigation', () => {
     fireEvent.press(screen.getByText('Add to cart'));
     expect(screen.getByText('Cart (1)')).toBeTruthy();
 
-    fireEvent.press(screen.getByLabelText(/Today, tab/));
+    act(() => appRouter.replace('/today'));
     expect(alertSpy).toHaveBeenCalledWith(
       'Discard sale?',
       'Your uncompleted sale will be lost.',
@@ -180,6 +193,7 @@ describe('M2 tab navigation', () => {
       | undefined;
     act(() => {
       actions?.find((action) => action.text === 'Discard')?.onPress?.();
+      jest.runAllTimers();
     });
     expect(await screen.findByText('Live today')).toBeTruthy();
     expect(router.getPathname()).toBe('/today');
@@ -258,7 +272,7 @@ describe('M2 tab navigation', () => {
     expect(screen.getByText('Purchase package')).toBeTruthy();
   });
 
-  it('requires confirmation before a dirty Quick Add form can leave through a tab', async () => {
+  it('requires confirmation before a dirty Quick Add form can leave the full-screen route', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert');
     const router = renderRouter(ROUTES, { initialUrl: '/sell' });
     expect(await screen.findByPlaceholderText('Search name, local SKU, or barcode')).toBeTruthy();
@@ -267,7 +281,7 @@ describe('M2 tab navigation', () => {
     fireEvent.press(screen.getByText('Add product'));
     fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Changed tab product');
 
-    fireEvent.press(screen.getByLabelText(/Today, tab/));
+    act(() => appRouter.replace('/today'));
     expect(alertSpy).toHaveBeenCalledWith(
       'Discard product and sale?',
       'Your product entries and uncompleted sale will be lost.',
@@ -280,6 +294,7 @@ describe('M2 tab navigation', () => {
       | undefined;
     act(() => {
       actions?.find((action) => action.text === 'Discard')?.onPress?.();
+      jest.runAllTimers();
     });
     expect(await screen.findByText('Live today')).toBeTruthy();
     expect(router.getPathname()).toBe('/today');
@@ -287,7 +302,7 @@ describe('M2 tab navigation', () => {
     alertSpy.mockRestore();
   });
 
-  it('removes Sell history Back handling while another tab is focused, then restores it on return', async () => {
+  it('removes Sell history Back handling while a pushed route is focused, then restores it on return', async () => {
     const subscriptions: { handler: () => boolean; remove: jest.Mock }[] = [];
     const addSpy = jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_eventName, handler) => {
       const subscription = { remove: jest.fn() };
@@ -301,12 +316,12 @@ describe('M2 tab navigation', () => {
     expect(await screen.findByText('Recent sales')).toBeTruthy();
     const sellHistorySubscription = subscriptions.at(-1);
 
-    fireEvent.press(screen.getByLabelText(/Products, tab/));
-    expect(await screen.findByText('No products yet')).toBeTruthy();
-    expect(router.getPathname()).toBe('/products');
+    testRouter.push('/sync');
+    expect(await screen.findByText('Cloud sync is not configured in this build')).toBeTruthy();
+    expect(router.getPathname()).toBe('/sync');
     expect(sellHistorySubscription?.remove).toHaveBeenCalledTimes(1);
 
-    fireEvent.press(screen.getByLabelText(/Sell, tab/));
+    testRouter.back();
     expect(await screen.findByText('Recent sales')).toBeTruthy();
     const returnedSellSubscription = subscriptions.at(-1);
     act(() => {

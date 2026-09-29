@@ -8,7 +8,7 @@ import ProductsIndexRoute from '../app/(tabs)/products/index';
 import QuickAddRoute from '../app/(tabs)/products/new';
 import NewPackageRoute from '../app/(tabs)/products/[id]/packages/new';
 import EditPackageRoute from '../app/(tabs)/products/[id]/packages/[packageId]';
-import SellScreen from '../app/(tabs)/sell';
+import SellScreen from '../app/sell';
 import TabsLayout from '../app/(tabs)/_layout';
 import TodayScreen from '../app/(tabs)/today';
 import RestockRoute from '../app/restock';
@@ -47,7 +47,7 @@ const ROUTES = {
   _layout: RootLayout,
   '(tabs)/_layout': TabsLayout,
   '(tabs)/today': TodayScreen,
-  '(tabs)/sell': SellScreen,
+  sell: SellScreen,
   '(tabs)/more': MoreScreen,
   '(tabs)/products/_layout': ProductsLayout,
   '(tabs)/products/index': ProductsIndexRoute,
