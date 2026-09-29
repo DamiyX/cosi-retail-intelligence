@@ -228,6 +228,33 @@ export function isPilotResolvableConflict(conflict: SyncConflictRow): boolean {
   }
 }
 
+export function isIdentifierConflict(adapter: DatabaseAdapter, conflictId: string): boolean {
+  return adapter.getFirstRow<{ id: string }>(`SELECT c.id FROM sync_conflicts c
+    JOIN scanner_identifier_quarantine q ON q.operation_id = c.operation_id
+    WHERE c.id = ? AND c.status = 'OPEN' AND q.resolved_at IS NULL`, [conflictId]) !== null;
+}
+
+/** Owner explicitly removes only the rejected association, keeping product and sale IDs. */
+export function recoverIdentifierConflict(adapter: DatabaseAdapter, conflictId: string, generateId = generateMobileId): void {
+  adapter.transaction(() => {
+    const context = resolvePilotOwner(adapter);
+    if (!context) throw new Error('Only the active owner can resolve this barcode conflict.');
+    const conflict = listOpenSyncConflicts(adapter, context.storeId).find(row => row.id === conflictId);
+    if (!conflict || !isIdentifierConflict(adapter, conflictId)) throw new Error('Barcode conflict is no longer available.');
+    const original = parseSyncOperationEnvelope(JSON.parse(conflict.localPayload));
+    if (original.operationType !== 'PRODUCT_CREATED' && original.operationType !== 'PRODUCT_IDENTIFIER_ADDED') throw new Error('Unsupported barcode recovery.');
+    if (original.operationType === 'PRODUCT_CREATED') {
+      enqueueOutboxOperation(adapter, { operationId: generateId(), storeId: context.storeId, deviceId: context.deviceId,
+        operationType: 'PRODUCT_CREATED', entityType: original.entityType, entityId: original.entityId,
+        occurredAt: new Date().toISOString(), entities: { ...original.entities, identifier: null } });
+    }
+    // The original outbox envelope remains quarantined and unacknowledged for audit.
+    adapter.run('UPDATE scanner_identifier_quarantine SET resolved_at = ? WHERE operation_id = ?', [new Date().toISOString(), original.operationId]);
+    resolveSyncConflict(adapter, { id: conflict.id, resolution: 'REMOVE_REJECTED_IDENTIFIER_KEEP_PRODUCT' });
+    adapter.run("UPDATE outbox_operations SET next_attempt_at = NULL WHERE store_id = ? AND status = 'ERROR_RETRYABLE' AND last_error_code = 'PRODUCT_DEPENDENCY'", [context.storeId]);
+  });
+}
+
 /** Explicit owner decision. The rejected operation stays in the audit ledger. */
 export function resolvePilotConflict(
   adapter: DatabaseAdapter,

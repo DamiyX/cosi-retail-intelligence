@@ -6,6 +6,7 @@ import {
 } from '@retail/contracts';
 
 import type { DatabaseAdapter } from '../db/adapter';
+import { prepareIncomingIdentifier } from './identifierQuarantine';
 import { finalizeBatchInventoryOperation } from '../db/repositories/batchTracking';
 import { rebuildAndPersistCostStateFromMovements } from '../db/repositories/costing';
 
@@ -367,6 +368,7 @@ export function materializeSyncOperation(
   adapter: DatabaseAdapter,
   envelope: SyncOperationEnvelope,
 ): void {
+  prepareIncomingIdentifier(adapter, envelope);
   const batchSeals: { id: string; sealedAt: string; entryCount: number; delta: string }[] = [];
   const affectedCostProducts = new Set<string>();
   const entries = Object.entries(envelope.entities).sort(

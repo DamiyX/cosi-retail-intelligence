@@ -8,6 +8,8 @@ import { cloudAuthClient, cloudSyncConfiguration } from '../src/sync/auth';
 import {
   forgetPilotEnrollment,
   isPilotResolvableConflict,
+  isIdentifierConflict,
+  recoverIdentifierConflict,
   readPilotSyncOverview,
   resolvePilotConflict,
   runPilotSync,
@@ -199,7 +201,16 @@ export default function CloudSyncScreen() {
                       <Text style={styles.body}>Cloud: {item.cloud}</Text>
                     </View>
                   )) : <Text style={styles.body}>The cloud change could not be loaded.</Text>}
-                  {signedInEmail && isPilotResolvableConflict(conflict) ? (
+                  {isIdentifierConflict(adapter, conflict.id) ? <Pressable accessibilityRole="button" disabled={busy} style={styles.secondaryButton}
+                    onPress={() => Alert.alert('Remove rejected barcode?', 'Keep this product and every recorded sale. Only its rejected barcode association will be removed. A rejected new product will be queued again without the barcode.', [
+                      { text: 'Cancel', style: 'cancel' },
+                      { text: 'Keep product, remove barcode', onPress: () => { void act(async () => {
+                        recoverIdentifierConflict(adapter, conflict.id);
+                        setMessage('Product and sales preserved. Barcode conflict resolved locally; sync again to send pending work.');
+                      }); } },
+                    ])}>
+                    <Text style={styles.secondaryText}>Keep product and sales; remove rejected barcode</Text>
+                  </Pressable> : signedInEmail && isPilotResolvableConflict(conflict) ? (
                     <View style={styles.row}>
                       <Pressable accessibilityRole="button" disabled={busy} onPress={() => decide(conflict.id, 'USE_CLOUD')} style={styles.secondaryButton}>
                         <Text style={styles.secondaryText}>Use cloud</Text>

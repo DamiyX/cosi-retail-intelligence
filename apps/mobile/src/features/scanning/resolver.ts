@@ -22,7 +22,9 @@ export function createRecognitionService(adapter: DatabaseAdapter, storeId: stri
       const rows = adapter.getAllRows<Mapping>(`
         SELECT sp.id AS store_product_id, i.product_variant_id, i.package_unit_id, i.type, i.value,
           EXISTS (SELECT 1 FROM sync_conflicts c WHERE c.store_id = sp.store_id AND c.status = 'OPEN'
-            AND (c.entity_id = i.id OR c.entity_id = sp.id OR c.entity_id = i.product_variant_id)) AS disputed
+            AND (c.entity_id = i.id OR c.entity_id = sp.id OR c.entity_id = i.product_variant_id))
+          OR EXISTS (SELECT 1 FROM scanner_identifier_quarantine q WHERE q.store_id = sp.store_id
+            AND q.resolved_at IS NULL AND (q.identifier_id = i.id OR q.winner_identifier_id = i.id)) AS disputed
         FROM product_identifiers i
         JOIN product_variants v ON v.id = i.product_variant_id
         JOIN store_products sp ON sp.product_variant_id = v.id

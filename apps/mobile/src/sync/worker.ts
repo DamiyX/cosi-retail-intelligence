@@ -27,6 +27,7 @@ import {
   updateSyncStoreState,
 } from '../db/repositories';
 import { generateMobileId } from '../crypto/mobileIds';
+import { quarantineLocalIdentifier } from './identifierQuarantine';
 import {
   applySyncBootstrapPage,
   applySyncPullPage,
@@ -344,12 +345,18 @@ export class OfflineSyncWorker {
             leaseId,
             errorCode: ack.error?.code ?? 'CONFLICT',
           });
+          if (ack.error?.details?.reason === 'IDENTIFIER_COLLISION') {
+            const winner = parseSyncOperationEnvelope(ack.error.details.serverPayload);
+            adapter.transaction(() => quarantineLocalIdentifier(adapter,
+              parseSyncOperationEnvelope(JSON.parse(operation.payload)),
+              winner));
+          }
           conflicts += 1;
         } else if (ack.status === 'REJECTED_RETRYABLE') {
           markOutboxRetryable(adapter, {
             operationId: operation.operationId,
             leaseId,
-            errorCode: ack.error?.code ?? 'RETRYABLE',
+            errorCode: ack.error?.details?.reason === 'PRODUCT_DEPENDENCY' ? 'PRODUCT_DEPENDENCY' : ack.error?.code ?? 'RETRYABLE',
             nextAttemptAt: addMilliseconds(now, retryDelayMs(operation.attemptCount, this.options.random)),
           });
           retryableErrors += 1;

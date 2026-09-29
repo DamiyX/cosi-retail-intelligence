@@ -2726,6 +2726,21 @@ export const MIGRATIONS: Migration[] = [
         WHERE status = 'BOOTSTRAPPING';`,
     ],
   },
+  {
+    version: 24,
+    name: 'scanner_identifier_quarantine',
+    statements: [
+      `CREATE TABLE scanner_identifier_quarantine (
+        identifier_id TEXT PRIMARY KEY REFERENCES product_identifiers(id) ON DELETE RESTRICT,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        operation_id TEXT NOT NULL REFERENCES outbox_operations(operation_id) ON DELETE RESTRICT,
+        winner_identifier_id TEXT NOT NULL,
+        original_payload TEXT NOT NULL,
+        resolved_at TEXT NULL
+      );`,
+      `CREATE INDEX idx_scanner_quarantine_store ON scanner_identifier_quarantine(store_id, resolved_at);`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;
