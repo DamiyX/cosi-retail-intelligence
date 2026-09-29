@@ -1,291 +1,224 @@
-# Tickets: M7 Offline Sync
+# Tickets: M8 Unified Scanner + Barcode
 
-M7 implements the controlled custom sync protocol in
-`docs/engineering/M7_OFFLINE_SYNC_PLAN.md`. The accepted M1–M6 local-write-first
-behavior remains authoritative. Do not start M8 production integration.
+**Status:** Founder approved 2026-09-29 (D-046); implementation ready.
+**Plan:** `docs/engineering/M8_SCANNER_PLAN.md` is the scope/boundary specification.
+**Workflow:** `.agents/workflows/m8-unified-scanner.json`.
+**Baseline:** `c817edb` accepted M7 local source; carried device/release gates remain open.
+**Execution:** sequential, one implementer, one ticket at a time. No implementation yet.
 
-## Implementation handoff and independent audit — 2026-09-28
+The M7 ledger is preserved verbatim in `docs/engineering/tickets/M7_OFFLINE_SYNC.md`.
+Sources: BUILD_PLAN M8, PC-02, proposed DESIGN M8 states, SCANNING_ARCHITECTURE,
+RECOGNITION_TEST_PLAN and D-017–D-022/D-030/D-034–D-037/D-042/D-044/D-045.
+Common invariant: camera results cannot write stock, price, cost or completed sales.
+Every ticket needs focused tests, strict typecheck and zero-warning lint before handoff.
 
-Local Docker/Supabase reset, 81 pgTAP assertions, scoped lint, security
-advisors and live Auth/Edge Function/PostgreSQL integration now pass. The
-earlier Docker blocker described below is resolved. The server now rejects a
-physical reconciliation made stale by another device's inventory/batch
-operation under D-044. The Galaxy A15 check installed the rebuilt development
-APK in place, enrolled against local Supabase, retained a queued restock through
-a cold-started connection failure, then synchronized it after reconnection.
-Purchase/sale pull graph corrections passed root validation (505 tests across
-52 suites). Additive migration 22 and the cost-projection rebuild then allowed
-concurrent same-product local orders without losing either sale. Two independent
-SQLite databases converged on final stock, batch and cost state. Delegated root
-validation passed 507 tests across 52 suites; coordinator focused tests,
-typecheck and lint passed after final stock/batch assertions. The cost
-correction and M5 pull parity passed independent review. Local database CI is
-configured but has not run on GitHub. M7-07 historical actor/device bootstrap
-and later pull pass local source checks under D-045. The reviewed audit
-corrections are committed as
-`9c230f1d641edc4b8aae5dc05a7f54977fec4edc` on `feat/m7-offline-sync`; there
-are no staged or unstaged changes. Generated root `app.json` remains untracked
-and excluded. Independent source acceptance is complete. No
-physical sale or two-phone convergence was performed in the M7 device run.
-See `docs/engineering/M7_INDEPENDENT_AUDIT.md`.
+## M8-01 — Scan a known item into the correct sale line
 
-M7-01 through M7-08 source work is committed sequentially on
-`feat/m7-offline-sync`: `66507e6`, `74b2053`, `6a15692`, `f411b0c`,
-`ecb1c21`, `f60c348`, `1b3236d`, `e9ef793`. The provider-independent contracts,
-SQLite sync state/worker, authenticated Supabase transport, server migrations,
-RLS/grants, Edge Function shells, operation projections, conflict records and
-bootstrap cursor handling are present.
+**Status:** Ready for assigned implementation. **Blocked by:** None; founder M8 plan/native/contract approval granted 2026-09-29.
+**Delivers:** an existing Sell flow can open the barcode camera, resolve a local
+product/package offline and configure a line, with usable manual fallback.
+**Likely modules:** contracts, scanning adapter/session/resolver, local identifier
+queries, Sell screen, mobile config/dependencies and focused tests.
 
-The initial implementation handoff passed 51 suites/484 tests while Docker
-was unavailable. That is superseded by the local PostgreSQL and phone evidence
-above. Independent audit corrected operation-history bootstrap, pilot sync
-entry, sale/purchase pull materialization and concurrent-device costing. See
-`docs/engineering/M7_INDEPENDENT_AUDIT.md`. No M8 work
-is authorized.
+- [ ] A provider-independent result contract supports STRONG, AMBIGUOUS and
+  UNKNOWN; errors/cancellation remain distinct. Contract tests exercise real
+  invalid states, not only TypeScript compilation. No speculative enrollment API.
+- [ ] Expo Camera is confined to one adapter; only camera permission is requested.
+  Preview runs only while foreground/focused. Unavailable, denied/permanently
+  denied and disabled states offer search without loading a camera view.
+- [ ] Known EAN-13/EAN-8/UPC-A and bounded exact QR mappings resolve only current
+  store active products. Preserve zeroes, validate GTIN detection and evaluate
+  UPC-A/zero-prefixed EAN-13 aliases together. QR raw differences cannot become
+  false matches; scanned links never execute/open. Unsupported/long data falls back.
+- [ ] Exact package is respected; missing package asks rather than assuming base
+  or preferred. Inactive/wrong-product packages cannot enter the line. Multiple
+  equivalent identities cannot be silently reduced to one result.
+- [ ] Confirmation re-reads sellability and current price/package through the sale
+  client. Existing exact arithmetic, immutable snapshots and completion own all
+  effects. Late/cancelled/foreign-session results have no effect, including after
+  store change. Zero recorded stock does not hide an active known product: show
+  its recorded balance and retain existing sale rules without invented stock.
+- [ ] Single-item mode offers quantity editing after one scan. Basket mode adds
+  one unit for an exact conflict-free identity with explicit sellable package and
+  known price, using existing line validation, and remains open for the next item.
+  Show running count/total, last addition and Undo/edit; payment is always explicit.
+- [ ] Duplicate-frame suppression is tested: stationary A-A-A adds one unit;
+  deliberate A-B adds both; explicit A-again or quantity editing handles repeats.
+  A timeout/focus change alone cannot rearm the same item. Missing price/package
+  pauses for input. Wrong/unknown/conflicted results cannot enter the fast path.
+- [ ] Successful additions have one short optional beep plus visible feedback;
+  mute leaves feedback usable and failures never emit success. Torch is available
+  when supported; no microphone/image retention. Any playback dependency receives
+  native review. Device evidence in M8-05 gates automatic basket addition.
+- [ ] Unit, real-SQLite resolver and screen tests cover these branches plus local
+  read failure and unchanged cart. Existing sales tests remain green. Record
+  dependency/version/license review; native behavior remains pending M8-05.
 
-## M7-01 — Establish the secure protocol and server transaction spine
+**Non-goals:** global navigation replacement, new catalogue mutations, visual model,
+OCR, image storage, automatic sale completion, any new financial/inventory rules.
+**Risk:** barcode aliases and legacy normalization; use safe fallback on ambiguity.
+**Evidence:** none yet.
 
-**Status:** Implemented; local PostgreSQL, Auth and endpoint checks passed. **Basis:** M6 source/automated scope independently accepted.
-**Delivers:** versioned protocol contracts and a testable authenticated Supabase
-boundary capable of one atomic, revisioned store operation.
+## M8-02 — Reach Scan globally without losing a sale
 
-- [x] Add provider-independent push/pull/bootstrap DTOs with explicit protocol
-  and payload versions, bounded request/page sizes, canonical decimal strings,
-  typed acknowledgements/errors and runtime validation. Reject unknown versions.
-- [x] Add imperative Supabase migrations for auth-subject mapping, stores,
-  memberships, devices, per-store sync state, applied operations, change log and
-  the minimum normalized domain foundation. Use UUID/timestamptz, exact numeric
-  quantity/rational values and integer minor-money types, plus constraints,
-  foreign-key/query indexes and deterministic lock order.
-- [x] Add authenticated Edge Function shells and one transactional PostgreSQL
-  application boundary. Verify JWT, active membership, device/store relation,
-  operation permission and cross-store references; serialize each store revision
-  and keep service credentials server-only.
-- [x] Revoke ambient access, use explicit grants, enable RLS on exposed tables,
-  pin privileged-function search paths and add positive/negative pgTAP policy
-  tests. Adopt current explicit Data API grants rather than platform defaults.
-- [x] Add repeatable database/function test scripts and CI integration. A real
-  PostgreSQL run is required; absence of Docker/authorized dev project blocks
-  completion rather than becoming a waiver.
+**Status:** Ready for assigned implementation. **Blocked by:** M8-01.
+**Delivers:** one labelled floating Scan on Today, Products list and More, and
+full-screen selling with protected drafts and a clear manual entry.
+**Likely modules:** root/tab routes, sale route/draft guards, Home/More/product list
+entry, scanning presentation and navigation/accessibility tests. No migration.
 
-**Evidence:** local Supabase reset, 81 pgTAP assertions, scoped lint, security
-advisors and Auth/Edge/Postgres integration passed. The dedicated Ubuntu CI
-job is configured in `.github/workflows/validate.yml`; no remote CI run is
-claimed until the branch is pushed.
+- [ ] Today/Products/More remain tabs; Sell is a full-screen destination retaining
+  `/sell`. Global Scan opens scanner mode in that sale session. Manual Sell/search
+  and sale history remain reachable without granting camera permission.
+- [ ] One global Scan is visible only on the allowlisted overview surfaces. Hide
+  it for keyboard, forms, product detail, scanner, cart/payment, restock, counts,
+  adjustments and sync screens. Contextual Scan next item remains inside the sale.
+- [ ] Keep the original cart mounted across scan, unknown/search and return.
+  Header/hardware/system back, cancel, direct routes and rapid navigation never
+  bypass line/Quick Add/cart discard confirmation. Cancelled scanning preserves
+  existing lines; completed receipt/history navigation is safe. Do not make drafts
+  durable or claim crash recovery of unfinished carts under D-037.
+- [ ] Missing/corrupt store context follows current safe setup/retry flow; camera
+  cannot create a second store. New routes do not expose another store's data.
+- [ ] Use existing tokens/components, labelled 48dp minimum touch targets, safe
+  area and content padding; large text does not obscure search or checkout.
+  Navigation tests cover the actual move from tab to stack and scanner disabled.
 
-**Out of scope:** business aggregate coverage beyond a tracer fixture, final Auth
-screens, production project linking/deployment.
+**Non-goals:** Reports tab redesign, global Add product action, scanner on every
+screen, M9 price UI or a new visual identity.
+**Risk:** existing sale state and draft guards are coupled to the Sell tab.
+**Evidence:** none yet.
 
-## M7-02 — Enrol a local store and add crash-safe client sync state
+## M8-03 — Keep selling when the code is unknown
 
-**Status:** First-owner pilot app path implemented; local Auth/transport and one-phone queued retry passed. **Dependency:** M7-01.
-**Delivers:** an authenticated owner can bind one existing local-only store safely,
-and the app can retain retry/cursor/conflict state across restart.
+**Status:** Ready for assigned implementation. **Blocked by:** M8-01. Execute after M8-02 by convention.
+**Delivers:** unknown scan can link an existing owned product/package or quickly
+create a typed provisional product, return to the sale, and survive restart.
+**Likely modules:** scanning fallback, Quick Add, catalogue application/client,
+product-detail association, existing outbox commands and repository/UI tests.
 
-- [x] Add an idempotent first-owner enrolment transaction for the existing
-  domain user/store/owner-member/device IDs. Bind verified auth subject exactly
-  once; reject attempts to claim an already-bound store or inject another store.
-- [x] Add additive SQLite migration(s) for store cursor/bootstrap state, remote
-  versions, durable conflicts and outbox lease/retry metadata without rewriting
-  migrations 1–17 or pending envelopes.
-- [x] Build an injected authenticated-session/transport boundary and worker with
-  one-active-run guard, stale-lease recovery, bounded batches/backoff/jitter,
-  acknowledgement handling and permanent versus retryable errors.
-- [x] Build paginated pull application transactions: validate page, preserve
-  pending local work, apply echo safely, persist conflicts and advance cursor
-  only after commit.
-- [x] Add honest compact sync status/diagnostics and manual retry without exposing
-  outbox/revision jargon in ordinary flows. Offline or expired tokens pause cloud
-  work but never local completion.
+- [ ] Unknown offers Search, Add product and Scan again. Never prefill a barcode as
+  the product name. Preserve the detected code/type visibly; use minimal existing
+  required fields. Cancel has no write; exiting a dirty form asks.
+- [ ] Association is explicit and store-owned, checks current package/product
+  status, and never rebinds a claimed value silently. A variant-only association
+  remains valid but requires package choice on future sale. A known association
+  to the same target is a safe no-op/replay rather than duplicate rows.
+- [ ] Typed optional identifier input preserves EAN/UPC/QR for new scanner callers;
+  legacy Quick Add input remains compatible. New product plus optional identifier
+  plus one PRODUCT_CREATED envelope is atomic. Existing-product link plus one
+  PRODUCT_IDENTIFIER_ADDED envelope is atomic. Reuse operation ID on retries.
+- [ ] Existing catalog paths apply the same bounded input/collision checks where
+  necessary; scanner cannot be the only path protecting a new invariant. No QR
+  lossy match, UPC/EAN alias duplicate, foreign-store detail leak or guessed package.
+- [ ] Product saved/association saved state is truthful if refresh or later sale
+  fails. A newly created product is fetched by ID rather than relying on a bounded
+  search page; the existing cart and correct line configuration survive return.
+- [ ] In basket mode unknown/None of these pauses scanning, accepts minimum short
+  name and selling price (plus package/quantity when needed), adds the configured
+  line and resumes the same basket. No readable barcode still permits manual
+  quick creation. No repeated prompt/re-add from the paused detection on resume.
+- [ ] A saved temporary product is discoverable through the existing Temporary
+  filter and Complete details path after restart/days later. Enrichment preserves
+  its ID and prior sales; missing cost/stock stays unknown rather than invented.
+  Cancelled unsaved forms create nothing; cancelling a sale does not delete a
+  product already explicitly saved. Visual enrollment is not required to sell.
+- [ ] Real-SQLite rollback, restart, replay, double-tap, conflict/validation and
+  component tests pass. Keep new scan-association rollout disabled until M8-04
+  proves same-store sync compatibility; tests can explicitly enable it.
 
-**Evidence:** More → Cloud sync invokes the worker, shows waiting work/conflicts
-and offers retry; the pilot integration test proves owner IDs reach enrolment and
-the worker. Local Auth/Edge/Postgres tests passed idempotent first-owner
-enrollment and denial of a different owner; the Galaxy local-backend run
-enrolled and retried a queued restock.
+**Non-goals:** shared catalogue discovery/publishing, image enrollment, product
+merging, deletion/reassignment of existing identifiers, manufacturer batch parsing.
+**Risk:** legacy Quick Add currently hardcodes EAN; preserve existing envelopes.
+**Evidence:** none yet.
 
-**Out of scope:** final onboarding/invitation/multi-store UI.
+## M8-04 — Conflicting barcode assignments do not break synchronization
 
-## M7-03 — Synchronize completed Sale end to end
+**Status:** Ready for assigned implementation. **Blocked by:** M8-03.
+**Delivers:** two devices' new catalogue mappings converge or surface a recoverable
+conflict; safe manual sales and unrelated synchronization remain available.
+**Likely modules:** local sync materialization/conflict display, scanner exclusion
+of disputed mappings, existing server apply boundary, additive migration if needed,
+pgTAP and live Auth/Edge/PostgreSQL plus two-SQLite-client tests.
 
-**Status:** Implemented; local server integration and two-database concurrent-sale checks passed. **Dependencies:** M7-01 and M7-02.
-**Delivers:** one offline completed sale reaches the server once and returns by
-pull/echo without duplicating inventory or financial effects.
+- [ ] First reproduce the source-inspected gap with two offline same-store clients:
+  different product/identifier IDs claim one raw value, a UPC/EAN equivalent, or a
+  legacy-normalized QR collision. Exercise PRODUCT_CREATED and
+  PRODUCT_IDENTIFIER_ADDED. Record observed result before any correction.
+- [ ] Server applies at most one incompatible claim and returns explicit evidence
+  for the other using the existing protocol; derive identity from validated raw
+  data and bind it to the authorized store/variant/package. Replays do not add
+  revisions/facts. Cross-store callers cannot see another store's conflict data.
+- [ ] If needed, add the smallest server claim guard/projection as an additive
+  migration; audit historical collisions before backfill and preserve history.
+  Do not rewrite old migrations. Any new protocol/ownership/identifier-model
+  requirement returns to the coordinator before implementation.
+- [ ] On the losing client, preserve outbox/conflict evidence, products and completed
+  transactions; do not mark it synchronized or silently reassign its mapping.
+  Explicitly define and test quarantine/resolution of the conflicting identifier
+  projection so a local unique-index failure cannot wedge unrelated pull work.
+  Scanner excludes disputed identities and offers manual selection/review.
+- [ ] A rejected new-product envelope's dependent sale stays durable and visibly
+  blocked until recovery; never acknowledge it prematurely or change its snapshot
+  to another product. Prove a safe owner recovery path or return a coordinator
+  amendment before enabling association.
+- [ ] Retry, reconnect, cold-start and fresh-device bootstrap do not duplicate
+  mappings, skip unprocessed changes or resurrect an unsafe mapping. Existing
+  M7 sync/reference/history/cost/batch tests pass. Existing local unique constraints
+  and real PostgreSQL integration are part of the oracle, not mocked away.
+- [ ] Run a scan-created-product -> offline completed sale -> sync -> second client
+  lookup chain, preserving price/package/FEFO snapshots. Enable association only
+  after this gate passes. Record any exact local/server migrations used.
 
-- [x] Add normalized server sale, items, payment, optional customer/receivable,
-  inventory-event, batch-allocation and immutable cost-snapshot application from
-  versioned sale envelopes. Revalidate exact arithmetic, immutable snapshots,
-  store ownership and package/product references server-side.
-- [x] Apply sale graph, inventory/batch/cost effects, applied-operation result,
-  revision and change records in one PostgreSQL transaction.
-- [x] Make identical operation/entity replay return `ALREADY_APPLIED`; reject
-  different immutable content under reused IDs. Preserve two genuine concurrent
-  offline sales and a negative/discrepancy projection where required by D-013.
-- [x] Pull/echo into a second local database without rerunning sale effects or
-  overwriting local pending work.
+**Non-goals:** broad M7 redesign, cross-store catalogue canonicalization, automatic
+product merges or a general conflict-resolution product.
+**Risk:** unsafe ambiguity can propagate into stock/price; source inspection alone
+is insufficient evidence that the server or pull path handles it correctly.
+**Evidence:** none yet.
 
-**Evidence:** server graph migrations and local echo/conflict tests are present;
-timeout-after-commit, two-device, cross-store and real PostgreSQL cases are
-pending the integration environment.
+## M8-05 — Verify the scanner on Android and return it for independent audit
 
-**Out of scope:** voids, returns, split tender, receivable settlement.
+**Status:** Ready for assigned implementation. **Blocked by:** M8-01, M8-02, M8-03, M8-04.
+**Delivers:** a reproducible handoff with explicit source and physical acceptance.
+**Likely modules:** focused failure regression tests, device procedure/evidence,
+plan/ticket/workflow state. No unrelated features.
 
-## M7-04 — Synchronize Purchase, inventory, batch and costing facts
+- [ ] Root validation, Expo dependency check/Doctor and Android export pass. Run
+  local pgTAP/live-sync checks for M8-04. Record commands/results and exact source;
+  retain baseline M2–M7 tests and explain any legitimate fixture changes.
+- [ ] Resolve or precisely isolate the carried Galaxy A15 launch issue without
+  deleting real data. Rebuild for the native dependency; record application ID,
+  version/build/source, device/OS and development-versus-preview behavior.
+- [ ] On the physical A15, cold launch and test permission denial/grant, airplane
+  mode known/unknown/carton/package-less scans, repeated code, back/cancel,
+  background/resume and completion -> force-stop -> receipt survival. Verify
+  first-use detector availability offline after required store provisioning.
+- [ ] Test a basket of several products, repeated identical units, unknown-item
+  interruption/resume, missing price, zero recorded stock, Undo/edit, beep/mute
+  and torch. A stationary code never increments repeatedly and exactly one
+  completed sale contains the intended lines. Reopen and enrich a temporary
+  product without changing its saved sale. Record actual fast-path false-add
+  behavior before enabling it; no accuracy percentage is invented.
+- [ ] Preview works without Metro; test 200% text scale and TalkBack reachability,
+  controls not covered by keyboard/system UI, camera release and usable manual
+  flow with scanner disabled. Record speed/size observations honestly; compare
+  product-selection time with manual search rather than inventing benchmarks.
+- [ ] If device/build/tooling is unavailable, mark its gate pending/blocked and
+  return source evidence promptly. Do not claim complete physical acceptance or
+  keep repeating unchanged waits. No second phone is implied by a two-client test.
+- [ ] Update tickets, PROJECT_STATE and workflow, send a concise final handoff to
+  the coordinator and stop. Report commits, changes/migrations, passed/failed/
+  deferred checks and risks. Coordinator performs independent audit; implementer
+  does not accept its own work or begin another milestone.
 
-**Status:** Implemented; local server integration, remote purchase pull and cost/batch reconstruction checks passed. **Dependency:** M7-03.
-**Delivers:** a completed restock and its accepted M5 batch/cost extensions move
-atomically between devices without changing historical meaning.
+**Non-goals:** M9 integration, M10, M12 production visual recognition, release.
+**Evidence:** none yet.
 
-- [x] Apply completed purchase, items, optional supplier, inventory events,
-  private price observations, batch groups/operations/entries and immutable cost
-  movements/snapshots atomically from legacy/current envelope versions.
-- [x] Preserve exact D-034 quantities and D-038 rational cost values. FEFO batch
-  projection remains separate from financial costing; unknown stock and negative
-  stock remain valid first-class states.
-- [x] Define deterministic server projection/rebuild ordering for accepted
-  immutable movements and surface unresolved cost/batch coverage instead of
-  inventing certainty after concurrent device work.
-- [x] Pull purchases and dependent reference/fact rows in safe dependency order;
-  replay and echo never duplicate inventory, observations or cost.
+## Dependency and approval review
 
-**Evidence:** sale/purchase graph, cost/batch validation and deterministic
-rebuild migrations are present; real database and two-device evidence is
-pending.
-
-**Out of scope:** payables, batch financial costing, strict traceability.
-
-## M7-05 — Synchronize mutable catalogue, package and store configuration
-
-**Status:** Pilot conflict review/resolution implemented; local server stale-edit evidence passed. **Dependency:** M7-04.
-**Delivers:** catalogue/config edits use explicit versions and visible conflicts
-instead of last-write-wins.
-
-- [x] Cover product creation/identity/lifecycle, identifier addition, package
-  create/update/deactivation, preferred store package, reorder level/history and
-  supplier metadata under the approved ownership and cross-symbology uniqueness
-  rules.
-- [x] Populate and require `baseServerVersion` for existing mutable records.
-  Apply only compatible edits; return current record/version on conflict and
-  retain the original local operation plus durable conflict.
-- [x] Protect immutable package conversions/historical snapshots and stale-cart
-  sales. Concurrent deactivation or metadata change cannot erase a genuine
-  completed transaction.
-- [x] Add bounded conflict review/resolution that creates a new operation against
-  the latest version. Owner-only high-impact settings remain enforced.
-
-**Evidence:** catalogue history, conversion snapshots and durable conflict
-storage are present. Owner pilot tests prove explicit cloud/local choice,
-versioned re-enqueue, rejected-operation preservation, newer-version refusal
-and quarantine of a pending local edit. Real server authorization/isolation
-tests are pending.
-
-**Out of scope:** shared-catalogue consolidation, staff permission management.
-
-## M7-06 — Synchronize M5 reconciliation, checks and attention
-
-**Status:** Implemented; local stale-reconciliation server tests passed. **Dependency:** M7-05.
-**Delivers:** batch classification, adjustments, blind checks and attention state
-retain their audit meaning across devices.
-
-- [x] Apply inventory adjustments, batch classifications and finalized
-  reconciliation graphs with actor/source links, immutable submissions,
-  inventory/batch/cost effects and one applied operation.
-- [x] Recheck inventory-event and batch-operation watermarks. A stale physical
-  count becomes a conflict and never overwrites intervening work.
-- [x] Synchronize check and attention settings with optimistic versions;
-  synchronize assignments, attempts and snoozes as auditable facts with stable
-  idempotency and owner authorization.
-- [x] Preserve inferred-versus-physical evidence labels, unknown composition,
-  actual expired removal and condition-driven attention semantics on pull.
-
-**Evidence:** local server stale-count tests passed. The M5 pull regression
-materializes receipt and physical groups, unknown residual, attention snooze
-and expired-stock removal as a real inventory event. A required materializer
-dependency-order correction passed a failing-before/passing-after test.
-
-**Out of scope:** M11 staff assignment/reviewer policy, background notifications.
-
-## M7-07 — Synchronize money-out and prove consistent bootstrap
-
-**Status:** Source and local-server restore checks pass under D-045; handoff commit `9c230f1d641edc4b8aae5dc05a7f54977fec4edc` has independent source acceptance. Physical release checks remain. **Dependency:** M7-06.
-**Delivers:** expenses/withdrawals deduplicate and a newly authorized installation
-can reconstruct the accepted M1–M6 private store state.
-
-- [x] Apply expenses and owner withdrawals as immutable owner-authorized facts;
-  preserve exact store currency, actor/device/time and separation from purchases
-  or each other.
-- [x] Build a consistent paginated bootstrap snapshot with its matching revision.
-  Restore dependencies, immutable history, current projections, mutable versions
-  and sync metadata into a fresh SQLite database, then start incremental pull.
-  The former latest-document query lost earlier creation facts after edits;
-  operation-history pagination now preserves them in local source tests.
-- [x] Register a later device only for an authorized member. Interrupted
-  bootstrap restarts safely; a failed snapshot never becomes the active store.
-- [x] Protect unsynced local work during full resync/logout/reset paths and state
-  clearly that only server-acknowledged records are recoverable after uninstall.
-
-**Evidence:** D-045 server-authoritative reference context and additive SQLite
-staging, a different-device multi-page M1–M6 restore, interrupted/rollback
-tests, delayed pull from newly registered and later-revoked origins, 92 pgTAP
-assertions, and live local Auth/Edge/Postgres checks passed. See
-`docs/engineering/M7_INDEPENDENT_AUDIT.md` for the independent trace and
-physical limits.
-
-**Out of scope:** final multi-store selector, invitation UI, production recovery
-support process.
-
-## M7-08 — Harden, validate and stop for independent audit
-
-**Status:** Independently accepted for local source scope after committed D-045 correction and Git handoff `9c230f1d641edc4b8aae5dc05a7f54977fec4edc`. Remote CI and physical two-phone checks remain release gates. **Dependency:** M7-01 through M7-07.
-**Delivers:** a recoverable M7 handoff with actual server integration evidence.
-
-- [x] Run source and local-server scenarios in `OFFLINE_SYNC.md`: restart/crash boundaries,
-  commit-before-ack, pagination, unsupported versions, revoked user/device,
-  tampered cross-store IDs, duplicate/reused IDs and two-device conflicts.
-- [x] Run Supabase reset/migrations, database lint/advisors where available,
-  pgTAP/RLS and Edge Function integration tests against local Docker or an
-  explicitly authorized isolated hosted development project. Do not substitute
-  mocks for this gate.
-- [x] Run focused suites, full `npm run validate`, Expo Doctor, dependency check,
-  Android export, workflow/index/artifact/migration checks and `git diff --check`.
-- [x] Update tickets, PROJECT_STATE and M7 workflow with actual commits/commands,
-  server migrations, residual risks and clean branch/HEAD/status. Stop for
-  independent audit; do not start M8, push, deploy or claim physical-device work.
-
-**Current evidence:** audited source handoff committed as
-`9c230f1d641edc4b8aae5dc05a7f54977fec4edc` on `feat/m7-offline-sync`; the
-working tree has no staged or unstaged changes except generated root
-`app.json`, which remains untracked and excluded. Coordinator
-`npm run validate` passed 515 tests across 57 suites, strict typecheck and
-zero-warning lint. `npm run test:sync:local`
-and `npx supabase test db` passed (92 assertions/10 files). Prior Expo Doctor
-21/21, dependency check and Android export passed. Local database lint and
-security advisors passed in Luna's D-045 handoff; remote CI has not run.
-Galaxy A15 local-backend enrollment, queued-restock retention and retry passed
-earlier; the installed app's later failure to open needs diagnosis. A physical
-sale and second-device phone pull remain unverified.
-The scenario ledger is supported by `m7Sync.test.ts` (lease/restart, pull
-cursor, interrupted bootstrap, conflicts), contract version tests,
-`m7ConcurrentCosting.test.ts` (two independent local databases),
-`m7PullReferences.test.ts` (late origins), pgTAP authorization/snapshot tests
-and the live local script (identical replay, conflicting ID reuse, cross-store
-denial, stale cross-device reconciliation). These are automated source/local
-server checks, not physical two-phone or release evidence.
-The staged `git diff --cached --check` reported one extra blank line at EOF in
-`apps/mobile/__tests__/m7Pilot.test.ts`; it was preserved with the reviewed
-source change and did not alter test behavior.
-
-**Out of scope:** production Supabase migration, App Store/Play deployment,
-physical-device release acceptance, M8 code.
-
-## Dependency frontier
-
-```text
-M6 accepted -> M7-01 -> M7-02 -> M7-03 -> M7-04
-            -> M7-05 -> M7-06 -> M7-07 -> M7-08 -> independent audit
-```
-
-The coordinator owns plan/ticket decisions and independent acceptance. One M7
-implementation task owns this checkout sequentially. M8 planning may occur in a
-separate worktree, but production M8 and shared-contract edits wait for accepted
-M7.
+Coordinator checked five bounded outcomes against the actual code. Dependencies:
+M8-01 -> {M8-02, M8-03}; M8-03 -> M8-04; all four -> M8-05. Serial execution
+is an ownership policy, not an invented dependency between M8-02 and M8-03.
+Founder delegated ticket granularity and approved the clarified scanner/native/
+contract/navigation plan on 2026-09-29. Implementer: Astra low in one separate
+chat; coordinator reviews only after handoff. No ticket is completed yet.

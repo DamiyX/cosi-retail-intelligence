@@ -1,4 +1,10 @@
+<!-- M8 approval checkpoint 2026-09-29: founder approved the clarified plan, DESIGN and M8-01..05 (D-046). Earlier pending-review wording below is historical. One Astra low implementation chat; coordinator reviews after handoff only. -->
 # Product Design Gate
+
+**M8 checkpoint, 2026-09-28:** scanner/global-Scan states are proposed in
+`DESIGN.md`; technical boundaries and options are in
+`../engineering/M8_SCANNER_PLAN.md`. This proposal awaits founder review before
+UI implementation. Earlier milestone approvals remain valid for their scope.
 
 **Status:** Required before substantial product UI implementation  
 **Current design:** `DESIGN.md` approved as the whole-MVP direction and M2 implementation baseline on 2026-09-14

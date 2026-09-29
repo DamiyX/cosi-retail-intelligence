@@ -26,7 +26,7 @@ Use these principles:
 
 ## MVP Information Architecture
 
-The baseline primary navigation is:
+The implemented pre-M8 primary navigation is:
 
 - **Today:** current store, high-value shortcuts, honest operational summaries,
   and actionable sync/recovery status.
@@ -36,7 +36,7 @@ The baseline primary navigation is:
 - **More:** restocking, inventory, expenses/withdrawals, transaction history,
   staff, settings, and diagnostics until evidence justifies a dedicated tab.
 
-The scanner is a contextual action from Sell and Products rather than a fifth
+This historical baseline places the scanner as a contextual action from Sell and Products rather than a fifth
 permanent tab. M2 implements the Products area only. Today, Sell, and More may
 remain clearly labelled placeholders until their milestones; the M0 Welcome and
 About routes are technical scaffolding and may be removed when the product shell
@@ -45,6 +45,10 @@ lands.
 This navigation is a baseline for implementation, not a claim that every later
 screen is fully designed. Later milestone tickets must expand this file before
 adding their substantial user flows.
+
+PC-02 requests a different M8 entry/navigation pattern. The proposed M8 section
+below defines that transition; the implementation above remains current until
+the M8 design gate is approved and its navigation tests pass.
 
 ## M2 Catalogue Flow
 
@@ -431,3 +435,95 @@ behavior, and accessibility details here and link the corresponding tickets.
 Design JSON is intentionally absent because no current generator or token
 pipeline consumes it. Create it only when a real consumer exists, and generate
 it from this approved source.
+
+## M8 Scanner and Global Entry — Approved, 2026-09-29
+
+**Status:** Founder approved 2026-09-29 (D-046), including PC-08. Implements the
+PC-02 direction; earlier milestone navigation describes the pre-M8 application. Technical scope: `../engineering/M8_SCANNER_PLAN.md`.
+
+### Entry and navigation
+
+- Keep Today, Products and More as primary tabs. Move selling to a full-screen
+  `/sell` route, preserving its URL and manual functionality. Do not add a Reports
+  tab in this change. Sale history stays accessible from manual selling and More.
+- One labelled **Scan** floating action appears on Today, Products list and More
+  only. It opens the sale session in camera mode. Use safe-area spacing and list
+  bottom padding so the control cannot cover content. Hide while the keyboard
+  is open or a focused form/transaction is shown; avoid a global Add/+ control.
+- **Sell manually** remains available from Home and More. The scanner always
+  offers **Search products**. Camera permission is optional for manual selling.
+- Inside a sale, **Scan next item** is contextual and explicitly opens capture.
+  Keep the same mounted cart across camera/search/Quick Add. Product detail has
+  **Associate barcode** with a product-scoped return path, never an implicit sale.
+- Offer **Single item** and **Basket** modes per PC-08. Basket scanning stays
+  open between accepted items, shows the last-added name/package, running count
+  and total, and an easy Undo/edit path plus Review and pay. A known exact code
+  with explicit package/price may add one unit; incomplete/uncertain items pause
+  for input. Do not send the retailer back to the cart after every known item.
+- Keep existing styles, colors and components. Use a text label with any scan
+  icon, at least 48dp targets, readable focus order and 200% text-scale layouts.
+  Avoid icon-only fallback controls, continuous animation or a new design system.
+
+### Camera and result states
+
+| State | What the retailer sees and can do |
+| --- | --- |
+| No ready local store | Existing setup or retry; preserve corrupt-store protection |
+| First permission request | Brief purpose, Allow camera and Search products; ask on explicit entry |
+| Denied, can ask again | Enable camera or Search products |
+| Permanently denied | Open settings or Search products; no repeated permission loop |
+| Camera starting | Short progress state plus cancel/search; one active preview |
+| Ready | Frame one barcode, optional torch, Search products and Back |
+| Resolving | Pause repeated detections; no line/write yet; keep cancel available |
+| Strong match | Single mode: quantity/price confirmation. Basket: add one only when package/price are explicit and valid, show last addition and allow Undo/edit |
+| Package unknown | Explicit available package choices; do not silently assume a piece/carton |
+| Ambiguous/conflicted | Small safe choice set or manual search; no automatic association repair |
+| Unknown | Code text, Search and link, Add product or Scan again |
+| Recorded stock is zero | Identify the known item, display recorded balance and follow existing sale rules |
+| Invalid/unsupported/too long | Plain explanation and manual search; do not truncate identity |
+| Local read/camera failure | Retry and manual search; do not describe an error as an unknown product |
+| Association save failed | Keep entries/cart; explain nothing saved when atomic transaction failed |
+| Product saved, refresh failed | Say product is saved and offer retry; do not create a duplicate |
+| Scanner disabled | Manual product selection works without mounting native camera |
+
+Single mode uses the existing sale-line form for quantity and price. Basket mode
+uses the same validations to add a complete known line and continue scanning;
+it never completes payment automatically. Unknown/missing-price/package input
+returns to that same basket after completion. One optional beep plus visible
+feedback follows a successful addition; provide mute and a torch control when
+available. No microphone permission is needed for this experience.
+
+Hold a detection latch: the same stationary barcode cannot add repeatedly or
+rearm merely because time passed or the app resumed. A different accepted code,
+explicit Scan same item again or quantity edit expresses a new intention. Any
+more automatic removal/re-entry mechanism requires real-device proof. This
+supersedes the first proposal's confirm-every-item rule. Fast addition remains
+subject to actual safety evidence before rollout.
+
+Quick creation asks for a short name and selling price, plus unit/quantity where
+needed; full cost/stock/photo setup is deferred. Products -> Temporary should
+make **Complete details** easy to find after minutes or days. The saved product
+persists separately from the sale draft. Enrichment keeps its ID and historical
+sale snapshots; it does not invent historical cost or initial inventory.
+
+### Recovery, privacy and correctness
+
+Back/cancel from the camera preserves the cart. Dirty line/Quick Add/cart exits
+retain explicit discard confirmation on header, hardware and system navigation.
+Backgrounding stops preview; resume starts a fresh capture generation so a late
+result cannot modify a newer session. Drafts remain in memory under D-037;
+completed sales retain their existing durable receipt/restart behavior.
+
+The current store's price is obtained from the catalogue, never from the QR or
+camera. QR is treated as data, never a web-link action. Do not request microphone
+permission, save camera frames, or upload images for this barcode milestone.
+Expiry groups and FEFO remain inventory concerns; a product scan does not prove
+which physical expiry group was picked. Batch OCR and strict lot verification
+remain future capabilities.
+
+### Design acceptance evidence
+
+Automated navigation/state tests plus physical A15 verification must cover the
+state table, repeated scans, all exit paths, text scale, TalkBack, camera release,
+offline scan-to-sale and receipt survival. Compare time/errors with manual
+search. No screenshots or physical passes are claimed by this specification.

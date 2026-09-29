@@ -1,6 +1,7 @@
+<!-- M8 approval checkpoint 2026-09-29: founder approved the clarified plan, DESIGN and M8-01..05 (D-046). Earlier pending-review wording below is historical. One Astra low implementation chat; coordinator reviews after handoff only. -->
 # Product Change / UX Backlog and Impact Review
 
-**Updated:** 2026-09-19. **Owner:** coordinating product/planning/audit task.
+**Updated:** 2026-09-28. **Owner:** coordinating product/planning/audit task.
 **Status:** PC-03/PC-05/PC-06 are accepted in M5; PC-01/PC-01a and the M6 Home
 promotion of PC-05 are accepted in M6. Physical release-readiness checks remain
 carried. Future UX ideas retain their documented gates.
@@ -26,7 +27,7 @@ catalogue/inventory enrichment must preserve immediate sell-first value.
 | --- | --- | --- |
 | PC-01 | Live Today count and sales value after completed sales; sales value is not profit or cash received | Accepted M6 source; stored completed totals over the store-local day, full-range exact query and focus/resume/rollover refresh |
 | PC-01a | Optional one popular product; deeper rankings in Reports | Accepted M6 source after audit correction: “Most frequently sold today” by distinct completed sales containing product with stable ties |
-| PC-02 | One prominent accessible floating Scan on suitable major surfaces; no second global product + and no permanent Sell tab once scanner is delivered | M8 navigation gate; preserve manual/search fallback, dirty sale state/history/deep links and accessible reachability; hide in scanner/cart/payment/restock/count/edit/keyboard flows |
+| PC-02 | One prominent accessible floating Scan on suitable major surfaces; no second global product + and no permanent Sell tab once scanner is delivered | M8 proposal prepared 2026-09-28 in M8_SCANNER_PLAN and DESIGN; founder design review pending. Preserve manual/search fallback, dirty sale state/history/deep links and accessible reachability; hide in scanner/cart/payment/restock/count/edit/keyboard flows |
 | PC-03 | Blind-first count -> compare -> optional recount -> confirm difference/reason -> real reconciliation; matching check has no zero event | Approved M5, D-040; retains first/recount facts and protects event/batch watermarks while trading |
 | PC-03a | Rotate quick/easy, moving and not-recently-checked stock using extensible policy | Approved simple M5 selector; advanced risk/value/discrepancy/recent-restock/random scoring future, no permanently fixed three classes |
 | PC-03b | Default around three checks/day, configurable/pausable, shop-local morning/afternoon/preclosing intent | Approved M5 foreground due windows/settings; unfinished work survives day rollover; background notification delivery separately scoped |
@@ -37,6 +38,70 @@ catalogue/inventory enrichment must preserve immediate sell-first value.
 | PC-05b | Expiry attention from surviving recorded stock, not old receipt reminders | Approved first-pilot M5 list, M6 Home; inferred remaining wording, month/day precision, unknown coverage, actual removal/reconciliation actions |
 | PC-06 | Multiple expiry groups per product; optional printed numbers, internal IDs, automatic assumed FEFO without ordinary checkout confirmation | Approved D-039; M5 receipt/sale extension, unknown residual, progressive physical classification; costing stays D-027/D-038/D-040 |
 | PC-07 | Important replacement-cost/personal/market movements on Home | M9 personal/M10 market; real comparable observations, coverage/freshness/consent; no simulation in M5/M6 |
+| PC-08 | Scan while selling; single-item and continuous basket modes; progressively complete catalogue and guided visual enrollment | Founder clarification 2026-09-28 below; barcode/QR sale, basket mode, feedback and temporary completion path in M8 proposal; visual/OCR/guided enrollment in Recognition Track B and M12 |
+
+## PC-08 — Founder scanner experience clarification, 2026-09-28
+
+This records the founder's detailed spoken intent, summarized rather than a
+verbatim transcript. M8 technical/design/ticket specifics remain in their own
+authoritative documents. The explanation clarified the existing sell-first
+strategy and added a continuous basket UX absent from the first M8 draft.
+
+- One coherent scanner should eventually identify a saved store product through
+  its registered barcode, registered QR, or appearance. A barcode need not exist
+  for the eventual visual path. A code being readable alone does not prove that
+  its stored mapping is correct; never promise 100% identity accuracy.
+- Visual candidates must distinguish meaningful variants and package sizes,
+  including ordinary Coke versus Zero, 35cl versus 50cl, sachet/pack/carton.
+  Anniversary artwork may be another reference for the same variant rather than
+  an automatic new SKU. OCR may help read size/name text after measured testing.
+  On uncertainty show a small set (for example three) and None of these/search.
+- An active known product with zero recorded stock remains identifiable. Show
+  Recorded stock: 0 or a similarly honest notice; do not say Not found. Existing
+  negative-stock/manual selling rules still apply. Deactivated records follow
+  explicit lifecycle review; do not erase history or reactivate automatically.
+- Unknown means COSI cannot safely link the scan to a saved item. Offer Add
+  product and sell with minimum information (currently short name, selling price,
+  and unit/quantity when needed). Store the code when safe. The completed sale is
+  durable, while the product may remain temporary/Needs details for hours or days.
+  Make pending products easy to revisit using the existing Temporary filter;
+  add cost, other details and future visual setup later on the same product ID.
+  Never force full catalogue onboarding before checkout, invent initial stock,
+  substitute guessed cost, duplicate products or rewrite old sale snapshots.
+- Single scan: identify one product, change quantity if buying several identical
+  units, then complete the sale. Basket scan: scan different items one after
+  another into one running cart and pay once. It does not mean recognizing an
+  entire basket/shelf in one image and is unrelated to expiry batches.
+- In basket mode, an exact unambiguous code with explicit sellable package and
+  known selling price can add one unit and keep scanning. Show last-added item,
+  quantity/total, easy undo/edit and brief optional beep/visual feedback. Unknown,
+  missing-price/package and ambiguous results pause for input, then resume the
+  same basket. Never complete payment automatically or count repeated frames as
+  repeated purchases. A quantity edit or explicit repeat action handles identical
+  units safely. A mute control must not remove visual confirmation.
+- Future visual enrollment should feel like moving the camera around the item,
+  with useful views captured automatically when possible. No mandatory fixed
+  number of manual photos. Give truthful hold-steady/light/framing guidance,
+  torch control, and progress based on accepted useful views, not elapsed time.
+  Stop when enough diverse clear evidence exists; allow retry/cancel/save for
+  later. Do not fake knowledge of object angle/distance or guarantee facial-ID
+  style capture works equally well for all retail objects without experiments.
+- Product-list thumbnail and recognition reference images serve different jobs.
+  One good thumbnail does not necessarily make visual recognition reliable.
+  Capture a bounded useful reference set; do not retain a continuous video or
+  every frame. Guided enrollment must never become a prerequisite for a first sale.
+- Unbranded shoes/bags may be distinguishable from local references; physically
+  identical goods cannot reveal invisible brand/grade/price differences from an
+  image. Offer choices or a store label/manual selection rather than guessing.
+
+**Milestone disposition:** M8 adds the barcode/QR basket behavior, feedback,
+zero-stock identity and temporary-product continuation requirements to its
+proposal. In M8 an item with no readable registered code can still be sold by
+manual quick entry; appearance recognition is not claimed. Track B/R1–R6 tests
+visual retrieval, adaptive guided capture and useful OCR; M12 integrates proven
+capabilities. The existing model/runtime and consent/data-provenance gates stay
+in force. No new recognition engine or image-retention feature is authorized by
+writing this clarification.
 
 ## M4 impact — resolved
 
@@ -95,15 +160,15 @@ schema/UX details live in approved authorities, not copied into this backlog.
 - M7 must preserve and synchronize the completed M5/M6 envelopes under
   `OFFLINE_SYNC.md`, including legacy/extended sale and purchase payloads,
   batch/reconciliation facts, mutable settings, expenses and withdrawals.
-- M8 owns PC-02 and scanner/barcode application integration after the M7 source
-  contract is accepted. Founder deferred Astra/coordinator M8 planning until this
-  coordinator task is explicitly switched to Astra. When resumed, any parallel
-  Recognition Track B work uses separate branches/worktrees and does not edit
-  shared schema or contracts concurrently.
-- Production M8 and M9 remain sequential in the core app. Recognition R&D is the
-  parallel track; M9 must not begin in the same checkout while M8 is changing
-  navigation, catalogue or scanner contracts.
+- M8 owns PC-02 and scanner/barcode application integration. M7 local source is
+  accepted and the founder resumed coordinator M8 planning on 2026-09-28. The
+  proposal and tickets are prepared; implementation approval remains pending.
+  Recognition Track B uses separate branches/worktrees and does not edit shared
+  schema or contracts concurrently.
+- The founder authorized isolated M9 work while M8 was deferred. Its final M7
+  integration/audit remains separate; no concurrent editing of catalogue, sync,
+  navigation or recognition contracts is authorized by that exception.
 
-M7 tickets are now published and include every accepted M5/M6 envelope. Next:
-establish the non-production Supabase integration environment and assign M7
-implementation. Do not implement PC-02, PC-04 or PC-07 inside M7.
+M7 local source and integration evidence is accepted. Next: review the M8
+proposal and then assign only its approved scope. PC-04 staff accountability
+and PC-07 market-price signals remain outside M8.

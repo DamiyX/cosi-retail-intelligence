@@ -1,3 +1,4 @@
+<!-- M8 approval checkpoint 2026-09-29: founder approved the clarified plan, DESIGN and M8-01..05 (D-046). Earlier pending-review wording below is historical. One Astra low implementation chat; coordinator reviews after handoff only. -->
 # COSI Project Context and Decision Packet
 
 **Status:** Active  
@@ -24,11 +25,12 @@ M0–M6 source/automated scope is independently accepted. M5 added minimal
 batch-aware expiry, assumed FEFO, blind reconciliation, guided owner checks and
 attention. M6 added owner-only expenses/withdrawals and truthful Home/Today.
 Physical/release gates remain carried and native/release readiness is not yet
-approved. M7 runtime code is present on `feat/m7-offline-sync`; local PostgreSQL,
-endpoint and D-044 stale-count checks pass, while the rebuilt-APK Galaxy gate
-remains open. M9 source work exists separately on `plan/m9-price-intelligence`
-and awaits integration with accepted M7. The coordinator owns tickets and
-independent acceptance; M8 remains deferred.
+approved. M7 local source is accepted at `c817edb`, including D-044/D-045 and
+local integration evidence. M8 planning is now active in `COSI-m8-planning` on
+`plan/m8-unified-scanner`, based on that accepted commit. The plan and five tickets
+are proposals awaiting founder implementation/design approval. M9 source work
+exists separately on `plan/m9-price-intelligence` and awaits final M7 integration
+and audit. The coordinator owns tickets and independent acceptance.
 
 ## Product Snapshot
 
@@ -79,20 +81,20 @@ partial measure, never full profit or P&L.
 
 ## Current Priorities
 
-1. Implement M7 under `M7_OFFLINE_SYNC_PLAN.md` and tickets M7-01 through M7-08.
-   Cover all accepted M2–M6 outbox envelopes, store/device authorization,
-   idempotent push, revisioned pull, conflicts and bootstrap. A real disposable
-   PostgreSQL/Supabase integration run is mandatory before acceptance.
+1. Review `M8_SCANNER_PLAN.md`, proposed DESIGN M8 states, tickets M8-01 through
+   M8-05 and `.agents/workflows/m8-unified-scanner.json`. Implementation is not
+   yet assigned. Include focused identifier-collision sync evidence before new
+   scanner associations are accepted; do not broadly reopen M7.
 2. Complete the explicitly deferred M3 physical-device/offline-sale,
    development-client/Metro, large-text, and second-laptop checks before any
    external beta/native-release claim; preserve the M1/M2 Galaxy evidence as
    historical evidence only.
 3. Continue validating useful retailer workflows early instead of building all
    future infrastructure at once.
-4. Keep M8 scanner/recognition planning coordinator/Astra-owned. Founder
-   explicitly deferred it until this task is switched to Astra. Production M8
-   and shared contract edits wait for accepted M7; production M9 remains after
-   accepted M8.
+4. Keep M8 planning coordinator-owned and confirm the founder's M8 implementer
+   selection before creating a new chat. M9 was explicitly allowed to proceed
+   in isolation during the M8 deferral. Coordinate shared contract edits and
+   reconcile branches deliberately; no simultaneous writers in one checkout.
 
 ## Decision Budget
 
@@ -111,9 +113,9 @@ partial measure, never full profit or P&L.
 
 - main is the canonical accepted branch; task branches carry active work.
 - The temporary codename may change, so domain names remain brand-neutral.
-- EAS cloud builds are linked. M7 needs either Docker-backed local Supabase or an
-  explicitly authorized isolated hosted development project; neither is active
-  at this checkpoint.
+- EAS cloud builds are linked. Docker-backed local Supabase was used for accepted
+  M7 integration evidence. Recheck availability before running future checks;
+  that evidence does not authorize deployment or mutation of a hosted project.
 - M0 screens are a technical navigation shell, not approved product design.
 - The deferred second-laptop setup check remains required before external beta
   readiness.

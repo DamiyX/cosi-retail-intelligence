@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "task_id": "m8-unified-scanner",
+  "workflow_id": "build-feature",
+  "mode": "implement",
+  "status": "in_progress",
+  "current_state": "approved-awaiting-implementer-start",
+  "completed_states": [
+    "accepted-m7-baseline-inspected",
+    "existing-m8-worktree-fast-forwarded",
+    "scanner-and-navigation-impact-reviewed",
+    "ticket-granularity-and-dependencies-reviewed",
+    "founder-m8-plan-approved"
+  ],
+  "owner": {
+    "agent": "coordinating-planner-independent-auditor",
+    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
+    "worktree": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning"
+  },
+  "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
+  "lease": null,
+  "evidence": [
+    {
+      "kind": "inspection",
+      "source": "c817edb; docs/engineering/M8_SCANNER_PLAN.md",
+      "result": "Inspected real catalogue/identifier commands, migrations 1-23, sale/draft/navigation ownership, M7 server apply/materialization and approved scanner sources. No M8 runtime code implemented.",
+      "observed_at": "2026-09-28T17:00:34Z"
+    },
+    {
+      "kind": "planning",
+      "source": "tickets.md",
+      "result": "Five coordinator-reviewed proposed tickets; M8-01 unlocks M8-02 and M8-03; M8-03 unlocks M8-04; all precede M8-05. Execution remains sequential.",
+      "observed_at": "2026-09-28T17:00:34Z"
+    },
+    {
+      "kind": "bounded-research",
+      "source": "https://docs.expo.dev/versions/v57.0.0/sdk/camera/; https://docs.expo.dev/guides/permissions/; https://support.gs1.org/support/solutions/articles/43000734386-are-all-gtins-unique-numbers-",
+      "result": "Checked SDK-matched Camera documentation, native permission/lifecycle constraints and GTIN representation. No visual model/runtime selected.",
+      "observed_at": "2026-09-28T17:00:34Z"
+    },
+    {
+      "kind": "planning-verification",
+      "result": "Workflow/index schema validation passed; gate graph is acyclic; artifact paths exist; five pending tickets; M7 archive matches baseline Git blob; documentation-only scope and git diff --check passed. No runtime tests run.",
+      "source": "PowerShell Test-Json; workflow/artifact inspection; git hash-object; git diff --check",
+      "observed_at": "2026-09-28T17:03:10Z"
+    },
+    {
+      "kind": "founder-clarification",
+      "result": "PC-08 records scan-while-selling, single/basket modes, safe continuous additions, unknown-item pause/resume, temporary-product completion, beep/torch and zero-stock identity. Guided visual multi-view enrollment/OCR stays Track B/M12. Plan/design/tickets updated; no implementation approval inferred.",
+      "source": "docs/product/PRODUCT_CHANGE_BACKLOG.md; docs/engineering/M8_SCANNER_PLAN.md; tickets.md",
+      "observed_at": "2026-09-28T17:55:15Z"
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "m7-source-baseline",
+      "claim": "M8 uses the accepted M7 local-source baseline.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [],
+      "verification": {
+        "kind": "inspection",
+        "procedure": "Inspect base commit, M7 audit and archive.",
+        "success_condition": "Accepted base with remaining release gates explicit."
+      },
+      "evidence": [
+        {
+          "result": "Accepted M7 source baseline c817edb; prior coordinator validation is recorded in M7_INDEPENDENT_AUDIT and archived M7 ledger.",
+          "source": "docs/engineering/M7_INDEPENDENT_AUDIT.md",
+          "observed_at": "2026-09-28T17:00:34Z"
+        }
+      ],
+      "limitations": [
+        "M7 physical and release-readiness gates remain carried."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m8-plan-approval",
+      "claim": "Founder approves proposed scanner UX, native dependency and contract before implementation.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "m7-source-baseline"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Review M8_SCANNER_PLAN and proposed DESIGN section.",
+        "success_condition": "Approval recorded without inferring it from document creation."
+      },
+      "evidence": [
+        {
+          "result": "Founder approved revised M8 plan including PC-08, design and native/service boundaries; D-046 recorded.",
+          "source": "docs/decisions/DECISION_LOG.md",
+          "observed_at": "2026-09-29T07:38:35.786Z"
+        }
+      ],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m8-source",
+      "claim": "M8-01 through M8-03 behavior and regressions pass.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m8-plan-approval"
+      ],
+      "verification": {
+        "kind": "test",
+        "procedure": "Run ticket-focused contract, SQLite, UI/navigation tests and root validation.",
+        "success_condition": "All specified source acceptance criteria pass with actual command evidence."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m8-sync-safety",
+      "claim": "New identifier associations survive sync, conflict and restart without unsafe matching.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m8-source"
+      ],
+      "verification": {
+        "kind": "test",
+        "procedure": "Run M8-04 collision reproduction/regressions with actual PostgreSQL and two SQLite clients.",
+        "success_condition": "Conflicts are explicit, unrelated sync progresses, valid mappings survive replay/bootstrap."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m8-native-device",
+      "claim": "Barcode camera and offline sale journey work on the physical Galaxy A15.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m8-source",
+        "m8-sync-safety"
+      ],
+      "verification": {
+        "kind": "test",
+        "procedure": "Execute M8-05 using recorded rebuilt APK and device details, including carried launch diagnosis.",
+        "success_condition": "Known/unknown/package scans, permissions, back, large text, preview offline and completed-sale restart pass."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m8-independent-audit",
+      "claim": "Coordinator independently reviews completed source and correction evidence.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m8-source",
+        "m8-sync-safety"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Review stopped implementer handoff, code/migrations/diff and actual acceptance evidence.",
+        "success_condition": "No unresolved source findings; physical/release limits reported separately."
+      },
+      "evidence": [],
+      "limitations": [],
+      "blocker": null,
+      "waiver": null
+    }
+  ],
+  "artifacts": [
+    "docs/engineering/M8_SCANNER_PLAN.md",
+    "tickets.md",
+    "docs/design/DESIGN.md",
+    "docs/engineering/PROJECT_STATE.md",
+    "docs/engineering/tickets/M7_OFFLINE_SYNC.md"
+  ],
+  "approvals": [
+    {
+      "scope": "ticket-granularity-and-dependency-judgment",
+      "status": "delegated-to-coordinator",
+      "basis": "Founder explicitly delegated technical ticket sizing earlier; repository TICKETING permits coordinator review."
+    },
+    {
+      "scope": "m8-implementation-native-contract-design",
+      "status": "approved",
+      "basis": "Founder explicitly approved revised five-ticket plan 2026-09-29 and requested separate Astra low implementation with sequential coordinator medium review."
+    },
+    {
+      "scope": "sequential-implementation-and-report-back",
+      "status": "approved",
+      "model": "gpt-6-astra",
+      "reasoningEffort": "low",
+      "coordinatorEffortPreference": "medium",
+      "basis": "Founder request 2026-09-29 authorizes implementer-to-coordinator completion/blocker messages."
+    }
+  ],
+  "blockers": [
+    "Carried Galaxy launch failure must be resolved or isolated before M8 physical acceptance; it does not block planning."
+  ],
+  "next_action": "Assigned gpt-6-astra low implementer records its chat ID and works M8-01..05. Stop edits, save handoff, notify coordinator 01a098ef-d830-7531-bca7-2d66b0a5b587 and stop. Coordinator does not work/poll alongside implementation.",
+  "created_at": "2026-09-28T17:00:34Z",
+  "updated_at": "2026-09-29T07:38:35.786Z",
+  "archived": false
+}

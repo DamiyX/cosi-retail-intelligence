@@ -115,6 +115,7 @@ When a major decision changes, update the affected source-of-truth document too.
 | D-042 | M7 authenticated sync and PostgreSQL application boundary | ACTIVE |
 | D-044 | Reject cross-device stale physical reconciliations | ACTIVE |
 | D-045 | Restore authoritative historical actor and device references before bootstrap replay | ACTIVE |
+| D-046 | M8 barcode scanner, basket flow and camera/service boundary | ACTIVE |
 
 ---
 
@@ -1404,6 +1405,37 @@ demonstrate safe idempotent retry, per-store ordering, RLS isolation and
 recoverable pull without disproportionate complexity.
 
 ---
+
+## D-046 — M8 Barcode Scanner, Basket Flow and Camera/Service Boundary
+
+**Status:** ACTIVE  
+**Approved:** 2026-09-29 by the founder after review and PC-08 clarification.
+
+Implement M8-01 through M8-05 under M8_SCANNER_PLAN.md and the M8 section of
+DESIGN.md. Use the SDK-compatible Expo Camera adapter and provider-independent
+RecognitionService result semantics (STRONG / AMBIGUOUS / UNKNOWN), with native
+and store/database types kept out of the shared contract. Barcode/QR is the
+initial implementation; no final visual model/runtime or image enrollment is
+approved by this decision.
+
+PC-02 global Scan replaces the visible Sell tab while retaining manual selling,
+the /sell route, history and all draft exit protections. PC-08 provides single
+item and continuous basket modes. Automatic addition is allowed only for exact,
+unconflicted identity with explicit valid package and known price; missing data
+pauses for input. Duplicate-frame suppression, undo and physical verification
+gate the fast path. Completed sales remain explicit, atomic and durable.
+
+Reuse current catalogue/outbox commands, preserve typed identifiers and permit
+temporary product enrichment after selling. Recorded zero stock does not erase
+identity. Reproduce and correct the bounded identifier-claim sync gap under
+OFFLINE_SYNC section 29 before enabling new associations. New ownership/protocol
+semantics or broad schema redesign require a coordinator amendment.
+
+Expo Camera is preferred over an additional high-performance camera stack for
+this barcode scope. Visual/OCR/guided enrollment remain Track B/M12. The founder
+selected one separate Astra implementation chat at low effort, with sequential
+coordinator review after handoff; that staffing preference is not an architecture
+dependency. No push, deployment or release approval is implied.
 
 ## D-044 — Reject Cross-Device Stale Physical Reconciliations
 

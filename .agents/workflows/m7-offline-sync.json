@@ -243,7 +243,9 @@
           "observed_at": "2026-09-28T15:52:25Z"
         }
       ],
-      "limitations": ["One Galaxy with local Supabase passed queued-restock retry; a physical sale and two-phone same-product convergence were not run. Generated root app.json remains untracked and excluded. The staged diff check reported one extra blank line at EOF in apps/mobile/__tests__/m7Pilot.test.ts."],
+      "limitations": [
+        "One Galaxy with local Supabase passed queued-restock retry; a physical sale and two-phone same-product convergence were not run. Generated root app.json remains untracked and excluded. The staged diff check reported one extra blank line at EOF in apps/mobile/__tests__/m7Pilot.test.ts."
+      ],
       "blocker": null,
       "waiver": null
     }
@@ -281,7 +283,6 @@
   "blockers": [],
   "next_action": "Begin Astra-led M8 planning from the recognition source of truth in an isolated task. Reconcile isolated M9 work against final M7 before M9 acceptance. Keep generated root app.json excluded; diagnose the Galaxy app-opening issue and carry physical two-phone, remote CI and second-laptop checks as release gates.",
   "created_at": "2026-09-19T02:59:49.0107167Z",
-  "updated_at": "2026-09-28T16:11:38Z",
-  "archived": false
+  "updated_at": "2026-09-28T17:00:34Z",
+  "archived": true
 }
-

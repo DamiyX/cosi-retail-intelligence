@@ -1,3 +1,4 @@
+<!-- M8 approval checkpoint 2026-09-29: founder approved the clarified plan, DESIGN and M8-01..05 (D-046). Earlier pending-review wording below is historical. One Astra low implementation chat; coordinator reviews after handoff only. -->
 # COSI Application Flow
 
 **Status:** Active; M1–M6 source scope accepted with readiness carried. M7 sync is planned and unimplemented.  
@@ -159,6 +160,14 @@ private sales, margin, stock, or supplier relationship.
 
 ## Scanner and Recognition
 
+M8 planning is active in `C:\Users\doyew\Documents\DEV 2\COSI-m8-planning`.
+The proposed PC-02 transition is Today/Products list/More -> floating Scan ->
+full-screen sale scanner -> confirm product/package -> line -> cart. Manual
+Sell/search remains reachable and the `/sell` route is preserved. Hide the
+global action in focused forms/transactions. Product detail may associate a code
+without starting a sale. See DESIGN.md's proposed M8 state matrix and
+M8_SCANNER_PLAN.md; do not treat this proposal as implementation approval.
+
 One scanner entry point may route barcode and visual recognition. Results have
 three user-facing states:
 
@@ -169,6 +178,13 @@ three user-facing states:
 The core sale/catalogue code depends on a recognition contract, not one final
 model/runtime. Final camera treatment and result UI wait for benchmark evidence
 and the design gate.
+
+PC-08 clarifies single-item versus sequential basket scanning (not identifying
+a whole basket in one image). M8 proposes continuous exact-code additions only
+with safe package/price data, and pauses unknown/incomplete items for minimal
+input before resuming. Products can stay temporary while completed sales are
+durable. Guided automatic multi-view capture and visual/OCR retrieval remain
+Recognition Track B/M12. See PRODUCT_CHANGE_BACKLOG PC-08 for the founder intent.
 
 ## Offline, Sync, and Recovery States
 

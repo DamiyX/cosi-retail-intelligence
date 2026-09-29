@@ -985,6 +985,16 @@ Examples:
 
 Enrollment UX is determined by experiment.
 
+Founder clarification on 2026-09-28 prefers guided camera movement with automatic
+selection of useful views, quality feedback and truthful progress over requiring
+separate manual shutter taps for a fixed set of angles. Full intent and milestone
+disposition are recorded once in `docs/product/PRODUCT_CHANGE_BACKLOG.md`, PC-08.
+This is a Recognition Track B / M12 experience target; M8 barcode selling does
+not depend on it. Measurements must establish which guidance and automatic
+capture are reliable for objects; never substitute a timed progress animation
+for sufficient clear, diverse references. A catalogue thumbnail is distinct
+from the recognition reference set.
+
 ---
 
 # 43. Enrollment Reference Limits

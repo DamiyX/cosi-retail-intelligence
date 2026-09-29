@@ -1,3 +1,4 @@
+<!-- M8 approval checkpoint 2026-09-29: founder approved the clarified plan, DESIGN and M8-01..05 (D-046). Earlier pending-review wording below is historical. One Astra low implementation chat; coordinator reviews after handoff only. -->
 # Ticketing and Milestone Decomposition
 
 **Status:** Engineering operating source of truth  
@@ -72,10 +73,11 @@ copying full histories between them.
 
 ## Current Milestone Gate
 
-M0–M6 source/automated scope passed independent audits, with physical/release
-gates carried. Accepted ledgers remain archived under `docs/engineering/tickets/`.
-The active `tickets.md` contains coordinator-reviewed M7-01 through M7-08 and is
-registered in `.agents/workflows/m7-offline-sync.json`. No M7 runtime work is
-claimed at the planning checkpoint. A disposable non-production Supabase
-PostgreSQL environment is required before M7 can close; coordinator retains
-delegation and final independent acceptance. Production M8 has not started.
+M0–M7 local source/automated scope is independently accepted, with explicit
+physical/release gates carried. Prior ledgers remain under
+`docs/engineering/tickets/`; the M7 ledger is preserved there verbatim.
+The active `tickets.md` contains proposed M8-01 through M8-05, registered in
+`.agents/workflows/m8-unified-scanner.json`. Coordinator reviewed ticket size
+and dependencies under the founder's delegated judgment. Founder review of the
+M8 experience/native/contract plan precedes implementation; no M8 code or device
+pass is claimed. M9 remains an isolated integration/audit task.
