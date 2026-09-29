@@ -1,10 +1,9 @@
-<!-- M8 approval checkpoint 2026-09-29: founder approved the clarified plan, DESIGN and M8-01..05 (D-046). Earlier pending-review wording below is historical. One Astra low implementation chat; coordinator reviews after handoff only. -->
 # COSI Project Context and Decision Packet
 
 **Status:** Active  
 **Scope:** Whole project  
 **Project ID:** COSI  
-**Updated:** 2026-09-28  
+**Updated:** 2026-09-29  
 **Confidence:** High for approved product and architecture; explicit unknowns
 remain below.
 
@@ -26,9 +25,9 @@ batch-aware expiry, assumed FEFO, blind reconciliation, guided owner checks and
 attention. M6 added owner-only expenses/withdrawals and truthful Home/Today.
 Physical/release gates remain carried and native/release readiness is not yet
 approved. M7 local source is accepted at `c817edb`, including D-044/D-045 and
-local integration evidence. M8 planning is now active in `COSI-m8-planning` on
-`plan/m8-unified-scanner`, based on that accepted commit. The plan and five tickets
-are proposals awaiting founder implementation/design approval. M9 source work
+local integration evidence. M8 source and audit corrections are active in `COSI-m8-planning` on
+`plan/m8-unified-scanner`, based on that accepted commit. D-046 approved the plan;
+independent source acceptance and physical Android verification remain pending. M9 source work
 exists separately on `plan/m9-price-intelligence` and awaits final M7 integration
 and audit. The coordinator owns tickets and independent acceptance.
 
@@ -81,18 +80,17 @@ partial measure, never full profit or P&L.
 
 ## Current Priorities
 
-1. Review `M8_SCANNER_PLAN.md`, proposed DESIGN M8 states, tickets M8-01 through
-   M8-05 and `.agents/workflows/m8-unified-scanner.json`. Implementation is not
-   yet assigned. Include focused identifier-collision sync evidence before new
-   scanner associations are accepted; do not broadly reopen M7.
+1. Review `M8_INDEPENDENT_AUDIT.md`, `M8_IMPLEMENTATION_HANDOFF.md`, active tickets
+   and `.agents/workflows/m8-unified-scanner.json`. The assigned implementer owns
+   corrections exclusively until it stops; coordinator then independently reviews.
+   Scanner association rollout and ordinary-build fast addition stay off.
 2. Complete the explicitly deferred M3 physical-device/offline-sale,
    development-client/Metro, large-text, and second-laptop checks before any
    external beta/native-release claim; preserve the M1/M2 Galaxy evidence as
    historical evidence only.
 3. Continue validating useful retailer workflows early instead of building all
    future infrastructure at once.
-4. Keep M8 planning coordinator-owned and confirm the founder's M8 implementer
-   selection before creating a new chat. M9 was explicitly allowed to proceed
+4. Keep M8 correction work in its existing chat and branch. M9 was allowed to proceed
    in isolation during the M8 deferral. Coordinate shared contract edits and
    reconcile branches deliberately; no simultaneous writers in one checkout.
 

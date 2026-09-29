@@ -1,7 +1,7 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-29
-Current milestone: M8 source implementation submitted for independent audit; native acceptance blocked.
+Current milestone: M8 audit pass 1 source corrections verified and returned for re-audit; live worker/PostgreSQL and native acceptance blocked.
 
 ## Active work
 
@@ -15,7 +15,7 @@ Current milestone: M8 source implementation submitted for independent audit; nat
 
 Six real PostgreSQL/two-SQLite collision cases reproduce the original gap and now pass rejection, quarantine, owner recovery, dependent-sale preservation, cursor progress, replay, fresh bootstrap and authorization checks. SQLite migration 24 and server migration `20260929092623_m8_identifier_claim_guard.sql` are additive. The server migration was tested inside rollback-only transactions, not deployed.
 
-New scanner associations default off (`EXPO_PUBLIC_SCANNER_ASSOCIATIONS_ENABLED`); enable only for a reviewed build whose backend has the migration. Automatic basket addition stays off pending physical camera evidence and independent review. Manual selling and confirmed scanner additions remain usable. Optional beep uses playback only; native camera/audio require a rebuilt APK.
+New scanner associations default off (`EXPO_PUBLIC_SCANNER_ASSOCIATIONS_ENABLED`); enable only for a reviewed build whose backend has the migration. Automatic basket addition stays off in ordinary builds pending physical evidence/review. An isolated scanner-verification profile now permits bounded testing through the actual route. Manual selling and confirmed scanner additions remain usable. Optional beep uses playback only; native camera/audio require a rebuilt APK.
 
 Android export and Expo Doctor 21/21 passed. Existing local pgTAP 92 assertions and Auth/Edge/PostgreSQL checks passed; the pgTAP files also passed with M8 migration injected transactionally. Exact final typecheck/lint/test results are recorded in the evidence document. Automated checks are not physical acceptance.
 
@@ -29,4 +29,7 @@ Known source limits for review: association rollout is disabled; previously ackn
 
 ## Next action
 
-Coordinator independently reviews the stopped implementer handoff and returns corrections to the same chat. Then schedule the physical Android procedure and authorize any backend deployment/build separately. The implementer does not accept its own work, deploy, push, merge or start M9. Existing M9 work remains separate in its own checkout; coordinate shared sync/catalogue boundaries before integration.
+The implementer has returned a tracked correction handoff and stopped. Coordinator independently re-audits; live worker/PostgreSQL verification waits for the existing Docker engine to become available. Then schedule the physical Android procedure and authorize any backend deployment/build separately. The implementer does not accept its own work, deploy, push, merge or start M9. Existing M9 work remains separate in its own checkout; coordinate shared sync/catalogue boundaries before integration.
+
+
+Audit correction source e5b23ff clears cancelled scan intent and adds worker-boundary coverage plus an isolated verification profile. Root validation and additional focused suites produced 543 passing tests across runs; fresh typecheck/lint and verification export passed. Live worker RPC tests are written but blocked by the missing Docker engine; no startup/repair attempt remains active in this chat. See the appended implementer response in M8_INDEPENDENT_AUDIT.md.

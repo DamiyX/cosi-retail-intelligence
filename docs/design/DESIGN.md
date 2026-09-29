@@ -46,9 +46,11 @@ This navigation is a baseline for implementation, not a claim that every later
 screen is fully designed. Later milestone tickets must expand this file before
 adding their substantial user flows.
 
-PC-02 requests a different M8 entry/navigation pattern. The proposed M8 section
-below defines that transition; the implementation above remains current until
-the M8 design gate is approved and its navigation tests pass.
+The approved PC-02/M8 transition is now implemented in source: Today, Products
+and More tabs, global Scan on overview surfaces, and full-screen `/sell` with
+draft guards. The four-destination list above is historical. M8 independent
+audit and physical acceptance remain pending; see the M8 section below and the
+current implementation handoff.
 
 ## M2 Catalogue Flow
 

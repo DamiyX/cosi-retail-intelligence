@@ -38,7 +38,7 @@ Reviewed official docs: https://docs.expo.dev/versions/v57.0.0/sdk/camera/ and h
 
 ## Gates and remaining limits
 
-EXPO_PUBLIC_SCANNER_ASSOCIATIONS_ENABLED defaults off; reviewed deployment must apply the server migration before enabling it. Automatic basket addition defaults off, with only an explicit test injection; camera evidence and independent review are still required. Scanner can be disabled with EXPO_PUBLIC_SCANNER_ENABLED=false without removing manual sales.
+EXPO_PUBLIC_SCANNER_ASSOCIATIONS_ENABLED defaults off; reviewed deployment must apply the server migration before enabling it. Automatic basket addition defaults off in ordinary builds; tests and the isolated scanner-verification build can enable it. Camera evidence and independent review are still required. Scanner can be disabled with EXPO_PUBLIC_SCANNER_ENABLED=false without removing manual sales.
 
 adb devices -l found no device; Java unavailable. No rebuilt APK, physical A15 launch diagnosis, native permission/torch/beep observation, first-use offline detector check, 200% text/TalkBack check, APK size or timed-selection comparison. See M8_ANDROID_VERIFICATION.md. Carried M3–M7/two-phone/second-laptop/remote-CI release gates stay open.
 
@@ -46,8 +46,22 @@ Historical acknowledged identifier collisions require support; the migration ref
 
 Final source correction commit: e10ca70. Expo install --check passed (the intentionally pinned Expo package remains excluded by existing configuration). Expo config --type introspect generated CAMERA, INTERNET, MODIFY_AUDIO_SETTINGS, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, SYSTEM_ALERT_WINDOW and VIBRATE, with no RECORD_AUDIO; this is configuration evidence, not an inspected APK. Final Android export passed again after corrections (5.2 MB Hermes bundle, 28 assets).
 
-## Final verification result
+## Initial verification result (before audit)
 
 On final source e10ca70, npm run validate exited 0: environment check, strict workspace typecheck, zero-warning lint, contracts 12/12, domain 150/150, mobile 368/368 (56 passing mobile suites). Six opt-in PostgreSQL tests are skipped by the ordinary root run and passed separately with M8_POSTGRES_TESTS=1: total 536 executed passing tests across those runs, plus 92 pgTAP assertions. No snapshot tests. The existing product-list VirtualizedList act(...) console warning remains; no failing assertion was ignored. Workflow/index schema checks and git diff --check passed.
 
-All local commands and test sessions finished before final handoff. No physical/native acceptance, deployment, push, merge or independent audit occurred. Final handoff is written last and intentionally remains the only untracked file, because the dispatch instruction requires stopping all edits and commands immediately after writing it.
+The initial handoff was left untracked under the earlier stop-after-writing instruction. The coordinator clarified during audit that repository continuity requires committing it before stopping; the current correction handoff follows that instruction. No physical/native acceptance, deployment, push or merge occurred.
+
+## Audit pass 1 correction evidence — source e5b23ff
+
+Original cancelled-QR regression reproduced: scannerSale.test.tsx had 2 passes and 1 failure before correction. After shared scan-intent cleanup, all 9 scanner-sale tests pass, including saved-row assertions, dirty/clean cancel, explicit search-to-association, cart discard, new sale and preserved existing basket. No lifecycle finding is claimed fixed merely from compilation.
+
+Ordinary worker tests: 2/2 passed for nested creation and later association using realistic full parsed protocol responses, real SQLite, OfflineSyncWorker acknowledgement/pull/retry and owner recovery. They assert one conflict, original rejected outbox retained, durable sale, subsequent synchronization, second-client convergence and restart. No direct quarantine helper bypass. Fixture transport remains explicitly distinct from live PostgreSQL.
+
+New scannerWorker.postgres.test.ts (2 opt-in cases) is implemented/typechecked but its run was environment-blocked before RPC execution: Docker reported missing npipe dockerDesktopLinuxEngine. One `docker desktop start --timeout 50` attempt ended `Docker Desktop is still starting: context deadline exceeded`; own waiting status CLI processes were stopped. The coordinator took over startup, reported the stale sailor-ingest.sock problem, and directed no further attempts. No reset, database deletion or Docker configuration change was made by this implementer. The prior six real PostgreSQL tests are historical evidence, not rerun evidence for this correction.
+
+Root npm run validate exited 0: contracts 12, domain 150, mobile 377 = 539 passing tests, 8 opt-in PostgreSQL tests skipped. New ordinary worker tests (2) and actual-route verification tests (2) passed separately after root discovery, for 543 passing tests across these runs. Fresh mobile typecheck and zero-warning lint passed after the new files. An intermediate typecheck caught nullable cursor use in the test fixture; corrected and rechecked. Existing product-list act(...) warning persists without failed assertions.
+
+Verification build: dedicated internal EAS profile plus isolated app environment/ID; actual route checks all guard values and displays a verification banner. Configuration resolution produced com.damiyx.retailintelligence.scannerverification with opt-in true. Production with the same opt-in was rejected. Verification-mode Android export passed (1587 modules, 28 assets, 5.2 MB Hermes bundle); not an APK/native or physical result. No build job submitted, no dependency added. Procedure is in M8_ANDROID_VERIFICATION.md.
+
+Audit response, active routing contexts, BUILD_PLAN, design summaries, tickets, PROJECT_STATE and workflow are updated. The current handoff is committed before stopping. Independent re-audit, live worker/PostgreSQL evidence and physical acceptance remain open.

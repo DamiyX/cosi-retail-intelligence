@@ -1,9 +1,8 @@
-<!-- M8 approval checkpoint 2026-09-29: founder approved the clarified plan, DESIGN and M8-01..05 (D-046). Earlier pending-review wording below is historical. One Astra low implementation chat; coordinator reviews after handoff only. -->
 # COSI Application Flow
 
-**Status:** Active; M1–M6 source scope accepted with readiness carried. M7 sync is planned and unimplemented.  
+**Status:** M0–M7 local source accepted; M8 source/audit corrections active, physical acceptance pending.  
 **Scope:** MVP user journeys  
-**Updated:** 2026-09-19  
+**Updated:** 2026-09-29  
 **Confidence:** High for required jobs and transaction behavior; medium or low
 where later-milestone navigation, permissions, and recovery UI remain undecided.
 
@@ -34,15 +33,15 @@ actions must be attributable. The exact permission model remains open.
 The MVP needs a short path from account/store setup to the first product or sale
 workflow, without full inventory onboarding. Exact registration, sign-in,
 offline-expired-session, store creation, invitation, recovery, and multi-store
-screens are not yet approved and must be resolved before Auth and membership UI
-is built.
+screens beyond the implemented M7 owner cloud pilot remain future work. M7 provides
+owner sign-in/enrollment, local-first sync and explicit conflict recovery.
 
 ## Approved Navigation Baseline
 
-The MVP begins with four primary destinations: Today, Sell, Products, and More.
-Scanner entry is contextual from Sell and Products. M2 implements Products and
-M3 implements Sell; Today and More remain later-milestone destinations. See
-`docs/design/DESIGN.md`.
+The approved M8 source has Today, Products and More tabs, with `/sell` in the
+root stack. Global Scan is allowlisted to those three overview surfaces. Manual
+selling and guarded drafts remain available; independent/physical acceptance is
+pending. See `docs/design/DESIGN.md` and the M8 audit/handoff.
 
 ## Primary Daily Flow
 
@@ -160,13 +159,13 @@ private sales, margin, stock, or supplier relationship.
 
 ## Scanner and Recognition
 
-M8 planning is active in `C:\Users\doyew\Documents\DEV 2\COSI-m8-planning`.
-The proposed PC-02 transition is Today/Products list/More -> floating Scan ->
+M8 source and audit corrections are active in `C:\Users\doyew\Documents\DEV 2\COSI-m8-planning`.
+The implemented PC-02 transition is Today/Products list/More -> floating Scan ->
 full-screen sale scanner -> confirm product/package -> line -> cart. Manual
 Sell/search remains reachable and the `/sell` route is preserved. Hide the
 global action in focused forms/transactions. Product detail may associate a code
-without starting a sale. See DESIGN.md's proposed M8 state matrix and
-M8_SCANNER_PLAN.md; do not treat this proposal as implementation approval.
+without starting a sale when association rollout is enabled. See the approved M8
+state matrix, M8_SCANNER_PLAN.md and current audit evidence; rollout stays off.
 
 One scanner entry point may route barcode and visual recognition. Results have
 three user-facing states:
@@ -176,13 +175,15 @@ three user-facing states:
 - UNKNOWN: use quick creation or manual search and continue.
 
 The core sale/catalogue code depends on a recognition contract, not one final
-model/runtime. Final camera treatment and result UI wait for benchmark evidence
-and the design gate.
+model/runtime. Barcode source is implemented; physical camera acceptance and
+any later visual-model selection still require their separate evidence.
 
 PC-08 clarifies single-item versus sequential basket scanning (not identifying
-a whole basket in one image). M8 proposes continuous exact-code additions only
+a whole basket in one image). M8 implements continuous exact-code additions only
 with safe package/price data, and pauses unknown/incomplete items for minimal
-input before resuming. Products can stay temporary while completed sales are
+input before resuming. Automatic additions are restricted to the isolated internal
+verification build until physical evidence and review; ordinary builds confirm.
+Products can stay temporary while completed sales are
 durable. Guided automatic multi-view capture and visual/OCR retrieval remain
 Recognition Track B/M12. See PRODUCT_CHANGE_BACKLOG PC-08 for the founder intent.
 
@@ -205,17 +206,17 @@ transaction completed if its local atomic commit failed.
 
 | Capability | MVP intent | Design status |
 | --- | --- | --- |
-| Account/store onboarding | Minimal path to useful work | Flow details open |
+| Account/store onboarding | Minimal path to useful work | M7 owner pilot implemented; broader membership flows open |
 | Today/Home | Live daily facts, compact M5 attention and next actions | M6 source accepted; physical checks carried |
 | Sale/cart/payment/completion | Required offline workflow | Capability flow approved |
 | Catalogue/search/product edit | Progressive digitization | M2 flow approved in `docs/design/DESIGN.md` |
 | Restock/purchase | Required offline workflow | M4 source accepted; M5 expiry-group extension accepted |
 | Inventory/reconciliation | Event-based blind checks and batch control | M5 source accepted; physical checks carried |
-| Expense/withdrawal | Separate immutable owner-only offline records | M6 source accepted; M7 sync pending |
+| Expense/withdrawal | Separate immutable owner-only offline records | M6/M7 source accepted; physical checks carried |
 | Transactions/history | Review and accountability | Filters/actions open |
 | Price history/signals | Lead value proposition | Presentation open |
-| Scanner | Barcode first, recognition later | Interaction open |
-| Sync status/recovery | Honest offline state | Interaction open |
+| Scanner | Barcode first, recognition later | M8 approved source under audit; physical gates open |
+| Sync status/recovery | Honest offline state | M7 pilot implemented; M8 identifier recovery under audit |
 | Staff/accountability | Attributed permitted actions | Permissions open |
 
 The M0 Welcome/About screens prove routing and builds only; they are not part of
@@ -223,7 +224,7 @@ the approved final information architecture.
 
 ## Design Questions That Must Be Resolved
 
-- Validate the approved Today / Sell / Products / More baseline with retailer
+- Validate the approved Today / Products / More tabs and full-screen Sell with retailer
   use before beta and adjust only through an explicit design update.
 - Owner/admin versus cashier information density and shortcuts.
 - Onboarding, membership, invitation, recovery, and multiple-store behavior.

@@ -2,7 +2,7 @@
 
 **Status:** Active  
 **Scope:** Whole project  
-**Updated:** 2026-09-19
+**Updated:** 2026-09-29
 
 ## Implemented Foundation
 
@@ -12,7 +12,8 @@
 | Package manager | npm workspaces | npm 11.19.0 |
 | Mobile framework | Expo / React Native | Expo 57.0.22, RN 0.86.3 |
 | UI runtime | React | 19.2.3 |
-| Navigation | Expo Router | 57.0.21 |
+| Navigation | Expo Router | 57.0.23 |
+| Barcode camera / optional feedback | expo-camera / expo-audio | 57.0.5 / 57.0.5; rebuild required |
 | Development client | Expo Development Build | expo-dev-client 57.0.19 |
 | Language | TypeScript, strict configuration | 6.0.3 |
 | Lint | ESLint with Expo config | 9.39.5 |
@@ -20,35 +21,30 @@
 | Cloud native builds | EAS | Project linked |
 | CI | GitHub Actions | Windows and Ubuntu validation |
 
-The mobile package is apps/mobile. It contains the independently accepted M1–M6
+The mobile package is apps/mobile. It contains the independently accepted M0–M7
 local-first source: SQLite/domain, catalogue/package units, sales, restocking and
 costing, batch-aware inventory/reconciliation/attention, expenses, withdrawals
-and Home/Today. Physical-device, development-client/Metro and second-laptop
+and Home/Today, plus M7 offline sync. M8 scanner source is undergoing independent
+audit corrections. Physical-device, development-client/Metro and second-laptop
 readiness checks remain deferred before external beta/native release. The app
 uses a small project-owned component/theme layer; no global or server-state
 library has been selected.
 
-## Approved but Not Implemented
+## Cloud and remaining scope
 
-- Supabase synchronization and remote business schema.
-- Supabase PostgreSQL, Auth, Storage, and Edge Functions.
-- A hosted Supabase development project or Docker-backed local integration
-  environment and migration-driven business schema.
-- Domain packages only when M1 responsibilities justify them.
-- Network synchronization workers over the implemented durable local outbox;
-  they remain M7 scope.
-
-These items are architecture commitments, not evidence that a package, schema,
-remote project, or runtime behavior already exists.
+M7 implements the sync worker, Auth/Edge/PostgreSQL boundary, reference context,
+migrations, RLS and local integration tests. Supabase Storage remains a future
+media capability. M8 adds an undeployed server identifier guard and SQLite
+quarantine migration. Physical/release gates and later recognition remain open.
 
 ## Environments and Integrations
 
 - EAS owner: damiyxs-team.
 - EAS project: @damiyxs-team/cosi.
 - EAS project ID: 737ed99c-2c20-4612-ac80-a8a868b827cb.
-- Development and preview Android build profiles exist.
-- Supabase project configuration exists locally, but no business migrations,
-  functions, RLS policies, or service-role credentials are committed.
+- Development, preview and isolated scanner-verification Android build profiles exist.
+- Supabase migrations, functions and authorization tests are committed; secrets
+  and service-role credentials are not. M8 migration is not deployed.
 - apps/mobile/.env.example documents public mobile configuration names. Secrets
   must stay outside Git, and a service-role key must never enter the mobile
   application.

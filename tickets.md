@@ -1,6 +1,6 @@
 # Tickets: M8 Unified Scanner + Barcode
 
-**Status:** Source implementation submitted for independent audit; physical acceptance blocked.
+**Status:** Audit pass 1 source corrections returned for re-audit; live worker/PostgreSQL and physical acceptance blocked.
 **Plan:** `docs/engineering/M8_SCANNER_PLAN.md` is the scope/boundary specification.
 **Workflow:** `.agents/workflows/m8-unified-scanner.json`.
 **Baseline:** `c817edb` accepted M7 local source; carried device/release gates remain open.
@@ -222,3 +222,8 @@ is an ownership policy, not an invented dependency between M8-02 and M8-03.
 Founder delegated ticket granularity and approved the clarified scanner/native/
 contract/navigation plan on 2026-09-29. Implementer: Astra low in one separate
 chat; coordinator reviews only after handoff. No ticket is independently accepted yet; source work is available for coordinator review.
+
+
+## Audit pass 1 corrections
+
+Source e5b23ff fixes cancelled scan-intent leakage with nine scanner-sale regressions, adds two passing worker protocol-fixture recovery cases and two actual-route verification cases, and provides an isolated default-off-for-release verification build. Current routing statuses are corrected. Root and focused checks total 543 passing tests; typecheck/lint/export pass. Two new live PostgreSQL worker cases are environment-blocked, not accepted. Read M8_INDEPENDENT_AUDIT.md and the tracked M8_IMPLEMENTATION_HANDOFF.md. No physical or independent acceptance is claimed.

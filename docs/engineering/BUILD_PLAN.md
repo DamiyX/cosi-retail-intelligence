@@ -1,4 +1,3 @@
-<!-- M8 approval checkpoint 2026-09-29: founder approved the clarified plan, DESIGN and M8-01..05 (D-046). Earlier pending-review wording below is historical. One Astra low implementation chat; coordinator reviews after handoff only. -->
 # BUILD_PLAN — Retail Commerce Intelligence
 
 **Version:** 1.0  
@@ -695,10 +694,10 @@ integration evidence. Production deployment is a separate approval.
 
 # 21. M8 — Unified Scanner + Barcode
 
-Planning packet: `M8_SCANNER_PLAN.md`, active `tickets.md` and
-`.agents/workflows/m8-unified-scanner.json` (2026-09-28; proposed, awaiting
-founder implementation/design approval). M7 local source is accepted; physical
-and release gates remain carried. No M8 implementation is claimed.
+Approved packet (D-046): `M8_SCANNER_PLAN.md`, active `tickets.md` and
+`.agents/workflows/m8-unified-scanner.json`. M8 source is implemented and audit
+corrections are active. Independent acceptance is pending; physical and release
+gates remain carried. See M8_INDEPENDENT_AUDIT.md and M8_IMPLEMENTATION_HANDOFF.md.
 
 ## Goal
 
@@ -718,7 +717,7 @@ Introduce scanner UX without waiting for advanced visual recognition.
 
 PC-02 adds one floating Scan action on suitable main surfaces, replacing the
 visible Sell tab while preserving manual selling, history, direct routes and
-unfinished-sale guards. See the proposed M8 section in `docs/design/DESIGN.md`.
+unfinished-sale guards. See the approved M8 section in `docs/design/DESIGN.md`.
 Typed unknown-code creation/association reuses catalogue/outbox operations.
 Barcode collision behavior across two same-store devices must be verified and
 corrected before enabling association. Visual recognition, enrollment, OCR and
@@ -727,7 +726,8 @@ model/runtime selection remain Recognition Track B / M12 work.
 PC-08 clarification (2026-09-28) adds single-item and continuous basket modes,
 safe exact-code fast addition with missing-information interruption/resume,
 optional beep/torch, zero-stock identity and durable temporary-product completion
-to the M8 proposal. Guided multi-view automatic visual enrollment and OCR remain
+to M8. Ordinary-build automatic additions remain off; an isolated verification
+build supports the pending device checks. Guided visual enrollment and OCR remain
 in the recognition track; the full founder intent is preserved in the single
 PRODUCT_CHANGE_BACKLOG record rather than split into new discovery documents.
 
