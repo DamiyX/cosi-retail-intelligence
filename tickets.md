@@ -1,6 +1,6 @@
 # Tickets: M8 Unified Scanner + Barcode
 
-**Status:** Audit pass 1 source corrections returned for re-audit; live worker/PostgreSQL and physical acceptance blocked.
+**Status:** Returned source corrections passed independent re-audit; eight live PostgreSQL cases passed on 2026-09-30; physical acceptance pending.
 **Plan:** `docs/engineering/M8_SCANNER_PLAN.md` is the scope/boundary specification.
 **Workflow:** `.agents/workflows/m8-unified-scanner.json`.
 **Baseline:** `c817edb` accepted M7 local source; carried device/release gates remain open.
@@ -227,3 +227,8 @@ chat; coordinator reviews only after handoff. No ticket is independently accepte
 ## Audit pass 1 corrections
 
 Source e5b23ff fixes cancelled scan-intent leakage with nine scanner-sale regressions, adds two passing worker protocol-fixture recovery cases and two actual-route verification cases, and provides an isolated default-off-for-release verification build. Current routing statuses are corrected. Root and focused checks total 543 passing tests; typecheck/lint/export pass. Two new live PostgreSQL worker cases are environment-blocked, not accepted. Read M8_INDEPENDENT_AUDIT.md and the tracked M8_IMPLEMENTATION_HANDOFF.md. No physical or independent acceptance is claimed.
+
+
+## Live database follow-up — 2026-09-30
+
+Both scannerWorker.postgres cases and all six scannerSync.postgres cases passed: 8/8, two suites, exit 0, rollback-only migration injection against the existing disposable database. The earlier Docker-blocked test gap is resolved for this scope. No production source changes or physical/native verification; coordinator owns acceptance and the next sequential phone step. See M8_IMPLEMENTATION_EVIDENCE.md.

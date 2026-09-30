@@ -65,3 +65,18 @@ Root npm run validate exited 0: contracts 12, domain 150, mobile 377 = 539 passi
 Verification build: dedicated internal EAS profile plus isolated app environment/ID; actual route checks all guard values and displays a verification banner. Configuration resolution produced com.damiyx.retailintelligence.scannerverification with opt-in true. Production with the same opt-in was rejected. Verification-mode Android export passed (1587 modules, 28 assets, 5.2 MB Hermes bundle); not an APK/native or physical result. No build job submitted, no dependency added. Procedure is in M8_ANDROID_VERIFICATION.md.
 
 Audit response, active routing contexts, BUILD_PLAN, design summaries, tickets, PROJECT_STATE and workflow are updated. The current handoff is committed before stopping. Independent re-audit, live worker/PostgreSQL evidence and physical acceptance remain open.
+
+## Live database verification — 2026-09-30
+
+At source HEAD c995641, ran with the pinned Node 24.21.0/npm 11.19.0 toolchain:
+
+```powershell
+$env:M8_POSTGRES_TESTS = '1'
+npm run test --workspace @retail/mobile -- --runInBand scannerWorker.postgres.test.ts scannerSync.postgres.test.ts
+```
+
+Exit 0: two suites, eight tests passed, zero snapshots; Jest reported 40.551 seconds. Both new live OfflineSyncWorker cases passed (PRODUCT_CREATED and PRODUCT_IDENTIFIER_ADDED), using actual sync_push/sync_pull/sync_reference_context JSON through contract parsing, recovery, dependent-sale retry, two-client convergence and restart. All six existing scannerSync PostgreSQL collision cases also passed in this run. This resolves the prior unavailable-engine evidence gap for these database tests.
+
+Tests invoked psql inside existing supabase_db_retail-intelligence and injected the M8 migration and disposable fixtures in BEGIN/ROLLBACK transactions. No source/test changes, persistent migration, reset, Docker startup/repair, deployment or HTTP smoke run occurred. The coordinator reported the Edge runtime exited; no HTTP readiness is inferred. Prior root/mobile validation remains attributed to its earlier runs rather than rerun here.
+
+Coordinator's uncommitted independent audit, workflow/state updates and DEVELOPMENT.md Docker workaround were preserved. Physical verification is still pending; coordinator reports the SM-A156E Android 16 is connected, but this database-only task performed no phone/native work. Independent source re-audit passed as recorded by the coordinator; final gate ownership remains with the coordinator.

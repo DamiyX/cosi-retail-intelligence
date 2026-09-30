@@ -1,7 +1,7 @@
 # PROJECT_STATE — COSI
 
-Last updated: 2026-09-29
-Current milestone: M8 audit pass 1 source corrections verified and returned for re-audit; live worker/PostgreSQL and native acceptance blocked.
+Last updated: 2026-09-30
+Current milestone: M8 returned source corrections passed independent re-audit; all eight live PostgreSQL cases passed; physical/native acceptance remains pending.
 
 ## Active work
 
@@ -21,7 +21,7 @@ Android export and Expo Doctor 21/21 passed. Existing local pgTAP 92 assertions 
 
 ## Blockers and carried limits
 
-No Android device is connected and Java is unavailable in this environment. No APK was built or installed; the Galaxy A15 launch issue could not be reproduced or diagnosed. Camera permissions/lifecycle, first-use offline detection, beep/torch, 200% text/TalkBack, standalone preview and completed-sale force-stop behavior still require the device procedure.
+Coordinator reports an SM-A156E running Android 16 is now connected (2026-09-30). This database-only verification did not inspect the phone or native toolchain. No APK was built or installed; the Galaxy A15 launch issue could not be reproduced or diagnosed. Camera permissions/lifecycle, first-use offline detection, beep/torch, 200% text/TalkBack, standalone preview and completed-sale force-stop behavior still require the device procedure.
 
 M0–M7 local source remains independently accepted. M3–M7 physical flows, two-phone verification, remote CI and second-laptop reproduction remain release gates. Prior M7 audit/evidence is preserved in `M7_INDEPENDENT_AUDIT.md` and `tickets/M7_OFFLINE_SYNC.md`.
 
@@ -29,7 +29,7 @@ Known source limits for review: association rollout is disabled; previously ackn
 
 ## Next action
 
-The implementer has returned a tracked correction handoff and stopped. Coordinator independently re-audits; live worker/PostgreSQL verification waits for the existing Docker engine to become available. Then schedule the physical Android procedure and authorize any backend deployment/build separately. The implementer does not accept its own work, deploy, push, merge or start M9. Existing M9 work remains separate in its own checkout; coordinate shared sync/catalogue boundaries before integration.
+The implementer is stopped. Coordinator re-audit of the returned correction diff passed at c995641; independent mobile verification passed 381 tests (8 database tests skipped). All eight live PostgreSQL cases now pass on the existing disposable database, with rollback-only migration injection. Coordinator reviews this database handoff, then schedules the physical Android procedure sequentially under the founder utility-model preference. Authorize any backend deployment/build separately. The implementer does not accept its own work, deploy, push, merge or start M9. Existing M9 work remains separate in its own checkout; coordinate shared sync/catalogue boundaries before integration.
 
 
-Audit correction source e5b23ff clears cancelled scan intent and adds worker-boundary coverage plus an isolated verification profile. Root validation and additional focused suites produced 543 passing tests across runs; fresh typecheck/lint and verification export passed. Live worker RPC tests are written but blocked by the missing Docker engine; no startup/repair attempt remains active in this chat. See the appended implementer response in M8_INDEPENDENT_AUDIT.md.
+Audit correction source e5b23ff clears cancelled scan intent and adds worker-boundary coverage plus an isolated verification profile. Root validation and additional focused suites produced 543 passing tests across runs; fresh typecheck/lint and verification export passed. On 2026-09-30, both live worker RPC cases and all six existing collision cases passed (8/8, two suites). No Docker startup/repair or persistent migration was performed. Edge HTTP smoke readiness was not tested. See the appended implementer response in M8_INDEPENDENT_AUDIT.md.

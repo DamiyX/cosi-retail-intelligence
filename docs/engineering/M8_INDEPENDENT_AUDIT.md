@@ -32,3 +32,20 @@ Source correction commit: e5b23ff. These are implementation/evidence disposition
 - Routing-status gap: current paragraphs in project/app-flow/stack contexts, BUILD_PLAN and design routing summaries now state M7 source acceptance and M8 correction/re-audit status instead of awaiting implementation approval.
 
 Validation: root npm run validate exited 0 (12 contract + 150 domain + 377 mobile = 539 tests; 8 opt-in PostgreSQL tests skipped). Two newer worker-boundary tests and two actual-route tests passed separately, making 543 passing tests across those runs. Fresh mobile typecheck and zero-warning lint passed after those additions. Existing product-list act(...) console warning remains. Physical gates and live-worker evidence remain open. Handoff is tracked and committed before the implementer stops under the coordinator's clarified instruction.
+
+## Independent re-audit of returned corrections — 2026-09-29
+
+Reviewed HEAD c995641, source correction e5b23ff, against first handoff 4ad4a84. The implementer was stopped; the coordinator reviewed the code and evidence sequentially. No production source was changed during this review.
+
+Decision: returned source corrections pass this re-audit. Full milestone acceptance remains pending live PostgreSQL worker evidence and physical Android verification; this does not enable rollout or authorize deployment.
+
+- Confirmed endScanIntent clears the abandoned identifier and resume flags on creation/line cancellation, discard and new-sale paths. Intentional search-to-selection and successful creation retain their association context until line commit. The original regression now verifies no identifier is persisted for the unrelated product, with sibling-path and preserved-basket coverage.
+- Confirmed ordinary worker tests exercise OfflineSyncWorker with parsed acknowledgement payloads, one recoverable conflict, original outbox preservation, owner recovery, dependent-sale retry, second-client materialization and restart. Their transport is simulated; the two new live RPC cases remain unexecuted because Docker is unavailable.
+- Confirmed isolated verification configuration reaches the actual Sell route, requires the separate environment/package and explicit flag, and displays a banner. Ordinary app variants remain off. This closes the source/procedure gap, not the physical camera gate.
+- Routing summaries and the tracked handoff now preserve the returned state. No additional correction request arose from this correction diff.
+
+Independent commands/results: focused scannerSale, scannerWorker and scannerVerificationRoute run passed 13/13 across three suites. The already-started complete mobile run was collected after the model switch without restarting it: npm run test --workspace @retail/mobile -- --runInBand --silent passed 381 tests across 59 suites; eight opt-in database tests in two suites were skipped. Git diff --check for the correction range passed. The working tree was clean at the reviewed HEAD before this audit record update.
+
+Count clarification: 381 mobile plus the implementer's recorded 12 contract and 150 domain tests gives 543 distinct tests. The earlier coordinator statement that four tests were double-counted was premature and is withdrawn. Those four were added after the earlier root discovery. Contract/domain checks were not rerun in this correction audit; their implementation evidence is attributed accordingly.
+
+Next: after the founder switches to the preferred utility model, restore the existing Docker engine and run the pending live worker tests against the disposable local backend. Any new failure returns to source review. Then execute the documented native/phone gate. No Docker setup, native build submission, Git commit/push, deployment, or new implementation chat was performed in this re-audit.

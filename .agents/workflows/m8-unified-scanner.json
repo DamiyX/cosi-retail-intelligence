@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "blocked",
-  "current_state": "audit-pass-1-returned-live-worker-and-device-blocked",
+  "current_state": "correction-reaudit-and-live-database-passed-device-pending",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
@@ -19,11 +19,13 @@
     "audit-pass-1-scan-intent-corrected",
     "audit-pass-1-worker-fixture-coverage",
     "isolated-verification-route-tested",
-    "current-routing-contexts-corrected"
+    "current-routing-contexts-corrected",
+    "returned-source-corrections-independently-reviewed",
+    "eight-live-postgres-cases-passed"
   ],
   "owner": {
-    "agent": "stopped-implementer-awaiting-independent-reaudit",
-    "thread": "01a0ec1c-578c-7c41-b151-e803c9e5c548",
+    "agent": "coordinator-remaining-acceptance-gates",
+    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
     "worktree": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning"
   },
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
@@ -70,6 +72,18 @@
       "result": "Cancelled QR regression reproduced and fixed; root plus focused suites total 543 passing tests, fresh typecheck/lint and verification export passed. Live worker/PostgreSQL test implemented but engine-blocked; no self-acceptance.",
       "source": "e5b23ff; docs/engineering/M8_INDEPENDENT_AUDIT.md",
       "observed_at": "2026-09-29T15:28:43.4671374Z"
+    },
+    {
+      "observed_at": "2026-09-29T20:46:22.3241558Z",
+      "result": "Returned source corrections reviewed. Focused tests 13/13; full mobile 381 passed, 8 database cases skipped. Earlier 543 aggregate is consistent with 381 mobile + recorded 12 contracts + 150 domain. Full milestone gates remain pending.",
+      "source": "c995641; docs/engineering/M8_INDEPENDENT_AUDIT.md",
+      "kind": "independent-correction-audit"
+    },
+    {
+      "kind": "live-database-verification",
+      "source": "c995641; docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md",
+      "result": "Both live worker RPC cases and six existing collision cases passed: 8/8, two suites, exit 0. Existing disposable PostgreSQL, rollback-only migration injection; no HTTP/native verification or persistent deployment.",
+      "observed_at": "2026-09-30T00:37:41.1526088Z"
     }
   ],
   "acceptance_gates": [
@@ -192,7 +206,7 @@
       },
       "evidence": [],
       "limitations": [],
-      "blocker": "adb devices -l: no device; no rebuilt native APK. See M8_ANDROID_VERIFICATION.md.",
+      "blocker": "Physical procedure pending; coordinator reports connected SM-A156E Android 16. No rebuilt APK or camera evidence from database verification.",
       "waiver": null
     },
     {
@@ -247,11 +261,10 @@
     }
   ],
   "blockers": [
-    "Live worker PostgreSQL test blocked: missing dockerDesktopLinuxEngine pipe; coordinator confirmed startup failed. No further implementer Docker recovery.",
-    "Physical Android/native build unavailable; independent re-audit pending."
+    "Physical Android/native acceptance pending; coordinator reports SM-A156E Android 16 connected, but no rebuilt APK or camera evidence from this task."
   ],
-  "next_action": "Coordinator independently re-audits tracked correction handoff. Run opt-in live worker tests after Docker is usable; physical verification remains separate. No rollout, deployment or M9.",
+  "next_action": "Coordinator reviews the live database handoff (8/8 passed), then sequences the documented phone/native verification under founder utility-model preference. Implementer stopped; no new milestone, deployment or native build performed.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-09-29T15:28:43.4760933Z",
+  "updated_at": "2026-09-30T00:37:41.1805504Z",
   "archived": false
 }

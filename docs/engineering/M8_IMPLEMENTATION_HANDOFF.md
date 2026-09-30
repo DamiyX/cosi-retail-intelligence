@@ -36,3 +36,11 @@ M8 is not independently accepted. No push, merge, deployment, reset, data deleti
 ## Repository continuity and next owner
 
 Under the clarified handoff instruction, this handoff and all correction evidence are committed before stopping. The implementer performs the final Git checks, stops edits and commands, and sends the authorized coordinator notification with the resulting documentation commit. The coordinator owns independent re-audit and the remaining live/device gates. No acceptance gate is self-approved.
+
+## Superseding live database handoff — 2026-09-30
+
+Resumed only the authorized live database verification at c995641. Both new worker RPC cases and all six existing collision cases passed: eight tests, two suites, exit 0 (40.551 seconds). See the exact command and limits in M8_IMPLEMENTATION_EVIDENCE.md. No implementation changes were needed. Rollback-only migration injection used the existing disposable PostgreSQL container; no persistent deployment or Docker utility work occurred.
+
+The previous Docker blocker is resolved for this test scope. Coordinator source re-audit passed before this run. Physical/native verification remains pending and sequential; the coordinator reports a connected SM-A156E Android 16, but this task did no phone work. Edge HTTP readiness was not tested.
+
+Coordinator's pending audit, workflow/state changes and DEVELOPMENT.md workaround are preserved in the evidence commit. After final commit/status checks the implementer stops all commands and edits and sends branch/HEAD/status to the coordinator. No push, merge, reset, spending, new milestone or self-acceptance.
