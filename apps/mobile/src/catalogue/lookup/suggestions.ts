@@ -21,8 +21,8 @@ function createBroker(db: DatabaseAdapter, adapter: CatalogueLookupAdapter, now:
   let active: { barcode: string; promise: Promise<LookupResult> } | null = null;
   return async (barcode: string, signal: AbortSignal): Promise<LookupResult> => {
     if (signal.aborted) return { status: 'CANCELLED' };
-    if (AppState.currentState && AppState.currentState !== 'active') return { status: 'CANCELLED' };
     if (!adapter.enabled) return { status: 'DISABLED' };
+    if (AppState.currentState !== 'active') return { status: 'CANCELLED' };
     const cached = db.getFirstRow<{ result: string; expires_at: number }>('SELECT result, expires_at FROM catalogue_lookup_cache WHERE barcode = ?', [barcode]);
     if (cached && cached.expires_at > now()) return JSON.parse(cached.result) as LookupResult;
     if (active) return active.barcode === barcode ? active.promise : { status: 'RATE_LIMIT' };
@@ -43,7 +43,7 @@ function createBroker(db: DatabaseAdapter, adapter: CatalogueLookupAdapter, now:
     const timed = new Promise<LookupResult>(resolve => { timeout = setTimeout(() => { controller.abort(); resolve({ status: 'TIMEOUT' }); }, 5000); });
     let background: ReturnType<typeof AppState.addEventListener>;
     const foreground = new Promise<LookupResult>(resolve => { background = AppState.addEventListener('change', state => { if (state !== 'active') { controller.abort(); resolve({ status: 'CANCELLED' }); } }); });
-    const promise = Promise.race([Promise.resolve().then(() => adapter.lookup(barcode, controller.signal)).catch((): LookupResult => ({ status: 'ERROR' })), timed, foreground]).then(result => {
+    const promise = Promise.race([Promise.resolve().then((): Promise<LookupResult> | LookupResult => controller.signal.aborted ? { status: 'CANCELLED' } : adapter.lookup(barcode, controller.signal)).catch((): LookupResult => ({ status: 'ERROR' })), timed, foreground]).then(result => {
       if (result.status === 'CANCELLED') return result;
       const ttl = result.status === 'FOUND' ? 7 * 86400000 : result.status === 'NO_MATCH' ? 86400000 : result.status === 'RATE_LIMIT' ? 3600000 : 300000;
       db.run('INSERT INTO catalogue_lookup_cache(barcode, result, expires_at) VALUES (?, ?, ?) ON CONFLICT(barcode) DO UPDATE SET result = excluded.result, expires_at = excluded.expires_at', [barcode, JSON.stringify(result), now() + ttl]);

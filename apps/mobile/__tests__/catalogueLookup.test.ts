@@ -26,6 +26,10 @@ it('only validated UPC/EAN leaves the adapter; QR, URLs, private text and bad ch
   try {
     for (const invalid of [{ value: code.value, type: 'QR' as const }, { value: 'https://example.test/secret', type: 'QR' as const }, { value: 'STORE-123', type: 'EAN' as const }, { value: '5449000011528', type: 'EAN' as const }]) expect((await service.preview(invalid, signal())).status).toBe('INVALID');
     expect(lookup).not.toHaveBeenCalled();
+    AppState.currentState = 'unknown';
+    expect((await service.preview(code, signal())).status).toBe('CANCELLED');
+    expect(lookup).not.toHaveBeenCalled();
+    AppState.currentState = 'active';
     expect(gtin({ value: code.value, type: 'INTERNAL_CODE' } as unknown as Parameters<typeof gtin>[0])).toBeNull();
     expect(gtin({ value: '036000291452', type: 'UPC' })).toBe('0036000291452');
     await service.preview(code, signal());
