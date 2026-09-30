@@ -4,13 +4,14 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AppState, Linking, Text, View } from 'react-native';
 
 import { ErrorPanel, SecondaryButton } from '../../ui/components';
+import ScannerActivity from './ScannerActivity';
 
 export interface BarcodeCameraProps {
   active: boolean;
   onDetection(detection: Pick<BarcodeInput, 'symbology' | 'value'>): void;
 }
 
-/** The only native camera dependency. No capture, recording or persistence API. */
+/** Barcode-only preview adapter. Explicit product photos use a separate, mutually exclusive preview. */
 export default function BarcodeCamera({ active, onDetection }: BarcodeCameraProps) {
   const [permission, requestPermission] = useCameraPermissions();
   const [foreground, setForeground] = useState(AppState.currentState === 'active');
@@ -44,7 +45,7 @@ export default function BarcodeCamera({ active, onDetection }: BarcodeCameraProp
     }} />
   </View>;
   return <View style={{ gap: 12 }}>
-    <CameraView style={{ height: 240 }} facing="back" enableTorch={torch}
+    <ReadyBarcodePreview torch={torch}
       barcodeScannerSettings={{ barcodeTypes: ['ean13', 'ean8', 'upc_a', 'qr'] }}
       onMountError={() => setFailure('The camera could not start. Search products or retry.')}
       onBarcodeScanned={event => {
@@ -54,5 +55,21 @@ export default function BarcodeCamera({ active, onDetection }: BarcodeCameraProp
         }
       }} />
     <SecondaryButton title={torch ? 'Torch off' : 'Torch on'} onPress={() => setTorch(value => !value)} />
+  </View>;
+}
+
+function ReadyBarcodePreview({ torch, onMountError, onBarcodeScanned }: {
+  torch: boolean;
+  onMountError: NonNullable<React.ComponentProps<typeof CameraView>['onMountError']>;
+  onBarcodeScanned: NonNullable<React.ComponentProps<typeof CameraView>['onBarcodeScanned']>;
+  barcodeScannerSettings?: React.ComponentProps<typeof CameraView>['barcodeScannerSettings'];
+}) {
+  const [ready, setReady] = useState(false);
+  return <View>
+    <CameraView style={{ height: 240 }} facing="back" enableTorch={torch}
+      barcodeScannerSettings={{ barcodeTypes: ['ean13', 'ean8', 'upc_a', 'qr'] }}
+      onCameraReady={() => setReady(true)} onMountError={onMountError} onBarcodeScanned={onBarcodeScanned} />
+    <ScannerActivity active={ready} />
+    <Text>{ready ? 'Looking for a barcode. The guide helps framing; codes can be read anywhere in the preview.' : 'Starting barcode camera…'}</Text>
   </View>;
 }

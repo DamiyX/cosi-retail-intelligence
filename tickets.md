@@ -309,3 +309,15 @@ and is visible in the temporary-product completion path after restart.
 previously delegated technical granularity. Acceptance remains coordinator-owned.
 
 ---
+
+## M8-08 — Show when the scanner is actively looking
+
+Status: Pending implementation; blocked by M8-07 only for sequential checkout ownership, not a technical dependency.
+Delivers: four corner brackets and a restrained up/down scanning line help retailer frame the barcode and understand that the live scanner is active.
+Acceptance:
+- Four clear corner markers and sweeping line appear over live barcode preview without obscuring codes or torch/back/mode controls; overlay does not consume touches. Use existing animation facilities/dependencies, no new native package.
+- Animation runs only when camera is mounted/ready, screen focused, app foreground and scan session accepting detections. Stop/freeze or hide while UNKNOWN/AMBIGUOUS/confirmation/photo capture, processing, permission-denied/error, paused, background or unmounted; no dangling timers/animation loops.
+- Animation is an activity indicator, NOT percentage/progress, success or a promise of recognition. Honest status copy distinguishes active scanning, checking and paused/result states. A framing guide is NOT a claimed restricted detector ROI unless actual implementation constrains it; do not change detection scope here.
+- Respect system reduced-motion with static framing/status; decorative brackets/line do not create repeated TalkBack announcements. Accessibility/large-text/contrast remain usable.
+- Existing duplicate-frame latch, exact resolution, single/basket choices, basket totals, unknown pause/return, photo/price flow and explicit payment unchanged. Moving line never generates product additions or feedback itself.
+- Focused lifecycle/status/reduced-motion UI tests and strict typecheck/zero-warning lint pass. Native appearance/continuous-basket behavior remains unverified until later phone pass, not inferred from animation.

@@ -1,0 +1,57 @@
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { AccessibilityInfo, AppState, type AppStateStatus } from 'react-native';
+import BarcodeCamera from '../src/features/scanning/BarcodeCamera';
+let mockGranted = true;
+let mockDetection!: (event: { type: string; data: string }) => void;
+jest.mock('expo-camera', () => {
+  const { View, Text } = jest.requireActual<typeof import('react-native')>('react-native');
+  return { useCameraPermissions: () => [{ granted: mockGranted, canAskAgain: true }, jest.fn()], CameraView: ({ onCameraReady, onMountError, onBarcodeScanned }: { onCameraReady(): void; onMountError(): void; onBarcodeScanned(event: { type: string; data: string }): void }) => {
+    mockDetection = onBarcodeScanned;
+    return <View testID="barcode-preview" onLayout={onCameraReady}><Text onPress={onMountError}>Fail camera</Text></View>;
+  } };
+});
+beforeEach(() => { mockGranted = true; Object.defineProperty(AppState, 'currentState', { configurable: true, value: 'active' }); });
+it('shows framing only after readiness, retains controls and removes it on pause/error', async () => {
+  const motion = jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
+  const detected = jest.fn();
+  const view = render(<BarcodeCamera active onDetection={detected} />);
+  expect(screen.queryByTestId('scanner-frame', { includeHiddenElements: true })).toBeNull();
+  expect(screen.getByText('Starting barcode camera…')).toBeTruthy();
+  fireEvent(screen.getByTestId('barcode-preview'), 'layout');
+  await act(async () => {});
+  expect(screen.getByTestId('scanner-frame', { includeHiddenElements: true })).toBeTruthy();
+  expect(screen.getByText(/Looking for a barcode/)).toBeTruthy();
+  expect(screen.getByText('Torch on')).toBeTruthy();
+  expect(detected).not.toHaveBeenCalled();
+  act(() => mockDetection({ type: 'upc_a', data: '036000291452' }));
+  expect(detected).toHaveBeenCalledWith({ symbology: 'upc_a', value: '036000291452' });
+  view.rerender(<BarcodeCamera active={false} onDetection={detected} />);
+  expect(screen.getByText('Camera paused.')).toBeTruthy();
+  expect(screen.queryByTestId('scanner-frame', { includeHiddenElements: true })).toBeNull();
+  view.rerender(<BarcodeCamera active onDetection={detected} />);
+  fireEvent(screen.getByTestId('barcode-preview'), 'layout');
+  fireEvent.press(screen.getByText('Fail camera'));
+  expect(screen.queryByTestId('scanner-frame', { includeHiddenElements: true })).toBeNull();
+  expect(screen.getByText('Camera unavailable')).toBeTruthy();
+  view.unmount(); motion.mockRestore();
+});
+it('permission denial and background never display scanning activity or accept stale detections', async () => {
+  let changed!: (state: AppStateStatus) => void;
+  const subscription = jest.spyOn(AppState, 'addEventListener').mockImplementation((_event, callback) => { changed = callback; return { remove: jest.fn() }; });
+  const motion = jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
+  mockGranted = false;
+  const detected = jest.fn();
+  const view = render(<BarcodeCamera active onDetection={detected} />);
+  expect(screen.queryByTestId('barcode-preview')).toBeNull();
+  expect(screen.queryByTestId('scanner-frame', { includeHiddenElements: true })).toBeNull();
+  mockGranted = true;
+  view.rerender(<BarcodeCamera active onDetection={detected} />);
+  fireEvent(screen.getByTestId('barcode-preview'), 'layout');
+  await act(async () => {});
+  const stale = mockDetection;
+  act(() => { Object.defineProperty(AppState, 'currentState', { configurable: true, value: 'background' }); changed('background'); });
+  expect(screen.queryByTestId('scanner-frame', { includeHiddenElements: true })).toBeNull();
+  act(() => stale({ type: 'upc_a', data: '036000291452' }));
+  expect(detected).not.toHaveBeenCalled();
+  view.unmount(); subscription.mockRestore(); motion.mockRestore();
+});

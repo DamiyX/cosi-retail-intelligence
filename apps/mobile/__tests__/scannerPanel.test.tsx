@@ -48,3 +48,21 @@ it('offers unknown-code creation with the detected type/value and explicit user 
   expect(create).toHaveBeenCalledWith({ symbology: 'upc_a', value: '036000291452' });
 });
 
+
+it('status distinguishes checking from a paused unknown result and accepts no extra frames', async () => {
+  let resolve!: (result: RecognitionResult) => void;
+  const recognise = jest.fn(() => new Promise<RecognitionResult>(done => { resolve = done; }));
+  const candidate = jest.fn();
+  const view = render(<ScannerPanel service={{ recognize: recognise }} session={new ScanSession()} active onCandidate={candidate} onSearch={jest.fn()} onCancel={jest.fn()} basketMode onModeChange={jest.fn()} summary="2 items" onUndo={jest.fn()} />);
+  const trigger = await screen.findByText('Camera test event');
+  fireEvent.press(trigger);
+  expect(screen.getByText('Checking this code. Scanning paused.')).toBeTruthy();
+  fireEvent.press(trigger);
+  expect(recognise).toHaveBeenCalledTimes(1);
+  await act(async () => resolve({ status: 'UNKNOWN', reason: 'NOT_FOUND' }));
+  expect(screen.getByText('Scanning paused. No safe product match. Search products or sell this item.')).toBeTruthy();
+  fireEvent.press(trigger);
+  expect(recognise).toHaveBeenCalledTimes(1);
+  expect(candidate).not.toHaveBeenCalled();
+  view.unmount();
+});

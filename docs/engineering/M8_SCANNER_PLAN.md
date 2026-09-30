@@ -396,3 +396,7 @@ Some real known additions, unknown cancel and a manually reconstructed completed
 offline sale survived restart. Do not confuse that sale with the original scanned
 basket or claim standalone cold launch. No verified detector/audio root cause yet.
 These remain separate audit/retest findings; this amendment does not waive them.
+
+## Coordinator-specified scanner activity addition — M8-08
+
+Founder requested four right-angle corner brackets and one restrained line sweeping up/down over the live barcode preview. Ticket M8-08 in tickets.md follows M8-07 for sequential ownership only. Use existing React Native animation facilities; no new dependency/native build. Show motion only while the ready, focused, foreground scanner accepts detections, with static framing/status for reduced motion. Pause or hide on processing/results/errors/permission denial/photo entry or lifecycle exit; dispose animation loops. The guide does not constrain detector ROI, signal progress/success or authorize simultaneous multi-product recognition. D-047 photo/price scope and all existing physical findings remain unchanged. Source tests must cover lifecycle, honest status and reduced motion; continuous basket behavior still needs the physical procedure.

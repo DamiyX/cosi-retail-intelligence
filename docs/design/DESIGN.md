@@ -540,3 +540,7 @@ Automated navigation/state tests plus physical A15 verification must cover the
 state table, repeated scans, all exit paths, text scale, TalkBack, camera release,
 offline scan-to-sale and receipt survival. Compare time/errors with manual
 search. No screenshots or physical passes are claimed by this specification.
+
+### M8-08 scanner activity feedback — coordinator-specified, 2026-09-30
+
+Four visible corner brackets and one restrained sweeping line frame the live barcode preview. Motion runs only for a ready scanner accepting detections; show static framing/status with reduced motion and remove activity while paused, processing or displaying a result. The decoration consumes no touches, is hidden from repeated screen-reader announcements, and does not imply a detector ROI, success or multi-object recognition. See tickets.md M8-08 and the M8_SCANNER_PLAN addition linked to D-047. Physical appearance and continuous basket flow remain unverified.

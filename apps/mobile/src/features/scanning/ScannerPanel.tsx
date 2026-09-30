@@ -70,11 +70,11 @@ export default function ScannerPanel({ service, session, active, onCandidate, on
     <CameraFailureBoundary><Suspense fallback={<Text>Opening camera…</Text>}>
       <BarcodeCamera active={active && !busy && result === null && failure === null} onDetection={detect} />
     </Suspense></CameraFailureBoundary>
-    {busy ? <Text>Looking up this code…</Text> : null}
+    {busy ? <Text>Checking this code. Scanning paused.</Text> : null}
     {failure ? <Text accessibilityRole="alert">{failure}</Text> : null}
-    {result?.status === 'UNKNOWN' ? <Text>No safe product match. Search products to continue selling.</Text> : null}
+    {result?.status === 'UNKNOWN' ? <Text>Scanning paused. No safe product match. Search products or sell this item.</Text> : null}
     {result?.status === 'UNKNOWN' && detection ? <Text>{detection.symbology}: {detection.value}</Text> : null}
-    {result?.status === 'AMBIGUOUS' ? <Text>This code has conflicting mappings. Search and choose the product manually.</Text> : null}
+    {result?.status === 'AMBIGUOUS' ? <Text>Scanning paused. This code has conflicting mappings. Search and choose the product manually.</Text> : null}
     {onUseCode && detection ? <SecondaryButton title="Use this code for association" onPress={() => onUseCode(detection)} /> : null}
     <SecondaryButton title="Scan again" onPress={() => { session.repeatExplicitly(); setResult(null); setFailure(null); setDetection(undefined); }} />
     <SecondaryButton title="Search products" onPress={() => onSearch(detection)} />
