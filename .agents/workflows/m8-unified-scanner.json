@@ -3,8 +3,8 @@
   "task_id": "m8-unified-scanner",
   "workflow_id": "build-feature",
   "mode": "implement",
-  "status": "blocked",
-  "current_state": "isolated-native-pass-returned-findings",
+  "status": "in_progress",
+  "current_state": "price-first-photo-amendment-ready-for-sequential-implementation",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
@@ -26,11 +26,12 @@
     "one-authorized-included-native-build-installed",
     "bounded-galaxy-a15-native-pass-recorded",
     "offline-manual-sale-restart-survival-observed",
-    "device-settings-and-metro-restored"
+    "device-settings-and-metro-restored",
+    "coordinator-reviewed-price-first-photo-amendment"
   ],
   "owner": {
-    "agent": "coordinator-remaining-acceptance-gates",
-    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
+    "agent": "m8-amendment-implementer",
+    "thread": "01a0ec1c-578c-7c41-b151-e803c9e5c548",
     "worktree": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning"
   },
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
@@ -101,6 +102,12 @@
       "source": "4d6521e; docs/engineering/M8_ANDROID_VERIFICATION.md",
       "observed_at": "2026-09-30T02:18:38.958Z",
       "result": "One conditional zero-additional-cost EAS build 105bb294-dce0-487c-ba87-d1620a40cd82 installed separately on SM-A156E Android 16/API 36. Known EAN-13 additions, exact UNKNOWN/cancel, torch and one beep observed. Three unexpected decoder values paused UNKNOWN without extra lines; stable scanning remains unaccepted. Manual offline NGN 4,000 sale survived force-stop with identical sale/payment/snapshots/inventory/outbox and reopened receipt. USB Metro available; no standalone/first-use offline proof. Large text partial, TalkBack tutorial blocked. Settings restored; camera/Metro/reverse released. No runtime edit, migration deployment or second build."
+    },
+    {
+      "kind": "planning",
+      "source": "D-047; M8_SCANNER_PLAN.md; tickets.md M8-06/07",
+      "result": "Inspected real name validation, temporary graph, snapshots, absent runtime media storage and locked filesystem dependency. Approved two sequential slices; no runtime code changed. Device-local photo limit and native findings explicit.",
+      "observed_at": "2026-09-30T02:25:05.6918048Z"
     }
   ],
   "acceptance_gates": [
@@ -214,7 +221,8 @@
       "status": "blocked",
       "depends_on": [
         "m8-source",
-        "m8-sync-safety"
+        "m8-sync-safety",
+        "m8-price-photo-source"
       ],
       "verification": {
         "kind": "test",
@@ -251,7 +259,8 @@
       "status": "pending",
       "depends_on": [
         "m8-source",
-        "m8-sync-safety"
+        "m8-sync-safety",
+        "m8-price-photo-source"
       ],
       "verification": {
         "kind": "review",
@@ -260,6 +269,28 @@
       },
       "evidence": [],
       "limitations": [],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m8-price-photo-source",
+      "claim": "Unknown-item price-first selling and durable private photo source behavior pass independent review.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m8-source"
+      ],
+      "verification": {
+        "kind": "test",
+        "procedure": "Run M8-06/07 UI, SQLite/file-adapter, restart, isolation and snapshot regressions; review stopped source handoff.",
+        "success_condition": "No mandatory name typing; durable photo or truthful fallback; exact atomic sale/catalogue behavior retained."
+      },
+      "evidence": [],
+      "limitations": [
+        "Real camera capture and file retention on Galaxy require separate native pass.",
+        "Private photos initially stay on originating device; backup/restore unimplemented."
+      ],
       "blocker": null,
       "waiver": null
     }
@@ -297,6 +328,11 @@
       "scope": "one-isolated-scanner-verification-build-and-bounded-physical-pass",
       "status": "approved",
       "basis": "Founder authorized one isolated APK conditional on no additional charge. Live Free-plan allowance checked before submission; post-build overage and cost zero confirmed. No second build or rollout acceptance authorization."
+    },
+    {
+      "scope": "m8-price-first-unknown-selling-identification-photo",
+      "status": "approved",
+      "basis": "Founder requested no mandatory name/detail typing at unknown checkout and product photo for later enrichment; coordinator delegated bounded tickets under D-047. No second APK/deployment approved."
     }
   ],
   "blockers": [
@@ -304,8 +340,8 @@
     "Standalone offline/first-use detector, TalkBack and broader native cases remain unverified; no second build authorized.",
     "New association checks additionally require a reviewed migrated test backend; migration remains rollback-only."
   ],
-  "next_action": "Coordinator reviews the stopped isolated native evidence and proposes bounded corrections/retests. Automatic additions in ordinary builds and new associations remain off. Separate standalone-build approval and reviewed migrated test backend are still required; no self-acceptance, deployment, push, merge or M9 work.",
+  "next_action": "Original M8 implementer implements M8-06 then M8-07 from stopped native evidence HEAD 1e50d1b, preserves coordinator planning changes, and returns stopped handoff. Coordinator audits before physical retest. No extra build, deployment or M9.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-09-30T02:18:38.958Z",
+  "updated_at": "2026-09-30T02:25:05.6918048Z",
   "archived": false
 }

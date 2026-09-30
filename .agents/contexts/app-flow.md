@@ -1,5 +1,13 @@
 # COSI Application Flow
 
+**D-047 amendment, 2026-09-30:** unknown/no-code selling now targets quick
+whole-product photo -> numeric selling price -> same basket, without mandatory
+name/detail typing. Generated temporary labels and privately retained device
+photos support later Complete details. Capture failure must not block selling;
+photo backup/cross-device restore is not implemented. Route to the approved
+M8_SCANNER_PLAN amendment and tickets M8-06/07. Earlier build/native evidence
+does not verify this changed flow. Ordinary catalogue creation is unchanged.
+
 **Status:** M0–M7 local source accepted; M8 source/audit corrections active, physical acceptance pending.  
 **Scope:** MVP user journeys  
 **Updated:** 2026-09-29  

@@ -313,3 +313,86 @@ Bounded external verification on 2026-09-28:
 
 Planning verifies feasibility and identifies tests; it does not prove a camera,
 new scanner path or concurrent-identifier correction already works.
+
+## Approved amendment — price-first unknown items, 2026-09-30
+
+D-047 records the founder's observed checkout friction and supersedes mandatory
+name/base-unit typing in the unknown-item selling shortcut. Existing M8-01..05
+evidence remains attributed to its tested source; it cannot accept this new flow.
+The phone utility is stopped at evidence HEAD 1e50d1b. The original M8 implementer
+owns M8-06 then M8-07 sequentially; coordinator audits after its stopped handoff.
+
+### User flow
+
+Unknown barcode/QR -> Sell this item -> quick whole-product photo -> numeric
+selling-price entry -> Add to basket -> resume the same sale/scanner.
+Use helpful copy such as 'Take a photo so you can finish this product later'
+and 'Fit the whole product in the frame'. No forced distance, name, SKU, cost,
+description or unit typing. Quantity is editable and defaults to one sold unit.
+Offer search/link instead if the product already exists. If photo cannot be
+captured or saved, expose retry and Continue without photo; preserve sale access.
+The no-code selling shortcut can use the same photo/price path without inventing
+a barcode. Do not route ordinary Products creation through mandatory photography.
+
+Generate a recognizable temporary label with a stable distinguishing suffix;
+IDs remain globally unique, names never become identity keys. Repeated operation
+IDs cannot duplicate products, assets, outbox entries or basket lines. Keep the
+typed raw identifier and existing collision/association rollout protections.
+Do not enable disabled scanner associations to make this shortcut appear complete.
+Keep generated labels in immutable sale snapshots; later enrichment may expose
+the current name alongside history but never rewrite past transaction facts.
+
+### Data and media boundary
+
+Reuse temporary-product graph, exact price parsing, local creation/outbox
+atomicity and current provisional package model. Do not make variant names null
+or change costing/stock rules. Keep one store-private identification photo and
+bounded metadata tied to stable StoreProduct identity; use an additive SQLite
+migration only if needed. The documented MediaAsset model is the guide, not a
+second business ledger. Restrict this first implementation to originating-device
+retention; private media upload/restore is a named future gate, not a hidden claim.
+
+Persist files in app-private durable storage, not Camera cache. Use generated
+asset/file identities and bounds on dimensions/size; never use scanned values
+as paths. Stage file persistence before attaching its metadata in the product
+transaction. Handle failed writes/transactions/retries and cancelled drafts
+without dangling 'saved' references, duplicate attachments or deletion of an
+already committed asset. Filesystem and SQLite are not one atomic transaction:
+define conservative orphan/staging recovery and test each failure boundary.
+Missing/corrupt files display a truthful fallback and do not block sales.
+Scope every asset read/write/replacement to the active authorized store/product.
+Do not send device URIs or bytes through PRODUCT_CREATED or sale envelopes.
+
+Existing expo-camera supports explicit still capture. expo-file-system 57.0.7
+is already locked transitively; review and declare it directly if used, without
+unrelated upgrades. Verify native module presence in the installed verification
+APK before claiming Metro can deliver the change; report before any extra native
+dependency/build/config change. Do not submit another cloud job under this task.
+Official bounded source: https://docs.expo.dev/versions/v57.0.0/sdk/camera/
+(photos initially go to cache; one active camera preview).
+
+### Likely change surface and proof
+
+Sell/Quick Add shortcut, scanning camera adapter, catalogue application boundary,
+temporary product list/detail, a focused local media repository/service and
+additive metadata migration if justified; direct filesystem dependency/lockfile
+only if needed. Existing contracts/server protocol remain unchanged.
+
+Focused UI/SQLite/file-adapter tests must show price-only creation, two distinct
+unnamed products, same operation replay, cancellation/retry, existing basket
+preservation, no stale identifier/photo attachment, current-store isolation,
+camera-denied/storage-full/missing-file fallback, restart after completed sale,
+later naming with unchanged sale/price/package/cost snapshots, and no media
+bytes/URI in synced business JSON. Existing manual/catalogue and scanner tests
+remain green. Root validation, Expo Doctor and Android export are source checks.
+Real capture/display and restart retention require a subsequent physical pass.
+
+### Returned native findings remain open
+
+The September 30 physical handoff records unexpected detector codes, an initially
+silent addition, incomplete permission-return/continuous-scan/accessibility
+checks and memory-only unfinished basket loss on font/configuration recreation.
+Some real known additions, unknown cancel and a manually reconstructed completed
+offline sale survived restart. Do not confuse that sale with the original scanned
+basket or claim standalone cold launch. No verified detector/audio root cause yet.
+These remain separate audit/retest findings; this amendment does not waive them.

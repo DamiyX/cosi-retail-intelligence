@@ -1,5 +1,12 @@
 # COSI Project Context and Decision Packet
 
+**Active amendment 2026-09-30:** D-047 and M8_SCANNER_PLAN authorize price-first
+unknown-product selling with one private identification photo and later naming.
+Original M8 implementer executes M8-06 then M8-07 after the phone utility stopped
+at evidence HEAD 1e50d1b. Photo initially stays on the originating device; cloud
+backup/restore is not claimed. Coordinator audits after handoff; source evidence
+for the earlier flow and native findings remain recorded, not new-flow acceptance.
+
 **Status:** Active  
 **Scope:** Whole project  
 **Project ID:** COSI  

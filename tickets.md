@@ -1,5 +1,9 @@
 # Tickets: M8 Unified Scanner + Barcode
 
+**Amendment 2026-09-30:** D-047 authorizes price-first unknown-product selling
+with a private identification photo. M8-06 and M8-07 below extend the existing
+milestone. Native findings from HEAD 1e50d1b remain open; M8 is not accepted.
+
 **Status:** Source re-audit and eight live PostgreSQL cases passed; isolated Galaxy A15 pass returned native findings on 2026-09-30; physical acceptance blocked.
 **Plan:** `docs/engineering/M8_SCANNER_PLAN.md` is the scope/boundary specification.
 **Workflow:** `.agents/workflows/m8-unified-scanner.json`.
@@ -256,3 +260,52 @@ launch, and root cause remains unverified. All M8 physical criteria stay
 unchecked. Build quota/cost review and separately authorized isolated build are
 the next prerequisites. See the superseding stopped handoff in
 M8_ANDROID_VERIFICATION.md; no acceptance gate is self-approved.
+
+Coordinator amendment tickets (the published M8-01..05 ledger is retained):
+
+## M8-06 — Sell an unfamiliar item without typing its name
+
+**Status:** Ready for implementation.  
+**Blocked by:** Returned M8-03/source correction baseline; already available.  
+**Delivers:** unknown/no-code sale creation accepts selling price as the only
+required typed product field, retains the same basket and enriches the same product later.
+
+- [ ] Name, cost, SKU, description and unit typing are absent from the normal
+  selling shortcut; quantity defaults to one sold unit and remains editable.
+- [ ] Nonempty generated distinguishing labels use stable product IDs, not
+  names as keys; ordinary catalogue creation still works as before.
+- [ ] Exact price validation, temporary graph/outbox atomicity, operation replay,
+  existing association gates and no invented stock/package conversion are preserved.
+- [ ] Cancel/retry/repeat/unknown-search return preserve existing basket and never
+  leak an abandoned identifier; no extra line appears from rapid duplicate taps.
+- [ ] Later naming/enrichment preserves identity and immutable sale snapshots;
+  wording distinguishes completed sale from unfinished product details.
+- [ ] Focused UI/SQLite regression tests, typecheck and zero-warning lint pass.
+
+## M8-07 — Identify unfinished products with a saved photo
+
+**Status:** Pending.  
+**Blocked by:** M8-06.  
+**Delivers:** one explicit whole-product photo accompanies price-first selling
+and is visible in the temporary-product completion path after restart.
+
+- [ ] Clear photo/price flow without mandatory name typing, simultaneous camera
+  previews, silent capture, OCR or visual identity claims; no-code flow supported.
+- [ ] One bounded store-private file survives restart outside cache, with durable
+  metadata tied to stable product identity; reads/replacements reject other stores.
+- [ ] Staging/transaction failures, retry/replay, cancel and missing files have
+  tested recovery; no dangling saved reference or deletion of committed photos.
+- [ ] Camera denied/storage failure allows retry or Continue without photo,
+  with a truthful missing-photo state; completed sale remains atomic/durable.
+- [ ] Temporary list/detail/Complete details show the photo and permit enrichment
+  without rewriting transaction snapshots. No bytes/device URI in business sync.
+- [ ] Device-local retention limitation is visible/documented; no claim of cloud
+  backup or cross-device photo restore. Public uploads and recognition enrollment excluded.
+- [ ] Existing installed native module compatibility is checked before proposing
+  APK rebuild; no extra build submitted. Focused tests and root validation,
+  Expo Doctor and Android export pass; physical capture/restart remains separately verified.
+
+**Coordinator sizing review:** two end-to-end slices, sequential 06 -> 07. Founder
+previously delegated technical granularity. Acceptance remains coordinator-owned.
+
+---

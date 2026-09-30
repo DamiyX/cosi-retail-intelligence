@@ -440,6 +440,17 @@ it from this approved source.
 
 ## M8 Scanner and Global Entry — Approved, 2026-09-29
 
+**September 30 amendment:** D-047 replaces required name/unit entry in the
+unknown-item selling shortcut with one whole-product identification photo and
+numeric selling price. Quantity defaults to one and remains editable. Offer a
+clear Continue without photo fallback when camera/storage is unavailable.
+Generated temporary labels and thumbnails support later Complete details;
+payment is normal, not pending. Ordinary Products creation remains available.
+The originating-device photo is private and not yet cloud-backed. The amended
+flow and failure tests are specified in M8_SCANNER_PLAN.md; guided multi-view
+enrollment, visual matching and OCR remain later work. Earlier physical evidence
+does not verify this changed flow.
+
 **Status:** Founder approved 2026-09-29 (D-046), including PC-08. Implements the
 PC-02 direction; earlier milestone navigation describes the pre-M8 application. Technical scope: `../engineering/M8_SCANNER_PLAN.md`.
 

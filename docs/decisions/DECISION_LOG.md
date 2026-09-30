@@ -116,10 +116,51 @@ When a major decision changes, update the affected source-of-truth document too.
 | D-044 | Reject cross-device stale physical reconciliations | ACTIVE |
 | D-045 | Restore authoritative historical actor and device references before bootstrap replay | ACTIVE |
 | D-046 | M8 barcode scanner, basket flow and camera/service boundary | ACTIVE |
+| D-047 | Price-first temporary selling and private identification photos | ACTIVE |
 
 ---
 
 # 5. Decision Records
+
+## D-047 — Price-First Temporary Selling and Private Identification Photos
+
+**Status:** ACTIVE  
+**Date:** 2026-09-30  
+**Approval:** Founder requested removal of compulsory name/detail typing during
+unknown-product checkout and a product photo for later identification. Coordinator
+owns the bounded M8 amendment and implementation/audit sequencing.
+
+Unknown-item selling requires only the selling price as typed product information.
+Offer one quick, explicit whole-product photo with guidance to fit the product
+in frame; do not require a particular distance. Generate a distinguishable
+temporary label and retain the existing stable product identity, provisional
+base package, exact sale arithmetic and outbox protocol. Quantity defaults to
+one sold unit and remains editable. Do not infer carton conversions or opening
+stock. Ordinary catalogue creation may retain its existing name-based flow.
+
+The sale completes normally; product enrichment is pending, not payment.
+Later naming/enrichment preserves identity and immutable transaction snapshots.
+Display the identification photo in the temporary-product completion path.
+It is an aid to the retailer, not recognition, OCR or proof of physical identity.
+
+First delivery retains a bounded private photo on the originating device,
+outside cache, with durable store-scoped metadata linked to the product.
+Do not place image bytes or local file paths in business sync envelopes. This
+uses the existing MediaAsset/offline media direction; private upload/restore
+remains explicitly unimplemented until separately delivered and verified.
+Never imply this photo is backed up or available on another phone. Camera,
+storage or upload failure cannot prevent checkout: offer retry or continue
+without photo and show the missing-photo state truthfully. Capture is never
+silent; no public gallery, shared recognition corpus or platform upload.
+
+This narrows D-035's retailer-entered-name requirement for the selling shortcut:
+persist a generated nonempty label rather than making domain names nullable.
+It extends D-046 with a single identification-photo feature, not multi-view
+enrollment, visual matching or a new recognition contract. Full M8 acceptance
+still requires independent audit and native verification of the changed flow.
+
+Implementation boundaries/tests are in the amendment to M8_SCANNER_PLAN.md;
+execution is recorded in tickets.md and the existing M8 workflow.
 
 ## D-001 — Android-First Mobile MVP
 

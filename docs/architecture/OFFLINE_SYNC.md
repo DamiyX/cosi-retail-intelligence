@@ -1401,6 +1401,13 @@ A forced upgrade should be reserved for genuine compatibility/security requireme
 
 # 60. Large Payloads / Media
 
+**D-047 M8 delivery status:** the initial temporary-product identification photo
+is private to its originating device, retained outside cache with local metadata.
+It is not uploaded/restored by M7 business synchronization. Do not include its
+bytes or device path in business envelopes, imply cloud backup, or block a sale
+when capture/storage/upload is unavailable. Implementing private object upload
+and cross-device restore follows the workflow below as a separate verified scope.
+
 Do not include large image binaries inside ordinary sync JSON batches.
 
 Media workflow:

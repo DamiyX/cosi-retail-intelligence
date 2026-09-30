@@ -1305,6 +1305,14 @@ Detailed recognition telemetry/storage rules belong in the scanning architecture
 
 ## 15.1 MediaAsset
 
+**D-047 delivery note (2026-09-30):** M8 adds one private identification photo
+for a temporary StoreProduct. The first implementation uses originating-device
+durable file/metadata retention with explicit local-only status; metadata alone
+does not prove file availability or cloud backup. Keep assets separate from sale
+facts, store-scoped, and out of ordinary business sync JSON. The M8 plan defines
+staging/recovery and missing-file tests. Private upload/restore is not delivered
+by this amendment; the architecture's offline media workflow remains its route.
+
 Represents image/file metadata.
 
 ### Core fields

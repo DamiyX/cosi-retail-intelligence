@@ -1,9 +1,20 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-30
-Current milestone: M8 source re-audit and eight live PostgreSQL cases passed; isolated Galaxy A15 pass returned native findings, so physical acceptance remains blocked.
+Current milestone: M8 price-first unknown-product/photo amendment approved (D-047); original implementer assigned M8-06/07. Prior source/database evidence is retained; native findings and changed-flow acceptance remain open.
 
 ## Active work
+
+- Founder observed mandatory product-name typing during unknown-item selling.
+  D-047 and the amendment in M8_SCANNER_PLAN.md specify selling-price-only
+  typed entry, explicit whole-product photo, generated temporary labels and
+  later enrichment. Tickets M8-06 then M8-07 are sequential. First photos stay
+  privately on the originating device; private backup/restore is not claimed.
+- Phone utility is stopped at clean evidence HEAD 1e50d1b; its earlier utility
+  chat was changed by founder to ChatGPT-6.1 high. Coordinator prepared the
+  amendment only after that handoff. No further APK or rollout is authorized.
+- Next owner is the existing M8 source implementer, who preserves these local
+  planning updates and returns a stopped handoff before coordinator audit.
 
 - Checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m8-planning`; branch `plan/m8-unified-scanner`.
 - Accepted M7 base: `c817edb`; approved M8 planning preserved at `4105618` (D-046).
@@ -33,7 +44,12 @@ Known source limits for review: association rollout is disabled; previously ackn
 
 ## Next action
 
-Return this stopped evidence-only pass to the coordinator for native finding review and a bounded correction/retest plan. No second build is authorized. Source re-audit passed at c995641; independent mobile verification passed 381 tests (8 database tests skipped), and eight live PostgreSQL cases passed with rollback-only migration injection. Standalone preview needs separate compatible-build authorization; associations need a reviewed migrated test backend. Full native criteria remain unaccepted. No deployment, push, merge or M9 work is implied; existing M9 work remains separate.
-
-
+The original M8 implementer takes M8-06 then M8-07 under D-047, preserving the
+coordinator's planning changes. Phone utility and coordinator are stopped during
+implementation. Return a clean, stopped source/evidence handoff for independent
+audit; only then schedule native retests. No second APK, persistent backend
+migration, rollout, push/merge or M9 is authorized. Unexpected detector codes,
+intermittent beep, incomplete native cases and unfinished-cart configuration
+loss remain explicit findings. Source/live database evidence applies to its
+recorded earlier source, not this unimplemented amendment.
 Audit correction source e5b23ff clears cancelled scan intent and adds worker-boundary coverage plus an isolated verification profile. Root validation and additional focused suites produced 543 passing tests across runs; fresh typecheck/lint and verification export passed. On 2026-09-30, both live worker RPC cases and all six existing collision cases passed (8/8, two suites). No Docker startup/repair or persistent migration was performed. Edge HTTP smoke readiness was not tested. See the appended implementer response in M8_INDEPENDENT_AUDIT.md.

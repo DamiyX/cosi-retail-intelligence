@@ -103,6 +103,18 @@ capabilities. The existing model/runtime and consent/data-provenance gates stay
 in force. No new recognition engine or image-retention feature is authorized by
 writing this clarification.
 
+## PC-09 — Price-first unknown-item sales and identification photo
+
+Founder observation, 2026-09-30: name/detail typing during unknown-item selling
+adds friction. Requested a whole-product photo and selling-price entry, with
+name/full catalogue completion later. D-047 is the approved behavior authority;
+M8_SCANNER_PLAN.md and tickets M8-06/07 specify the bounded extension.
+Initial photo retention is private to the originating device; private backup
+and cross-device restore remain future media work under OFFLINE_SYNC section 60.
+This is not visual recognition or guided multi-view enrollment. Sale completion
+is real; product enrichment is pending. Native verification must be repeated
+for the new flow before acceptance. Prior physical findings are not waived.
+
 ## M4 impact — resolved
 
 No new mandatory M4 reopening follows from these requirements. Existing stable
