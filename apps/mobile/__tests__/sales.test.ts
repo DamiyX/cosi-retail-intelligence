@@ -141,6 +141,7 @@ describe('M3 Sales milestone', () => {
             { version: 23, name: 'offline_sync_later_device_restore_staging' },
             { version: 24, name: 'scanner_identifier_quarantine' },
             { version: 25, name: 'local_product_photos' },
+            { version: 26, name: 'local_catalogue_suggestions' },
           ]);
         } finally {
           reopened.close();

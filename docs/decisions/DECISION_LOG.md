@@ -117,10 +117,27 @@ When a major decision changes, update the affected source-of-truth document too.
 | D-045 | Restore authoritative historical actor and device references before bootstrap replay | ACTIVE |
 | D-046 | M8 barcode scanner, basket flow and camera/service boundary | ACTIVE |
 | D-047 | Price-first temporary selling and private identification photos | ACTIVE |
+| D-048 | Optional unconfirmed online catalogue suggestions | ACTIVE; live provider disabled |
 
 ---
 
 # 5. Decision Records
+
+## D-048 — Optional Unconfirmed Online Catalogue Suggestions
+
+**Status:** ACTIVE for the local source flow; LIVE PROVIDER DISABLED.  
+**Date:** 2026-09-30.  
+**Approval:** Founder approved the second/background online product-details approach; coordinator assigned M8-09 sequentially after M8-06..08 with explicit terms/contact gates.
+
+Local known barcode resolution remains first. An unknown/no-code sale uses D-047 photo/price entry and never waits for internet. A saved temporary product with a validated UPC/EAN may receive an opportunistic foreground, unconfirmed suggestion for later completion. Ordinary Add product may show an inline ready suggestion. QR/URLs/private codes never request external data or navigate automatically.
+
+No response automatically changes product identity, package conversion, identifiers, commercial facts, inventory or sales. Use details/Edit fills an actual editable name; explicit Save invokes the established identity command. Display name, brand, size, source and attribution together. Size is descriptive text only. Persist dismissals/corrections locally and reject stale work across product/store/barcode changes, edits, enrichment, cancellation and lifecycle exit. Local photos and historical snapshots remain intact.
+
+A replaceable adapter sends only a validated GTIN and public application identity. No private retailer identifiers, photos or business facts leave through lookup. Additive local suggestion/cache/budget metadata stays outside business sync and is not authoritative shared product identity. No new backend, package, paid account, scraping or OS background scheduler.
+
+Open Food Facts is a disabled candidate implementation, not verified coverage. Public contact, licence/reuse/attribution review, native transport compatibility and representative provider smoke remain activation gates. No private email is substituted; no account/form/email or real barcode request was made. See [provider comparison and precise limitations](../engineering/M8_CATALOGUE_LOOKUP_PROVIDER.md). D-046 RecognitionService and D-047 photo/price semantics are unchanged. M8-08 decorative framing is linked in M8_SCANNER_PLAN.md and changes no detector acceptance.
+
+Independent audit and the amended native flow remain required. This decision does not accept M8 or authorize live provider activation, deployment or another APK.
 
 ## D-047 — Price-First Temporary Selling and Private Identification Photos
 

@@ -2766,6 +2766,31 @@ export const MIGRATIONS: Migration[] = [
        BEGIN SELECT RAISE(ABORT, 'Photo product store mismatch'); END;`,
     ],
   },
+  {
+  version: 26,
+  name: 'local_catalogue_suggestions',
+  statements: [
+    `CREATE TABLE catalogue_lookup_suggestions (
+      store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+      store_product_id TEXT PRIMARY KEY REFERENCES store_products(id) ON DELETE RESTRICT,
+      barcode TEXT NOT NULL CHECK(length(barcode) IN (8, 13)),
+      status TEXT NOT NULL CHECK(status IN ('PENDING','FOUND','NO_MATCH','DISABLED','OFFLINE','ERROR','TIMEOUT','RATE_LIMIT','INVALID','CANCELLED','ACCEPTED','DISMISSED','CORRECTED')),
+      details TEXT,
+      identity_name TEXT NOT NULL,
+      identity_version INTEGER NOT NULL,
+      identifier_snapshot TEXT NOT NULL,
+      request_version INTEGER NOT NULL DEFAULT 0
+    );`,
+    `CREATE TRIGGER catalogue_suggestion_store_insert BEFORE INSERT ON catalogue_lookup_suggestions
+     WHEN NOT EXISTS(SELECT 1 FROM store_products WHERE id = NEW.store_product_id AND store_id = NEW.store_id)
+     BEGIN SELECT RAISE(ABORT, 'Suggestion product store mismatch'); END;`,
+    `CREATE TRIGGER catalogue_suggestion_store_update BEFORE UPDATE ON catalogue_lookup_suggestions
+     WHEN NOT EXISTS(SELECT 1 FROM store_products WHERE id = NEW.store_product_id AND store_id = NEW.store_id)
+     BEGIN SELECT RAISE(ABORT, 'Suggestion product store mismatch'); END;`,
+    `CREATE TABLE catalogue_lookup_cache (barcode TEXT PRIMARY KEY, result TEXT NOT NULL, expires_at INTEGER NOT NULL);`,
+    `CREATE TABLE catalogue_lookup_budget (kind TEXT NOT NULL CHECK(kind IN ('MINUTE','DAY')), window INTEGER NOT NULL, attempts INTEGER NOT NULL CHECK(attempts > 0), PRIMARY KEY(kind, window));`,
+  ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

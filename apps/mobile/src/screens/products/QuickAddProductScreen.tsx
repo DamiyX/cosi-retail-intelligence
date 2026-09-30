@@ -1,5 +1,7 @@
 import { calculateSaleLine, DomainError, parseQuantityDecimal } from '@retail/domain';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { PreviewSuggestion } from '../../catalogue/lookup/SuggestionCard';
+import { gtin, type LookupCode } from '../../catalogue/lookup/provider';
 import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { CatalogueClient, TemporaryProductGraph } from '../../catalogue/client';
@@ -77,6 +79,8 @@ export default function QuickAddProductScreen({
   const [showMore, setShowMore] = useState(false);
   const [localSku, setLocalSku] = useState('');
   const [barcode, setBarcode] = useState('');
+  const lookupCode = useMemo<LookupCode>(() => ({ value: barcode.trim(), type: barcode.trim().length === 12 ? 'UPC' : 'EAN' }), [barcode]);
+  const [previewDecision, setPreviewDecision] = useState<{ barcode: string; status: 'ACCEPTED' | 'DISMISSED' | 'CORRECTED' } | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
@@ -159,6 +163,7 @@ export default function QuickAddProductScreen({
       const priceMinor = requireSellingPrice || saleShortcut ? parseMajorUnitsToMinor(sellingPrice, client.storeCurrencyCode) : undefined;
       if (saleShortcut) calculateSaleLine({ quantityPackagesMicros: quantityMicros, conversionToBaseMicros: 1000000, unitPriceMinor: priceMinor!, discountAmountMinor: 0 });
       const graph = savedGraph.current ?? client.createTemporaryProduct({
+        lookupCode: initialIdentifier,
         operationId,
         name: name.trim(),
         generateTemporaryLabel: saleShortcut,
@@ -166,10 +171,11 @@ export default function QuickAddProductScreen({
         baseUnitName: baseUnitName.trim().length === 0 ? 'piece' : baseUnitName.trim(),
         localSku: localSku.trim().length === 0 ? null : localSku.trim(),
         barcode: initialIdentifier ? (allowScannedAssociation ? initialIdentifier.value : null) : barcode.trim().length === 0 ? null : barcode.trim(),
-        barcodeType: initialIdentifier && allowScannedAssociation ? initialIdentifier.type : undefined,
+        barcodeType: initialIdentifier && allowScannedAssociation ? initialIdentifier.type : barcode.trim().length === 12 ? 'UPC' : undefined,
         defaultSellingPriceMinor: priceMinor,
       });
       savedGraph.current = graph;
+      if (!saleShortcut && previewDecision?.barcode === gtin(lookupCode)) { try { client.suggestions?.decide(graph.storeProduct.id, previewDecision.status); } catch { /* Provider metadata cannot invalidate a saved product. */ } }
       setProductSaved(true);
       if (saleShortcut && onSaleReady) onSaleReady(graph, quantityMicros);
       else onSaved(graph.storeProduct.id);
@@ -216,6 +222,7 @@ export default function QuickAddProductScreen({
         value={name}
         onChangeText={(text) => {
           setName(text);
+          if (previewDecision?.barcode === gtin(lookupCode)) setPreviewDecision({ barcode: previewDecision.barcode, status: 'CORRECTED' });
           setErrors((current) => ({ ...current, name: undefined }));
         }}
         error={errors.name}
@@ -266,6 +273,7 @@ export default function QuickAddProductScreen({
             maxLength={128}
             testID="quick-add-barcode"
           />
+          {client.suggestions && gtin(lookupCode) && !(previewDecision?.barcode === gtin(lookupCode) && previewDecision.status !== 'ACCEPTED') ? <PreviewSuggestion key={`${client.storeId}:${barcode}`} service={client.suggestions} code={lookupCode} onUse={details => { setName(details.name); setPreviewDecision({ barcode: details.barcode, status: 'ACCEPTED' }); setErrors(current => ({ ...current, name: undefined })); }} onDismiss={() => setPreviewDecision({ barcode: gtin(lookupCode)!, status: 'DISMISSED' })} /> : null}
         </View>
       ) : null}
       </> : null}

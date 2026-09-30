@@ -1,4 +1,6 @@
 import { createProductPhotos, type PhotoFiles, type ProductPhotos } from '../media/productPhotos';
+import { createCatalogueSuggestions, type CatalogueSuggestions } from './lookup/suggestions';
+import type { CatalogueLookupAdapter, LookupCode } from './lookup/provider';
 import { generateMobileId } from '../crypto/mobileIds';
 import type { RecognitionService } from '@retail/contracts';
 import { createRecognitionService } from '../features/scanning/resolver';
@@ -68,6 +70,7 @@ import {
  */
 
 export interface QuickAddInput {
+  lookupCode?: LookupCode;
   name: string;
   generateTemporaryLabel?: boolean;
   localPhotoId?: string;
@@ -103,6 +106,7 @@ export interface ProductReorderLevelInput {
 }
 
 export interface CatalogueClient {
+  suggestions?: CatalogueSuggestions;
   photos?: ProductPhotos;
   recognition?: RecognitionService;
   readonly storeId: string;
@@ -157,10 +161,13 @@ export function createCatalogueClient(
   device: DeviceRow,
   generateId: () => string = generateMobileId,
   photoFiles?: () => PhotoFiles,
+  lookupAdapter?: CatalogueLookupAdapter,
 ): CatalogueClient {
   const catalogueUserId = resolveCatalogueUser(adapter, store.id, device);
   const photos = createProductPhotos(adapter, store.id, photoFiles, generateId);
+  const suggestions = createCatalogueSuggestions(adapter, store.id, lookupAdapter);
   return {
+    suggestions,
     storeId: store.id,
     recognition: createRecognitionService(adapter, store.id),
     photos,
@@ -185,7 +192,10 @@ export function createCatalogueClient(
         barcodeForBasePackage: input.barcodeForBasePackage,
         defaultSellingPriceMinor: input.defaultSellingPriceMinor,
       };
-      return createTemporaryProduct(adapter, operation, { generateId, operationId: input.operationId });
+      const graph = createTemporaryProduct(adapter, operation, { generateId, operationId: input.operationId });
+      const code = input.lookupCode ?? (input.barcode ? { value: input.barcode, type: input.barcodeType ?? 'EAN' } : undefined);
+      if (code) { try { suggestions.remember(graph.storeProduct.id, code); } catch { /* Lookup never invalidates a durable product. */ } }
+      return graph;
     },
     getProductDetail(productId: string): ProductDetail | null {
       const product = getStoreProductById(adapter, productId);
@@ -214,11 +224,13 @@ export function createCatalogueClient(
     updateProductIdentity(
       input: Omit<UpdateProductIdentityInput, 'storeId' | 'deviceId'> & { storeProductId: string },
     ): ProductIdentityResult {
-      return updateProductIdentity(
+      const result = updateProductIdentity(
         adapter,
         { ...input, storeId: store.id, deviceId: device.id },
         { generateId },
       );
+      try { suggestions.decide(input.storeProductId, 'CORRECTED'); } catch { /* Name fingerprint still rejects late responses. */ }
+      return result;
     },
     addProductIdentifier(
       input: Omit<AddProductIdentifierInput, 'storeId' | 'deviceId'> & { storeProductId: string },

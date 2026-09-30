@@ -184,3 +184,7 @@ schema/UX details live in approved authorities, not copied into this backlog.
 M7 local source and integration evidence is accepted. Next: review the M8
 proposal and then assign only its approved scope. PC-04 staff accountability
 and PC-07 market-price signals remain outside M8.
+
+## M8 optional catalogue enrichment follow-up — 2026-09-30
+
+Founder approved the second/background online product-details approach, bounded by D-048 and ticket M8-09 after D-047/M8-08. Product details are unconfirmed foreground suggestions, never checkout requirements or shared platform truth. Provider selection/reuse/contact and native HTTP verification gates remain open; default live integration disabled. This is catalogue enrichment within M8, not recognition, M9 price intelligence or a new milestone. Provider comparison: docs/engineering/M8_CATALOGUE_LOOKUP_PROVIDER.md.

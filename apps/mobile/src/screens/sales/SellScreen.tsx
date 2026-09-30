@@ -761,6 +761,7 @@ export default function SellScreen({
 
   // Quick Add proxy client if needed
   const effectiveCatalogueClient: CatalogueClient = catalogueClient ?? {
+    suggestions: client.suggestions,
     photos: client.photos,
     storeId: client.storeId,
     storeName: client.storeName,

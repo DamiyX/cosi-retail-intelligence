@@ -265,7 +265,7 @@ Coordinator amendment tickets (the published M8-01..05 ledger is retained):
 
 ## M8-06 — Sell an unfamiliar item without typing its name
 
-**Status:** Ready for implementation.  
+**Status:** Source implemented; independent audit and physical acceptance pending.  
 **Blocked by:** Returned M8-03/source correction baseline; already available.  
 **Delivers:** unknown/no-code sale creation accepts selling price as the only
 required typed product field, retains the same basket and enriches the same product later.
@@ -312,7 +312,7 @@ previously delegated technical granularity. Acceptance remains coordinator-owned
 
 ## M8-08 — Show when the scanner is actively looking
 
-Status: Pending implementation; blocked by M8-07 only for sequential checkout ownership, not a technical dependency.
+Status: Source implemented at e71674c; independent audit/native appearance pending. Sequential M8-07 ownership dependency satisfied.
 Delivers: four corner brackets and a restrained up/down scanning line help retailer frame the barcode and understand that the live scanner is active.
 Acceptance:
 - Four clear corner markers and sweeping line appear over live barcode preview without obscuring codes or torch/back/mode controls; overlay does not consume touches. Use existing animation facilities/dependencies, no new native package.
@@ -321,3 +321,17 @@ Acceptance:
 - Respect system reduced-motion with static framing/status; decorative brackets/line do not create repeated TalkBack announcements. Accessibility/large-text/contrast remain usable.
 - Existing duplicate-frame latch, exact resolution, single/basket choices, basket totals, unknown pause/return, photo/price flow and explicit payment unchanged. Moving line never generates product additions or feedback itself.
 - Focused lifecycle/status/reduced-motion UI tests and strict typecheck/zero-warning lint pass. Native appearance/continuous-basket behavior remains unverified until later phone pass, not inferred from animation.
+
+## M8-09 — Offer optional online product details after local lookup
+
+Status: Source implemented; final verification and independent audit pending. Live provider DISABLED.
+Blocked by: M8-06..08 for sequential ownership; contact/licensing/transport/provider-smoke review for live activation.
+Delivers: unconfirmed inline catalogue suggestions from a narrow replaceable GTIN-only adapter; photo/price checkout never awaits internet.
+
+Acceptance:
+- Local known mapping wins; no-code, invalid checksum, QR/URL/private codes make no external requests. Sale graph/price/photo and same-basket return remain immediate.
+- Ordinary Add can show name/brand/size/source + Use details/Edit/Dismiss; Temporary details retain suggestions for later completion. Explicit selection fills actual editable values; Save reuses existing identity command. Provider never changes package conversions/prices/cost/stock/identifiers or historical sale snapshots automatically.
+- Store/product/name/version/identifier/enriched/cancel/lifecycle guards reject stale work; dismissals and corrections persist. Lookup-only metadata remains outside the business outbox.
+- Five-second timeout, one active request, deduplication, bounded positive/negative cache, persistent ten/minute and hundred/day budgets, backoff and manual retry; no scan-frame/search flood or OS background scheduler.
+- Provider comparison records precise API version/docs discrepancy, cost/account/coverage/accuracy/licensing/attribution/privacy/rates before selection. No account signup, form, email, scraping, paid plan or remote images. Missing public contact/reuse review keeps live integration disabled; representative provider smoke not claimed.
+- Real SQLite + boundary/UI tests and fresh root validation, Doctor and Android export. Native/provider tests remain separately unverified; M8 acceptance is coordinator-owned.

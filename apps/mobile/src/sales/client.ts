@@ -1,4 +1,6 @@
 import { createProductPhotos, type ProductPhotos } from '../media/productPhotos';
+import { createCatalogueSuggestions, type CatalogueSuggestions } from '../catalogue/lookup/suggestions';
+import type { CatalogueLookupAdapter } from '../catalogue/lookup/provider';
 import type { QuickAddInput } from '../catalogue/client';
 import type { RecognitionService } from '@retail/contracts';
 import { createRecognitionService } from '../features/scanning/resolver';
@@ -69,6 +71,7 @@ export interface CompleteSaleScreenInput {
  * business logic out of UI components (AGENTS.md section 12).
  */
 export interface SalesClient {
+  suggestions?: CatalogueSuggestions;
   photos?: ProductPhotos;
   readonly storeId: string;
   readonly storeName: string;
@@ -88,6 +91,7 @@ export interface SalesClient {
 }
 
 export interface CreateSalesClientOptions {
+  lookupAdapter?: CatalogueLookupAdapter;
   storeId?: string;
   deviceId?: string;
   userId?: string;
@@ -167,7 +171,9 @@ export function createDatabaseSalesClient(
     });
   };
 
+  const suggestions = createCatalogueSuggestions(adapter, store.id, options.lookupAdapter);
   return {
+    suggestions,
     storeId: store.id,
     storeName: store.name,
     storeCurrencyCode: store.currencyCode,
@@ -233,7 +239,10 @@ export function createDatabaseSalesClient(
         barcodeForBasePackage: input.barcodeForBasePackage,
         defaultSellingPriceMinor: input.defaultSellingPriceMinor,
       };
-      return createTemporaryProduct(adapter, operation, { generateId, operationId: input.operationId });
+      const graph = createTemporaryProduct(adapter, operation, { generateId, operationId: input.operationId });
+      const code = input.lookupCode ?? (input.barcode ? { value: input.barcode, type: input.barcodeType ?? 'EAN' } : undefined);
+      if (code) { try { suggestions.remember(graph.storeProduct.id, code); } catch { /* Optional lookup cannot delay checkout. */ } }
+      return graph;
     },
 
     completeSale(input: CompleteSaleScreenInput): CompletedSaleGraph {

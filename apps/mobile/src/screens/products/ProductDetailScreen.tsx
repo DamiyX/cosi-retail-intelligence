@@ -11,6 +11,7 @@ import ScannerPanel from '../../features/scanning/ScannerPanel';
 import { ScanSession } from '../../features/scanning/session';
 import { generateMobileId } from '../../crypto/mobileIds';
 import ProductPhoto from '../../media/ProductPhoto';
+import { SavedSuggestion } from '../../catalogue/lookup/SuggestionCard';
 
 interface ProductDetailScreenProps {
   client: CatalogueClient;
@@ -87,6 +88,7 @@ export default function ProductDetailScreen({
 }: ProductDetailScreenProps) {
   const [screen, setScreen] = useState<ScreenState>(() => loadScreen(client, productId));
   const [editing, setEditing] = useState(false);
+  const [usingSuggestion, setUsingSuggestion] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [localSku, setLocalSku] = useState('');
   const [nameError, setNameError] = useState<string | null>(null);
@@ -184,6 +186,7 @@ export default function ProductDetailScreen({
     setSkuError(null);
     setFailure(null);
     setEditing(true);
+    setUsingSuggestion(null);
   };
 
   const saveIdentity = (): void => {
@@ -202,6 +205,7 @@ export default function ProductDetailScreen({
         name: name.trim(),
         localSku: localSku.trim().length === 0 ? null : localSku.trim(),
       });
+      if (usingSuggestion === name.trim()) { try { client.suggestions?.decide(detail.product.id, 'ACCEPTED'); } catch { /* Identity is durable; metadata remains conservative. */ } }
       refresh();
       setEditing(false);
     } catch (error) {
@@ -420,6 +424,7 @@ export default function ProductDetailScreen({
           )}
           {failure !== null ? <ErrorPanel title="Not saved" message={failure} /> : null}
           <ProductPhoto photos={client.photos} productId={detail.product.id} />
+          {detail.product.isTemporary && !editing && client.suggestions ? <SavedSuggestion key={`${client.storeId}:${detail.product.id}`} service={client.suggestions} productId={detail.product.id} onUse={suggestion => { beginEdit(); setName(suggestion.name); setUsingSuggestion(suggestion.name); }} /> : null}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Codes</Text>
             {client.recognition ? <PrimaryButton title="Associate barcode" disabled={process.env.EXPO_PUBLIC_SCANNER_ASSOCIATIONS_ENABLED !== 'true'} onPress={() => setAssociating(true)} /> : null}
