@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "price-first-photo-amendment-ready-for-sequential-implementation",
+  "current_state": "source-handoff-ready-awaiting-coordinator-audit",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
@@ -27,7 +27,14 @@
     "bounded-galaxy-a15-native-pass-recorded",
     "offline-manual-sale-restart-survival-observed",
     "device-settings-and-metro-restored",
-    "coordinator-reviewed-price-first-photo-amendment"
+    "coordinator-reviewed-price-first-photo-amendment",
+    "m8-06-price-only-source-implemented",
+    "m8-07-private-device-photo-source-implemented",
+    "m8-08-scanner-activity-source-implemented",
+    "m8-09-disabled-provider-suggestion-source-implemented",
+    "m8-amendment-final-root-validation-589-passed",
+    "m8-amendment-final-android-export-passed",
+    "m8-amendment-provider-and-doctor-gates-recorded"
   ],
   "owner": {
     "agent": "m8-amendment-implementer",
@@ -108,6 +115,12 @@
       "source": "D-047; M8_SCANNER_PLAN.md; tickets.md M8-06/07",
       "result": "Inspected real name validation, temporary graph, snapshots, absent runtime media storage and locked filesystem dependency. Approved two sequential slices; no runtime code changed. Device-local photo limit and native findings explicit.",
       "observed_at": "2026-09-30T02:25:05.6918048Z"
+    },
+    {
+      "kind": "source-verification",
+      "source": "bcd9e16; docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md",
+      "observed_at": "2026-09-30T07:28:45Z",
+      "result": "M8-06 b0baf90, M8-07 0ecfecf, M8-08 e71674c, M8-09 d87597b plus bcd9e16 foreground guard. Final root validation589 tests:12 contracts/150 domain/427 mobile; eight opt-in PostgreSQL skipped. All typecheck/lint passed; Android export1615 modules/28 assets/5.3MB passed. Doctor20/21 patch-version discrepancy remains. Native/private-photo/provider HTTP unverified; live provider disabled. No acceptance gate met by implementer."
     }
   ],
   "acceptance_gates": [
@@ -260,11 +273,12 @@
       "depends_on": [
         "m8-source",
         "m8-sync-safety",
-        "m8-price-photo-source"
+        "m8-price-photo-source",
+        "m8-catalogue-suggestions-source"
       ],
       "verification": {
         "kind": "review",
-        "procedure": "Review stopped implementer handoff, code/migrations/diff and actual acceptance evidence.",
+        "procedure": "Review stopped M8-06..09 source/evidence, migration25/26, scanner activity, disabled provider gates and current Doctor20/21 discrepancy. Preserve original native findings and historical audit.",
         "success_condition": "No unresolved source findings; physical/release limits reported separately."
       },
       "evidence": [],
@@ -293,6 +307,34 @@
       ],
       "blocker": null,
       "waiver": null
+    },
+    {
+      "id": "m8-catalogue-suggestions-source",
+      "claim": "Unconfirmed catalogue suggestions preserve local business writes and explicit identity acceptance; default provider is disabled with documented gates.",
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "m8-source",
+        "m8-price-photo-source"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Review M8-09 client/UI/store/stale/caching/migration/contract tests and D-048 provider comparison against stopped source bcd9e16.",
+        "success_condition": "Explicit editable acceptance only, no checkout/network gate or private data transmission, default live-disabled behavior and unresolved activation gates are truthful."
+      },
+      "evidence": [
+        {
+          "source": "docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md",
+          "result": "21 focused tests plus final root589 passed. Fixture transport and native mocks only; no provider/native acceptance claimed."
+        }
+      ],
+      "limitations": [
+        "Public application contact and ODbL private-catalogue reuse/attribution review outstanding.",
+        "Pinned endpoint/native redirect/User-Agent/response buffering and food/nonfood coverage unverified; live adapter disabled."
+      ],
+      "blocker": null,
+      "waiver": null
     }
   ],
   "artifacts": [
@@ -303,7 +345,8 @@
     "docs/engineering/tickets/M7_OFFLINE_SYNC.md",
     "docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md",
     "docs/engineering/M8_ANDROID_VERIFICATION.md",
-    "docs/engineering/M8_IMPLEMENTATION_HANDOFF.md"
+    "docs/engineering/M8_IMPLEMENTATION_HANDOFF.md",
+    "docs/engineering/M8_CATALOGUE_LOOKUP_PROVIDER.md"
   ],
   "approvals": [
     {
@@ -333,15 +376,22 @@
       "scope": "m8-price-first-unknown-selling-identification-photo",
       "status": "approved",
       "basis": "Founder requested no mandatory name/detail typing at unknown checkout and product photo for later enrichment; coordinator delegated bounded tickets under D-047. No second APK/deployment approved."
+    },
+    {
+      "scope": "m8-scanner-activity-and-optional-online-catalogue-suggestions",
+      "status": "approved",
+      "basis": "Founder approved scanner corners/sweep and the second/background product-details approach; coordinator assigned M8-08/09 sequentially. D-048 retains explicit disabled live-provider/contact/licence gates. No build/deployment/signup/upload/push authorized."
     }
   ],
   "blockers": [
     "Three unexpected camera UPC/EAN values paused UNKNOWN; detector stability and consistent addition beep need bounded investigation/retest.",
     "Standalone offline/first-use detector, TalkBack and broader native cases remain unverified; no second build authorized.",
-    "New association checks additionally require a reviewed migrated test backend; migration remains rollback-only."
+    "New association checks additionally require a reviewed migrated test backend; migration remains rollback-only.",
+    "Live catalogue provider disabled: authorized public contact, ODbL reuse/attribution review and native HTTP/provider smoke remain unverified.",
+    "Fresh Expo Doctor is 20/21: remote SDK recommendations differ for camera/constants/router patch versions; dependencies not changed."
   ],
-  "next_action": "Original M8 implementer implements M8-06 then M8-07 from stopped native evidence HEAD 1e50d1b, preserves coordinator planning changes, and returns stopped handoff. Coordinator audits before physical retest. No extra build, deployment or M9.",
+  "next_action": "Coordinator independently audits the clean stopped M8-06..09 handoff and Doctor/provider gates. Native retests require separate reviewed authorization. Keep live provider, associations and ordinary automatic scanner rollout disabled. No build spend, phone work, persistent migration, deployment, push/merge or M9.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-09-30T02:25:05.6918048Z",
+  "updated_at": "2026-09-30T07:28:45Z",
   "archived": false
 }

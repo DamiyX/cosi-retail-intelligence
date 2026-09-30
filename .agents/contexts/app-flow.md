@@ -5,8 +5,8 @@ whole-product photo -> numeric selling price -> same basket, without mandatory
 name/detail typing. Generated temporary labels and privately retained device
 photos support later Complete details. Capture failure must not block selling;
 photo backup/cross-device restore is not implemented. Route to the approved
-M8_SCANNER_PLAN amendment and tickets M8-06/07. Earlier build/native evidence
-does not verify this changed flow. Ordinary catalogue creation is unchanged.
+M8_SCANNER_PLAN amendment and tickets M8-06..09. D-048 unconfirmed inline suggestions require explicit Use details/Edit and Save; live provider remains disabled. Earlier build/native evidence
+does not verify this changed flow. Ordinary catalogue creation retains name entry and may show an optional ready suggestion.
 
 **Status:** M0–M7 local source accepted; M8 source/audit corrections active, physical acceptance pending.  
 **Scope:** MVP user journeys  

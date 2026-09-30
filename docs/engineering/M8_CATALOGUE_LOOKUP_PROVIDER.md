@@ -5,7 +5,7 @@ Reviewed 2026-09-30. This is a source implementation decision, not live-provider
 | Candidate | Access/cost | Coverage and constraints | Decision |
 | --- | --- | --- | --- |
 | Open Food Facts | Public read API, no read account or paid subscription required; custom application/version/contact User-Agent required | Volunteer food catalogue; accuracy/completeness unassured. Product requests limited to 15/min/IP. Database ODbL; individual contents Database Contents Licence; images CC BY-SA | Implement a replaceable, disabled adapter. No images, search, uploads or private retailer data |
-| Verified by GS1 | Public browser access has a daily limit; API access through GS1 member organizations | Identity/ownership validation; not a freely available public product-details API | No scraping, signup or account/API purchase |
+| Verified by GS1 | Public browser access: 30 queries/day; API access through GS1 member organizations, API pricing/access not established | Identity/ownership validation; not a freely available public product-details API | No scraping, signup or account/API purchase |
 
 Primary evidence: [OFF API introduction](https://openfoodfacts.github.io/openfoodfacts-server/api/), [OFF licence guidance](https://openfoodfacts.github.io/openfoodfacts-server/api/tutorials/license-be-on-the-legal-side/), [official terms source](https://github.com/openfoodfacts/openfoodfacts-web/blob/main/lang/en/texts/terms-of-use.html), [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/), [GS1 API/access explanation](https://support.gs1.org/support/solutions/articles/43000734077-what-is-verified-by-gs1-).
 

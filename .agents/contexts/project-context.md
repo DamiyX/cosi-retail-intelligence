@@ -2,9 +2,9 @@
 
 **Active amendment 2026-09-30:** D-047 and M8_SCANNER_PLAN authorize price-first
 unknown-product selling with one private identification photo and later naming.
-Original M8 implementer executes M8-06 then M8-07 after the phone utility stopped
+Original M8 implementer has implemented M8-06..09 after the phone utility stopped
 at evidence HEAD 1e50d1b. Photo initially stays on the originating device; cloud
-backup/restore is not claimed. Coordinator audits after handoff; source evidence
+backup/restore is not claimed. D-048 optional catalogue suggestions default to a disabled live provider pending contact/licence/native transport review. Scanner activity uses existing animation facilities. Coordinator audits after stopped handoff; source evidence
 for the earlier flow and native findings remain recorded, not new-flow acceptance.
 
 **Status:** Active  

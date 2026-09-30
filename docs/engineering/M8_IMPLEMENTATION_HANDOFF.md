@@ -1,3 +1,10 @@
+# M8-06..09 stopped source handoff — independent audit pending
+
+Latest handoff date: 2026-09-30. Frozen source review target: **bcd9e16**.
+Checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m8-planning`; branch `plan/m8-unified-scanner`.
+Read the **Superseding amendment handoff** at the end for current results/gates. Earlier handoffs below are preserved historical records and do not describe the final amendment state. The final documentation HEAD/clean status is delivered in the coordinator notification after commit/checks.
+
+---
 # M8 correction handoff — independent re-audit pending
 
 Date: 2026-09-29
@@ -83,3 +90,36 @@ corrections/retests. No second build is authorized. A separate standalone
 build and migrated isolated association backend still require their respective
 approval gates. Checkout remains C:\Users\doyew\Documents\DEV 2\COSI-m8-planning,
 branch plan/m8-unified-scanner. Existing app data and unrelated work are preserved.
+
+## Superseding amendment handoff — 2026-09-30
+
+Original implementer resumed on the same checkout/branch after the model switch. Coordinator planning was preserved at 8a3c15b. No new branch/chat/subagent, phone work, build/spend, backend deployment, push/merge or destructive reset.
+
+| Slice | Source commit | Delivered | Remaining |
+| --- | --- | --- | --- |
+| M8-06 | b0baf90 | Price-only temporary selling, editable quantity, generated labels, same basket/replay, unchanged later sale snapshots | Independent review; amended native journey |
+| M8-07 | 0ecfecf | Explicit private product photo, device document storage, local migration 25, list/detail fallback, transactional attachment and conservative recovery | Native capture/file retention/display; no backup/restore |
+| M8-08 | e71674c | Decorative four corners/ready sweeping line, reduced-motion static framing, lifecycle cleanup and honest detector-scope status | Native appearance/accessibility/continuous basket |
+| M8-09 | d87597b + bcd9e16 | Unconfirmed GTIN-only suggestions, migration 26, explicit editable acceptance, store/stale/lifecycle guards, cache/budget/backoff; confirmed foreground only | LIVE DISABLED: public contact, licence/reuse review, native transport and provider smoke |
+
+Source is frozen at bcd9e16. Later edits are evidence/routing/handoff documentation only. SQLite migrations 25/26 are additive and tested, including schema25->26 retention of existing product/photo/sale/inventory/outbox rows. No new server migration or business sync protocol/RecognitionService change. Declared existing locked MIT expo-file-system 57.0.7 directly for M8-07; no transitive upgrade, other new package or native build. No private photos, URIs, lookup provenance or provider cache enters business operation JSON.
+
+Final verification:
+
+- `npm run validate`: exit 0, contracts 12 + domain 150 + mobile 427 = 589 tests passed, 75 suites passed. Eight opt-in PostgreSQL tests/two mobile suites skipped. All workspace typechecks and zero-warning lint passed after the last source guard. Mobile suite 205.935 seconds. Log: C:\Users\doyew\AppData\Local\Temp\cosi-m8-amendment-foreground-validate.log.
+- Lookup/lookup UI focused 21 tests passed; final root includes those and the added unknown-foreground/abort guard. Prior photo 109 and scanner 17 focused results are retained in M8_IMPLEMENTATION_EVIDENCE.md and superseded by root coverage for final source.
+- Final `npm run mobile:export`: exit 0; 1615 modules, 28 assets, 5.3 MB Hermes bundle entry-9c7b05be418614f05d6562341462e9da.hbc. Log: C:\Users\doyew\AppData\Local\Temp\cosi-m8-amendment-final-export.log. This is not an APK or physical result.
+- `npm run mobile:doctor`: 20/21, exit 1 for current remote patch recommendations: camera~57.0.6 vs57.0.5, constants~57.0.20 vs57.0.19, router~57.0.24 vs57.0.23. Installed SDK bundled ranges admit current versions. No suppression/upgrade/waiver; coordinator reviews discrepancy before native changes.
+- Workflow state/index validated against repository JSON schemas; git diff --check passed. Final Git HEAD/clean status is checked after this document is committed and reported in the stopped notification.
+
+Own fresh source review checked price/domain invariants, client forwarding, outbox exclusion, explicit acceptance, store and stale predicates, foreground lifecycle and migration retention. This is self-check, not independent audit. Jest sale suites emitted suspended-resource act warnings without failed assertions; these are harness limitations. Native camera/files/network are mocked. Real SQLite and actual temporary-file photo-port tests prove local behavior, not Android invocation.
+
+Provider review: M8_CATALOGUE_LOOKUP_PROVIDER.md records OFF/GS1 comparison, API v3.6/spec discrepancy, free read/account expectations, uncertain Nigerian/nonfood coverage, licence/attribution, minimum barcode-only exposure and rates. No real barcode lookup/staging smoke, signup/form/email, image fetch/upload, private data sharing or paid API. Application defaults are disabled without an environment switch. Contact/licence/native fetch buffering/redirect/User-Agent/endpoint compatibility must be resolved before live activation; separating local cache does not establish an ODbL exemption.
+
+Prior native findings remain open: three unexpected detector UPC/EAN values, first silent beep, incomplete permission/settings-return/large-text/TalkBack/continuous/offline-first-use criteria and unfinished-cart loss on font recreation. Only the manually reconstructed completed NGN4,000 sale survived restart with USB Metro available; do not call it the scanned basket or standalone offline proof. New photo flow and the sequential knownA->knownB->stationary repeats->unknown photo/price->next known->edit/Undo->combined payment->restart procedure remain unperformed. No root cause or acceptance is asserted.
+
+Read-only APK module/hash inspection found camera/filesystem classes in the existing zero-charge isolated binary, supporting a later existing-client test but not proving compatibility. No second APK, installation, Metro/dev server or physical interaction during this amendment. New associations/default automatic rollout remain off; original server guard migration was rollback-only tested. Earlier eight live PostgreSQL/92 pgTAP results are historical and were not rerun here.
+
+Documentation updated: D-048, M8 plan, DESIGN, backlog, tickets, PROJECT_STATE, project/app-flow/stack contexts, workflow state/index, provider review, implementation evidence, Android retest procedure and this handoff. Existing audit/native history is preserved; coordinator-owned gates remain pending/blocked without self-waiver. Ticket source implementation is delivered; full milestone acceptance is not passed.
+
+Next owner: coordinator 01a098ef-d830-7531-bca7-2d66b0a5b587 independently audits the stopped branch, decides the Doctor/provider gaps, then schedules separately authorized native retests. No extra source scope, build charge, persistent backend migration, deployment, Git push/merge or M9 is authorized. The implementer finishes all processes and final commit/status checks, then stops repository commands/edits before the authorized notification.

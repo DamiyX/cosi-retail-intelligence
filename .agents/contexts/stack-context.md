@@ -14,6 +14,7 @@
 | UI runtime | React | 19.2.3 |
 | Navigation | Expo Router | 57.0.23 |
 | Barcode camera / optional feedback | expo-camera / expo-audio | 57.0.5 / 57.0.5; rebuild required |
+| Private device photo files | expo-file-system | 57.0.7 direct dependency; existing APK contains module, invocation unverified |
 | Development client | Expo Development Build | expo-dev-client 57.0.19 |
 | Language | TypeScript, strict configuration | 6.0.3 |
 | Lint | ESLint with Expo config | 9.39.5 |
@@ -84,3 +85,5 @@ Update exact versions from committed manifests and lockfiles, not memory. Major
 framework, backend, database, sync, native dependency, or security-boundary
 changes require explicit architecture review and a decision-log entry. Record
 ordinary dependency changes in the relevant task and verification evidence.
+
+Current amendment verification (2026-09-30): Expo Doctor 20/21 flags newer camera/constants/router patch recommendations. Locked versions and installed SDK ranges were retained; no native upgrade/build or waiver. Live catalogue provider disabled under D-048 contact/licence/transport gates.

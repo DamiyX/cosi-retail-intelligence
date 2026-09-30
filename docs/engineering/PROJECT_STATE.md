@@ -1,55 +1,36 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-30
-Current milestone: M8 price-first unknown-product/photo amendment approved (D-047); original implementer assigned M8-06/07. Prior source/database evidence is retained; native findings and changed-flow acceptance remain open.
+Current milestone: M8 source amendments M8-06..09 implemented; stopped handoff prepared for independent audit. D-047/D-048 apply. M8 is not accepted.
 
-## Active work
+## Active source and ownership
 
-- Founder observed mandatory product-name typing during unknown-item selling.
-  D-047 and the amendment in M8_SCANNER_PLAN.md specify selling-price-only
-  typed entry, explicit whole-product photo, generated temporary labels and
-  later enrichment. Tickets M8-06 then M8-07 are sequential. First photos stay
-  privately on the originating device; private backup/restore is not claimed.
-- Phone utility is stopped at clean evidence HEAD 1e50d1b; its earlier utility
-  chat was changed by founder to ChatGPT-6.1 high. Coordinator prepared the
-  amendment only after that handoff. No further APK or rollout is authorized.
-- Next owner is the existing M8 source implementer, who preserves these local
-  planning updates and returns a stopped handoff before coordinator audit.
+- Checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m8-planning`; branch `plan/m8-unified-scanner`. Continue this branch across model changes.
+- M0–M7 local source remains accepted at M7 base `c817edb`. Original M8 plan `4105618` and returned native evidence `1e50d1b` are preserved.
+- M8-06 `b0baf90`: unknown/no-code selling needs price as its only typed product field; editable quantity defaults to one. Stable IDs, generated nonempty labels, exact arithmetic and same basket retained.
+- M8-07 `0ecfecf`: explicit whole-product photo before price, truthful Continue without photo, device-private document storage and SQLite migration 25. Temporary list/detail/enrichment displays photo or missing/damaged fallback. No backup/upload/cross-device restore.
+- M8-08 `e71674c`: four decorative corners and ready/active sweeping line; reduced-motion static frame, lifecycle cleanup and honest full-preview detection copy. No detector/feedback acceptance change.
+- M8-09 `d87597b`: local unconfirmed catalogue suggestions, SQLite migration 26, explicit Use details/Edit + Save, durable dismissals/corrections and bounded foreground lookup. Confirmed-foreground correction `bcd9e16` is included in final verification.
+- Implementer chat `01a0ec1c-578c-7c41-b151-e803c9e5c548`; coordinator `01a098ef-d830-7531-bca7-2d66b0a5b587`. Coordinator audits only after implementer stops commands/edits and sends the authorized handoff.
 
-- Checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m8-planning`; branch `plan/m8-unified-scanner`.
-- Accepted M7 base: `c817edb`; approved M8 planning preserved at `4105618` (D-046).
-- Implementer chat: `01a0ec1c-578c-7c41-b151-e803c9e5c548`. Coordinator: `01a098ef-d830-7531-bca7-2d66b0a5b587`.
-- M8 adds a local barcode resolver, guarded camera/session, full-screen Sell and global Scan, typed temporary creation, optional beep/mute, and recoverable identifier conflicts. No visual recognition, OCR or M9 work.
-- See `M8_IMPLEMENTATION_EVIDENCE.md`, `M8_ANDROID_VERIFICATION.md`, active `tickets.md` and `.agents/workflows/m8-unified-scanner.json`. Final stopped-work handoff is `M8_IMPLEMENTATION_HANDOFF.md`.
+## Evidence and gates
 
-## Source evidence and rollout
+Final source bcd9e16: root validation 589 tests/typecheck/lint passed; Android export passed. Fresh exact command results are in `M8_IMPLEMENTATION_EVIDENCE.md`; stopped review target is recorded in `M8_IMPLEMENTATION_HANDOFF.md`. Real SQLite/file-port, UI, replay, snapshot, cache/timeout/decision and migration tests are source evidence. Native camera/file/HTTP tests remain unperformed for these amendments.
 
-Six real PostgreSQL/two-SQLite collision cases reproduce the original gap and now pass rejection, quarantine, owner recovery, dependent-sale preservation, cursor progress, replay, fresh bootstrap and authorization checks. SQLite migration 24 and server migration `20260929092623_m8_identifier_claim_guard.sql` are additive. The server migration was tested inside rollback-only transactions, not deployed.
+Current Expo Doctor: 20/21. Remote recommendations expect camera 57.0.6, constants 57.0.20 and router 57.0.24; locked versions 57.0.5/57.0.19/57.0.23 were retained. Installed Expo 57.0.22 bundled ranges admit the locked versions. This discrepancy is not waived; review before changing native dependencies/build compatibility. Android export is a source bundle, not an APK/device result.
 
-New scanner associations default off (`EXPO_PUBLIC_SCANNER_ASSOCIATIONS_ENABLED`); enable only for a reviewed build whose backend has the migration. Automatic basket addition stays off in ordinary builds pending physical evidence/review. An isolated scanner-verification profile now permits bounded testing through the actual route. Manual selling and confirmed scanner additions remain usable. Optional beep uses playback only; native camera/audio require a rebuilt APK.
+Live catalogue integration is disabled. Open Food Facts is a candidate adapter only: public application contact, ODbL reuse/attribution review, native HTTP compatibility/buffering/redirect/User-Agent checks and representative provider smoke remain open. No real barcode request, signup/form/email, scraping, remote photo or paid service. Provider comparison: `M8_CATALOGUE_LOOKUP_PROVIDER.md`.
 
-Android export and Expo Doctor 21/21 passed. Existing local pgTAP 92 assertions and Auth/Edge/PostgreSQL checks passed; the pgTAP files also passed with M8 migration injected transactionally. Exact final typecheck/lint/test results are recorded in the evidence document. Automated checks are not physical acceptance.
+Scanner associations and ordinary automatic basket addition remain default off. Server migration `20260929092623_m8_identifier_claim_guard.sql` was rollback-only tested, not deployed. Earlier eight live PostgreSQL cases/92 pgTAP assertions remain historical evidence; ordinary sync tests are included in current validation. No persistent backend change is authorized.
 
-## Blockers and carried limits
+## Carried native findings
 
-The founder authorized one isolated scanner-verification APK conditional on no additional charge. Build 105bb294-dce0-487c-ba87-d1620a40cd82 finished from 4d6521e; native camera/audio/barcode classes and manifest were inspected, and the separate scannerverification app installed on SM-A156E Android 16/API 36. Post-build Free-plan usage confirmed zero overages and total cost zero. Existing apps/data were preserved. This development client used matching USB Metro and does not establish standalone offline cold launch.
+The one zero-additional-cost isolated APK 105bb294-dce0-487c-ba87-d1620a40cd82 was built from 4d6521e and tested on SM-A156E Android 16. Camera/audio/filesystem classes are present, but this does not prove amended native invocation. No second build, installation, Metro or phone operation occurred during amendment implementation.
 
-The bounded physical pass is stopped. Real Fanta and AirPro EAN-13 scans added the correct cans at synthetic NGN 1,000/2,000 prices; AirPro unknown/cancel preserved Fanta. Torch helped after glare was avoided and the final AirPro addition beeped. Three unexpected UPC/EAN observations paused UNKNOWN without an extra basket line; stability/false-decode investigation is required. The first Fanta addition was silent; close-distance/blur findings remain. Permission denial/search/settings grant were exercised; exact settings-return refresh is unproven. Large text has partial screenshots; TalkBack tutorial blocked the intended sample. Font configuration change lost the unfinished memory-only basket.
+Prior real Fanta/AirPro additions, unknown cancel, torch and one beep were observed. Three unexpected UPC/EAN values paused UNKNOWN without extra lines; stable detection and consistent beep remain unresolved. Large text was partial, TalkBack tutorial blocked evidence, exact settings return is unproven, and font configuration recreation lost the memory-only unfinished basket.
 
-A manually reconstructed offline sale of 2 Fanta + 1 AirPro, NGN 4,000 Cash, survived force-stop/cold reopen. Native sale/payment/snapshots/inventory/outbox checkpoints matched byte-for-byte and its receipt reopened. USB Metro was available; this is local business-data durability, not standalone or first-use offline detector proof. Device settings were restored, camera released, Metro stopped and port 8083 reverse removed. Installed isolated app/test data remain. No runtime source changed; full evidence and unperformed criteria are in M8_ANDROID_VERIFICATION.md.
-
-M0–M7 local source remains independently accepted. M3–M7 physical flows, two-phone verification, remote CI and second-laptop reproduction remain release gates. Prior M7 audit/evidence is preserved in `M7_INDEPENDENT_AUDIT.md` and `tickets/M7_OFFLINE_SYNC.md`.
-
-Known source limits for review: association rollout is disabled; previously acknowledged historical identifier collisions require support and are not silently repaired. The migration refuses deployment over historical accepted collisions. No production readiness or performance claim is made.
+A manually reconstructed offline NGN 4,000 completed sale survived restart with matching receipt/snapshots/inventory/outbox. This was not the original scanned basket; USB Metro was available. Standalone offline cold launch/first-use detection, amended photo retention and the continuous basket procedure remain unverified. See `M8_ANDROID_VERIFICATION.md` for the sequential retest and preserved history. M3–M7 physical flows, two phones, remote CI and second laptop remain release gates.
 
 ## Next action
 
-The original M8 implementer takes M8-06 then M8-07 under D-047, preserving the
-coordinator's planning changes. Phone utility and coordinator are stopped during
-implementation. Return a clean, stopped source/evidence handoff for independent
-audit; only then schedule native retests. No second APK, persistent backend
-migration, rollout, push/merge or M9 is authorized. Unexpected detector codes,
-intermittent beep, incomplete native cases and unfinished-cart configuration
-loss remain explicit findings. Source/live database evidence applies to its
-recorded earlier source, not this unimplemented amendment.
-Audit correction source e5b23ff clears cancelled scan intent and adds worker-boundary coverage plus an isolated verification profile. Root validation and additional focused suites produced 543 passing tests across runs; fresh typecheck/lint and verification export passed. On 2026-09-30, both live worker RPC cases and all six existing collision cases passed (8/8, two suites). No Docker startup/repair or persistent migration was performed. Edge HTTP smoke readiness was not tested. See the appended implementer response in M8_INDEPENDENT_AUDIT.md.
+Coordinator independently reviews the committed stopped handoff for M8-06..09, the Doctor discrepancy and disabled-provider gates. Then schedule the amended native basket/photo flow using reviewed compatibility and explicit authorization. No extra APK/build spend, deployment, rollout, Git push/merge, destructive reset or M9 work under this task.
