@@ -17,7 +17,7 @@ import {
   View,
 } from 'react-native';
 
-import type { CatalogueClient } from '../../catalogue/client';
+import type { CatalogueClient, TemporaryProductGraph } from '../../catalogue/client';
 import type { BarcodeInput, RecognitionCandidate } from '@retail/contracts';
 import ScannerPanel from '../../features/scanning/ScannerPanel';
 import { ScanSession } from '../../features/scanning/session';
@@ -736,6 +736,28 @@ export default function SellScreen({
     );
   }, [client, loadProducts, startConfiguringLine]);
 
+  const addQuickSale = (graph: TemporaryProductGraph, quantityMicros: number) => {
+    const price = graph.storeProduct.defaultSellingPriceMinor!;
+    const calculated = calculateSaleLine({ quantityPackagesMicros: quantityMicros,
+      conversionToBaseMicros: graph.basePackage.conversionToBaseMicros, unitPriceMinor: price, discountAmountMinor: 0 });
+    const line: CartLine = { id: graph.outbox.operationId, storeProductId: graph.storeProduct.id,
+      productVariantId: graph.variant.id, packageUnitId: graph.basePackage.id, productName: graph.variant.name,
+      packageName: graph.basePackage.name, conversionToBaseMicros: graph.basePackage.conversionToBaseMicros,
+      quantityPackagesMicros: quantityMicros, quantityText: String(quantityMicros / 1000000),
+      unitPriceMinor: price, unitPriceText: formatMinorForEdit(price), discountAmountMinor: 0, discountText: '',
+      lineTotalMinor: calculated.netTotalMinor, calculated };
+    calculateSaleTotals([...lines.filter(item => item.id !== line.id), line].map(item => item.calculated));
+    setLines(current => current.some(item => item.id === line.id) ? current : [...current, line]);
+    setQuickAddDiscard(null);
+    setViewMode('cart');
+    setSearchQuery('');
+    setScanIdentifier(undefined);
+    setScanLine(false);
+    setScanning(resumeScanner);
+    setResumeScanner(false);
+    loadProducts('');
+  };
+
   // Quick Add proxy client if needed
   const effectiveCatalogueClient: CatalogueClient = catalogueClient ?? {
     storeId: client.storeId,
@@ -789,7 +811,8 @@ export default function SellScreen({
         initialName={searchQuery.trim()}
         initialIdentifier={scanIdentifier}
         allowScannedAssociation={scanAssociationsVerified}
-        requireSellingPrice={resumeScanner || scanIdentifier !== undefined}
+        saleShortcut
+        onSaleReady={addQuickSale}
         onSaved={handleQuickAddSaved}
         onCancel={closeQuickAdd}
         onDirtyDraftChange={handleQuickAddDraftChange}

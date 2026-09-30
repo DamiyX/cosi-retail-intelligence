@@ -219,6 +219,7 @@ export function createDatabaseSalesClient(
         storeId: store.id,
         deviceId: device.id,
         name: input.name,
+        generateTemporaryLabel: input.generateTemporaryLabel,
         baseUnitName: input.baseUnitName,
         baseUnitSymbol: input.baseUnitSymbol,
         localSku: input.localSku,

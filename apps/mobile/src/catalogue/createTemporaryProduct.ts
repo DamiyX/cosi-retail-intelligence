@@ -42,8 +42,9 @@ export interface CatalogueOperationOptions {
 export interface CreateTemporaryProductInput {
   storeId: string;
   deviceId: string;
-  /** Retailer-entered product name; the only required field. */
+  /** Catalogue name, or an empty input when the selling shortcut generates it. */
   name: string;
+  generateTemporaryLabel?: boolean;
   /** Base-unit label, editable before save. Defaults to "piece". */
   baseUnitName?: string;
   baseUnitSymbol?: string | null;
@@ -98,14 +99,17 @@ export function createTemporaryProduct(
 
   const occurredAt = nowIso();
   return adapter.transaction(() => {
+    const variantId = generateId();
+    const packageId = generateId();
+    const storeProductId = generateId();
     const variant = createProductVariant(adapter, {
-      id: generateId(),
+      id: variantId,
       identityScope: 'STORE_LOCAL',
       ownerStoreId: storeId,
-      name: input.name,
+      name: input.generateTemporaryLabel ? `Unfinished product ${storeProductId.replace(/-/g, '').slice(-12)}` : input.name,
     });
     const basePackage = createPackageUnit(adapter, {
-      id: generateId(),
+      id: packageId,
       productVariantId: variant.id,
       name: input.baseUnitName === undefined || input.baseUnitName.trim().length === 0
         ? 'piece'
@@ -115,7 +119,7 @@ export function createTemporaryProduct(
       isBaseUnit: true,
     });
     const storeProduct = createStoreProduct(adapter, {
-      id: generateId(),
+      id: storeProductId,
       storeId,
       productVariantId: variant.id,
       localSku: input.localSku,

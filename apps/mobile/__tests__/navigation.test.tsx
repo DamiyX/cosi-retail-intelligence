@@ -279,7 +279,7 @@ describe('M2 tab navigation', () => {
 
     fireEvent.changeText(screen.getByPlaceholderText('Search name, local SKU, or barcode'), 'New tab product');
     fireEvent.press(screen.getByText('Add product'));
-    fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Changed tab product');
+    fireEvent.changeText(screen.getByTestId('quick-add-price'), '25');
 
     act(() => appRouter.replace('/today'));
     expect(alertSpy).toHaveBeenCalledWith(

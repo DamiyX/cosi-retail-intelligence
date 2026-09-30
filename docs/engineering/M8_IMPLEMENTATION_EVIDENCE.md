@@ -149,3 +149,7 @@ production source/dependency changes, migration deployment, second build,
 push/merge or self-acceptance. Full procedure, evidence and outstanding criteria
 are in M8_ANDROID_VERIFICATION.md. Final workflow schema/diff checks are recorded
 in M8_IMPLEMENTATION_HANDOFF.md; ordinary tests were not rerun for evidence edits.
+
+## M8-06 price-first source — 2026-09-30
+
+Approved planning preserved at 8a3c15b. Selling shortcut generates its nonempty distinguishing label from stable StoreProduct identity, validates exact price/quantity and adds directly to the same basket with operation-ID deduplication. Ordinary Products creation stays name-based. New regressions cover invalid price, rapid taps, distinct labels/replay and enrichment with unchanged completed-sale snapshots after restart. Focused priceFirstSale/scannerSale/catalogue/scannerCatalogue: 30/30 passed; navigation/sell/products/scannerPanel also passed (58 cases in the earlier focused run). Fresh mobile typecheck and zero-warning lint passed. Initial old scanner assertions expected the superseded name/line form; updated to price-only behavior while retaining saved-identifier assertions. No physical acceptance inferred. M8-07 photo implementation follows separately.

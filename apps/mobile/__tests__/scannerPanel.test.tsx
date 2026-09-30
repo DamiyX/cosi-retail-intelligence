@@ -44,7 +44,7 @@ it('offers unknown-code creation with the detected type/value and explicit user 
   const trigger = await screen.findByText('Camera test event');
   await act(async () => { fireEvent.press(trigger); });
   expect(create).not.toHaveBeenCalled();
-  fireEvent.press(screen.getByText('Add product'));
+  fireEvent.press(screen.getByText('Sell this item'));
   expect(create).toHaveBeenCalledWith({ symbology: 'upc_a', value: '036000291452' });
 });
 

@@ -53,7 +53,7 @@ it('cancelling an unknown item preserves the existing basket and ends only that 
     await screen.findByText('Scan A');
     await act(async () => { fireEvent.press(screen.getByText('Scan A')); });
     await act(async () => { fireEvent.press(screen.getByText('Scan B')); });
-    fireEvent.press(screen.getByText('Add product'));
+    fireEvent.press(screen.getByText(screen.queryByText('Scan a product') ? 'Sell this item' : 'Add product'));
     fireEvent.press(screen.getByText('Cancel'));
     expect(screen.getByText('Cart (1)')).toBeTruthy();
     expect(screen.queryByText('Scan a product')).toBeNull();
@@ -85,13 +85,13 @@ it('audit: cancelling unknown creation clears its barcode from subsequent manual
     const { unmount } = render(<SellScreen client={createDatabaseSalesClient(fixture.adapter)} initialScan scanAssociationsVerified />);
     await screen.findByText('Scan B');
     await act(async () => { fireEvent.press(screen.getByText('Scan B')); });
-    fireEvent.press(screen.getByText('Add product'));
+    fireEvent.press(screen.getByText(screen.queryByText('Scan a product') ? 'Sell this item' : 'Add product'));
     expect(screen.getByText('Scanned QR: B')).toBeTruthy();
     fireEvent.press(screen.getByText('Cancel'));
-    fireEvent.press(screen.getByText('Add product'));
+    fireEvent.press(screen.getByText(screen.queryByText('Scan a product') ? 'Sell this item' : 'Add product'));
     expect(screen.queryByText('Scanned QR: B')).toBeNull();
-    fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Unrelated product');
-    fireEvent.press(screen.getByText('Save product'));
+    fireEvent.changeText(screen.getByTestId('quick-add-price'), '2');
+    fireEvent.press(screen.getByText('Add to basket'));
     expect(fixture.adapter.getFirstRow<{ count: number }>('SELECT count(*) AS count FROM product_identifiers')?.count).toBe(0);
     unmount();
   } finally { fixture.closeAndDelete(); }
@@ -110,8 +110,8 @@ for (const exit of ['line cancel', 'dirty line discard', 'dirty product discard'
       await screen.findByText('Scan B');
       await act(async () => { fireEvent.press(screen.getByText('Scan B')); });
       if (exit === 'dirty product discard') {
-        fireEvent.press(screen.getByText('Add product'));
-        fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Abandoned');
+        fireEvent.press(screen.getByText(screen.queryByText('Scan a product') ? 'Sell this item' : 'Add product'));
+        fireEvent.changeText(screen.getByTestId('quick-add-price'), '2');
         fireEvent.press(screen.getByText('Cancel'));
       } else {
         fireEvent.press(screen.getByText('Search products'));
@@ -137,12 +137,10 @@ for (const exit of ['line cancel', 'dirty line discard', 'dirty product discard'
         act(() => { discard?.onPress?.(); });
       }
       fireEvent.changeText(screen.getByPlaceholderText('Search name, local SKU, or barcode'), 'Unrelated');
-      fireEvent.press(screen.getByText('Add product'));
+      fireEvent.press(screen.getByText(screen.queryByText('Scan a product') ? 'Sell this item' : 'Add product'));
       expect(screen.queryByText('Scanned QR: B')).toBeNull();
-      fireEvent.press(screen.getByText('Save product'));
-      expect(screen.getByText('Add to sale')).toBeTruthy();
-      fireEvent.changeText(screen.getByTestId('line-price-input'), '2');
-      fireEvent.press(screen.getByText('Add to cart'));
+      fireEvent.changeText(screen.getByTestId('quick-add-price'), '2');
+      fireEvent.press(screen.getByText('Add to basket'));
       expect(screen.getByText('Cart (1)')).toBeTruthy(); // no stale basket-mode resume
       expect(screen.queryByText('Scan a product')).toBeNull();
       const identifiers = fixture.adapter.getAllRows<{ product_variant_id: string }>('SELECT product_variant_id FROM product_identifiers');

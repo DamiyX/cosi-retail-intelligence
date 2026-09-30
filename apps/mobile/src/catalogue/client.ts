@@ -68,6 +68,7 @@ import {
 
 export interface QuickAddInput {
   name: string;
+  generateTemporaryLabel?: boolean;
   baseUnitName?: string;
   baseUnitSymbol?: string | null;
   localSku?: string | null;
@@ -167,6 +168,7 @@ export function createCatalogueClient(
         storeId: store.id,
         deviceId: device.id,
         name: input.name,
+        generateTemporaryLabel: input.generateTemporaryLabel,
         baseUnitName: input.baseUnitName,
         baseUnitSymbol: input.baseUnitSymbol,
         localSku: input.localSku,

@@ -581,7 +581,7 @@ describe('SellScreen', () => {
       alertSpy.mockClear();
       fireEvent.changeText(screen.getByPlaceholderText('Search name, local SKU, or barcode'), 'No match');
       fireEvent.press(screen.getByText('Add product'));
-      fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Changed product name');
+      fireEvent.changeText(screen.getByTestId('quick-add-price'), '25');
       fireEvent.press(screen.getByText('Cancel'));
       expect(alertSpy).toHaveBeenCalledWith(
         'Discard product?',
@@ -604,15 +604,12 @@ describe('SellScreen', () => {
 
       fireEvent.changeText(screen.getByPlaceholderText('Search name, local SKU, or barcode'), 'No result');
       fireEvent.press(screen.getByText('Add product'));
-      fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Quick Add Biscuit');
-      fireEvent.press(screen.getByText('Save product'));
+      fireEvent.changeText(screen.getByTestId('quick-add-price'), '75');
+      fireEvent.press(screen.getByText('Add to basket'));
 
-      expect(screen.getByText('Add to sale')).toBeTruthy();
-      expect(screen.getByText('Quick Add Biscuit')).toBeTruthy();
-      fireEvent.changeText(screen.getByTestId('line-price-input'), '75');
-      fireEvent.press(screen.getByText('Add to cart'));
+      expect(screen.queryByText('Add to sale')).toBeNull();
       expect(screen.getByText('Cart (1)')).toBeTruthy();
-      expect(screen.getAllByText('Quick Add Biscuit').length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Unfinished product/).length).toBeGreaterThan(0);
 
       unmount();
     } finally {
@@ -690,20 +687,16 @@ describe('SellScreen', () => {
       const { unmount } = render(<SellScreen client={salesClient} />);
 
       fireEvent.press(screen.getByText('Add product'));
-      fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Saved during refresh failure');
-      fireEvent.press(screen.getByText('Save product'));
+      fireEvent.changeText(screen.getByTestId('quick-add-price'), '75');
+      fireEvent.press(screen.getByText('Add to basket'));
 
-      expect(
-        screen.getByText(
-          'Product saved on this device. Its catalogue listing could not be refreshed; retry before adding it to this sale.',
-        ),
-      ).toBeTruthy();
+      expect(screen.getByText('Cart (1)')).toBeTruthy();
       expect(screen.getByText('Products unavailable')).toBeTruthy();
       expect(countRows(fixture.adapter, 'store_products')).toBe(1);
       expect(screen.queryByText('Not saved')).toBeNull();
 
       fireEvent.press(screen.getByText('Try again'));
-      expect(screen.getByText('Saved during refresh failure')).toBeTruthy();
+      expect(screen.getAllByText(/Unfinished product/)[0]).toBeTruthy();
 
       searchSpy.mockRestore();
       unmount();

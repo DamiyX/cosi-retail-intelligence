@@ -1,8 +1,8 @@
-import { DomainError } from '@retail/domain';
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { calculateSaleLine, DomainError, parseQuantityDecimal } from '@retail/domain';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import type { CatalogueClient } from '../../catalogue/client';
+import type { CatalogueClient, TemporaryProductGraph } from '../../catalogue/client';
 import { generateMobileId } from '../../crypto/mobileIds';
 import { parseMajorUnitsToMinor } from '../../ui/money';
 import { ErrorPanel, Field, PrimaryButton, SecondaryButton } from '../../ui/components';
@@ -13,6 +13,8 @@ interface QuickAddProductScreenProps {
   initialName?: string;
   initialIdentifier?: { value: string; type: 'EAN' | 'UPC' | 'QR' };
   requireSellingPrice?: boolean;
+  saleShortcut?: boolean;
+  onSaleReady?: (graph: TemporaryProductGraph, quantityMicros: number) => void;
   allowScannedAssociation?: boolean;
   onSaved: (productId: string) => void;
   onCancel: () => void;
@@ -52,8 +54,12 @@ export default function QuickAddProductScreen({
   initialIdentifier,
   requireSellingPrice = false,
   allowScannedAssociation = false,
+  saleShortcut = false,
+  onSaleReady,
 }: QuickAddProductScreenProps) {
   const [operationId] = useState(generateMobileId);
+  const savingRef = useRef(false);
+  const [quantity, setQuantity] = useState('1');
   const [sellingPrice, setSellingPrice] = useState('');
   const [name, setName] = useState(initialName);
   const [baseUnitName, setBaseUnitName] = useState('piece');
@@ -64,7 +70,7 @@ export default function QuickAddProductScreen({
   const [saving, setSaving] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const dirty =
-    name !== initialName || baseUnitName !== 'piece' || localSku.length > 0 || barcode.length > 0 || sellingPrice.length > 0;
+    name !== initialName || baseUnitName !== 'piece' || localSku.length > 0 || barcode.length > 0 || sellingPrice.length > 0 || quantity !== '1';
 
   const cancel = useCallback((): void => {
     if (!dirty) {
@@ -100,11 +106,11 @@ export default function QuickAddProductScreen({
   }, [cancel, dirty, isFocused]);
 
   const save = (): void => {
-    if (saving) {
+    if (savingRef.current) {
       return;
     }
     const nextErrors: FieldErrors = {};
-    if (name.trim().length === 0) {
+    if (!saleShortcut && name.trim().length === 0) {
       nextErrors.name = 'Enter a product name.';
     }
     setErrors(nextErrors);
@@ -112,18 +118,25 @@ export default function QuickAddProductScreen({
       return;
     }
     setSaving(true);
+    savingRef.current = true;
     setFailure(null);
     try {
+      const quantityMicros = parseQuantityDecimal(quantity);
+      if (quantityMicros <= 0) throw new Error('Enter a quantity greater than zero.');
+      const priceMinor = requireSellingPrice || saleShortcut ? parseMajorUnitsToMinor(sellingPrice, client.storeCurrencyCode) : undefined;
+      if (saleShortcut) calculateSaleLine({ quantityPackagesMicros: quantityMicros, conversionToBaseMicros: 1000000, unitPriceMinor: priceMinor!, discountAmountMinor: 0 });
       const graph = client.createTemporaryProduct({
         operationId,
         name: name.trim(),
+        generateTemporaryLabel: saleShortcut,
         baseUnitName: baseUnitName.trim().length === 0 ? 'piece' : baseUnitName.trim(),
         localSku: localSku.trim().length === 0 ? null : localSku.trim(),
         barcode: initialIdentifier ? (allowScannedAssociation ? initialIdentifier.value : null) : barcode.trim().length === 0 ? null : barcode.trim(),
         barcodeType: initialIdentifier && allowScannedAssociation ? initialIdentifier.type : undefined,
-        defaultSellingPriceMinor: requireSellingPrice ? parseMajorUnitsToMinor(sellingPrice, client.storeCurrencyCode) : undefined,
+        defaultSellingPriceMinor: priceMinor,
       });
-      onSaved(graph.storeProduct.id);
+      if (saleShortcut && onSaleReady) onSaleReady(graph, quantityMicros);
+      else onSaved(graph.storeProduct.id);
     } catch (error) {
       if (error instanceof DomainError) {
         const mapped = friendlyFieldError(error);
@@ -134,21 +147,24 @@ export default function QuickAddProductScreen({
         }
       } else {
         setFailure(
-          'This product could not be saved on the device. Nothing was saved; check the device storage and try again.',
+          'Could not finish adding this item. Check the price, quantity and device storage, then retry. Your basket is preserved.',
         );
       }
       setSaving(false);
+      savingRef.current = false;
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <Text accessibilityRole="header" style={styles.title}>
-        Add product
+        {saleShortcut ? 'Sell this item' : 'Add product'}
       </Text>
-      <Text style={styles.note}>{requireSellingPrice ? 'Enter a short name, selling price and unit to keep selling.' : 'Only a name is required.'} The product saves on this device.</Text>
+      <Text style={styles.note}>{saleShortcut ? 'Enter the selling price. Finish product details later in Products → Temporary. Payment completes normally.' : 'Only a name is required. The product saves on this device.'}</Text>
       {initialIdentifier ? <Text>Scanned {initialIdentifier.type}: {initialIdentifier.value}{!allowScannedAssociation ? '\nBarcode saving is unavailable in this build. You can save and sell this product without attaching the code.' : ''}</Text> : null}
-      {requireSellingPrice ? <Field label="Selling price" value={sellingPrice} onChangeText={setSellingPrice} keyboardType="decimal-pad" testID="quick-add-price" /> : null}
+      {requireSellingPrice || saleShortcut ? <Field label="Selling price" value={sellingPrice} onChangeText={setSellingPrice} keyboardType="decimal-pad" testID="quick-add-price" /> : null}
+      {saleShortcut ? <Field label="Quantity" value={quantity} onChangeText={setQuantity} keyboardType="decimal-pad" testID="quick-add-quantity" /> : null}
+      {!saleShortcut ? <>
       <Field
         label="Product name"
         value={name}
@@ -206,6 +222,7 @@ export default function QuickAddProductScreen({
           />
         </View>
       ) : null}
+      </> : null}
       {failure !== null ? (
         <ErrorPanel
           title="Not saved"
@@ -216,7 +233,7 @@ export default function QuickAddProductScreen({
       ) : null}
       <View style={styles.actions}>
         <PrimaryButton
-          title={saving ? 'Saving…' : 'Save product'}
+          title={saving ? 'Saving…' : saleShortcut ? 'Add to basket' : 'Save product'}
           onPress={save}
           disabled={saving}
           accessibilityHint="Save this product on this device"

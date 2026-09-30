@@ -78,7 +78,7 @@ export default function ScannerPanel({ service, session, active, onCandidate, on
     {onUseCode && detection ? <SecondaryButton title="Use this code for association" onPress={() => onUseCode(detection)} /> : null}
     <SecondaryButton title="Scan again" onPress={() => { session.repeatExplicitly(); setResult(null); setFailure(null); setDetection(undefined); }} />
     <SecondaryButton title="Search products" onPress={() => onSearch(detection)} />
-    {onCreate ? <SecondaryButton title="Add product" onPress={() => onCreate(detection)} /> : null}
+    {onCreate ? <SecondaryButton title="Sell this item" onPress={() => onCreate(detection)} /> : null}
     <SecondaryButton title="Undo last addition" onPress={onUndo} />
     <SecondaryButton title="Back to basket" onPress={onCancel} />
   </ScrollView>;
