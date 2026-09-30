@@ -7,6 +7,7 @@ import { generateMobileId } from '../../crypto/mobileIds';
 import { parseMajorUnitsToMinor } from '../../ui/money';
 import { ErrorPanel, Field, PrimaryButton, SecondaryButton } from '../../ui/components';
 import { theme } from '../../ui/theme';
+import ProductPhotoStep from '../../media/ProductPhotoStep';
 
 interface QuickAddProductScreenProps {
   client: CatalogueClient;
@@ -59,6 +60,16 @@ export default function QuickAddProductScreen({
 }: QuickAddProductScreenProps) {
   const [operationId] = useState(generateMobileId);
   const savingRef = useRef(false);
+  const savedGraph = useRef<TemporaryProductGraph | null>(null);
+  const [productSaved, setProductSaved] = useState(false);
+  const photoRef = useRef<string | undefined>(undefined);
+  const [photoStep, setPhotoStep] = useState(saleShortcut);
+  const [photoId, setPhotoId] = useState<string>();
+  const acceptingPhoto = useRef(false);
+  useLayoutEffect(() => {
+    acceptingPhoto.current = photoStep && isFocused;
+    return () => { acceptingPhoto.current = false; };
+  }, [isFocused, photoStep]);
   const [quantity, setQuantity] = useState('1');
   const [sellingPrice, setSellingPrice] = useState('');
   const [name, setName] = useState(initialName);
@@ -70,7 +81,29 @@ export default function QuickAddProductScreen({
   const [saving, setSaving] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const dirty =
-    name !== initialName || baseUnitName !== 'piece' || localSku.length > 0 || barcode.length > 0 || sellingPrice.length > 0 || quantity !== '1';
+    name !== initialName || baseUnitName !== 'piece' || localSku.length > 0 || barcode.length > 0 || sellingPrice.length > 0 || quantity !== '1' || photoId !== undefined;
+
+  const photos = client.photos;
+  useEffect(() => {
+    if (saleShortcut && photos) {
+      try { photos.recover(); } catch { /* Failure must not prevent checkout. */ }
+    }
+    return () => {
+      if (photoRef.current && photos) {
+        try { photos.discard(photoRef.current); } catch { /* Grace-period recovery preserves committed files. */ }
+      }
+    };
+  }, [photos, saleShortcut]);
+
+  const withoutPhoto = () => {
+    if (photoRef.current && photos) {
+      try { photos.discard(photoRef.current); } catch { /* Recovery will retry. */ }
+    }
+    photoRef.current = undefined;
+    setPhotoId(undefined);
+    setPhotoStep(false);
+    setFailure(null);
+  };
 
   const cancel = useCallback((): void => {
     if (!dirty) {
@@ -125,16 +158,19 @@ export default function QuickAddProductScreen({
       if (quantityMicros <= 0) throw new Error('Enter a quantity greater than zero.');
       const priceMinor = requireSellingPrice || saleShortcut ? parseMajorUnitsToMinor(sellingPrice, client.storeCurrencyCode) : undefined;
       if (saleShortcut) calculateSaleLine({ quantityPackagesMicros: quantityMicros, conversionToBaseMicros: 1000000, unitPriceMinor: priceMinor!, discountAmountMinor: 0 });
-      const graph = client.createTemporaryProduct({
+      const graph = savedGraph.current ?? client.createTemporaryProduct({
         operationId,
         name: name.trim(),
         generateTemporaryLabel: saleShortcut,
+        localPhotoId: photoId,
         baseUnitName: baseUnitName.trim().length === 0 ? 'piece' : baseUnitName.trim(),
         localSku: localSku.trim().length === 0 ? null : localSku.trim(),
         barcode: initialIdentifier ? (allowScannedAssociation ? initialIdentifier.value : null) : barcode.trim().length === 0 ? null : barcode.trim(),
         barcodeType: initialIdentifier && allowScannedAssociation ? initialIdentifier.type : undefined,
         defaultSellingPriceMinor: priceMinor,
       });
+      savedGraph.current = graph;
+      setProductSaved(true);
       if (saleShortcut && onSaleReady) onSaleReady(graph, quantityMicros);
       else onSaved(graph.storeProduct.id);
     } catch (error) {
@@ -162,6 +198,16 @@ export default function QuickAddProductScreen({
       </Text>
       <Text style={styles.note}>{saleShortcut ? 'Enter the selling price. Finish product details later in Products → Temporary. Payment completes normally.' : 'Only a name is required. The product saves on this device.'}</Text>
       {initialIdentifier ? <Text>Scanned {initialIdentifier.type}: {initialIdentifier.value}{!allowScannedAssociation ? '\nBarcode saving is unavailable in this build. You can save and sell this product without attaching the code.' : ''}</Text> : null}
+      {photoStep ? <ProductPhotoStep active={isFocused} onCaptured={uri => {
+        if (!acceptingPhoto.current) return;
+        if (!photos) throw new Error('Photo storage unavailable.');
+        const id = photos.stage(uri);
+        acceptingPhoto.current = false;
+        photoRef.current = id;
+        setPhotoId(id);
+        setPhotoStep(false);
+      }} onContinue={withoutPhoto} onCancel={cancel} /> : <>
+      {saleShortcut ? <Text>{photoId ? 'Identification photo ready on this device.' : 'No identification photo saved.'}</Text> : null}
       {requireSellingPrice || saleShortcut ? <Field label="Selling price" value={sellingPrice} onChangeText={setSellingPrice} keyboardType="decimal-pad" testID="quick-add-price" /> : null}
       {saleShortcut ? <Field label="Quantity" value={quantity} onChangeText={setQuantity} keyboardType="decimal-pad" testID="quick-add-quantity" /> : null}
       {!saleShortcut ? <>
@@ -239,7 +285,10 @@ export default function QuickAddProductScreen({
           accessibilityHint="Save this product on this device"
         />
         <SecondaryButton title="Cancel" onPress={cancel} />
+        {saleShortcut && !productSaved ? <SecondaryButton title="Retake product photo" onPress={() => { withoutPhoto(); setPhotoStep(true); }} /> : null}
+        {saleShortcut && photoId && !productSaved ? <SecondaryButton title="Continue without photo" onPress={withoutPhoto} /> : null}
       </View>
+      </>}
     </ScrollView>
   );
 }

@@ -1,3 +1,4 @@
+import { createProductPhotos, type ProductPhotos } from '../media/productPhotos';
 import type { QuickAddInput } from '../catalogue/client';
 import type { RecognitionService } from '@retail/contracts';
 import { createRecognitionService } from '../features/scanning/resolver';
@@ -68,6 +69,7 @@ export interface CompleteSaleScreenInput {
  * business logic out of UI components (AGENTS.md section 12).
  */
 export interface SalesClient {
+  photos?: ProductPhotos;
   readonly storeId: string;
   readonly storeName: string;
   readonly storeCurrencyCode: string;
@@ -173,6 +175,7 @@ export function createDatabaseSalesClient(
     userId,
 
     recognition: createRecognitionService(adapter, store.id),
+    photos: createProductPhotos(adapter, store.id),
     getProductById(storeProductId) {
       const product = getStoreProductById(adapter, storeProductId);
       if (!product || product.storeId !== store.id || product.status !== 'ACTIVE') return null;
@@ -215,11 +218,13 @@ export function createDatabaseSalesClient(
     },
 
     createTemporaryProduct(input: QuickAddInput): TemporaryProductGraph {
+      if (input.localPhotoId) createProductPhotos(adapter, store.id).assertReady(input.localPhotoId);
       const operation: CreateTemporaryProductInput = {
         storeId: store.id,
         deviceId: device.id,
         name: input.name,
         generateTemporaryLabel: input.generateTemporaryLabel,
+        localPhotoId: input.localPhotoId,
         baseUnitName: input.baseUnitName,
         baseUnitSymbol: input.baseUnitSymbol,
         localSku: input.localSku,

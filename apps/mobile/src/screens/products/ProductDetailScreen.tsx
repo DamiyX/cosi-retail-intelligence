@@ -10,6 +10,7 @@ import { theme } from '../../ui/theme';
 import ScannerPanel from '../../features/scanning/ScannerPanel';
 import { ScanSession } from '../../features/scanning/session';
 import { generateMobileId } from '../../crypto/mobileIds';
+import ProductPhoto from '../../media/ProductPhoto';
 
 interface ProductDetailScreenProps {
   client: CatalogueClient;
@@ -418,6 +419,7 @@ export default function ProductDetailScreen({
             </View>
           )}
           {failure !== null ? <ErrorPanel title="Not saved" message={failure} /> : null}
+          <ProductPhoto photos={client.photos} productId={detail.product.id} />
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Codes</Text>
             {client.recognition ? <PrimaryButton title="Associate barcode" disabled={process.env.EXPO_PUBLIC_SCANNER_ASSOCIATIONS_ENABLED !== 'true'} onPress={() => setAssociating(true)} /> : null}

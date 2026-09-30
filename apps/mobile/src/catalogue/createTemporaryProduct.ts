@@ -20,6 +20,7 @@ import {
   type StoreProductRow,
 } from '../db/repositories';
 import { nowIso, requireId } from '../db/repositories/common';
+import { attachProductPhoto } from '../media/productPhotos';
 
 /**
  * Application boundary for catalogue mutations. Every operation runs its
@@ -45,6 +46,8 @@ export interface CreateTemporaryProductInput {
   /** Catalogue name, or an empty input when the selling shortcut generates it. */
   name: string;
   generateTemporaryLabel?: boolean;
+  /** Local metadata only; never serialized into the business envelope. */
+  localPhotoId?: string;
   /** Base-unit label, editable before save. Defaults to "piece". */
   baseUnitName?: string;
   baseUnitSymbol?: string | null;
@@ -128,6 +131,7 @@ export function createTemporaryProduct(
       defaultSellingPriceMinor: input.defaultSellingPriceMinor,
     });
     const rawBarcode = input.barcode == null ? '' : input.barcodeType === 'QR' ? input.barcode : input.barcode.trim();
+    if (input.localPhotoId) attachProductPhoto(adapter, storeId, storeProduct.id, input.localPhotoId);
     const identifier =
       rawBarcode.length === 0
         ? null

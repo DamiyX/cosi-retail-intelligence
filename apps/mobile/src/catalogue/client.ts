@@ -1,3 +1,4 @@
+import { createProductPhotos, type PhotoFiles, type ProductPhotos } from '../media/productPhotos';
 import { generateMobileId } from '../crypto/mobileIds';
 import type { RecognitionService } from '@retail/contracts';
 import { createRecognitionService } from '../features/scanning/resolver';
@@ -69,6 +70,7 @@ import {
 export interface QuickAddInput {
   name: string;
   generateTemporaryLabel?: boolean;
+  localPhotoId?: string;
   baseUnitName?: string;
   baseUnitSymbol?: string | null;
   localSku?: string | null;
@@ -101,6 +103,7 @@ export interface ProductReorderLevelInput {
 }
 
 export interface CatalogueClient {
+  photos?: ProductPhotos;
   recognition?: RecognitionService;
   readonly storeId: string;
   readonly storeName: string;
@@ -153,22 +156,27 @@ export function createCatalogueClient(
   store: StoreRow,
   device: DeviceRow,
   generateId: () => string = generateMobileId,
+  photoFiles?: () => PhotoFiles,
 ): CatalogueClient {
   const catalogueUserId = resolveCatalogueUser(adapter, store.id, device);
+  const photos = createProductPhotos(adapter, store.id, photoFiles, generateId);
   return {
     storeId: store.id,
     recognition: createRecognitionService(adapter, store.id),
+    photos,
     storeName: store.name,
     storeCurrencyCode: store.currencyCode,
     listProducts(query: string, filter: ProductLifecycleFilter = 'ALL'): ProductSearchHit[] {
       return listStoreProducts(adapter, store.id, query, filter);
     },
     createTemporaryProduct(input: QuickAddInput): TemporaryProductGraph {
+      if (input.localPhotoId) photos.assertReady(input.localPhotoId);
       const operation: CreateTemporaryProductInput = {
         storeId: store.id,
         deviceId: device.id,
         name: input.name,
         generateTemporaryLabel: input.generateTemporaryLabel,
+        localPhotoId: input.localPhotoId,
         baseUnitName: input.baseUnitName,
         baseUnitSymbol: input.baseUnitSymbol,
         localSku: input.localSku,

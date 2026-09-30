@@ -2741,6 +2741,31 @@ export const MIGRATIONS: Migration[] = [
       `CREATE INDEX idx_scanner_quarantine_store ON scanner_identifier_quarantine(store_id, resolved_at);`,
     ],
   },
+  {
+    version: 25,
+    name: 'local_product_photos',
+    statements: [
+      `CREATE TABLE media_assets (
+        id TEXT PRIMARY KEY NOT NULL,
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE RESTRICT,
+        store_product_id TEXT UNIQUE REFERENCES store_products(id) ON DELETE RESTRICT,
+        file_key TEXT NOT NULL UNIQUE,
+        byte_size INTEGER NOT NULL CHECK(byte_size > 0 AND byte_size <= 8388608),
+        width INTEGER NOT NULL CHECK(width > 0 AND width <= 4096),
+        height INTEGER NOT NULL CHECK(height > 0 AND height <= 4096),
+        checksum TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        retention TEXT NOT NULL DEFAULT 'DEVICE_ONLY' CHECK(retention = 'DEVICE_ONLY')
+      );`,
+      `CREATE INDEX idx_media_store ON media_assets(store_id, store_product_id);`,
+      `CREATE TRIGGER media_product_store_insert BEFORE INSERT ON media_assets
+       WHEN NEW.store_product_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM store_products WHERE id = NEW.store_product_id AND store_id = NEW.store_id)
+       BEGIN SELECT RAISE(ABORT, 'Photo product store mismatch'); END;`,
+      `CREATE TRIGGER media_product_store_update BEFORE UPDATE ON media_assets
+       WHEN NEW.store_product_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM store_products WHERE id = NEW.store_product_id AND store_id = NEW.store_id)
+       BEGIN SELECT RAISE(ABORT, 'Photo product store mismatch'); END;`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

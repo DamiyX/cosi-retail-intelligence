@@ -748,6 +748,7 @@ export default function SellScreen({
       lineTotalMinor: calculated.netTotalMinor, calculated };
     calculateSaleTotals([...lines.filter(item => item.id !== line.id), line].map(item => item.calculated));
     setLines(current => current.some(item => item.id === line.id) ? current : [...current, line]);
+    if (scanLine) playScanFeedback();
     setQuickAddDiscard(null);
     setViewMode('cart');
     setSearchQuery('');
@@ -760,6 +761,7 @@ export default function SellScreen({
 
   // Quick Add proxy client if needed
   const effectiveCatalogueClient: CatalogueClient = catalogueClient ?? {
+    photos: client.photos,
     storeId: client.storeId,
     storeName: client.storeName,
     storeCurrencyCode: client.storeCurrencyCode,

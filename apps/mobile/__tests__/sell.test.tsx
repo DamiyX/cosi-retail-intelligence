@@ -581,6 +581,7 @@ describe('SellScreen', () => {
       alertSpy.mockClear();
       fireEvent.changeText(screen.getByPlaceholderText('Search name, local SKU, or barcode'), 'No match');
       fireEvent.press(screen.getByText('Add product'));
+      if (screen.queryByText('Continue without photo')) fireEvent.press(screen.getByText('Continue without photo'));
       fireEvent.changeText(screen.getByTestId('quick-add-price'), '25');
       fireEvent.press(screen.getByText('Cancel'));
       expect(alertSpy).toHaveBeenCalledWith(
@@ -604,6 +605,7 @@ describe('SellScreen', () => {
 
       fireEvent.changeText(screen.getByPlaceholderText('Search name, local SKU, or barcode'), 'No result');
       fireEvent.press(screen.getByText('Add product'));
+      if (screen.queryByText('Continue without photo')) fireEvent.press(screen.getByText('Continue without photo'));
       fireEvent.changeText(screen.getByTestId('quick-add-price'), '75');
       fireEvent.press(screen.getByText('Add to basket'));
 
@@ -687,6 +689,7 @@ describe('SellScreen', () => {
       const { unmount } = render(<SellScreen client={salesClient} />);
 
       fireEvent.press(screen.getByText('Add product'));
+      if (screen.queryByText('Continue without photo')) fireEvent.press(screen.getByText('Continue without photo'));
       fireEvent.changeText(screen.getByTestId('quick-add-price'), '75');
       fireEvent.press(screen.getByText('Add to basket'));
 

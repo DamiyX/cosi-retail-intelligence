@@ -6,6 +6,7 @@ import type { ProductLifecycleFilter, ProductSearchHit } from '../../db/reposito
 import { EmptyState, ErrorPanel, PrimaryButton, StatusNote } from '../../ui/components';
 import { displayMoney } from '../../ui/money';
 import { theme } from '../../ui/theme';
+import ProductPhoto from '../../media/ProductPhoto';
 
 interface ProductsListScreenProps {
   client: CatalogueClient;
@@ -124,6 +125,7 @@ export default function ProductsListScreen({
                 style={styles.row}
               >
                 <Text style={styles.rowName}>{item.variantName}</Text>
+                {item.isTemporary ? <ProductPhoto photos={client.photos} productId={item.product.id} compact /> : null}
                 {label ? <Text style={styles.rowStatus}>{label}</Text> : null}
                 {item.preferredPackageName ? (
                   <Text style={styles.rowMeta}>Sold per {item.preferredPackageName}</Text>

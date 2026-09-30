@@ -90,6 +90,7 @@ it('audit: cancelling unknown creation clears its barcode from subsequent manual
     fireEvent.press(screen.getByText('Cancel'));
     fireEvent.press(screen.getByText(screen.queryByText('Scan a product') ? 'Sell this item' : 'Add product'));
     expect(screen.queryByText('Scanned QR: B')).toBeNull();
+    if (screen.queryByText('Continue without photo')) fireEvent.press(screen.getByText('Continue without photo'));
     fireEvent.changeText(screen.getByTestId('quick-add-price'), '2');
     fireEvent.press(screen.getByText('Add to basket'));
     expect(fixture.adapter.getFirstRow<{ count: number }>('SELECT count(*) AS count FROM product_identifiers')?.count).toBe(0);
@@ -111,6 +112,7 @@ for (const exit of ['line cancel', 'dirty line discard', 'dirty product discard'
       await act(async () => { fireEvent.press(screen.getByText('Scan B')); });
       if (exit === 'dirty product discard') {
         fireEvent.press(screen.getByText(screen.queryByText('Scan a product') ? 'Sell this item' : 'Add product'));
+        if (screen.queryByText('Continue without photo')) fireEvent.press(screen.getByText('Continue without photo'));
         fireEvent.changeText(screen.getByTestId('quick-add-price'), '2');
         fireEvent.press(screen.getByText('Cancel'));
       } else {
@@ -139,6 +141,7 @@ for (const exit of ['line cancel', 'dirty line discard', 'dirty product discard'
       fireEvent.changeText(screen.getByPlaceholderText('Search name, local SKU, or barcode'), 'Unrelated');
       fireEvent.press(screen.getByText(screen.queryByText('Scan a product') ? 'Sell this item' : 'Add product'));
       expect(screen.queryByText('Scanned QR: B')).toBeNull();
+      if (screen.queryByText('Continue without photo')) fireEvent.press(screen.getByText('Continue without photo'));
       fireEvent.changeText(screen.getByTestId('quick-add-price'), '2');
       fireEvent.press(screen.getByText('Add to basket'));
       expect(screen.getByText('Cart (1)')).toBeTruthy(); // no stale basket-mode resume

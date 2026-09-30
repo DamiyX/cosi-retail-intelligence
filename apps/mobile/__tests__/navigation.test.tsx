@@ -279,6 +279,7 @@ describe('M2 tab navigation', () => {
 
     fireEvent.changeText(screen.getByPlaceholderText('Search name, local SKU, or barcode'), 'New tab product');
     fireEvent.press(screen.getByText('Add product'));
+    if (screen.queryByText('Continue without photo')) fireEvent.press(screen.getByText('Continue without photo'));
     fireEvent.changeText(screen.getByTestId('quick-add-price'), '25');
 
     act(() => appRouter.replace('/today'));

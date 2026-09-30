@@ -13,10 +13,13 @@ it('price is the only typed requirement; validates before writing and guards rap
     const { unmount } = render(<QuickAddProductScreen client={client} saleShortcut onSaleReady={ready} onSaved={jest.fn()} onCancel={jest.fn()} />);
     expect(screen.queryByTestId('quick-add-name')).toBeNull();
     expect(screen.queryByTestId('quick-add-base-unit')).toBeNull();
+    fireEvent.press(screen.getByText('Continue without photo'));
     expect(screen.getByTestId('quick-add-quantity').props.value).toBe('1');
+    if (screen.queryByText('Continue without photo')) fireEvent.press(screen.getByText('Continue without photo'));
     fireEvent.changeText(screen.getByTestId('quick-add-price'), '1.001');
     fireEvent.press(screen.getByText('Add to basket'));
     expect(f.adapter.getAllRows('SELECT id FROM store_products')).toHaveLength(0);
+    if (screen.queryByText('Continue without photo')) fireEvent.press(screen.getByText('Continue without photo'));
     fireEvent.changeText(screen.getByTestId('quick-add-price'), '1.25');
     fireEvent.changeText(screen.getByTestId('quick-add-quantity'), '2');
     const button = screen.getByText('Add to basket');
