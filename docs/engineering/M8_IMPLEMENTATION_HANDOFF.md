@@ -44,3 +44,42 @@ Resumed only the authorized live database verification at c995641. Both new work
 The previous Docker blocker is resolved for this test scope. Coordinator source re-audit passed before this run. Physical/native verification remains pending and sequential; the coordinator reports a connected SM-A156E Android 16, but this task did no phone work. Edge HTTP readiness was not tested.
 
 Coordinator's pending audit, workflow/state changes and DEVELOPMENT.md workaround are preserved in the evidence commit. After final commit/status checks the implementer stops all commands and edits and sends branch/HEAD/status to the coordinator. No push, merge, reset, spending, new milestone or self-acceptance.
+
+## Stopped isolated native utility handoff — 2026-09-30
+
+This supersedes the earlier absent-compatible-build gate. The founder authorized
+one scanner-verification build conditional on no additional charge. Build
+105bb294-dce0-487c-ba87-d1620a40cd82 from source 4d6521e finished and installed
+as separate com.damiyx.retailintelligence.scannerverification on Galaxy A15
+SM-A156E Android 16/API 36. Authenticated post-build usage confirmed zero
+overages and total cost zero. See M8_ANDROID_VERIFICATION.md for exact binary
+hash, manifest inspection, fixtures and observations.
+
+Returned evidence: correct Fanta/AirPro EAN-13 additions, exact AirPro UNKNOWN
+and cancel preserving basket, denial/search/settings grant, torch and one
+audible addition beep. Native finding: three unexpected UPC/EAN values paused
+UNKNOWN without extra lines; stable continuous scanning is not accepted.
+First Fanta addition was silent; low-light distance/blur and reflective-can glare
+remain usability findings. Large text is partial; TalkBack tutorial prevented
+announcements. Font recreation lost the unfinished memory-only cart.
+
+Offline manual sale NGN 4,000 Cash (2 Fanta + 1 AirPro) survived force-stop/cold
+reopen with byte-identical native sale/payment/snapshots/events/outbox evidence
+and a reopened receipt. USB Metro remained available, so standalone offline
+launch/first-use detector are not proved; original scanned basket was not sold.
+Broader native criteria remain unperformed. Associations and ordinary automatic
+addition stay off; no migration deployment, runtime edit or second build.
+
+Cleanup verified: original font/accessibility/network settings restored;
+isolated app force-stopped with test data preserved; no active camera clients;
+Metro session exited, port 8083 listener absent and scoped reverse removed.
+Workflow schema validation and git diff --check passed for this evidence-only
+return. No production test suite rerun. The utility commits only documentation,
+tickets and task state, then stops all commands/edits before the authorized
+coordinator notification. No push, merge or milestone acceptance.
+
+Next owner: coordinator reviews these native findings and defines bounded
+corrections/retests. No second build is authorized. A separate standalone
+build and migrated isolated association backend still require their respective
+approval gates. Checkout remains C:\Users\doyew\Documents\DEV 2\COSI-m8-planning,
+branch plan/m8-unified-scanner. Existing app data and unrelated work are preserved.

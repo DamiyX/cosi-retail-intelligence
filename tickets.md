@@ -1,6 +1,6 @@
 # Tickets: M8 Unified Scanner + Barcode
 
-**Status:** Returned source corrections passed independent re-audit; eight live PostgreSQL cases passed on 2026-09-30; physical acceptance pending.
+**Status:** Source re-audit and eight live PostgreSQL cases passed; isolated Galaxy A15 pass returned native findings on 2026-09-30; physical acceptance blocked.
 **Plan:** `docs/engineering/M8_SCANNER_PLAN.md` is the scope/boundary specification.
 **Workflow:** `.agents/workflows/m8-unified-scanner.json`.
 **Baseline:** `c817edb` accepted M7 local source; carried device/release gates remain open.
@@ -178,7 +178,7 @@ is insufficient evidence that the server or pull path handles it correctly.
 
 ## M8-05 — Verify the scanner on Android and return it for independent audit
 
-**Status:** Source checks recorded; authorized device inspected, physical verification blocked by absent compatible M8 native build.
+**Status:** One authorized zero-additional-cost isolated APK installed and tested; scoped native evidence returned. Physical acceptance blocked by unexpected decoder values and remaining criteria. No second build authorized.
 **Delivers:** a reproducible handoff with explicit source and physical acceptance.
 **Likely modules:** focused failure regression tests, device procedure/evidence,
 plan/ticket/workflow state. No unrelated features.
@@ -213,6 +213,18 @@ plan/ticket/workflow state. No unrelated features.
 
 **Non-goals:** M9 integration, M10, M12 production visual recognition, release.
 **Evidence:** See docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md for executed checks and exact limitations.
+
+**Current native result (supersedes the build blocker below):** Correct Fanta
+and AirPro EAN-13 additions, AirPro UNKNOWN/cancel with basket preserved,
+physical torch, one audible addition beep, and manual offline NGN 4,000 sale
+force-stop/receipt survival were observed. Three unexpected UPC/EAN values
+paused UNKNOWN without extra lines; continuous stability is not passed.
+Fanta's first addition was silent. Large-text evidence is partial; TalkBack
+tutorial blocked the sample and font change lost the unfinished cart.
+Composite acceptance checkboxes remain unchecked. Standalone preview,
+first-use offline detector, broader code/package cases and other missing
+criteria are explicitly listed in M8_ANDROID_VERIFICATION.md. Settings restored,
+Metro stopped, app/data preserved; coordinator owns review and acceptance.
 
 ## Dependency and approval review
 

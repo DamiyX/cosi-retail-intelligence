@@ -107,3 +107,45 @@ occurred. Evidence-only documentation/workflow checks are recorded in the
 utility's final coordinator handoff; acceptance remains coordinator-owned.
 Workflow schema validation returned True and git diff --check exited 0.
 Production tests were not rerun for these evidence-only changes.
+
+## Authorized isolated native pass — 2026-09-30
+
+This supersedes the preceding compatible-build blocker. The founder authorized
+one included scanner-verification build conditional on no additional charge.
+EAS build 105bb294-dce0-487c-ba87-d1620a40cd82 from exact source
+4d6521e66e1b43641fe93e69791b779bcf727baa finished; post-build authenticated
+Free-plan usage showed zero overages and total cost zero. APK 264,484,039 bytes,
+SHA-256 76f6d2ed882b3e89bb2d234ac00927728fc1d72944f11d2fb73cff8e114692dd,
+installed into separate com.damiyx.retailintelligence.scannerverification.
+Native camera/audio/barcode classes and CAMERA permission were inspected;
+RECORD_AUDIO is absent. SM-A156E Android 16/API 36 ran the actual isolated
+verification route with matching Metro, associations off and synthetic fixtures.
+
+Correct Fanta (5449000011527) and AirPro (6922420651355) EAN-13 additions,
+exact AirPro UNKNOWN/cancel preserving Fanta, permission denial/search/settings
+grant, physical torch and one audible AirPro addition beep were observed.
+Three unexpected UPC/EAN values paused UNKNOWN, without an extra basket line.
+Continuous stability/false-decode acceptance is not passed; initial Fanta beep
+was silent and longer-distance blur/reflective-can glare were reported.
+Large text was partially inspected; TalkBack tutorial blocked field evidence.
+Font change lost the unfinished memory-only cart. Settings return refresh and
+the remaining native criteria remain unproven, as itemized in the device report.
+
+A manually reconstructed sale of 2 Fanta cans + 1 AirPro can at synthetic prices,
+NGN 4,000 Cash, completed with airplane mode on and Wi-Fi off. After isolated-app
+force-stop/cold reopen, the native sale, payment, snapshots, inventory events and
+pending outbox evidence matched byte-for-byte; the receipt reopened correctly.
+Both checkpoint hashes are
+150808148a92498814e8c0f3c7b74c135e499622bc826bcd072120901e43d9d5.
+USB Metro was still available: standalone offline launch/first-use detector
+availability and cloud sync are not proved. This was not completion of the
+original scanned basket. Zero recorded stock produced explicit negative SALE
+events with reconciliation required; cost coverage was unavailable.
+
+The pass is stopped. Normal font/accessibility/network settings were restored,
+camera active clients were empty, Metro exited and port 8083 had no listener or
+reverse remaining. Installed isolated app/synthetic data are preserved. No
+production source/dependency changes, migration deployment, second build,
+push/merge or self-acceptance. Full procedure, evidence and outstanding criteria
+are in M8_ANDROID_VERIFICATION.md. Final workflow schema/diff checks are recorded
+in M8_IMPLEMENTATION_HANDOFF.md; ordinary tests were not rerun for evidence edits.

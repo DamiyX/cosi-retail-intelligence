@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "blocked",
-  "current_state": "device-inspected-compatible-native-build-blocked",
+  "current_state": "isolated-native-pass-returned-findings",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
@@ -22,7 +22,11 @@
     "current-routing-contexts-corrected",
     "returned-source-corrections-independently-reviewed",
     "eight-live-postgres-cases-passed",
-    "authorized-android-device-and-existing-builds-inspected"
+    "authorized-android-device-and-existing-builds-inspected",
+    "one-authorized-included-native-build-installed",
+    "bounded-galaxy-a15-native-pass-recorded",
+    "offline-manual-sale-restart-survival-observed",
+    "device-settings-and-metro-restored"
   ],
   "owner": {
     "agent": "coordinator-remaining-acceptance-gates",
@@ -91,6 +95,12 @@
       "source": "59ad39c; docs/engineering/M8_ANDROID_VERIFICATION.md",
       "result": "Authorized SM-A156E Android 16/API 36 inspected. Existing preview Home and dev launcher observed; historical launcher crash did not recur once, root cause unverified. Installed dev lacks CAMERA; newest EAS builds use pre-M8 1b2b100. No compatible M8 APK or local Java/Android SDK tools. All scanner/native acceptance checks unperformed; no build submission/data clearing/deployment.",
       "observed_at": "2026-09-30T00:48:10Z"
+    },
+    {
+      "kind": "bounded-native-verification",
+      "source": "4d6521e; docs/engineering/M8_ANDROID_VERIFICATION.md",
+      "observed_at": "2026-09-30T02:18:38.958Z",
+      "result": "One conditional zero-additional-cost EAS build 105bb294-dce0-487c-ba87-d1620a40cd82 installed separately on SM-A156E Android 16/API 36. Known EAN-13 additions, exact UNKNOWN/cancel, torch and one beep observed. Three unexpected decoder values paused UNKNOWN without extra lines; stable scanning remains unaccepted. Manual offline NGN 4,000 sale survived force-stop with identical sale/payment/snapshots/inventory/outbox and reopened receipt. USB Metro available; no standalone/first-use offline proof. Large text partial, TalkBack tutorial blocked. Settings restored; camera/Metro/reverse released. No runtime edit, migration deployment or second build."
     }
   ],
   "acceptance_gates": [
@@ -216,13 +226,21 @@
           "source": "docs/engineering/M8_ANDROID_VERIFICATION.md",
           "result": "Device directly inspected and existing apps launched; no compatible M8 binary or camera acceptance evidence. Historical no-device report superseded without erasing it.",
           "observed_at": "2026-09-30T00:48:10Z"
+        },
+        {
+          "source": "docs/engineering/M8_ANDROID_VERIFICATION.md",
+          "observed_at": "2026-09-30T02:18:38.958Z",
+          "result": "Compatible isolated APK installed; bounded real-camera and offline-sale checks recorded. This resolves absent-build blocker but returns unexpected decoder values and outstanding native criteria. No gate acceptance."
         }
       ],
       "limitations": [
-        "Existing-app launch is not M8 native, Metro or standalone offline evidence.",
-        "Association tests require a reviewed migrated test backend; ordinary rollout remains disabled."
+        "Development client uses USB Metro; standalone offline cold launch and first-use detector unproven.",
+        "Three unexpected UPC/EAN values paused UNKNOWN; no extra line observed, root cause unresolved; consistent beep requires retest.",
+        "Large text partial; TalkBack tutorial blocked field announcements; exact settings-return and broader package/code/lifecycle cases unperformed.",
+        "Font configuration recreation loses unfinished memory-only cart; completed-sale durability passed only the manually reconstructed sale path.",
+        "Associations require reviewed migrated test backend; association and ordinary automatic rollout remain off."
       ],
-      "blocker": "Compatible M8 APK absent; newest EAS builds predate camera/audio. Local Java/Android SDK unavailable. New isolated build needs quota/cost review and submission authorization; standalone preview installation must preserve existing app/data.",
+      "blocker": "Native decoder stability findings and incomplete physical criteria remain. Standalone preview and reviewed migrated association backend are unavailable; no second build authorized.",
       "waiver": null
     },
     {
@@ -274,14 +292,20 @@
       "reasoningEffort": "low",
       "coordinatorEffortPreference": "medium",
       "basis": "Founder request 2026-09-29 authorizes implementer-to-coordinator completion/blocker messages."
+    },
+    {
+      "scope": "one-isolated-scanner-verification-build-and-bounded-physical-pass",
+      "status": "approved",
+      "basis": "Founder authorized one isolated APK conditional on no additional charge. Live Free-plan allowance checked before submission; post-build overage and cost zero confirmed. No second build or rollout acceptance authorization."
     }
   ],
   "blockers": [
-    "Authorized SM-A156E Android 16/API 36 inspected; compatible M8 APK absent and local Java/Android SDK unavailable. Native/physical checks blocked on separately authorized isolated build after quota/cost review.",
+    "Three unexpected camera UPC/EAN values paused UNKNOWN; detector stability and consistent addition beep need bounded investigation/retest.",
+    "Standalone offline/first-use detector, TalkBack and broader native cases remain unverified; no second build authorized.",
     "New association checks additionally require a reviewed migrated test backend; migration remains rollback-only."
   ],
-  "next_action": "Coordinator reviews the stopped phone utility handoff, confirms EAS quota/cost and obtains founder authorization for a new isolated scanner-verification build from reviewed source. Plan standalone preview installation without overwriting existing app/data and migrate isolated test backend before enabling associations. No scanner acceptance, build submission or deployment performed.",
+  "next_action": "Coordinator reviews the stopped isolated native evidence and proposes bounded corrections/retests. Automatic additions in ordinary builds and new associations remain off. Separate standalone-build approval and reviewed migrated test backend are still required; no self-acceptance, deployment, push, merge or M9 work.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-09-30T00:48:10Z",
+  "updated_at": "2026-09-30T02:18:38.958Z",
   "archived": false
 }

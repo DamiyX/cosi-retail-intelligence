@@ -1,6 +1,213 @@
-# M8 Android verification — compatible build blocked
+# M8 Android verification — isolated native pass returned with findings
 
-## Superseding device utility handoff — 2026-09-30
+## Authorized isolated native pass — 2026-09-30
+
+This pass supersedes the compatible-build blocker below. Physical acceptance
+is still blocked by native findings and outstanding criteria; the older stopped
+observations are retained as history. The bounded utility pass is stopped.
+
+The founder authorized one scanner-verification build conditional on no
+additional charge. The authenticated EAS account API reported the Free plan,
+September allowance of 6/15 Android builds used, 6/30 total builds used, no
+overage metrics and total cost zero before submission. Installed official
+EAS CLI 24.3.0 states that Free accounts are blocked at their limit rather than
+charged. No subscription, upgrade, overage or second build was requested.
+Post-build authenticated usage at 2026-09-30T02:03:38.205Z showed 7/30 total
+builds used, zero overage count and total cost zero. No additional charge was
+observed for this one build.
+
+| Artifact | Observed value |
+| --- | --- |
+| EAS build | 105bb294-dce0-487c-ba87-d1620a40cd82 |
+| Source | 4d6521e66e1b43641fe93e69791b779bcf727baa |
+| Profile | scanner-verification, internal development client |
+| Android package | com.damiyx.retailintelligence.scannerverification |
+| Version / code | 0.0.1 / 1 |
+| Finished | 2026-09-30T01:29:55.291Z; native Gradle succeeded |
+| APK bytes | 264,484,039 (four native ABIs; development build) |
+| SHA-256 | 76f6d2ed882b3e89bb2d234ac00927728fc1d72944f11d2fb73cff8e114692dd |
+| Device | Galaxy A15 5G SM-A156E, Android 16 / API 36 |
+
+Binary archive inspection found CAMERA permission, native CameraViewModule,
+AudioModule and ML Kit BarcodeScanning classes. RECORD_AUDIO and background
+audio permissions are absent. The manifest is debuggable and permits cleartext
+traffic, as expected for this development client; it is not a release artifact.
+The effective build environment had no remote environment variables and
+scanner associations remained off. One scoped cloud signing keystore was
+generated as part of this build; signing secrets were not printed or committed.
+
+adb install succeeded into the previously absent separate package. Existing
+development and preview packages were not overwritten, uninstalled or cleared.
+Metro was started from this checkout on port 8083 with scanner-verification
+environment, explicit verification opt-in and association flag false. USB
+reverse connects the phone to that Metro port. The native cold launch returned
+Status ok / MainActivity / 2430 ms, then the app loaded and displayed the actual
+verification banner. This is development-client launch evidence, not standalone
+offline cold launch evidence.
+
+An isolated local store, M8 Scanner Verification Store, was created using the
+normal UI with synthetic owner M8 Test Owner. Fanta — M8 TEST was prepared
+through the existing native catalogue application API using the development
+inspector, guarded by the exact app package and store name. Its can barcode
+5449000011527 is explicitly base-package-bound, its test price is 100,000 minor
+units (NGN 1,000), and its PRODUCT_CREATED outbox is PENDING. No camera callback
+was injected, resolver was stubbed or rollout flag enabled. An initial fixture
+operation ID failed canonical UUID validation before writing; the corrected UUID
+succeeded. AirPro barcode 6922420651355 was initially absent for the unknown-code check.
+The founder corrected its spelling to AirPro; Fanta is unchanged.
+
+Permission checks: first Allow camera request was denied and product
+search remained usable; the second denial used Android's permanent-denial
+button and the app opened its own settings. Camera was granted while using the
+app in Android settings. Subsequent fresh Scan entry mounted the rear camera,
+confirmed by camera-service client inspection. The exact same-screen settings
+return is unproven: rapid back events returned to Home, so that sequence
+does not establish permission-hook refresh behavior.
+
+Basket mode was selected. The founder presented Fanta's printed barcode and
+reported that it decoded only when brought close; roughly arm's-length scanning
+did not succeed. No measured distance or timing was collected. Native UI then
+showed one line / NGN 1,000 / Last added Fanta — M8 TEST. The basket confirmed
+exactly 1 can at NGN 1,000. This is a real camera-driven known-item addition;
+the founder reported no audible feedback on this addition.
+
+The same scanner observation also showed UNKNOWN for upc_a 388502011527 and
+Camera paused, without a second addition. The founder confirmed that Fanta was
+the only product/barcode presented. This is a possible detector false decode;
+root cause and reproducibility remain unresolved. A floating video remained on
+screen. Do not infer a clean stationary-code suppression pass or decode accuracy
+from this sequence. Back to basket preserved the Fanta line and camera-service
+inspection showed no active camera client.
+
+The founder confirmed no audible beep on Fanta addition despite Sound on. Audio
+inspection showed media volume 9/15, not muted, on speaker; system and ring
+streams were muted. No audio setting was changed. The missing beep remains a
+physical finding, not a proven code root cause. A USB reconnect changed the adb transport and removed the port reverse;
+the app process and Fanta basket survived. The task restored its port 8083 reverse.
+
+AirPro subsequently decoded as exactly ean13 6922420651355 and paused with
+UNKNOWN while the original Fanta line/total remained. Founder confirmed the
+unknown message and again reported blurry longer-distance view, low indoor
+night lighting, close/rotated presentation needed and desire for focus/flashlight.
+The existing UI has a torch control but no manual focus control. Silence on
+UNKNOWN is expected because feedback is for successful basket addition.
+
+The unknown Add product form displayed the exact EAN and explicitly explained
+that barcode saving was unavailable with associations disabled. A synthetic
+name was typed; keyboard screenshot showed the focused field reachable. Cancel
+opened Discard product? / Keep editing / Discard. Discard returned to the same
+basket with 1 Fanta. Native catalogue inspection confirmed only the Fanta fixture,
+no inventory events and no completed sales before further preparation.
+
+AirPro — M8 TEST was then prepared through the same guarded existing native
+catalogue API as a separate fixture, with its can code base-package-bound and
+price 200,000 minor units (NGN 2,000); its outbox is PENDING. This is fixture
+preparation, not a scanner-association rollout test. No server/backend or flag
+was changed. Basket scanner re-entered; Torch on changed its label to Torch off.
+Founder confirmed physical torch illumination and improvement when the
+reflective steel can was tilted to remove glare. That attempt paused UNKNOWN
+for unexpected upc_a 919020651355 without adding AirPro. A final controlled
+attempt added AirPro correctly: UI showed 2 lines / NGN 3,000 / Last added
+AirPro — M8 TEST; founder heard the beep. It then paused UNKNOWN for unexpected
+ean13 6922420651690. Camera screenshots and basket detail captured 1 Fanta can
+at NGN 1,000 and 1 AirPro can at NGN 2,000. No unintended additional line was
+observed, but stable-code/false-decode acceptance is not passed. No accuracy
+rate is inferred. Audible feedback worked once; the earlier silent addition
+still needs a controlled retest without the earlier floating video.
+
+Changing font_scale from 1.0 to 2.0 recreated the screen and returned to Home.
+Fresh scanner entry showed an empty unfinished basket and Single item mode.
+Completed transactions were not involved. The source deliberately keeps the
+unfinished M3 cart in memory (SaleDraftNavigationContext.tsx); this observed
+configuration-change loss is a carried usability limitation, not completed-sale
+durability evidence. Native 200% screenshots show wrapped scanner/banner text
+and readable line fields. Scroll reaches later controls. No complete accessibility
+pass is claimed from screenshots alone.
+
+Samsung TalkBack was enabled temporarily with its discovered native service.
+The service was bound and enabled, but its first-use tutorial appeared before
+the intended field selection. Bounded tutorial dismissal did not establish a
+field announcement. TalkBack reachability and announcements remain unverified.
+The initial field-announcement question was corrected when the tutorial was
+observed; do not treat that question as evidence of a selected field.
+Original font_scale 1.0, accessibility_enabled 0 and
+enabled_accessibility_services null were restored and read back directly.
+
+### Completed offline sale and restart
+
+After the configuration change discarded the unfinished basket, the test sale
+was reconstructed through the normal manual Sell UI: 2 Fanta cans at NGN 1,000
+each and 1 AirPro can at NGN 2,000, total NGN 4,000, paid with Cash. This was not
+completion of the original scanned basket. The phone was in airplane mode with
+Wi-Fi disabled; USB Metro remained available for this development client.
+Sale completion showed Saved on this device. No cloud backend was configured.
+
+Sale 70c46569-05e2-423f-84ed-e9276c0ef6c6 completed at
+2026-09-30T02:08:31.109Z. Guarded native SQLite reads captured one completed sale,
+400,000 minor-unit cash payment, package/price/quantity snapshots, explicit SALE
+inventory events (-1 AirPro and -2 Fanta base units), and its PENDING
+COMPLETED_SALE_CREATED outbox alongside the two PENDING product creations.
+Both products started with zero recorded stock; negative stock requires
+reconciliation. Cost coverage was UNAVAILABLE; no profit claim is made.
+
+After force-stop of only the isolated package and cold reopening through the
+same dev-client deep link, Status ok / MainActivity / 2253 ms was observed.
+The before/after JSON evidence files were byte-identical, both SHA-256
+150808148a92498814e8c0f3c7b74c135e499622bc826bcd072120901e43d9d5.
+Normal Recent sales showed exactly one NGN 4,000 sale; its reopened receipt
+displayed the correct quantities/prices and Sync pending. This proves local
+completed-sale survival in this tested path. It does not prove standalone
+offline cold launch, first-use offline detector availability or cloud sync.
+
+A later USB reverse loss produced DevLauncherErrorActivity with an explicit
+ECONNREFUSED connection to port 8083. Restoring the scoped reverse and matching
+deep link recovered the app. This observed Metro transport failure is distinct
+from the historical launcher-redirection failure whose root cause remains unknown.
+
+### Returned findings and remaining gate
+
+- Known EAN-13 Fanta and AirPro additions, exact AirPro UNKNOWN result with basket
+  preserved, unknown-form cancellation, physical torch and one audible addition
+  beep were observed. UNKNOWN silence is expected.
+- Unexpected UPC/EAN values paused the scanner on three captured occasions.
+  No unintended extra basket line was observed; detector root cause remains
+  unproven. Stationary suppression/continuous stability and automatic rollout
+  acceptance are not passed. Investigate using these native observations.
+- The first correct Fanta addition was silent. A later correct AirPro addition
+  beeped; consistent feedback still needs a controlled retest.
+- Founder reported close-distance decoding and blurry distant view in low light;
+  torch helped after glare was avoided on the reflective can. No distance,
+  autofocus capability or performance benchmark is inferred.
+- Configuration change discarded the unfinished memory-only basket. Large text
+  screenshots provide partial layout evidence; TalkBack tutorial blocked the
+  intended sample. No full accessibility pass is claimed.
+- Exact settings-return refresh, EAN-8/UPC-A/exact QR, carton/package-less,
+  inactive/missing-price paths, explicit repeat, Undo, background/resume,
+  temporary-product enrichment, mute, scanner-disabled flow and standalone
+  preview remain unperformed. The repeated-unit completed sale was manual.
+
+Ordinary automatic additions and new associations remain off. The reviewed
+server migration remains rollback-tested only, not deployed. Coordinator owns
+review and remaining gates; no milestone acceptance or second build is implied.
+
+### Cleanup and evidence checks
+
+Original airplane_mode_on 0, Wi-Fi enabled, mobile_data 1, font_scale 1.0 and
+accessibility settings were restored and verified. Audio levels were unchanged.
+The isolated app was force-stopped with its synthetic data and installed APK
+preserved; Metro was stopped and only the port 8083 reverse was removed.
+
+Screenshots, APK and utility scripts are outside Git under
+C:\Users\doyew\AppData\Local\Temp\cosi-m8-native-verification. Key captures include
+fanta-first-decode.png, airpro-unknown.png, unknown-keyboard.png,
+airpro-torch-unexpected-upc.png, airpro-added-then-unexpected-ean.png,
+scanner-text-200.png, line-editor-text-200.png and receipt-after-restart.png.
+sale-before-restart.json and sale-after-restart.json contain the matching
+synthetic sale checkpoints. Production source remains unchanged. Workflow
+schema validation and git diff --check are recorded in the final handoff;
+ordinary production tests were not rerun for these evidence-only edits.
+
+## Historical pre-build device utility handoff — 2026-09-30
 
 This observation supersedes the historical no-device/tooling report below. The
 sequential utility pass started on clean branch plan/m8-unified-scanner at
