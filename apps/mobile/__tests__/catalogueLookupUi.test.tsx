@@ -11,6 +11,18 @@ const found: LookupResult = { status: 'FOUND', details: { barcode: code.value, n
 beforeEach(() => { AppState.currentState = 'active'; });
 const props = { onBack: jest.fn(), onAddPackage: jest.fn(), onEditPackage: jest.fn() };
 
+it('unsaved Add product offline copy makes no saved-product claim', async () => {
+  const f = openCatalogueFixture();
+  const client = createCatalogueClient(f.adapter, f.context.store, f.context.device, deterministicIds(1000), undefined, { enabled: true, lookup: async () => ({ status: 'OFFLINE' }) });
+  try {
+    render(<QuickAddProductScreen client={client} onSaved={jest.fn()} onCancel={jest.fn()} />);
+    fireEvent.press(screen.getByText('Add more details'));
+    fireEvent.changeText(screen.getByTestId('quick-add-barcode'), code.value);
+    expect(await screen.findByText('Online details are unavailable while offline. You can enter details yourself.')).toBeTruthy();
+    expect(f.adapter.getAllRows('SELECT id FROM store_products')).toHaveLength(0);
+  } finally { f.closeAndDelete(); }
+});
+
 it('later details remain unconfirmed until explicit Use details and Save changes; photo/price/package facts are untouched', async () => {
   const f = openCatalogueFixture();
   const adapter: CatalogueLookupAdapter = { enabled: true, lookup: async () => found };
@@ -40,7 +52,7 @@ it('Edit suggested details fills an actual editable value and saves the retailer
     const graph = client.createTemporaryProduct({ name: 'Unfinished', lookupCode: code });
     await client.suggestions!.refresh(graph.storeProduct.id, new AbortController().signal);
     render(<ProductDetailScreen client={client} productId={graph.storeProduct.id} {...props} />);
-    fireEvent.press(await screen.findByText('Edit suggested details'));
+    fireEvent.press(await screen.findByText('Use details'));
     fireEvent.changeText(screen.getByTestId('detail-name'), 'My Fanta bottle');
     fireEvent.press(screen.getByText('Save changes'));
     expect(client.getProductDetail(graph.storeProduct.id)!.variant.name).toBe('My Fanta bottle');

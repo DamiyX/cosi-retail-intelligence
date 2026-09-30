@@ -3,7 +3,61 @@ import { createCatalogueClient } from '../src/catalogue/client';
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
 import { createDatabaseSalesClient } from '../src/sales/client';
 import QuickAddProductScreen from '../src/screens/products/QuickAddProductScreen';
+import SellScreen from '../src/screens/sales/SellScreen';
 import { deterministicIds, openCatalogueFixture, reopenDatabase, testId } from './catalogueSupport';
+
+it('actual Sell basket retry uses corrected price and quantity without recreating the product or changing the existing line', () => {
+  const f = openCatalogueFixture();
+  try {
+    const catalogue = createCatalogueClient(f.adapter, f.context.store, f.context.device, deterministicIds(1000));
+    const known = catalogue.createTemporaryProduct({ name: 'Existing basket item', defaultSellingPriceMinor: 9007199254740800 });
+    const sales = createDatabaseSalesClient(f.adapter);
+    const complete = jest.spyOn(sales, 'completeSale');
+    render(<SellScreen client={sales} catalogueClient={catalogue} />);
+    fireEvent.press(screen.getByText('Existing basket item'));
+    fireEvent.press(screen.getByText('Add to cart'));
+    fireEvent.press(screen.getByText('Add another item'));
+    fireEvent.changeText(screen.getByPlaceholderText('Search name, local SKU, or barcode'), 'unfamiliar');
+    fireEvent.press(screen.getByText('Add product'));
+    fireEvent.press(screen.getByText('Continue without photo'));
+    fireEvent.changeText(screen.getByTestId('quick-add-price'), '2.00');
+    fireEvent.press(screen.getByText('Add to basket'));
+    expect(screen.getByText('Not saved')).toBeTruthy();
+    const productRows = f.adapter.getAllRows('SELECT * FROM store_products');
+    const outboxRows = f.adapter.getAllRows('SELECT * FROM outbox_operations');
+    expect(productRows).toHaveLength(2); expect(outboxRows).toHaveLength(2);
+    fireEvent.changeText(screen.getByTestId('quick-add-price'), '0.50');
+    fireEvent.changeText(screen.getByTestId('quick-add-quantity'), '2');
+    fireEvent.press(screen.getByText('Add to basket'));
+    expect(screen.getByText('Cart (2)')).toBeTruthy();
+    expect(f.adapter.getAllRows('SELECT * FROM store_products')).toEqual(productRows);
+    expect(f.adapter.getAllRows('SELECT * FROM outbox_operations')).toEqual(outboxRows);
+    fireEvent.press(screen.getByText(/^Complete sale ·/));
+    expect(complete).toHaveBeenCalledTimes(1);
+    const lines = complete.mock.calls[0][0].lines;
+    expect(lines.find(line => line.storeProductId === known.storeProduct.id)).toMatchObject({ unitPriceMinor: 9007199254740800, quantityPackagesMicros: 1000000 });
+    expect(lines.find(line => line.storeProductId !== known.storeProduct.id)).toMatchObject({ unitPriceMinor: 50, quantityPackagesMicros: 2000000 });
+    expect(screen.getByText('Sale complete')).toBeTruthy();
+  } finally { f.closeAndDelete(); }
+});
+
+it('uses the visible corrected price when basket addition is retried after product save', () => {
+  const f = openCatalogueFixture();
+  try {
+    const ready = jest.fn().mockImplementationOnce(() => { throw new Error('Basket total exceeds limit'); });
+    const client = createCatalogueClient(f.adapter, f.context.store, f.context.device, deterministicIds(1000));
+    render(<QuickAddProductScreen client={client} saleShortcut onSaleReady={ready} onSaved={jest.fn()} onCancel={jest.fn()} />);
+    fireEvent.press(screen.getByText('Continue without photo'));
+    fireEvent.changeText(screen.getByTestId('quick-add-price'), '1.25');
+    fireEvent.press(screen.getByText('Add to basket'));
+    fireEvent.changeText(screen.getByTestId('quick-add-price'), '2.00');
+    fireEvent.press(screen.getByText('Add to basket'));
+    expect(ready).toHaveBeenCalledTimes(2);
+    expect(ready.mock.calls[1][2]).toBe(200);
+    expect(ready.mock.calls[1][0].storeProduct.defaultSellingPriceMinor).toBe(125);
+    expect(f.adapter.getAllRows('SELECT id FROM store_products')).toHaveLength(1);
+  } finally { f.closeAndDelete(); }
+});
 
 it('price is the only typed requirement; validates before writing and guards rapid duplicate save', () => {
   const f = openCatalogueFixture();

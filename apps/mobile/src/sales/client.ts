@@ -224,7 +224,6 @@ export function createDatabaseSalesClient(
     },
 
     createTemporaryProduct(input: QuickAddInput): TemporaryProductGraph {
-      if (input.localPhotoId) createProductPhotos(adapter, store.id).assertReady(input.localPhotoId);
       const operation: CreateTemporaryProductInput = {
         storeId: store.id,
         deviceId: device.id,
@@ -239,7 +238,8 @@ export function createDatabaseSalesClient(
         barcodeForBasePackage: input.barcodeForBasePackage,
         defaultSellingPriceMinor: input.defaultSellingPriceMinor,
       };
-      const graph = createTemporaryProduct(adapter, operation, { generateId, operationId: input.operationId });
+      const graph = createTemporaryProduct(adapter, operation, { generateId, operationId: input.operationId,
+        validatePhoto: () => { if (input.localPhotoId) createProductPhotos(adapter, store.id).assertReady(input.localPhotoId); } });
       const code = input.lookupCode ?? (input.barcode ? { value: input.barcode, type: input.barcodeType ?? 'EAN' } : undefined);
       if (code) { try { suggestions.remember(graph.storeProduct.id, code); } catch { /* Optional lookup cannot delay checkout. */ } }
       return graph;

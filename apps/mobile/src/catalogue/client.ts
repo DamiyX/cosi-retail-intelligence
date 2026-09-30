@@ -177,7 +177,6 @@ export function createCatalogueClient(
       return listStoreProducts(adapter, store.id, query, filter);
     },
     createTemporaryProduct(input: QuickAddInput): TemporaryProductGraph {
-      if (input.localPhotoId) photos.assertReady(input.localPhotoId);
       const operation: CreateTemporaryProductInput = {
         storeId: store.id,
         deviceId: device.id,
@@ -192,7 +191,8 @@ export function createCatalogueClient(
         barcodeForBasePackage: input.barcodeForBasePackage,
         defaultSellingPriceMinor: input.defaultSellingPriceMinor,
       };
-      const graph = createTemporaryProduct(adapter, operation, { generateId, operationId: input.operationId });
+      const graph = createTemporaryProduct(adapter, operation, { generateId, operationId: input.operationId,
+        validatePhoto: () => { if (input.localPhotoId) photos.assertReady(input.localPhotoId); } });
       const code = input.lookupCode ?? (input.barcode ? { value: input.barcode, type: input.barcodeType ?? 'EAN' } : undefined);
       if (code) { try { suggestions.remember(graph.storeProduct.id, code); } catch { /* Lookup never invalidates a durable product. */ } }
       return graph;

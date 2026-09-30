@@ -43,6 +43,25 @@ function setup() {
   return { f, root, source, files, photos, create, close: () => { f.closeAndDelete(); rmSync(root, { recursive: true, force: true }); rmSync(source, { force: true }); } };
 }
 
+it('client replay succeeds after a committed identification photo becomes unavailable', () => {
+  const s = setup();
+  try {
+    const asset = s.photos.stage(s.source);
+    const client = createCatalogueClient(s.f.adapter, s.f.context.store, s.f.context.device, deterministicIds(12000), () => s.files);
+    const input = { name: '', generateTemporaryLabel: true, defaultSellingPriceMinor: 125, localPhotoId: asset, operationId: testId(12900) };
+    const product = client.createTemporaryProduct(input);
+    s.files.remove(`${asset}.jpg`);
+    expect(s.photos.read(product.storeProduct.id).status).toBe('missing');
+    expect(client.createTemporaryProduct(input).storeProduct.id).toBe(product.storeProduct.id);
+    expect(createDatabaseSalesClient(s.f.adapter).createTemporaryProduct(input).storeProduct.id).toBe(product.storeProduct.id);
+    writeFileSync(join(s.root, `${asset}.jpg`), 'corrupt');
+    expect(client.createTemporaryProduct(input).storeProduct.id).toBe(product.storeProduct.id);
+    expect(createDatabaseSalesClient(s.f.adapter).createTemporaryProduct(input).storeProduct.id).toBe(product.storeProduct.id);
+    expect(s.f.adapter.getAllRows('SELECT id FROM store_products')).toHaveLength(1);
+    expect(s.f.adapter.getAllRows('SELECT operation_id FROM outbox_operations')).toHaveLength(1);
+  } finally { s.close(); }
+});
+
 it('keeps one photo/product/outbox on replay, survives sale restart/enrichment, and sends no media URI or bytes', () => {
   const s = setup();
   try {

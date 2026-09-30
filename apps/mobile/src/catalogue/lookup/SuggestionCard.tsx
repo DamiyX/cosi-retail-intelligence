@@ -8,7 +8,7 @@ const messages: Partial<Record<Suggestion['status'], string>> = {
   LOCAL_MATCH: 'This barcode already belongs to a local product. Use the saved product from Search.',
   DISABLED: 'Online suggestions are unavailable in this build. You can enter details yourself.',
   NO_MATCH: 'No online details found. You can enter details yourself.',
-  OFFLINE: 'Online details are unavailable while offline. Your product is saved locally.',
+  OFFLINE: 'Online details are unavailable while offline. You can enter details yourself.',
   ERROR: 'Online details could not be checked. You can enter details yourself.',
   INVALID: 'The provider returned a different or invalid barcode. No details were used.',
   TIMEOUT: 'Online lookup timed out. You can continue without it.',
@@ -23,11 +23,12 @@ function Card({ value, onUse, onDismiss, onRetry }: { value: Suggestion | Lookup
     <Text>{details.name}</Text>
     {details.brand ? <Text>Brand: {details.brand}</Text> : null}
     {details.size ? <Text>Size: {details.size} (does not change package units)</Text> : null}
-    <Text>Source: {details.source}. Unconfirmed. Use details or Edit fills the product name; Save confirms your changes.</Text>
-    <SecondaryButton title="Source and attribution" onPress={() => { void Linking.openURL(details.sourceUrl).catch(() => undefined); }} />
-    <SecondaryButton title="Data licence (ODbL)" onPress={() => { void Linking.openURL(details.licenceUrl).catch(() => undefined); }} />
+    <Text>Source: {details.source}. Unconfirmed. Use details fills an editable product name; Save confirms your changes.</Text>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+      <Text accessibilityRole="link" style={{ paddingVertical: 12, textDecorationLine: 'underline' }} onPress={() => { void Linking.openURL(details.sourceUrl).catch(() => undefined); }}>Source and attribution</Text>
+      <Text accessibilityRole="link" style={{ paddingVertical: 12, textDecorationLine: 'underline' }} onPress={() => { void Linking.openURL(details.licenceUrl).catch(() => undefined); }}>Data licence (ODbL)</Text>
+    </View>
     <SecondaryButton title="Use details" onPress={() => onUse(details)} />
-    <SecondaryButton title="Edit suggested details" onPress={() => onUse(details)} />
     <SecondaryButton title="Dismiss suggestion" onPress={onDismiss} />
   </View>;
 }

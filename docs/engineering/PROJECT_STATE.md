@@ -1,7 +1,7 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-30
-Current milestone: M8 source amendments M8-06..09 implemented; stopped handoff prepared for independent audit. D-047/D-048 apply. M8 is not accepted.
+Current milestone: M8 source amendments M8-06..09 returned; independent amendment audit requires corrections (price retry, photo replay, truthful/compact suggestion UI). Two new auditor regressions fail at d3530bb. D-047/D-048 apply. M8 is not accepted.
 
 ## Active source and ownership
 
@@ -33,4 +33,6 @@ A manually reconstructed offline NGN 4,000 completed sale survived restart with 
 
 ## Next action
 
-Coordinator independently reviews the committed stopped handoff for M8-06..09, the Doctor discrepancy and disabled-provider gates. Then schedule the amended native basket/photo flow using reviewed compatibility and explicit authorization. No extra APK/build spend, deployment, rollout, Git push/merge, destructive reset or M9 work under this task.
+Same implementer chat corrects the findings in M8_INDEPENDENT_AUDIT.md and retains the two uncommitted auditor regressions. Coordinator performs no simultaneous checkout activity. Return a stopped handoff with corrected focused/full validation and truthful native/provider/Doctor gates. Unattended work ends 2026-09-30 08:56 Africa/Lagos; preserve partial work and report if time expires. Then schedule the amended native basket/photo flow using reviewed compatibility and explicit authorization. No extra APK/build spend, deployment, rollout, Git push/merge, destructive reset or M9 work under this task.
+
+Cutoff correction status (2026-09-30): audit R1/R2/R3 source corrected with preserved regressions; focused17 tests and mobile typecheck passed. Lint result/final clean HEAD in stopped notification. Fresh full validation/export and independent re-audit remain pending; prior589 does not prove these later changes. Implementer stops by07:56UTC under unattended authorization.

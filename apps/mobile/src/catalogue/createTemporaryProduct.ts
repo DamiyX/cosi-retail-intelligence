@@ -82,7 +82,7 @@ export interface TemporaryProductGraph {
 export function createTemporaryProduct(
   adapter: DatabaseAdapter,
   input: CreateTemporaryProductInput,
-  options: CatalogueOperationOptions = {},
+  options: CatalogueOperationOptions & { validatePhoto?: () => void } = {},
 ): TemporaryProductGraph {
   const generateId = options.generateId ?? generateMobileId;
   const storeId = requireId(input.storeId);
@@ -99,6 +99,8 @@ export function createTemporaryProduct(
   if (replayed) {
     return rehydrateTemporaryProduct(adapter, replayed);
   }
+
+  options.validatePhoto?.();
 
   const occurredAt = nowIso();
   return adapter.transaction(() => {

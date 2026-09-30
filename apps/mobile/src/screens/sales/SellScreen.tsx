@@ -736,8 +736,7 @@ export default function SellScreen({
     );
   }, [client, loadProducts, startConfiguringLine]);
 
-  const addQuickSale = (graph: TemporaryProductGraph, quantityMicros: number) => {
-    const price = graph.storeProduct.defaultSellingPriceMinor!;
+  const addQuickSale = (graph: TemporaryProductGraph, quantityMicros: number, price: number) => {
     const calculated = calculateSaleLine({ quantityPackagesMicros: quantityMicros,
       conversionToBaseMicros: graph.basePackage.conversionToBaseMicros, unitPriceMinor: price, discountAmountMinor: 0 });
     const line: CartLine = { id: graph.outbox.operationId, storeProductId: graph.storeProduct.id,

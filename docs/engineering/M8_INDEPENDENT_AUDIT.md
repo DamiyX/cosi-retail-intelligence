@@ -1,5 +1,59 @@
 # M8 independent audit — pass 1
 
+## Amendment audit — 2026-09-30, source bcd9e16 / handoff d3530bb
+
+Disposition: changes required; M8-06..09 and the full milestone are not accepted.
+The implementer was stopped and the tree clean before this review. Coordinator
+added only the two regression tests below and this audit/status record; no
+production code, device, service or dependency was changed.
+
+- **P1: corrected selling price is ignored after a basket-add failure.**
+  QuickAddProductScreen retains savedGraph after product creation. Its editable
+  price is validated on retry but onSaleReady receives the original graph;
+  SellScreen.addQuickSale consumes the old defaultSellingPriceMinor. Reproduction:
+  save at 1.25, reject basket addition, edit visible price to 2.00, retry: callback
+  still receives 125 minor units. Added priceFirstSale regression fails with
+  expected 200 / received 125. Preserve the durable product/outbox identity;
+  pass the current authoritative sale price separately to basket construction
+  rather than silently mutating the original product operation. Adapt the
+  regression to that explicit boundary and exercise the actual SellScreen path.
+- **P2: optional missing photo blocks idempotent product replay.** Both catalogue
+  and sales clients assertReady before the underlying operation checks its
+  committed outbox replay. After a photo-backed product is committed, remove
+  its photo and retry the same operation: client throws instead of returning
+  the durable graph. Added productPhotos client-level regression fails with
+  Photo missing or damaged. Check scoped replay before new-photo validation;
+  preserve first-write validation and cross-store/device/operation-type guards.
+  Cover both wrappers and missing/corrupt media after commit.
+- **P2: unsaved Add product has false offline copy.** Shared SuggestionCard
+  OFFLINE text says Your product is saved locally, including PreviewSuggestion
+  before Save product is pressed. Use truthful neutral copy or context-specific
+  saved/unsaved messages and test zero product rows in the unsaved case.
+- **UX refinement in approved scope:** FOUND renders five full buttons,
+  including Use details and Edit suggested details with identical handlers.
+  Reduce redundant actions and present attribution/licence compactly while
+  retaining accessible explicit acceptance, editable fields and dismissal.
+  Do not waive provider terms or activate live lookup.
+
+Actual focused commands (pinned Node 24.21.0/npm 11.19.0):
+
+1. npm run test --workspace @retail/mobile -- --runInBand productPhotos.test.ts
+   -t "client replay succeeds": exit 1, one failed regression, six skipped.
+2. npm run test --workspace @retail/mobile -- --runInBand priceFirstSale.test.tsx
+   -t "visible corrected price": exit 1, one failed regression, two skipped.
+   Existing Suspense/act harness warnings also appeared; assertion failure is
+   independent of those warnings.
+
+The retained final-validation log confirms the implementer's 589 passing tests
+before these new regressions (12 contracts, 150 domain, 427 mobile); this is
+not a fresh auditor full-suite run. Current Doctor 20/21 remains unresolved;
+do not claim all validation green. Filesystem method signatures were checked
+against installed expo-file-system declarations, not executed on Android.
+Live provider remains disabled, and amended phone/camera/standalone offline
+checks remain unperformed. Return corrections to the same chat, then stop
+coordinator checkout activity until its next stopped handoff. Unattended work
+authorization ends 2026-09-30 08:56 Africa/Lagos (07:56 UTC).
+
 Reviewed target: 4ad4a84 (source e10ca70); accepted base c817edb.
 Decision: changes required. This is a bounded first pass, not completed independent acceptance.
 
@@ -49,3 +103,13 @@ Independent commands/results: focused scannerSale, scannerWorker and scannerVeri
 Count clarification: 381 mobile plus the implementer's recorded 12 contract and 150 domain tests gives 543 distinct tests. The earlier coordinator statement that four tests were double-counted was premature and is withdrawn. Those four were added after the earlier root discovery. Contract/domain checks were not rerun in this correction audit; their implementation evidence is attributed accordingly.
 
 Next: after the founder switches to the preferred utility model, restore the existing Docker engine and run the pending live worker tests against the disposable local backend. Any new failure returns to source review. Then execute the documented native/phone gate. No Docker setup, native build submission, Git commit/push, deployment, or new implementation chat was performed in this re-audit.
+
+## Implementer amendment correction response — 2026-09-30 cutoff
+
+R1 corrected: current validated sale price is passed separately to onSaleReady and SellScreen, while the original durable graph/default price and operation identity remain unchanged. Auditor regression preserved/adapted to the explicit price argument. Actual SellScreen integration reproduces combined basket overflow, then corrects price/quantity and completes with exact line values, unchanged existing line, and one new product/outbox.
+
+R2 corrected: first-write file validation runs after the existing scoped operation replay check in createTemporaryProduct. Both catalogue/sales wrappers return durable replay graphs with missing/corrupt optional media; original ownership/device/type guards and new-write validation remain. Auditor regression preserved and extended to both wrappers/corruption.
+
+R3 corrected: OFFLINE wording is neutral before save; new unsaved-Add regression proves zero product rows. FOUND has two main actions (Use details, Dismiss), with accessible compact source/licence links; Use details opens actual editable fields followed by explicit Save. Removed duplicate Edit action; related test adapted.
+
+Focused priceFirstSale/productPhotos/catalogueLookupUi:17 passed,3 suites, exit0; actual Sell integration included. Mobile typecheck passed. Final lint result is recorded in the stopped report. Root validation/Android export NOT rerun after these corrections due strict07:56UTC cutoff; prior589 applies only to bcd9e16. Suspended-resource act warnings remain. Doctor20/21, provider-disabled/licensing/contact/native and all physical findings remain open. No acceptance or waiver, package upgrade, phone/Docker/build/backend/push/merge/new milestone.

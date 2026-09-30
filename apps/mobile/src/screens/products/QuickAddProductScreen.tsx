@@ -17,7 +17,7 @@ interface QuickAddProductScreenProps {
   initialIdentifier?: { value: string; type: 'EAN' | 'UPC' | 'QR' };
   requireSellingPrice?: boolean;
   saleShortcut?: boolean;
-  onSaleReady?: (graph: TemporaryProductGraph, quantityMicros: number) => void;
+  onSaleReady?: (graph: TemporaryProductGraph, quantityMicros: number, salePriceMinor: number) => void;
   allowScannedAssociation?: boolean;
   onSaved: (productId: string) => void;
   onCancel: () => void;
@@ -177,7 +177,7 @@ export default function QuickAddProductScreen({
       savedGraph.current = graph;
       if (!saleShortcut && previewDecision?.barcode === gtin(lookupCode)) { try { client.suggestions?.decide(graph.storeProduct.id, previewDecision.status); } catch { /* Provider metadata cannot invalidate a saved product. */ } }
       setProductSaved(true);
-      if (saleShortcut && onSaleReady) onSaleReady(graph, quantityMicros);
+      if (saleShortcut && onSaleReady) onSaleReady(graph, quantityMicros, priceMinor!);
       else onSaved(graph.storeProduct.id);
     } catch (error) {
       if (error instanceof DomainError) {
