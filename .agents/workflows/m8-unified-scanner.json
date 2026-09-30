@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "blocked",
-  "current_state": "correction-reaudit-and-live-database-passed-device-pending",
+  "current_state": "device-inspected-compatible-native-build-blocked",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
@@ -21,7 +21,8 @@
     "isolated-verification-route-tested",
     "current-routing-contexts-corrected",
     "returned-source-corrections-independently-reviewed",
-    "eight-live-postgres-cases-passed"
+    "eight-live-postgres-cases-passed",
+    "authorized-android-device-and-existing-builds-inspected"
   ],
   "owner": {
     "agent": "coordinator-remaining-acceptance-gates",
@@ -84,6 +85,12 @@
       "source": "c995641; docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md",
       "result": "Both live worker RPC cases and six existing collision cases passed: 8/8, two suites, exit 0. Existing disposable PostgreSQL, rollback-only migration injection; no HTTP/native verification or persistent deployment.",
       "observed_at": "2026-09-30T00:37:41.1526088Z"
+    },
+    {
+      "kind": "native-device-inspection",
+      "source": "59ad39c; docs/engineering/M8_ANDROID_VERIFICATION.md",
+      "result": "Authorized SM-A156E Android 16/API 36 inspected. Existing preview Home and dev launcher observed; historical launcher crash did not recur once, root cause unverified. Installed dev lacks CAMERA; newest EAS builds use pre-M8 1b2b100. No compatible M8 APK or local Java/Android SDK tools. All scanner/native acceptance checks unperformed; no build submission/data clearing/deployment.",
+      "observed_at": "2026-09-30T00:48:10Z"
     }
   ],
   "acceptance_gates": [
@@ -204,9 +211,18 @@
         "procedure": "Execute M8-05 using recorded rebuilt APK and device details, including carried launch diagnosis.",
         "success_condition": "Known/unknown/package scans, permissions, back, large text, preview offline and completed-sale restart pass."
       },
-      "evidence": [],
-      "limitations": [],
-      "blocker": "Physical procedure pending; coordinator reports connected SM-A156E Android 16. No rebuilt APK or camera evidence from database verification.",
+      "evidence": [
+        {
+          "source": "docs/engineering/M8_ANDROID_VERIFICATION.md",
+          "result": "Device directly inspected and existing apps launched; no compatible M8 binary or camera acceptance evidence. Historical no-device report superseded without erasing it.",
+          "observed_at": "2026-09-30T00:48:10Z"
+        }
+      ],
+      "limitations": [
+        "Existing-app launch is not M8 native, Metro or standalone offline evidence.",
+        "Association tests require a reviewed migrated test backend; ordinary rollout remains disabled."
+      ],
+      "blocker": "Compatible M8 APK absent; newest EAS builds predate camera/audio. Local Java/Android SDK unavailable. New isolated build needs quota/cost review and submission authorization; standalone preview installation must preserve existing app/data.",
       "waiver": null
     },
     {
@@ -261,10 +277,11 @@
     }
   ],
   "blockers": [
-    "Physical Android/native acceptance pending; coordinator reports SM-A156E Android 16 connected, but no rebuilt APK or camera evidence from this task."
+    "Authorized SM-A156E Android 16/API 36 inspected; compatible M8 APK absent and local Java/Android SDK unavailable. Native/physical checks blocked on separately authorized isolated build after quota/cost review.",
+    "New association checks additionally require a reviewed migrated test backend; migration remains rollback-only."
   ],
-  "next_action": "Coordinator reviews the live database handoff (8/8 passed), then sequences the documented phone/native verification under founder utility-model preference. Implementer stopped; no new milestone, deployment or native build performed.",
+  "next_action": "Coordinator reviews the stopped phone utility handoff, confirms EAS quota/cost and obtains founder authorization for a new isolated scanner-verification build from reviewed source. Plan standalone preview installation without overwriting existing app/data and migrate isolated test backend before enabling associations. No scanner acceptance, build submission or deployment performed.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-09-30T00:37:41.1805504Z",
+  "updated_at": "2026-09-30T00:48:10Z",
   "archived": false
 }

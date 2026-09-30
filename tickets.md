@@ -178,7 +178,7 @@ is insufficient evidence that the server or pull path handles it correctly.
 
 ## M8-05 — Verify the scanner on Android and return it for independent audit
 
-**Status:** Source checks recorded; physical verification blocked by unavailable device/native build.
+**Status:** Source checks recorded; authorized device inspected, physical verification blocked by absent compatible M8 native build.
 **Delivers:** a reproducible handoff with explicit source and physical acceptance.
 **Likely modules:** focused failure regression tests, device procedure/evidence,
 plan/ticket/workflow state. No unrelated features.
@@ -232,3 +232,15 @@ Source e5b23ff fixes cancelled scan-intent leakage with nine scanner-sale regres
 ## Live database follow-up — 2026-09-30
 
 Both scannerWorker.postgres cases and all six scannerSync.postgres cases passed: 8/8, two suites, exit 0, rollback-only migration injection against the existing disposable database. The earlier Docker-blocked test gap is resolved for this scope. No production source changes or physical/native verification; coordinator owns acceptance and the next sequential phone step. See M8_IMPLEMENTATION_EVIDENCE.md.
+
+## Phone utility follow-up — 2026-09-30
+
+Directly confirmed the SM-A156E Android 16/API 36 connection and observed
+existing preview Home/development launcher. No compatible M8 APK exists in the
+inspected artifacts/EAS history; installed development lacks CAMERA permission,
+and local Java/Android SDK tools are unavailable. Historical dev launch logs
+were inspected without clearing data; that failure did not recur in one current
+launch, and root cause remains unverified. All M8 physical criteria stay
+unchecked. Build quota/cost review and separately authorized isolated build are
+the next prerequisites. See the superseding stopped handoff in
+M8_ANDROID_VERIFICATION.md; no acceptance gate is self-approved.

@@ -1,4 +1,117 @@
-# M8 Android verification — pending
+# M8 Android verification — compatible build blocked
+
+## Superseding device utility handoff — 2026-09-30
+
+This observation supersedes the historical no-device/tooling report below. The
+sequential utility pass started on clean branch plan/m8-unified-scanner at
+59ad39c2c113f6674ef5f871e72b716e7156a0a3 in C:\Users\doyew\Documents\DEV 2\COSI-m8-planning.
+Runtime source remains the reviewed e5b23ff correction. This pass inspected
+the phone and existing builds; it did not perform scanner acceptance.
+
+### Observed device and tools
+
+- The authorized Galaxy A15 5G SM-A156E was the single connected/authorized
+  USB device. Android 16 / API 36 were read directly through adb.
+- adb 37.0.1, Node 24.21.0 and npm 11.19.0 were available. Java, javac, Gradle,
+  aapt/apkanalyzer and Maestro were absent from PATH. JAVA_HOME/ANDROID_HOME/
+  ANDROID_SDK_ROOT were unset; the usual Android Studio JBR/SDK/Java locations
+  checked were absent. A local native build is not feasible with the inspected
+  tools, and installation of toolchains is outside this assignment.
+- Host C: had approximately 122.9 GB free. Phone /data reported 2.2 GB free
+  (98% used). No space was reclaimed.
+- No APK/AAB or generated Android project was found in this checkout. The
+  existing external m1m2-apks cache contains old development (350,371,940 bytes)
+  and preview (104,391,805 bytes) artifacts dated September 14; these were not
+  installed or treated as M8 binaries.
+- Read-only EAS history succeeded using the existing signed-in team. The newest
+  finished Android builds are preview 7a36d34d-6217-461d-a1d3-88c937f13d3d
+  and development 3e75f2cc-5f93-4f38-8caf-e07bf5c634e3, both created September
+  28 from 1b2b10041fec8935d61a6c95b1365acfff0083b0. The history returned eight
+  jobs and no M8 or scanner-verification build. That source predates camera
+  introduction at 512352e and audio at e10ca70.
+
+### Existing-app launch diagnosis
+
+The phone has com.damiyx.retailintelligence.dev and
+com.damiyx.retailintelligence.preview, each version 0.0.1 / versionCode 1.
+Their last update times are September 28. The isolated
+com.damiyx.retailintelligence.scannerverification app is absent.
+Installed APKs were not cryptographically matched to an EAS artifact; their
+exact source provenance remains unverified. The development package's complete
+requested-permission section contains no CAMERA permission, so it is unsuitable
+for the M8 camera procedure.
+
+| Check actually performed | Observation and limit |
+| --- | --- |
+| adb devices, model/OS/API, df, package inspection | Authorized target present; app identities and storage recorded. |
+| Existing preview am start -W with MainActivity | Status ok; screenshot showed Home in the existing device-verification store. Its old Sell tab was visible. This is existing-app launch evidence only. |
+| Existing development am start -W with MainActivity | Status ok; Android reported DevLauncherActivity; screenshot showed the development-server connection screen. No Metro session or application JS was started. |
+| Bounded crash-buffer inspection without clearing logs/data | September 28 dev crashes say Unable to start activity, caused by Activity could not be started for Expo's DevLauncherActivity, through DevLauncherController.navigateToLauncher. |
+| Current dev process log inspection | No matching fatal/exception/error lines in the inspected 300-line window. The historical launch failure did not recur in this one launch. |
+
+The historical failure is localized to development-client launcher redirection;
+its underlying cause remains unverified. No repair or repeated restart loop was
+justified. Existing preview launch and current development launcher availability
+do not prove Metro connectivity, M8 native compatibility or standalone M8 operation.
+Screenshots remain outside Git in the task's temporary artifact directory;
+raw logs, account identity and app data are not committed.
+
+### Checks deferred
+
+No M8 camera callback was exercised. Permission denial/grant/permanent denial
+and settings return; physical EAN-8/EAN-13/UPC-A/exact QR; active/inactive,
+zero-stock, carton/package-less and missing-price cases; unknown
+create/search/cancel with the same basket; A-A-A/A-B/explicit repeat;
+background/resume; beep/mute/torch; Undo/edit; Android/header back;
+200% text/TalkBack/keyboard/insets; completed-sale force-stop/receipt survival;
+temporary-product enrichment; scanner-disabled manual flow; first-use offline
+detection; standalone preview without Metro; and M8 APK size/timing are all
+unperformed. They remain blocked by the absent compatible binary. No physical
+scanner success, false-add rate, accessibility pass or milestone acceptance is claimed.
+
+New association checks have an additional gate: the reviewed server migration
+must be applied to an isolated test backend before explicitly enabling
+EXPO_PUBLIC_SCANNER_ASSOCIATIONS_ENABLED. The existing migration evidence is
+rollback-only. This utility pass did not enable the flag or provision/deploy a backend.
+
+### Minimum next action for the coordinator
+
+1. Review this stopped evidence pass, then arrange a newly authorized native
+   build from this branch's reviewed source. The existing dedicated profile is
+   an internal development client with a separate application ID and automatic
+   additions enabled only for verification:
+
+       npm exec --workspace @retail/mobile -- eas build --platform android --profile scanner-verification
+
+   This command is prepared only, not executed. It creates one new EAS Android
+   build job for project 737ed99c-2c20-4612-ac80-a8a868b827cb; it is not a
+   standalone preview. Remaining account quota/credits and potential charges
+   were not established by build history. Confirm them and authorize submission
+   before running it. Verify association remains disabled in the effective build
+   environment until the test-backend migration gate is satisfied.
+2. Record the resulting build ID, exact Git source, APK checksum/size, native
+   camera/audio modules and manifest; install only the isolated verification
+   package. Use matching scanner-verification environment/opt-in for Metro as
+   documented below, then resume physical tests with isolated fixtures.
+3. Arrange a separate compatible standalone ordinary-preview build for offline
+   first-use/Metro-free evidence. Current preview configuration uses the already
+   installed .preview ID. Under this assignment's no-overwrite ceiling, a
+   separate isolated standalone identity/profile or explicit authorization to
+   update that app is required before installation. No such configuration was
+   changed here.
+
+Only evidence documents/workflow were changed. No APK/build submission,
+installation/uninstall/data clearing, dependency/global installation, Metro,
+Docker action, persistent migration, deployment, push, merge or production code
+change occurred. Coordinator-owned gates remain pending/blocked. This utility
+task stops after its local evidence commit and sends the authorized completion/
+blocker notification; further device/build work belongs to the next approved session.
+
+Evidence-only checks passed: workflow JSON validated against its schema
+(PowerShell Test-Json returned True), and git diff --check exited 0. Production
+tests were not rerun because this utility changed no runtime source.
+
+## Historical implementation observation — retained
 
 No device was connected during implementation (`adb devices -l` returned an empty list). Java was unavailable in the task environment. No APK was built or installed, no app data was cleared, and the carried Galaxy A15 launch failure was not reproduced or diagnosed. Android export is a JavaScript/asset check, not a native-build or physical acceptance result.
 

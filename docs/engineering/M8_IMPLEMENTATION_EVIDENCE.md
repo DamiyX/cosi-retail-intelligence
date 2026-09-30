@@ -80,3 +80,30 @@ Exit 0: two suites, eight tests passed, zero snapshots; Jest reported 40.551 sec
 Tests invoked psql inside existing supabase_db_retail-intelligence and injected the M8 migration and disposable fixtures in BEGIN/ROLLBACK transactions. No source/test changes, persistent migration, reset, Docker startup/repair, deployment or HTTP smoke run occurred. The coordinator reported the Edge runtime exited; no HTTP readiness is inferred. Prior root/mobile validation remains attributed to its earlier runs rather than rerun here.
 
 Coordinator's uncommitted independent audit, workflow/state updates and DEVELOPMENT.md Docker workaround were preserved. Physical verification is still pending; coordinator reports the SM-A156E Android 16 is connected, but this database-only task performed no phone/native work. Independent source re-audit passed as recorded by the coordinator; final gate ownership remains with the coordinator.
+
+## Sequential phone utility evidence — 2026-09-30
+
+At clean baseline 59ad39c, directly inspected the authorized SM-A156E Android
+16/API 36. Existing preview opened its test-store Home screen; existing
+development reached Expo's launcher. Historical September 28 logs localize the
+dev failure to DevLauncherActivity redirection; the failure did not recur in the
+single current launch and its root cause remains unverified. Installed dev
+requests no CAMERA permission. No M8 scanner check was performed.
+
+Read-only EAS history returned no M8 build; newest finished development/preview
+jobs both use pre-camera source 1b2b100. No compatible APK/generated native
+project exists in the inspected checkout/artifacts. Java/Android SDK build tools
+were unavailable, so local native build was not feasible. No cloud build was
+submitted; remaining quota/cost is unverified. The dedicated isolated profile's
+minimum command and separate standalone/association prerequisites are recorded
+in M8_ANDROID_VERIFICATION.md.
+
+This is device/build inspection and existing-app launch evidence only. All
+camera, permissions, scan cases, lifecycle, beep/torch, accessibility,
+standalone/offline-first-use and completed-sale restart criteria remain
+unperformed. No data clearing, app overwrite/installation, tool installation,
+Metro startup, Docker action, migration deployment or production code change
+occurred. Evidence-only documentation/workflow checks are recorded in the
+utility's final coordinator handoff; acceptance remains coordinator-owned.
+Workflow schema validation returned True and git diff --check exited 0.
+Production tests were not rerun for these evidence-only changes.
