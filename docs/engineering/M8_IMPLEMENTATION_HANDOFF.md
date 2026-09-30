@@ -1,8 +1,8 @@
-# M8-06..09 stopped source handoff — independent audit pending
+# M8 SDK57 patch handoff — coordinator compatibility review pending
 
-Latest handoff date: 2026-09-30. Frozen source review target: **bcd9e16**.
+Latest handoff date: 2026-09-30. Frozen runtime review target: **824b2af**.
 Checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m8-planning`; branch `plan/m8-unified-scanner`.
-Read the **Superseding amendment handoff** at the end for current results/gates. Earlier handoffs below are preserved historical records and do not describe the final amendment state. The final documentation HEAD/clean status is delivered in the coordinator notification after commit/checks.
+Read the **Superseding SDK57 compatibility handoff** at the end for current results/gates. Amendment corrections at adc8b8f passed coordinator re-audit; compatibility review and physical/provider gates remain separate. Earlier handoffs below are preserved historical records. The final documentation HEAD/clean status is delivered in the coordinator notification after commit/checks.
 
 ---
 # M8 correction handoff — independent re-audit pending
@@ -125,3 +125,20 @@ Documentation updated: D-048, M8 plan, DESIGN, backlog, tickets, PROJECT_STATE, 
 Next owner: coordinator 01a098ef-d830-7531-bca7-2d66b0a5b587 independently audits the stopped branch, decides the Doctor/provider gaps, then schedules separately authorized native retests. No extra source scope, build charge, persistent backend migration, deployment, Git push/merge or M9 is authorized. The implementer finishes all processes and final commit/status checks, then stops repository commands/edits before the authorized notification.
 
 Superseding cutoff correction: R1/R2/R3 implemented after d3530bb; focused17 tests and mobile typecheck passed. Final source/docs commit and lint result supplied in stopped coordinator message. Full validation/export not rerun for these changes; prior589 source claim remains historical. Independent audit and all Doctor/provider/native gates remain pending. Auditor regression/status files preserved.
+
+## Superseding SDK57 compatibility handoff — 2026-09-30
+
+Coordinator re-audited R1/R2/R3 atadc8b8f and passed593 tests/export before assigning this narrow patch task. Its ten-document packet is preserved exactly in5f92566. Same checkout/branch and original implementer continued across the model switch; runtime is frozen at824b2af56f66182ed72cf06f86246155dc5e4774.
+
+Only apps/mobile/package.json and root package-lock.json changed at runtime: camera57.0.5->57.0.6, constants57.0.19->57.0.20, router57.0.23->57.0.24 and Router's required existing transitive @expo/ui57.0.20->57.0.21. Existing manifest range conventions retained; no package addition/removal or unrelated lock change. Official changelogs and optional UI impact checked before accepting the controlled diff; see M8_IMPLEMENTATION_EVIDENCE.md.
+
+Fresh verification on pinned Node24.21.0/npm11.19.0:
+
+- Root validation exit0:593 tests (12 contracts/150 domain/431 mobile),75 suites, all workspace typecheck and zero-warning lint. Eight opt-in PostgreSQL tests/two suites skipped; live database cases not rerun. Existing act harness warnings remain.
+- Expo Doctor exit0:21/21, resolving the earlier20/21 patch mismatch.
+- expo install --check exit0:dependencies up to date; existing Expo-core exclusion unchanged, no new suppression.
+- Android export exit0:1615 modules,28 assets,5.3MB Hermes entry-8c98ddb3654b026844752fefbbc39601.hbc. This is source bundling, not an APK/device result.
+
+All four command logs are named cosi-m8-sdk57-patches-* under C:\Users\doyew\AppData\Local\Temp. Runtime unchanged after verification. Documentation records current state, version/required-transitive rationale, historical attribution and remaining gates. Final docs HEAD/clean status and schema/diff checks are delivered after commit; implementer then stops all checkout commands/edits before notifying the authorized coordinator.
+
+Existing APK's native modules remain unchanged. Galaxy unexpected codes, consistent beep, camera/photo/files, continuous-basket, accessibility and standalone offline acceptance remain unresolved/unperformed as previously recorded. Live provider disabled; associations and ordinary automatic addition off; server migration undeployed. No new APK/native build/spend, phone/Metro development server, Docker startup/repair, provider request/account, deployment, push/merge or new milestone. PC-10/11/12 remain proposals and overnight automation paused. Coordinator owns compatibility review and separately authorized native/provider next steps; M8 acceptance is not claimed.

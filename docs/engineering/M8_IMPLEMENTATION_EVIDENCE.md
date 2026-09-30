@@ -199,3 +199,29 @@ Jest emitted React suspended-resource act warnings in existing sale/price-first 
 The final export log is C:\Users\doyew\AppData\Local\Temp\cosi-m8-amendment-final-export.log. Workflow state/index schema checks and git diff --check passed during handoff preparation; final repository status is reported only after documentation commit/checks. No source change after the verified bcd9e16 tree.
 
 Audit correction cutoff follow-up: R1 current sale-price callback, R2 replay-before-optional-photo validation and R3 truthful compact suggestion UI corrected. Auditor regressions preserved; actual Sell overflow/retry and unsaved offline-copy cases added. Focused17 tests passed; mobile typecheck passed. Final lint reported with stopped HEAD. Full validation/export remain pending for this newer source;589 is historical bcd9e16 evidence. See M8_INDEPENDENT_AUDIT.md correction response.
+
+## SDK57 compatibility verification — 2026-09-30, 824b2af
+
+Daytime continuation resumed the same implementer/branch. Coordinator's ten pending documentation files were preserved exactly in5f92566 before dependency edits. Amendment corrections atadc8b8f already passed coordinator re-audit; this maintenance result does not independently accept M8 or its native/provider gates.
+
+Official SDK57 changelogs were read before installation: [Camera](https://github.com/expo/expo/blob/sdk-57/packages/expo-camera/CHANGELOG.md), [Constants](https://github.com/expo/expo/blob/sdk-57/packages/expo-constants/CHANGELOG.md) and [Router](https://github.com/expo/expo/blob/sdk-57/packages/expo-router/CHANGELOG.md). Camera57.0.6 addresses iOS barcode/session/fallback bugs; constants57.0.20 and router57.0.24 list no user-facing changes. None establishes a Galaxy unexpected-code fix. Router's published dependency requires @expo/ui^57.0.21; its [official changelog](https://github.com/expo/expo/blob/sdk-57/packages/expo-ui/CHANGELOG.md) adds optional observable-state/platform UI capabilities and an iOS touch fix. COSI source has no direct @expo/ui usage or affected optional API call.
+
+| Existing package | Previous lock | New lock | Manifest convention |
+| --- | --- | --- | --- |
+| expo-camera | 57.0.5 | 57.0.6 | ~57.0.6 |
+| expo-constants | 57.0.19 | 57.0.20 | ~57.0.20 |
+| expo-router | 57.0.23 | 57.0.24 | Exact57.0.24 |
+| @expo/ui | 57.0.20 | 57.0.21 | Existing transitive dependency required by Router |
+
+Pinned Node24.21.0/npm11.19.0; root `npm install --ignore-scripts --no-audit --no-fund` exited0, changed four packages. JSON lock comparison against preserved baseline confirmed exactly the mobile workspace's three constraints and these four existing entries changed: no added/removed packages or unrelated lock entries. Runtime commit824b2af changes only apps/mobile/package.json and package-lock.json (20 insertions/20 deletions). Expo core57.0.22, RN0.86.3, permissions/plugins, schema26, business contracts, provider/rollout defaults and application source are unchanged.
+
+Fresh commands after the runtime commit, all exit0:
+
+- Root `npm run validate`:12 contracts +150 domain +431 mobile =593 passing tests across75 suites; eight opt-in live PostgreSQL tests/two mobile suites skipped. All workspace typechecks and zero-warning lint pass. Mobile suite337.392 seconds. Existing suspended-resource/act harness warnings remain without failed assertions. Log: C:\Users\doyew\AppData\Local\Temp\cosi-m8-sdk57-patches-validate.log.
+- Root `npm run mobile:doctor`:21/21 passed, no issues detected. This resolves the prior20/21 patch recommendation discrepancy; historical runs above remain historical. Log: C:\Users\doyew\AppData\Local\Temp\cosi-m8-sdk57-patches-doctor.log.
+- Mobile `node ../../node_modules/expo/bin/cli install --check`:dependencies up to date. The pre-existing expo.install.exclude entry for Expo core is retained; no new exclusion/suppression. Log: C:\Users\doyew\AppData\Local\Temp\cosi-m8-sdk57-patches-install-check.log.
+- Root `npm run mobile:export`:1615 modules,28 assets,5.3MB Android Hermes bundle entry-8c98ddb3654b026844752fefbbc39601.hbc. Log: C:\Users\doyew\AppData\Local\Temp\cosi-m8-sdk57-patches-export.log.
+
+All check processes completed. No runtime edits followed824b2af; subsequent changes are evidence/routing/handoff only. Final schema/diff/clean-HEAD checks are supplied with the stopped notification. No new tests were introduced for the patch update; existing regression coverage was rerun.
+
+Existing isolated APK105bb294 still contains older native modules; no rebuilt APK, installation, phone/Metro development server, Docker startup/repair, live provider lookup, account/message, persistent backend change, spend, Git push/merge or M9 work occurred. Export and native mocks do not prove native compatibility or resolve Galaxy scanning/beep/accessibility/standalone/photo findings. Live provider, associations and ordinary automatic basket addition remain off. PC-10/11/12 are preserved proposals only; overnight automation remains paused. Coordinator reviews this stopped compatibility handoff separately from physical/provider acceptance.

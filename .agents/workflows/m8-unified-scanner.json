@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "corrections-reaudited-expo-patch-alignment-assigned",
+  "current_state": "sdk57-patches-verified-coordinator-handoff-pending",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
@@ -38,7 +38,10 @@
     "m8-amendment-r1-r2-r3-corrections-independently-reaudited",
     "m8-adc8b8f-coordinator-validation-593-and-export-passed",
     "founder-pc10-pc11-pc12-proposals-preserved",
-    "portable-local-docker-workflow-linked"
+    "portable-local-docker-workflow-linked",
+    "coordinator-documentation-packet-preserved-5f92566",
+    "sdk57-requested-and-required-transitive-patches-aligned-824b2af",
+    "sdk57-fresh-validation-593-doctor-21-and-export-passed"
   ],
   "owner": {
     "agent": "m8-amendment-implementer",
@@ -48,6 +51,12 @@
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
   "lease": null,
   "evidence": [
+    {
+      "kind": "compatibility-verification",
+      "source": "824b2af; docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md; docs/engineering/M8_IMPLEMENTATION_HANDOFF.md",
+      "result": "Coordinator packet preserved exactly in5f92566. Only mobile manifest/root lock changed: camera57.0.6, constants57.0.20, router57.0.24 plus Router-required existing @expo/ui57.0.21. Official changelogs and lock guard checked; no packages added/removed or unrelated entries changed. Fresh root validation exit0:593 tests/75 suites and all workspace typecheck/zero-warning lint, eight opt-in PostgreSQL cases/two suites skipped. Doctor21/21, dependency check and Android export exit0 (1615 modules/28 assets/5.3MB). Existing Expo-core check exclusion unchanged. Existing APK native modules unchanged; no Galaxy fix, provider activation, phone/Docker/build/backend/push/acceptance claim. Stopped compatibility handoff goes to coordinator after documentation commit/clean checks.",
+      "observed_at": "2026-09-30T10:57:41Z"
+    },
     {
       "kind": "independent-reaudit",
       "source": "adc8b8f; docs/engineering/M8_INDEPENDENT_AUDIT.md",
@@ -288,7 +297,7 @@
       ],
       "verification": {
         "kind": "review",
-        "procedure": "Review stopped M8-06..09 source/evidence, migration25/26, scanner activity, disabled provider gates and current Doctor20/21 discrepancy. Preserve original native findings and historical audit.",
+        "procedure": "Review stopped M8-06..09 source/evidence, migration25/26, scanner activity, disabled provider gates and SDK57 compatibility diff824b2af with fresh593 tests/Doctor21/21/export. Preserve coordinator R1/R2/R3 re-audit, original native findings and historical audit.",
         "success_condition": "No unresolved source findings; physical/release limits reported separately."
       },
       "evidence": [],
@@ -399,11 +408,10 @@
     "Three unexpected camera UPC/EAN values paused UNKNOWN; detector stability and consistent addition beep need bounded investigation/retest.",
     "Standalone offline/first-use detector, TalkBack and broader native cases remain unverified; no second build authorized.",
     "New association checks additionally require a reviewed migrated test backend; migration remains rollback-only.",
-    "Live catalogue provider disabled: authorized public contact, ODbL reuse/attribution review and native HTTP/provider smoke remain unverified.",
-    "Fresh Expo Doctor is 20/21: remote SDK recommendations differ for camera/constants/router patch versions; dependencies not changed."
+    "Live catalogue provider disabled: authorized public contact, ODbL reuse/attribution review and native HTTP/provider smoke remain unverified."
   ],
-  "next_action": "Same implementer performs only reviewed SDK57 camera57.0.6/constants57.0.20/router57.0.24 patch alignment, fresh checks and stopped report; coordinator does no concurrent checkout work. R1/R2/R3 corrections independently verified at adc8b8f with593 tests/export. New PC-10/11/12 remain proposals. Native/provider gates and build-spend/deployment/push limits retained. Overnight automation paused; founder resumed daytime source work.",
+  "next_action": "Coordinator reviews stopped compatibility handoff/runtime824b2af after implementer commits evidence and stops all checkout commands/edits. Fresh593 tests/Doctor21/21/dependency check/export pass, existing APK unchanged. Preserve independent R1/R2/R3 re-audit atadc8b8f and exact coordinator packet5f92566. PC-10/11/12 remain proposals; native/provider gates and build-spend/deployment/push limits retained. Overnight automation paused; no self-acceptance or new build/feature scope.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-09-30T10:37:33Z",
+  "updated_at": "2026-09-30T10:57:41Z",
   "archived": false
 }

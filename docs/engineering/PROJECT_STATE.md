@@ -1,7 +1,7 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-30
-Current milestone: M8 amendment source corrections pass coordinator re-audit at adc8b8f. Fresh full validation/export pass; Expo patch alignment, disabled-provider and native gates remain. D-047/D-048 apply. M8 is not accepted.
+Current milestone: M8 amendment corrections pass coordinator re-audit at adc8b8f; SDK57 patch alignment at824b2af passes fresh validation, Doctor21/21 and Android export. Coordinator compatibility review, disabled-provider and native gates remain. D-047/D-048 apply. M8 is not accepted.
 
 ## Active source and ownership
 
@@ -15,9 +15,9 @@ Current milestone: M8 amendment source corrections pass coordinator re-audit at 
 
 ## Evidence and gates
 
-Current reviewed source adc8b8f: coordinator root validation passed 593 tests (12 contracts,150 domain,431 mobile), all workspace typecheck and zero-warning lint; Android export passed. Eight opt-in PostgreSQL tests/two suites were skipped. Corrections retain current sale price after basket-add failure, scoped replay despite missing optional media and truthful/compact suggestions. Exact re-audit/evidence is in `M8_INDEPENDENT_AUDIT.md`. Prior589 is historical. Native camera/file/HTTP tests remain unperformed for these amendments.
+Coordinator-reviewed correction source adc8b8f retains current sale price after basket-add failure, scoped replay despite missing optional media and truthful/compact suggestions. Exact independent re-audit is in `M8_INDEPENDENT_AUDIT.md`. Fresh implementer validation after SDK57 patch commit824b2af passed593 tests (12 contracts,150 domain,431 mobile), all workspace typecheck and zero-warning lint; Android export passed. Eight opt-in PostgreSQL tests/two suites were skipped. Prior589 is historical. Native camera/file/HTTP tests remain unperformed for these amendments.
 
-Current Expo Doctor: 20/21. Remote recommendations expect camera 57.0.6, constants 57.0.20 and router 57.0.24; locked versions 57.0.5/57.0.19/57.0.23 were retained. Installed Expo 57.0.22 bundled ranges admit the locked versions. This discrepancy is not waived; review before changing native dependencies/build compatibility. Android export is a source bundle, not an APK/device result.
+Current Expo Doctor:21/21, exit0. Reviewed same-SDK patch alignment sets camera57.0.6, constants57.0.20 and router57.0.24; Router requires existing transitive @expo/ui57.0.21. Only apps/mobile/package.json and root package-lock.json runtime files changed, with no added/removed packages or new exclusion. expo install --check passes with its existing Expo-core exclusion unchanged. Exact changelog, diff and command evidence is in `M8_IMPLEMENTATION_EVIDENCE.md`. Android export is a source bundle; existing APK native versions remain unchanged and Galaxy decoder findings are unresolved.
 
 Live catalogue integration is disabled. Open Food Facts is a candidate adapter only: public application contact, ODbL reuse/attribution review, native HTTP compatibility/buffering/redirect/User-Agent checks and representative provider smoke remain open. No real barcode request, signup/form/email, scraping, remote photo or paid service. Provider comparison: `M8_CATALOGUE_LOOKUP_PROVIDER.md`.
 
@@ -33,6 +33,6 @@ A manually reconstructed offline NGN 4,000 completed sale survived restart with 
 
 ## Next action
 
-Same implementer chat receives only the reviewed same-SDK patch alignment (camera57.0.6/constants57.0.20/router57.0.24), preserves these coordinator documentation edits, and returns fresh validation/Doctor/export with a stopped handoff. Coordinator performs no simultaneous checkout activity. The founder resumed daytime source audit; overnight automation stays paused. No phone or Docker needed for these source checks. Standalone browsing/build and real native basket/photo/QR verification still require the reviewed build path and existing authorization limits; no new APK/build spend, deployment, rollout, Git push/merge, destructive reset or M9.
+Coordinator reviews the stopped SDK57 compatibility handoff and frozen runtime824b2af after the implementer commits evidence and stops checkout activity. Coordinator's prior ten-document packet is preserved in5f92566. Fresh validation/Doctor/dependency/export checks pass; no concurrent coordinator checkout work occurred. The founder resumed daytime source work; overnight automation stays paused. Standalone browsing/build and real native basket/photo/QR verification still require the reviewed build path and existing authorization limits; no new APK/build spend, deployment, rollout, Git push/merge, destructive reset or M9.
 
 New founder catalogue/targeting/structured-QR inputs are preserved as PC-10/11/12 proposals in PRODUCT_CHANGE_BACKLOG, not implemented scope. Local Docker startup/recovery now routes through LOCAL_DOCKER_WORKFLOW, linked by AGENTS and DEVELOPMENT. No startup was executed.

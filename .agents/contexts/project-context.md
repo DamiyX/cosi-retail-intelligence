@@ -7,7 +7,9 @@ at evidence HEAD 1e50d1b. Photo initially stays on the originating device; cloud
 backup/restore is not claimed. D-048 optional catalogue suggestions default to a disabled live provider pending contact/licence/native transport review. Scanner activity uses existing animation facilities. Coordinator audits after stopped handoff; source evidence
 for the earlier flow and native findings remain recorded, not new-flow acceptance.
 Current correction source adc8b8f has passed coordinator re-audit, full593-test
-validation and Android export. Doctor20/21 needs reviewed patch alignment;
+validation and Android export. SDK57 patch alignment is committed at824b2af;
+fresh Doctor21/21, dependency check and Android export pass. Existing APK native
+modules remain unchanged; compatibility handoff awaits coordinator review and
 provider/native gates remain open. New offline/shared-catalogue, code-targeting
 and structured-QR ideas are proposals PC-10/11/12 in PRODUCT_CHANGE_BACKLOG.
 For local Docker startup/recovery read docs/engineering/LOCAL_DOCKER_WORKFLOW.md;

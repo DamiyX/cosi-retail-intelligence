@@ -2,7 +2,7 @@
 
 **Status:** Active  
 **Scope:** Whole project  
-**Updated:** 2026-09-29
+**Updated:** 2026-09-30
 
 ## Implemented Foundation
 
@@ -12,8 +12,9 @@
 | Package manager | npm workspaces | npm 11.19.0 |
 | Mobile framework | Expo / React Native | Expo 57.0.22, RN 0.86.3 |
 | UI runtime | React | 19.2.3 |
-| Navigation | Expo Router | 57.0.23 |
-| Barcode camera / optional feedback | expo-camera / expo-audio | 57.0.5 / 57.0.5; rebuild required |
+| Navigation | Expo Router | 57.0.24; required existing @expo/ui transitive patch 57.0.21 |
+| Barcode camera / optional feedback | expo-camera / expo-audio | 57.0.6 / 57.0.5; existing APK has older camera module |
+| App constants | expo-constants | 57.0.20 |
 | Private device photo files | expo-file-system | 57.0.7 direct dependency; existing APK contains module, invocation unverified |
 | Development client | Expo Development Build | expo-dev-client 57.0.19 |
 | Language | TypeScript, strict configuration | 6.0.3 |
@@ -25,8 +26,9 @@
 The mobile package is apps/mobile. It contains the independently accepted M0–M7
 local-first source: SQLite/domain, catalogue/package units, sales, restocking and
 costing, batch-aware inventory/reconciliation/attention, expenses, withdrawals
-and Home/Today, plus M7 offline sync. M8 scanner source is undergoing independent
-audit corrections. Physical-device, development-client/Metro and second-laptop
+and Home/Today, plus M7 offline sync. M8 amendment corrections passed coordinator
+re-audit at adc8b8f; SDK57 patch alignment is committed at 824b2af for review.
+Physical-device, development-client/Metro and second-laptop
 readiness checks remain deferred before external beta/native release. The app
 uses a small project-owned component/theme layer; no global or server-state
 library has been selected.
@@ -86,4 +88,4 @@ framework, backend, database, sync, native dependency, or security-boundary
 changes require explicit architecture review and a decision-log entry. Record
 ordinary dependency changes in the relevant task and verification evidence.
 
-Current amendment verification (2026-09-30): Expo Doctor 20/21 flags newer camera/constants/router patch recommendations. Locked versions and installed SDK ranges were retained; no native upgrade/build or waiver. Live catalogue provider disabled under D-048 contact/licence/transport gates.
+Current compatibility verification (2026-09-30, 824b2af): Expo Doctor passes21/21; expo install --check reports dependencies up to date. Existing exclusion of Expo core from install checking is unchanged; no new exclusion or suppression. Camera/constants/router and Router's required existing @expo/ui transitive patch are aligned within SDK57. The existing APK retains its previous native modules; Android export is not a rebuilt APK or phone proof. Live catalogue provider remains disabled under D-048 contact/licence/transport gates. Full validation and handoff results are recorded in M8_IMPLEMENTATION_EVIDENCE.md.
