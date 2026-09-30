@@ -1,7 +1,7 @@
 <!-- M8 approval checkpoint 2026-09-29: founder approved the clarified plan, DESIGN and M8-01..05 (D-046). Earlier pending-review wording below is historical. One Astra low implementation chat; coordinator reviews after handoff only. -->
 # Product Change / UX Backlog and Impact Review
 
-**Updated:** 2026-09-28. **Owner:** coordinating product/planning/audit task.
+**Updated:** 2026-09-30. **Owner:** coordinating product/planning/audit task.
 **Status:** PC-03/PC-05/PC-06 are accepted in M5; PC-01/PC-01a and the M6 Home
 promotion of PC-05 are accepted in M6. Physical release-readiness checks remain
 carried. Future UX ideas retain their documented gates.
@@ -61,8 +61,10 @@ strategy and added a continuous basket UX absent from the first M8 draft.
   negative-stock/manual selling rules still apply. Deactivated records follow
   explicit lifecycle review; do not erase history or reactivate automatically.
 - Unknown means COSI cannot safely link the scan to a saved item. Offer Add
-  product and sell with minimum information (currently short name, selling price,
-  and unit/quantity when needed). Store the code when safe. The completed sale is
+  product and sell with minimum information. D-047 supersedes the original
+  short-name requirement: optional identification photo, selling price as the
+  only typed product field, and editable quantity defaulting to one. Store the
+  code when safe. The completed sale is
   durable, while the product may remain temporary/Needs details for hours or days.
   Make pending products easy to revisit using the existing Temporary filter;
   add cost, other details and future visual setup later on the same product ID.
@@ -188,3 +190,76 @@ and PC-07 market-price signals remain outside M8.
 ## M8 optional catalogue enrichment follow-up — 2026-09-30
 
 Founder approved the second/background online product-details approach, bounded by D-048 and ticket M8-09 after D-047/M8-08. Product details are unconfirmed foreground suggestions, never checkout requirements or shared platform truth. Provider selection/reuse/contact and native HTTP verification gates remain open; default live integration disabled. This is catalogue enrichment within M8, not recognition, M9 price intelligence or a new milestone. Provider comparison: docs/engineering/M8_CATALOGUE_LOOKUP_PROVIDER.md.
+
+## PC-10 — Offline starter catalogue and wider online directory
+
+Founder input, 2026-09-30: reduce identification effort and waiting by retaining
+popular product-code/name records on the phone, updating them while connected,
+and keeping a larger directory on COSI's backend. Optional further-provider
+lookup could fill gaps. A later ingestion agent was suggested as one means of
+maintaining the directory, not permission to scrape, publish or import data.
+
+Disposition: **proposal preserved; not delivered by M8-09**. This expands the
+existing small-cache/wider-catalogue tiers in SCANNING_ARCHITECTURE section 5.
+Coordinator recommends a hybrid: store-owned exact mapping first; bounded
+public discovery cache next; wider online directory/provider last. Checkout
+never waits for the latter. A previous cached suggestion is not a preloaded
+starter catalogue and the current cache does not provide cross-device updates.
+
+Public matches may suggest name/brand/size, not stock, prices, costs, store
+ownership or automatically confirmed package conversion. They do not silently
+register a product or rewrite a retailer correction. Preserve source, licence,
+version/freshness, correction and ambiguous/no-result handling. Measure pilot
+coverage and device lookup/update cost before choosing catalogue size; do not
+copy an entire provider database into every installation by default.
+
+Before implementation, review approved data rights/reuse/attribution, separation
+from private business data, curated ingestion/review, capped storage, atomic
+versioned update/recovery and offline fallback. No new backend/schema/sync
+contract, licence interpretation or always-running ingestion agent is approved
+by this entry. Use licensed feeds/curated imports rather than unrestricted
+Google scraping. Existing D-048 live provider gates still apply. Shared catalogue
+work and Track B/M12 discovery integration need their own approved plan; they
+are distinct from M9/M10 financial price observations.
+
+## PC-11 — Target one code when several are visible
+
+Founder input, 2026-09-30: packaging can have product, marketing, batch or serial
+codes side by side. Retailer should be able to narrow the scan area or use zoom
+to intentionally target one code, rather than hoping the first callback is right.
+
+Disposition: **priority M8 follow-up proposal, not implemented or accepted**.
+M8-08's brackets/sweeping line are decorative; detection currently covers the
+whole preview. Do not claim shrinking a decorative frame changes detection.
+Review an accessible narrow-target/zoom interaction, validated detector bounds
+and preview coordinate transforms on the Galaxy A15 before publishing a new
+implementation ticket. If reliable spatial filtering is unavailable, use an
+honest reposition/manual-choice fallback rather than inventing precision.
+Keep capture intent single-product even in sequential basket mode. Multiple
+conflicting codes must not cause two items, an arbitrary automatic association,
+or a wrong known-item addition. Coverage needs two codes inside/outside the
+target, orientation/preview size, QR plus EAN, stationary repeat prevention,
+explicit repeat and basket preservation. No new native dependency is selected.
+
+## PC-12 — Structured QR identity versus generic QR contents
+
+Founder input, 2026-09-30: clarify barcode versus QR priority and avoid treating
+lot/serial/other codes as the product itself. Current M8 camera reads both in
+one screen; exact bounded registered QR payloads resolve locally. Neither code
+format universally wins. Unsupported/unknown QR contents use safe manual selling;
+they do not open URLs or request arbitrary websites.
+
+Disposition: current bounded QR behavior is already specified/tested; physical
+QR verification remains required. GS1 Digital Link extraction of a GTIN from
+a structured QR, keeping lot/serial/expiry as separate attributes, is a future
+reviewed parser extension, **not current M8 behavior**. It may support PC-10 but
+must preserve raw-QR equality/identity ownership and approved batch semantics.
+Do not guess that every QR is a product code or that every numeric code is a GTIN.
+Visual identification of an unbranded/no-code item, OCR and guided multi-view
+enrollment remain PC-08 / Track B / M12; a D-047 photo is an identification aid
+for the human, not a deployed recognition model.
+
+Primary sanity-check sources, read 2026-09-30:
+[GS1 Digital Link quick start](https://ref.gs1.org/docs/2024/digital-link-quick-start-guide)
+distinguishes GTIN identity from batch/serial/expiry; [OFF licence guidance](https://openfoodfacts.github.io/documentation/docs/Product-Opener/api/tutorials/license-be-on-the-legal-side/)
+requires review of dataset/content/image reuse terms before importing or distributing data.

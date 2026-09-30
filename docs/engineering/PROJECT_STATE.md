@@ -1,7 +1,7 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-09-30
-Current milestone: M8 source amendments M8-06..09 returned; independent amendment audit requires corrections (price retry, photo replay, truthful/compact suggestion UI). Two new auditor regressions fail at d3530bb. D-047/D-048 apply. M8 is not accepted.
+Current milestone: M8 amendment source corrections pass coordinator re-audit at adc8b8f. Fresh full validation/export pass; Expo patch alignment, disabled-provider and native gates remain. D-047/D-048 apply. M8 is not accepted.
 
 ## Active source and ownership
 
@@ -15,7 +15,7 @@ Current milestone: M8 source amendments M8-06..09 returned; independent amendmen
 
 ## Evidence and gates
 
-Final source bcd9e16: root validation 589 tests/typecheck/lint passed; Android export passed. Fresh exact command results are in `M8_IMPLEMENTATION_EVIDENCE.md`; stopped review target is recorded in `M8_IMPLEMENTATION_HANDOFF.md`. Real SQLite/file-port, UI, replay, snapshot, cache/timeout/decision and migration tests are source evidence. Native camera/file/HTTP tests remain unperformed for these amendments.
+Current reviewed source adc8b8f: coordinator root validation passed 593 tests (12 contracts,150 domain,431 mobile), all workspace typecheck and zero-warning lint; Android export passed. Eight opt-in PostgreSQL tests/two suites were skipped. Corrections retain current sale price after basket-add failure, scoped replay despite missing optional media and truthful/compact suggestions. Exact re-audit/evidence is in `M8_INDEPENDENT_AUDIT.md`. Prior589 is historical. Native camera/file/HTTP tests remain unperformed for these amendments.
 
 Current Expo Doctor: 20/21. Remote recommendations expect camera 57.0.6, constants 57.0.20 and router 57.0.24; locked versions 57.0.5/57.0.19/57.0.23 were retained. Installed Expo 57.0.22 bundled ranges admit the locked versions. This discrepancy is not waived; review before changing native dependencies/build compatibility. Android export is a source bundle, not an APK/device result.
 
@@ -33,6 +33,6 @@ A manually reconstructed offline NGN 4,000 completed sale survived restart with 
 
 ## Next action
 
-Same implementer chat corrects the findings in M8_INDEPENDENT_AUDIT.md and retains the two uncommitted auditor regressions. Coordinator performs no simultaneous checkout activity. Return a stopped handoff with corrected focused/full validation and truthful native/provider/Doctor gates. Unattended work ends 2026-09-30 08:56 Africa/Lagos; preserve partial work and report if time expires. Then schedule the amended native basket/photo flow using reviewed compatibility and explicit authorization. No extra APK/build spend, deployment, rollout, Git push/merge, destructive reset or M9 work under this task.
+Same implementer chat receives only the reviewed same-SDK patch alignment (camera57.0.6/constants57.0.20/router57.0.24), preserves these coordinator documentation edits, and returns fresh validation/Doctor/export with a stopped handoff. Coordinator performs no simultaneous checkout activity. The founder resumed daytime source audit; overnight automation stays paused. No phone or Docker needed for these source checks. Standalone browsing/build and real native basket/photo/QR verification still require the reviewed build path and existing authorization limits; no new APK/build spend, deployment, rollout, Git push/merge, destructive reset or M9.
 
-Cutoff correction status (2026-09-30): audit R1/R2/R3 source corrected with preserved regressions; focused17 tests and mobile typecheck passed. Lint result/final clean HEAD in stopped notification. Fresh full validation/export and independent re-audit remain pending; prior589 does not prove these later changes. Implementer stops by07:56UTC under unattended authorization.
+New founder catalogue/targeting/structured-QR inputs are preserved as PC-10/11/12 proposals in PRODUCT_CHANGE_BACKLOG, not implemented scope. Local Docker startup/recovery now routes through LOCAL_DOCKER_WORKFLOW, linked by AGENTS and DEVELOPMENT. No startup was executed.

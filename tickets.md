@@ -284,7 +284,7 @@ required typed product field, retains the same basket and enriches the same prod
 
 ## M8-07 — Identify unfinished products with a saved photo
 
-**Status:** Pending.  
+**Status:** Source implemented; amendment corrections independently re-audited at adc8b8f. Native photo acceptance pending.  
 **Blocked by:** M8-06.  
 **Delivers:** one explicit whole-product photo accompanies price-first selling
 and is visible in the temporary-product completion path after restart.
@@ -324,7 +324,7 @@ Acceptance:
 
 ## M8-09 — Offer optional online product details after local lookup
 
-Status: Source implemented; final verification and independent audit pending. Live provider DISABLED.
+Status: Source implemented; amendment corrections independently re-audited at adc8b8f, fresh593 tests/export passed. Native/provider acceptance pending. Live provider DISABLED.
 Blocked by: M8-06..08 for sequential ownership; contact/licensing/transport/provider-smoke review for live activation.
 Delivers: unconfirmed inline catalogue suggestions from a narrow replaceable GTIN-only adapter; photo/price checkout never awaits internet.
 

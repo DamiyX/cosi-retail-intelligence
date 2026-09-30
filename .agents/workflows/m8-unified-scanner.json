@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "source-handoff-ready-awaiting-coordinator-audit",
+  "current_state": "corrections-reaudited-expo-patch-alignment-assigned",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
@@ -34,7 +34,11 @@
     "m8-09-disabled-provider-suggestion-source-implemented",
     "m8-amendment-final-root-validation-589-passed",
     "m8-amendment-final-android-export-passed",
-    "m8-amendment-provider-and-doctor-gates-recorded"
+    "m8-amendment-provider-and-doctor-gates-recorded",
+    "m8-amendment-r1-r2-r3-corrections-independently-reaudited",
+    "m8-adc8b8f-coordinator-validation-593-and-export-passed",
+    "founder-pc10-pc11-pc12-proposals-preserved",
+    "portable-local-docker-workflow-linked"
   ],
   "owner": {
     "agent": "m8-amendment-implementer",
@@ -44,6 +48,12 @@
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
   "lease": null,
   "evidence": [
+    {
+      "kind": "independent-reaudit",
+      "source": "adc8b8f; docs/engineering/M8_INDEPENDENT_AUDIT.md",
+      "result": "Coordinator reviewed d3530bb..adc8b8f while implementer stopped. R1 current selling price and basket retry, R2 optional-photo committed replay and R3 truthful compact suggestions pass. Fresh root validation exit0:593 tests/75 suites, all workspace typecheck and zero-warning lint; eight opt-in PostgreSQL tests/two suites skipped. Android export exit0. Doctor exit1,20/21 with three reviewed patch mismatches. Native/provider gates not accepted; no phone/Docker/build/deployment/push.",
+      "observed_at": "2026-09-30T10:37:33Z"
+    },
     {
       "kind": "inspection",
       "source": "c817edb; docs/engineering/M8_SCANNER_PLAN.md",
@@ -338,6 +348,8 @@
     }
   ],
   "artifacts": [
+    "docs/engineering/LOCAL_DOCKER_WORKFLOW.md",
+    "docs/product/PRODUCT_CHANGE_BACKLOG.md",
     "docs/engineering/M8_SCANNER_PLAN.md",
     "tickets.md",
     "docs/design/DESIGN.md",
@@ -390,8 +402,8 @@
     "Live catalogue provider disabled: authorized public contact, ODbL reuse/attribution review and native HTTP/provider smoke remain unverified.",
     "Fresh Expo Doctor is 20/21: remote SDK recommendations differ for camera/constants/router patch versions; dependencies not changed."
   ],
-  "next_action": "Coordinator independently audits the clean stopped M8-06..09 handoff and Doctor/provider gates. Native retests require separate reviewed authorization. Keep live provider, associations and ordinary automatic scanner rollout disabled. No build spend, phone work, persistent migration, deployment, push/merge or M9.",
+  "next_action": "Same implementer performs only reviewed SDK57 camera57.0.6/constants57.0.20/router57.0.24 patch alignment, fresh checks and stopped report; coordinator does no concurrent checkout work. R1/R2/R3 corrections independently verified at adc8b8f with593 tests/export. New PC-10/11/12 remain proposals. Native/provider gates and build-spend/deployment/push limits retained. Overnight automation paused; founder resumed daytime source work.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-09-30T07:28:45Z",
+  "updated_at": "2026-09-30T10:37:33Z",
   "archived": false
 }

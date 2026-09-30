@@ -205,8 +205,7 @@ M0 acceptance pending rather than inferring success from Jest or export.
 
 ## Windows Docker stale-socket startup recovery
 
-Observed and repaired on the initial laptop on 2026-09-30. Docker Desktop 4.91.0 could not start after reboot because Windows could not access/rename old Unix socket reparse points (`sailor-ingest.sock`, then `engine.sock`). Restarting the UI or Windows alone did not fix this occurrence.
-
-The successful reversible recovery stopped Docker Desktop/backend processes, preserved BOTH runtime directories under timestamped backup names, recreated empty directories, and launched Docker Desktop. The directories were `%LOCALAPPDATA%\Docker\run` and `%LOCALAPPDATA%\docker-secrets-engine`. Before moving them, verify absolute paths, reject reparse-point directories, and verify all contents are zero-byte socket reparse points (the second directory contained only `engine.sock`). Do not apply this procedure to a directory containing other data. Use native PowerShell literal-path operations; keep the backups. The old socket itself could not be moved, but its containing directory could.
-
-These are runtime sockets; container images, volumes and the Docker WSL disk were untouched. This is an observed workaround, not a diagnosed Windows root cause or a factory reset. Verify recovery with `docker info` and `docker ps` before claiming startup success. This run reported Docker engine 29.8.0 and the existing `supabase_db_retail-intelligence` healthy. Do not use database reset or container/volume deletion as a startup fix. If another startup error occurs, record it rather than repeatedly resetting services.
+Read [the local Docker workflow](LOCAL_DOCKER_WORKFLOW.md) before starting or
+repairing Docker on the initial Windows laptop. It contains the verified
+stale-socket workaround, exact target paths, preservation checks and bounded
+startup evidence. Docker is not needed for ordinary source validation/export.

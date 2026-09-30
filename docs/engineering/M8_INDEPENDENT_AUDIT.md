@@ -1,5 +1,59 @@
 # M8 independent audit — pass 1
 
+## Current coordinator re-audit — 2026-09-30, adc8b8f
+
+Decision: amendment corrections R1/R2/R3 pass source re-audit. M8 milestone,
+native rollout, live provider and physical acceptance remain unaccepted.
+Reviewed d3530bb..adc8b8f against the prior complete amendment inspection.
+Implementer was stopped; no parallel implementation occurred. No production
+source was edited by the coordinator.
+
+Specification: current validated price is explicitly forwarded to the basket
+callback, independently of the immutable product-creation graph/default price.
+The actual SellScreen regression preserves the existing line, one new product
+and one outbox after overflow/retry, and completes with the corrected price and
+quantity. Missing/corrupt optional media no longer blocks scoped committed
+replay in either client wrapper. Unsaved-product offline copy is truthful and
+the suggestion UI has two main actions plus accessible attribution links.
+
+Standards: first-write photo validation remains after replay lookup and before
+new transaction writes. Existing operation/store/device/type checks, exact
+calculations, stored snapshots, store isolation and disabled-provider semantics
+are retained. Tests operate real SQLite/file ports or native mocks as declared;
+this is not Android capture/HTTP/standalone launch evidence.
+
+Fresh coordinator commands on pinned Node24.21.0/npm11.19.0:
+
+- npm run validate: exit0; 12 contracts +150 domain +431 mobile =593 tests,
+  75 suites passed; eight opt-in PostgreSQL tests/two mobile suites skipped.
+  All workspace typecheck and zero-warning lint passed. Suspense/act harness
+  warnings remain; no failed assertions. Log:
+  C:\Users\doyew\AppData\Local\Temp\cosi-m8-adc8b8f-coordinator-validate.log.
+- npm run mobile:export: exit0; 5.3MB Android Hermes bundle
+  entry-5c7706889b66176ec5704d02c2c62829.hbc. Log:
+  C:\Users\doyew\AppData\Local\Temp\cosi-m8-adc8b8f-coordinator-export.log.
+- npm run mobile:doctor: exit1,20/21; three patch mismatches remain. Log:
+  C:\Users\doyew\AppData\Local\Temp\cosi-m8-adc8b8f-coordinator-doctor.log.
+
+Compatibility disposition: require a narrow same-SDK alignment to camera57.0.6,
+constants57.0.20 and router57.0.24, with controlled manifest/lockfile change and
+fresh checks, before choosing a new native build. Official SDK57 changelogs were
+read: camera patch addresses iOS scanning/session bugs; other two patches claim
+no user-facing changes. This does not establish a fix for the Galaxy's unexpected
+codes. No patch upgrade or APK build was performed in this coordinator review.
+Sources: https://github.com/expo/expo/blob/sdk-57/packages/expo-camera/CHANGELOG.md,
+https://github.com/expo/expo/blob/sdk-57/packages/expo-constants/CHANGELOG.md,
+https://github.com/expo/expo/blob/sdk-57/packages/expo-router/CHANGELOG.md.
+
+Founder daytime continuation authorizes renewed source audit, superseding the
+expired unattended window for this work; the overnight automation stays paused.
+New PC-10/11/12 ideas are recorded proposals, not implemented contracts. A linked
+local Docker workflow was created from the preserved observed workaround; no
+Docker startup, phone operation, cloud build/spend, server deployment, Git
+push/merge or new milestone was performed. Next: return only the bounded
+compatibility task to the same implementer, stop coordinator checkout activity,
+and require a stopped completion/blocker report.
+
 ## Amendment audit — 2026-09-30, source bcd9e16 / handoff d3530bb
 
 Disposition: changes required; M8-06..09 and the full milestone are not accepted.
