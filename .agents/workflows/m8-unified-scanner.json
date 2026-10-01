@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m8-15-16-source-awaiting-stopped-coordinator-audit",
+  "current_state": "october2-slider-revision-and-bounded-cue-candidate-source-next",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
@@ -64,7 +64,9 @@
     "m8-16-preview-zoom-and-accessible-controls-implemented-4e5863f",
     "m8-15-16-focused37-mobile-typecheck-zero-warning-lint-passed",
     "m8-15-16-final-root-validation-640-passed",
-    "m8-15-16-final-android-source-export-passed"
+    "m8-15-16-final-android-source-export-passed",
+    "m8-15-16-independent-source-review-19-tests-passed",
+    "october2-stopped-native-feedback-and-slider-preference-reviewed"
   ],
   "owner": {
     "agent": "m8-coordinator",
@@ -74,6 +76,24 @@
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
   "lease": null,
   "evidence": [
+    {
+      "kind": "founder-model-escalation",
+      "source": "direct coordinator human message2026-10-02",
+      "result": "Sol xhigh approved for existing M8 source implementer; accumulated evidence reviewed before candidate repair. M8 barcode/QR/photo-first source separated from unstarted TrackB/M12 visual/OCR work; no recognition model selected.",
+      "observed_at": "2026-10-01T23:09:46.422Z"
+    },
+    {
+      "kind": "october2-native-feedback-review",
+      "source": "native verification chat human message; M8_ANDROID_VERIFICATION.md; M8_INDEPENDENT_AUDIT.md",
+      "result": "Controlled pair not performed, loaded runtime unconfirmed; founder first-cue failure remains. Supersedes pinch with thumb slider. M8-17 prepared; M8-18 one100->300ms cue candidate at samegain/playbackpolicy, not causal fix. Focus native-extension question remains unanswered; no native/build/backend effect or gate pass.",
+      "observed_at": "2026-10-01T23:08:11.320Z"
+    },
+    {
+      "kind": "m8-15-16-independent-source-review",
+      "source": "4e5863f; stopped HEADb47354f; docs/engineering/M8_INDEPENDENT_AUDIT.md",
+      "result": "Retirement/preview gesture/readiness/accessibility/business consumer diff reviewed. Ordinary feedback/Sell/sale tests byte-identical8efb1e0; no runtime trace consumption. Independent19 tests/four suites exit0 in15.638s. Source slice passes; beep fix unresolved, real tap focus awaits founder native-extension decision, physical zoom/sound/other gates unchanged.",
+      "observed_at": "2026-10-01T20:13:27.540Z"
+    },
     {
       "kind": "m8-15-16-stopped-source-packet",
       "source": "41463fb/e1acccc/4e5863f; docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md; docs/engineering/M8_IMPLEMENTATION_HANDOFF.md",
@@ -548,6 +568,11 @@
       "scope": "end-of-exploration-and-source-feedback-correction-resume",
       "status": "approved",
       "basis": "Founder explicitly said done with feedback and resume/restart in verification chat; stopped authorized report-back confirms no device/source changes. Coordinator resumes D-049/D-050/M8-10..14 source packet; restart is not authorization for a new native build."
+    },
+    {
+      "scope": "october2-bounded-m8-17-18-sol-xhigh-escalation",
+      "status": "approved",
+      "basis": "Founder directly requested GPT-6.1 Sol extra high for scanner implementer to resolve recurring beep, explicitly excluding Astra. Bounded assignment only; default coding HIGH resumes afterwards. No native/build/spend/backend approval."
     }
   ],
   "blockers": [
@@ -557,8 +582,8 @@
     "Live catalogue provider disabled: authorized public contact, ODbL reuse/attribution review and native HTTP/provider smoke remain unverified.",
     "October1 cached/default native DB handle failed prepareSync; separate connection quick_check passed, cause and clean-session photo/no-photo discriminator unresolved."
   ],
-  "next_action": "After implementer final clean guard and authorized stopped report, coordinator independently audits source4e5863f/diagnostic retirement. Utility only resumes with coordinator-scoped physical zoom/accessibility/clarity/audio procedure. Real tap-focus native bridge/build proposal requires explicit review; no fake focus, new build/spend, source/phone concurrency, provider/association rollout or PC17/18/guide implementation. All native gates remain open.",
+  "next_action": "Existing implementer01a0ec1c-578c-7c41-b151-e803c9e5c548 Sol XHIGH under explicit October2 founder approval owns M8-17 slider and M8-18 bounded sound investigation/candidate. Preserve pending docs, no phone/Metro or native package/policy/build/backend/rollout. Stop with tests/evidence, clearly distinguish candidate from fix; coordinator audits before any phone retry. Genuine tap focus requires explicit founder decision; guide resize/PC17/18 deferred.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-10-01T20:07:40.558Z",
+  "updated_at": "2026-10-01T23:09:46.422Z",
   "archived": false
 }

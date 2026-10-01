@@ -1,7 +1,7 @@
 # PROJECT_STATE — COSI
 
-Last updated: 2026-10-01
-Current milestone: M8-15 diagnostic retirement and M8-16 preview zoom implemented through4e5863f, awaiting stopped handoff and independent coordinator audit. First Single/Basket sound remains unresolved; no causal repair established. Real tap-point focus requires explicit review of a native extension/build proposal. Guide resizing and PC17/18 remain deferred; native acceptance remains open.
+Last updated: 2026-10-02
+Current milestone: M8-15 retirement/M8-16 source reviewed; October2 native handoff stopped without controlled pair/runtime confirmation. Founder supersedes pinch with thumb slider (M8-17). M8-18 is one reversible300ms cue candidate, not established beep fix. Existing source implementer next owns both on Sol XHIGH under explicit October2 founder escalation; default HIGH resumes afterward. Native sound/zoom/focus/other gates remain open; focus extension awaits founder approval, guides/PC17/18 deferred.
 
 ## Active source and ownership
 
@@ -42,3 +42,9 @@ Source packet is complete through4e5863f; implementer finalizes checks/docs/clea
 After coordinator review, separately scope physical pinch/scroll/readiness/torch/clarity/large-text/TalkBack and ONE proposed paired2 Single audibility/native-output discriminator. Audio cause remains unknown. Real tap focus needs review of a maintained native bridge/CameraX metering proposal and separate APK/build/spend approval. Guide resizing and PC17/18 checkout/cart/price/cost-floor work remain deferred until scanning is finished. Identifier reuse/association rollout, live catalogue provider and TrackB/M12 enrollment remain separately gated.
 
 No new schema/dependency/native patch/global audio/DB connection workaround, phone/adb/helper/inspector/fixture/Metro/Docker control, build/spend/backend effect/push/merge/reset/new chat/agent/milestone. Existing storage/decoder/audio/photo/accessibility/standalone/provider/release gates stay open; overnight automation remains paused. Historical reasoning/procedure is in evidence/handoff and preserved independent/native documents.
+
+Superseding coordinator review: M8-15 retirement and M8-16 source pass independent review (19 tests/four suites,15.638s); this is not a sound fix, native zoom/focus pass or composite M8 acceptance. Implementation remains stopped. Existing native utility receives bounded paired beep/zoom check; no coordinator/source work concurrently. Real tap-focus extension requested for founder approval separately; no response is not approval.
+
+Superseding October2 handoff: founder original slider/first-beep feedback verified in native chat; no source/runtime causal test or controlled pair completed in utility lane. Current live basket status unknown, so source assignment must not touch phone/server or imply reload consent. Utility observed PID28720 on8083 but did not control it; earlier84206 is historical. Source changes limited to M8-17 slider and M8-18 bounded cue candidate, preserving five pending coordinator plus native appendix and new planning files. Candidate sound must not be described as fixed until actual first-cue native result.
+
+Founder escalation2026-10-02: existing scanner implementer may use GPT-6.1 Sol extra high for this bounded recurring-beep/slider assignment, no Astra. Inspect all accumulated evidence before selecting a supported correction or transparent reversible mitigation;300ms candidate is not a proven cause/fix. Default project policy remains Sol HIGH after this assignment. TrackB visual enrollment/OCR/model benchmarking has not been implemented in this checkout; M8 remains barcode/QR plus photo-first manual unknown selling, M12 integrates benchmarked visual recognition. No final recognition model or roadmap expansion approved here.

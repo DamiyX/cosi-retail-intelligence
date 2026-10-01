@@ -430,3 +430,30 @@ Delivers: retailer can use a two-finger pinch on the live preview to enlarge a d
 - [ ] Preserve independent snapshot/money/quantity/outbox/domain behavior. Do not implement resizable guides, PC17/18 checkout or TrackB/M12 recognition. Stop after source handoff; coordinator audits before returning to phone.
 
 M8-15/16 source packet (2026-10-01): preserved eight-file coordinator/native packet4e74be1; retirement41463fb/e1acccc; zoom4e5863f. Focused28/five and37/eight counts overlap; mobile typecheck/zero-warning lint passed. Fresh root validation640 tests/79 suites with eight opt-in PostgreSQL tests/two suites skipped, all workspace typecheck/zero-warning lint and Android source export1620 modules/29 assets/5.3MB passed. Details/limits in latest evidence/handoff. Checkbox acceptance stays coordinator-owned and unchecked: sound cause, real native gestures/TalkBack/clarity/focus and independent audit remain open. No native patch/build or deferred guide/PC17/18 work.
+
+M8-15/16 coordinator source review (2026-10-01): retirement and zoom source independently reviewed at4e5863f/b47354f with19 tests/four suites exit0. No source defect requiring correction found; acceptance checkboxes remain unchanged. M8-15 sound correction and M8-16 native pinch/focus/clarity/accessibility remain pending. See M8_INDEPENDENT_AUDIT.md for precise scope and next bounded phone assignment.
+
+## M8-17 — Replace pinch zoom with a thumb-operated preview slider
+
+Status: Founder-authorized preference revision, 2026-10-02; supersedes M8-16 pinch/buttons interaction, not its accepted lifecycle/business guards.
+Blocked by: stopped source/native review (complete). Same camera API; no schema or native dependency.
+Delivers: one-thumb zoom adjustment inside live preview at bottom of framing guides, magnifier and minus/plus ends, without a second screen or long labels.
+
+- [ ] Remove pinch capture and current labeled Zoom in/out/reset button row; provide a genuine single-thumb draggable track inside the preview. Minus/plus ends may provide compact accessible stepping; minimum returns to unzoomed state. Decorative guides do not swallow slider touches or imply restricted detection.
+- [ ] Finite normalized0..1 zoom uses measured track dimensions and consistent coordinates. Child-thumb/track targets cannot cause position jumps; tiny/unmeasured track, touch replacement/cancellation, background/unfocus/permission/error/unmount and stale asynchronous measurement never apply stale/runaway zoom. Drag starts relative to current thumb or a correctly measured absolute track; no hard-coded screen coordinates.
+- [ ] Capture only intentional slider interaction; keep camera viewport/parent one-finger scrolling and torch/scan controls usable. Retain one preview, readiness/lifecycle epochs, duplicate and intent safety, basket contents and all business writes unchanged. No extra native slider library, camera remount/ROI/dependency or tap-focus simulation.
+- [ ] Slider has meaningful adjustable role/label/value and increment/decrement actions; icon ends have accessible names and48dp targets. Ensure contrast against live images and usable available track width. No false optical magnification claim. Tests cover drag/measure/bounds/stale/cancel, accessibility, torch/detector and basket preservation; mobile typecheck/zero-warning lint pass. Native drag/scroll/TalkBack checks remain pending.
+- [ ] Stop for coordinator source audit; guide resizing, PC17/18 and real focus extension remain deferred or explicitly gated.
+
+## M8-18 — Test a longer single recognition cue as a reversible candidate
+
+Status: Coordinator-scoped mitigation experiment under founder's requested beep correction; no confirmed cause or native sound fix.
+Blocked by: completed trace review/retirement (complete). Execute after M8-17 for sole source ownership only.
+Delivers: bounded candidate against the short100ms-cue startup/perception hypothesis, to be accepted or reverted based on first-scan phone evidence.
+
+- [ ] Extend existing match and neutral code-read WAV cues to300ms, retaining their distinct recognizable tone, mono16-bit PCM formats/sample rates, nonzero unclipped signal and comparable peak/RMS/envelope. Keep gain0.3,500ms playback-request deadline, currentness/background/mute/cancellation and one cue at actual recognition. No extra warm-up/silent playback, double beep, global audio mode/focus API, readiness timer or native dependency change.
+- [ ] Reproducible asset generation or exact transformation and original/replacement checks are recorded; both original assets remain recoverable from8efb1e0. No new audio URI/network/storage/analytics or app tracing. Asset validity and longer output are source evidence only, never proof of sound heard.
+- [ ] Ordinary known/unknown/single/basket/later-Add/mute/stale/background regressions remain green with exact caller behavior; typecheck/zero-warning lint and final appropriate combined source checks pass. Avoid broad unchanged diagnosis reruns.
+- [ ] Report explicitly as candidate/mitigation, with100->300ms change and no causal claim. Coordinator audits before phone owner runs controlled first-versus-repeat audible checks. If first-cue still silent, revert this candidate or return an evidence-based next decision; do not keep lengthening/gaining/replaying in a loop. Native gate stays open until actual result.
+
+October2 founder-approved model override: M8-17/18 assigned to existing implementer on GPT-6.1 Sol XHIGH, explicitly no Astra; restore default HIGH for later coding assignments. The proposed300ms sound experiment must first undergo the escalated technical review; replace/reject it if evidence supports a smaller safer repair. Do not claim any mitigation a cause/fix before native first-cue acceptance, or make unapproved global/native policy changes.

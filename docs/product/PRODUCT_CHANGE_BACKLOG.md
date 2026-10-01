@@ -449,3 +449,5 @@ Primary sanity-check sources, read 2026-09-30:
 [GS1 Digital Link quick start](https://ref.gs1.org/docs/2024/digital-link-quick-start-guide)
 distinguishes GTIN identity from batch/serial/expiry; [OFF licence guidance](https://openfoodfacts.github.io/documentation/docs/Product-Opener/api/tutorials/license-be-on-the-legal-side/)
 requires review of dataset/content/image reuse terms before importing or distributing data.
+
+PC11 superseding founder input (2026-10-02): pinch and labeled zoom buttons withdrawn. M8-17 instead places one-thumb zoom slider inside preview near bottom of framing guides, minus/plus ends and magnifier. Normalized zoom remains camera API setting; no detector crop/ROI or guide-resize promise. Real tap-focus request remains pending native-extension review/approval; absence of focus in current version is known, not a new implemented regression.
