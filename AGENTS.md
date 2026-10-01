@@ -44,6 +44,9 @@ Before local Docker startup/recovery, read
 `docs/engineering/LOCAL_DOCKER_WORKFLOW.md`. Follow the founder's utility-task
 notification preferences and use the bounded recorded workaround only for its
 matching error. Do not repeatedly launch, reset Docker or erase database data.
+Before agent dispatch or model changes, follow the founder's model/effort and
+sequential handoff policy in `docs/engineering/MULTI_AGENT_WORKFLOW.md` section
+1.1. Older task prompts naming other models do not override that policy.
 Product/UX inputs and proposals are preserved in
 `docs/product/PRODUCT_CHANGE_BACKLOG.md`; a proposal is not an approved runtime
 contract or proof of implementation.

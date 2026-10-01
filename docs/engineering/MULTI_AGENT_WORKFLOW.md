@@ -26,6 +26,42 @@ If one agent reaches a token/context/usage limit, another compatible agent shoul
 
 ---
 
+# 1.1 Founder Model and Sequential Handoff Policy
+
+Founder instruction, recorded 2026-10-01, supersedes earlier chat/task model
+preferences. Apply it to existing and new agents:
+
+- Coordinator planning, reasoning and independent audit: GPT-6.1 Sol, high.
+- Implementation, code changes and technical corrections: GPT-6.1 Sol, high.
+- Phone verification, browser/computer control and bounded web lookup: GPT-6.1
+  Sol, medium. Technical analysis or code repair follows the high-effort rule.
+- Routine utility operations such as opening Docker, downloads, installation
+  and approved Git operations: GPT-6.1 Sol, low (the currently supported lowest
+  effort). These settings do not authorize spending or external effects.
+- Before dispatching an agent or changing its settings, tell the founder the
+  proposed model/effort and purpose. The defaults above are authorized; any
+  different model or effort above high requires explicit founder approval first.
+  In particular, do not reuse older Astra, Terra, Luna or GPT-5.6 settings.
+- Agents cannot assume they can change their own model. If escalation is needed,
+  stop with the concrete difficulty, attempted checks and recommended setting.
+  The coordinator obtains approval and applies the supported override. Return
+  to the normal task setting after the approved bounded escalation.
+- A usage-limit or model switch resumes the same task branch and unfinished
+  work. Inspect current commits/diff and passed evidence; do not restart or
+  discard another agent's valid work.
+- Maintain sequential ownership: the implementer works alone, then stops and
+  sends a handoff to the coordinator when directly authorized by the founder.
+  The coordinator audits only after that stop, sends concrete corrections if
+  needed, and stops again while implementation resumes. Do not duplicate work
+  or poll/wait in loops. A direct report-back does not itself guarantee that the
+  receiving chat is automatically resumed; report actual delivery/tool status.
+
+This is a project preference, not a new architecture or milestone acceptance
+rule. If the host cannot change the current coordinator model/settings, tell the
+founder to select GPT-6.1 Sol high in the app; do not claim a switch occurred.
+
+---
+
 # 2. What Carries Context Between Agents
 
 The next agent should recover context from:
