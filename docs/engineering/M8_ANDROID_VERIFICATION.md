@@ -676,3 +676,71 @@ implementation and stopped independent source audit before changed-app verificat
 Existing build/provider/deployment/reset constraints remain. Utility stops commands
 and edits after this note/final Git state and notification. Metro intentionally
 retained for the development client; no debugger or diagnostic helper activated.
+
+## Reviewed October correction packet — 2026-10-01, in progress
+
+Coordinator stopped after independent source re-audit of M8-10..14 (75 tests/10
+suites); implementer632/static/Doctor/export are attributed source evidence,
+not device results. Checkout plan/m8-unified-scanner, HEADa1bcffa73875ca749fc7c6ec9e77b06056bb47d3,
+frozen runtime8efb1e071b259b9b7304813e320c9e89dc7dfcc2. Seven pending coordinator
+context/workflow/audit/state/ticket files are preserved; evidence appendix only
+is editable here. Founder model policy requests phone verification Sol medium;
+no self-setting/model switch is claimed by this utility.
+
+Readiness: actual paired adb device SM-A156E available, isolated package installed
+version0.0.1/code1, existing native provenance4d6521e unchanged. No app PID or
+Metro8083 listener existed at preflight; laptop Wi-Fi192.168.1.3. Founder explicitly
+answered Ready—no basket needs preserving and has all three physical products.
+Scoped Metro started in apps/mobile with scanner-verification environment/opt-in,
+associations false and LAN host192.168.1.3:8083, session60684. Existing .MainActivity
+launcher opened, then advertised development-client URL loaded current checkout.
+No new APK/install/clear/reset, USB reverse, database/runtime inspector import,
+fixture-writing helper or network/settings mutation. Ready UI confirms reviewed
+summary label Sales value(after discounts) and Discounts given.
+
+At approximately17:49 Lagos, initial Today UI in isolated store shows3 completed
+sales, Sales value NGN47,705 and Discounts given NGN100. These are observed UI
+baseline values from founder's exploration, not an audited native ledger query.
+At17:50 Scan opened and founder presented Fanta before the next prompt. Screenshot
+shows Single Add to sale/Fanta, Product matched/Review and add to basket, default
+quantity1, priceNGN1,000, recorded stock-18, no typed discount. Recognition cue,
+Cancel-to-camera and same-code repeat human confirmation requested. No new line
+or checkout is inferred from opening this form. Earlier negative inventory is
+not repaired by this scanner utility.
+
+### First Single recognition cue not audible — stopped finding
+
+Founder answered no beep to the first Single Fanta match/cancel/same-code question.
+This explicitly establishes the reported missing audible initial cue; it does not
+fully answer the multi-part Cancel/repeat question. At17:52 passive screenshot
+shows Single ready camera, Sound on,0 lines/NGN0. Return to camera is observed,
+but exact human cancellation/repeat actions and subsequent cue outcomes were not
+confirmed. Do not convert this into a full Single re-entry or dirty-back pass.
+
+Read-only app-scoped logcat PID7017 contained AudioTrack setVolume0.3 and stop
+with2205 delivered frames at17:52:12 and17:52:21, plus later volume entries. Those
+later entries cannot be unambiguously assigned to the first Fanta scan and do not
+prove audibility. No prepareSync/NPE exception appeared in the limited filtered
+sample; no local-storage pass is inferred. STREAM_MUSIC readback: unmuted, internally
+unmuted, volume15/max15, speaker selected. No volume/audio setting was changed.
+Physical first audible recognition criterion remains failed despite source mocks.
+Root cause is unestablished; existing older native APK remains a provenance limit.
+
+Per assignment, stop further scan/retry/business-write testing and return evidence
+for coordinator technical review. No technical repair/source/native/dependency
+change or model self-escalation. Controlled Basket accumulation/Undo/quantity10+1,
+commercial distinctions/combined discounted checkout, unknown barcode/QR neutral
+cue, photo/no-photo creation/attachment/replacement/bytes/clarity/restart, and
+accessibility/standalone/provider checks are unperformed in this reviewed-source
+pass. Today summary wording and baseline were observed only, not arithmetic or
+completed-sale persistence verification. No manually rebuilt sale or native DB
+inspection/handle opens occurred. Earlier evidence remains historical.
+
+Cleanup: utility used Android back from the ready scanner to release that preview,
+without resetting app/data. Scoped LAN Metro session60684/PID31060 intentionally
+retained for the reviewed development client and next coordinator-owned action;
+prior70408/PID12824 is no longer live and was not assumed. No other helper/debugger
+runs; network/font/audio/accessibility settings unchanged. Same branch/HEAD/runtime;
+appendix is the only new utility edit, seven pending coordinator files preserved.
+No commits/push/build/installation/backend or ordinary rollout. Stop all commands
+and edits after final status/hash/check and authorized report-back.

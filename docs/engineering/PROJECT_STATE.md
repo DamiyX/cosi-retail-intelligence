@@ -1,7 +1,7 @@
 # PROJECT_STATE — COSI
 
 Last updated: 2026-10-01
-Current milestone: M8-10..14 founder feedback is source implemented on frozen runtime8efb1e0. Fresh632-test validation, Doctor21/21, dependency check and Android export passed. Coordinator source re-audit and physical/provider/rollout acceptance remain pending. M8 is not accepted. D-049/D-050 and PC-14 apply.
+Current milestone: M8-10..14 source re-audit passed at8efb1e0, but reviewed-source Galaxy Single Fanta first-scan cue was reported inaudible. Phone agent stopped; bounded Sol high audio diagnosis is next. Composite/native/provider/rollout acceptance remains open.
 
 ## Active source and ownership
 
@@ -33,6 +33,8 @@ A separately reconstructed offline NGN4,000 completed sale survived restart with
 
 ## Next action
 
-After final checks/documentation, implementer stops all edits/commands and sends the authorized stopped handoff. Coordinator independently audits M8-10..14 source, then routes a separate controlled phone retest and Fanta/AirPro thumbnail fixture preparation. Preserve application data. Utility intentionally retained scoped LAN Metro70408/PID12824; source work does not control it or claim its reload as native verification.
+Implementer has stopped at documentation HEAD a1bcffa with a clean working tree. Coordinator source review found no material specification or standards defect requiring another correction round; scope/results/limits are in M8_INDEPENDENT_AUDIT.md. Next owner is the existing phone verification chat, GPT-6.1 Sol medium, for a separate readiness check and controlled native retest/Fanta/AirPro thumbnail preparation. Ask the founder to participate before manual camera checks if not available. Preserve application data and unfinished-session consent. Previously retained LAN Metro70408/PID12824 must be checked rather than assumed current; no source export/reload proves native or standalone acceptance.
 
 No new cloud build/spend, backend deployment, live provider/rollout enablement, push/merge, destructive reset or new milestone was authorized/performed. Overnight automation remains paused. PC-10/11/12 catalogue/targeting/structured-QR proposals and TrackB/M12 multi-view recognition enrollment remain deferred; one thumbnail is not a recognition reference set. Docker startup/recovery remains routed through LOCAL_DOCKER_WORKFLOW; no startup/repair was performed.
+
+Latest stopped native return (2026-10-01): utility observed current summary labels and a correct Single Fanta configuration, but founder answered no beep. Speaker music volume15/max15 and later AudioTrack2205-frame entries do not explain first-cue audibility; no audio setting changed. Remaining physical sequence was not performed. No NPE in a limited log sample is not a storage pass. Prior Metro70408/PID12824 was absent; utility started and intentionally retains LAN Metro60684/PID31060. Existing native APK4d6521e remains installed. Source implementer receives only bounded M8-10 audio diagnosis/established repair; coordinator and phone utility stop while it works. Preserve eight pending documentation files; no new build/spend or speculative native/connection-policy change.

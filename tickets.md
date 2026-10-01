@@ -340,7 +340,7 @@ SDK57 maintenance return (2026-09-30): runtime824b2af aligns camera57.0.6/consta
 
 ## M8-10 — Recognize the next deliberate scan and give honest feedback
 
-Status: Source implemented under D-049; 25 focused tests, mobile typecheck and zero-warning lint pass. Native first-beep/stability and independent acceptance remain pending.
+Status: Source implemented under D-049; 25 focused tests, mobile typecheck and zero-warning lint pass. Independent source review passed; native first-beep/stability acceptance remains pending.
 Blocked by: Existing M8-01/02/08 source; no new schema or provider prerequisite.
 Delivers: reopening a scan accepts the same product, Single cancellation returns to scanning, and sound matches the current mode without a second beep.
 
@@ -353,7 +353,7 @@ Out of scope: decoder/ROI redesign, automatic timeout re-arming, recognition mod
 
 ## M8-11 — Accumulate compatible products within the same basket
 
-Status: Source implemented under D-049; 30 focused tests and mobile typecheck pass, corrected import-order warning and fresh zero-warning lint pass. Independent/native acceptance pending.
+Status: Source implemented under D-049; 30 focused tests and mobile typecheck pass, corrected import-order warning and fresh zero-warning lint pass. Independent source review passed; native acceptance pending.
 Blocked by: Existing M3/M8 draft paths. No semantic dependence on M8-10, but ownership is sequential 10 then 11 because both extend the Sell flow.
 Delivers: five deliberate identical scans show one row with quantity five; Fanta quantity ten plus one deliberate addition shows eleven; alternating Fanta/AirPro leaves two compatible rows.
 
@@ -366,7 +366,7 @@ Out of scope: combining completed transactions, discount allocation redesign, pa
 
 ## M8-12 — Identify products by their photos across catalogue and selling
 
-Status: Source implemented under D-050; 19 focused tests/three suites and mounted-snapshot regression passed. Mobile typecheck and zero-warning lint passed. Independent/native acceptance remains pending.
+Status: Source implemented under D-050; 19 focused tests/three suites and mounted-snapshot regression passed. Mobile typecheck and zero-warning lint passed. Independent source review passed; native acceptance remains pending.
 Blocked by: Existing M8-07 private-photo storage. No semantic dependence on M8-10/11; execute after them to preserve sequential ownership of the Sell flow.
 Delivers: named and unfinished products with photos are visually distinguishable in catalogue, sale search, basket and detail; tapping a thumbnail shows the whole photo. D-050 extends the original temporary-cart request.
 
@@ -378,7 +378,7 @@ Delivers: named and unfinished products with photos are visually distinguishable
 
 ## M8-13 — Add or change a product thumbnail through normal onboarding
 
-Status: Source implemented under D-050; 33 focused tests/four suites, mobile typecheck and zero-warning lint pass. Native clarity/size/onboarding/restart and independent acceptance remain pending.
+Status: Source implemented under D-050; 33 focused tests/four suites, mobile typecheck and zero-warning lint pass. Independent source review passed; native clarity/size/onboarding/restart acceptance remains pending.
 Blocked by: Existing M8-07 camera/private-photo persistence; M8-12 provides the consistent presentation. Execute after M8-10..12 under the same sequential source ownership.
 Delivers: an ordinary named product can be created with a photo; an existing named/temporary/enriched product can receive or replace its photo without repeating product creation.
 
@@ -395,7 +395,7 @@ capture/display overhead on available devices. Target sizes are not passed tests
 
 ## M8-14 — Show discounts separately in Today's Summary
 
-Status: Source implemented for PC-14; 11 focused tests/three suites, mobile typecheck and zero-warning lint pass. Combined632-test validation/Doctor/dependency check/export passed; independent/native acceptance remains pending.
+Status: Source implemented for PC-14; 11 focused tests/three suites, mobile typecheck and zero-warning lint pass. Combined632-test validation/Doctor/dependency check/export passed; independent source review passed; native acceptance remains pending.
 Blocked by: Existing completed-sale/summary data only. Execute after M8-10..13 for sequential ownership, not because scanner logic is a semantic prerequisite.
 Delivers: retailer sees today's total Discounts given and understands Sales value is after discounts; summary remains compact.
 
@@ -403,4 +403,4 @@ Delivers: retailer sees today's total Discounts given and understands Sales valu
 - [ ] Cover mixed discounted/undiscounted, paid/partial/credit completed sales, empty day, other stores/days/drafts exclusion, timezone boundaries, arithmetic overflow and refresh after completion. Existing receipts/history retain individual line detail; no crowded per-product discount dashboard. Older completed records remain readable.
 - [ ] Summary data and component tests prove exact discounted amount and unchanged sales value/cost coverage/margin/withdrawals/expense semantics. Focused tests/typecheck/lint and final combined root validation/export pass with actual evidence. Native display/refresh remains a separate phone check; no device evidence inferred from mocks.
 
-M8-10..14 stopped source packet (2026-10-01): runtime8efb1e0; focused25/30/19/33/11 checks overlap. One fresh root validation passed632 tests/77 suites, eight live PostgreSQL tests/two suites skipped; all workspace typecheck/zero-warning lint, Doctor21/21, existing dependency check and Android export passed. No migration or new dependency. Independent/native acceptance checkboxes remain unchecked. Read the superseding October handoff; native storage/audio/photo clarity/accessibility/standalone and provider/rollout gates remain open.
+M8-10..14 stopped source packet (2026-10-01): runtime8efb1e0; focused25/30/19/33/11 checks overlap. One fresh root validation passed632 tests/77 suites, eight live PostgreSQL tests/two suites skipped; all workspace typecheck/zero-warning lint, Doctor21/21, existing dependency check and Android export passed. No migration or new dependency. Coordinator independent source review passed with75 focused tests/10 suites; composite/native acceptance checkboxes remain unchecked. See M8_INDEPENDENT_AUDIT.md. Read the superseding October handoff; native storage/audio/photo clarity/accessibility/standalone and provider/rollout gates remain open.

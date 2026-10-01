@@ -22,7 +22,7 @@ it contains the initial laptop's bounded preserved-runtime workaround.
 **Confidence:** High for approved product and architecture; explicit unknowns
 remain below.
 
-**October1 source update:** D-049/D-050/M8-10..14 are implemented through runtime8efb1e0: deliberate scan feedback/re-arm, exact compatible draft accumulation/Undo, all-product private thumbnails/enlargement, ordinary Add/detail photo controls with new300KiB/1024px limits and legacy reads, and separate Today discount totals. Independent source re-audit and native storage/audio/photo/clarity/accessibility acceptance remain pending. Latest checks/ownership are in PROJECT_STATE and M8_IMPLEMENTATION_HANDOFF; prior593 is historical.
+**October1 source update:** D-049/D-050/M8-10..14 are implemented through runtime8efb1e0: deliberate scan feedback/re-arm, exact compatible draft accumulation/Undo, all-product private thumbnails/enlargement, ordinary Add/detail photo controls with new300KiB/1024px limits and legacy reads, and separate Today discount totals. Independent source re-audit passed against8efb1e0 with75 tests/10 suites; native storage/audio/photo/clarity/accessibility acceptance remains pending. Latest checks/ownership are in PROJECT_STATE and M8_IMPLEMENTATION_HANDOFF; prior593 is historical.
 
 ## Runtime Summary
 
