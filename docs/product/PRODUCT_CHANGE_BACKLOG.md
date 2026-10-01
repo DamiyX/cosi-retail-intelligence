@@ -39,10 +39,90 @@ catalogue/inventory enrichment must preserve immediate sell-first value.
 | PC-06 | Multiple expiry groups per product; optional printed numbers, internal IDs, automatic assumed FEFO without ordinary checkout confirmation | Approved D-039; M5 receipt/sale extension, unknown residual, progressive physical classification; costing stays D-027/D-038/D-040 |
 | PC-07 | Important replacement-cost/personal/market movements on Home | M9 personal/M10 market; real comparable observations, coverage/freshness/consent; no simulation in M5/M6 |
 | PC-08 | Scan while selling; single-item and continuous basket modes; progressively complete catalogue and guided visual enrollment | Founder clarification 2026-09-28 below; barcode/QR sale, basket mode, feedback and temporary completion path in M8 proposal; visual/OCR/guided enrollment in Recognition Track B and M12 |
-| PC-13 | Explicit same-code re-entry, Single recognition beep, first-beep investigation and compatible repeated draft quantities | Founder requested October1; D-049/M8-10/11 planned, no source edits while founder independently explores the phone |
-| PC-14 | Show today's discounts separately from sales value | Founder requested October1; M8-14 is a bounded correction to existing M6 summary in the feedback packet, not a new milestone; not implemented |
-| PC-15 | Product thumbnails across list/search/cart/detail, tap-to-enlarge and normal Add/Change photo controls | Founder clarified all products October1; D-050/M8-12/13 prepared against existing M8-07 camera/storage, no source changes while phone exploration continues |
-| PC-16 | Small predictable thumbnail storage and bounded display work | Founder requested October1; D-050/M8-12/13 size/cleanup/legacy checks prepared; recognition reference/OCR compression remains separately benchmarked |
+| PC-13 | Explicit same-code re-entry, Single recognition beep, first-beep investigation and compatible repeated draft quantities | M8-10/11 source reviewed at8efb1e0; native intermittent Single/silent Basket sound remains unresolved; latest exploration hold prevents runtime changes |
+| PC-14 | Show today's discounts separately from sales value | M8-14 source reviewed at8efb1e0; current phone labels observed, discounted-checkout arithmetic/retention still needs native verification |
+| PC-15 | Product thumbnails across list/search/cart/detail, tap-to-enlarge and normal Add/Change photo controls | M8-12/13 source reviewed at8efb1e0; native photo/capture/replacement/retention/accessibility checks remain pending |
+| PC-16 | Small predictable thumbnail storage and bounded display work | M8-12/13 source enforces new300KiB/1024px limits and legacy reads; actual size/clarity/overhead still requires native measurement; recognition budgets separate |
+| PC-17 | Compact checkout, product language, scoped edit cancellation and inline quantity controls | Founder explicitly deferred October1 until scanning is finished; preserve as later sales/checkout work, outside current M8 corrections |
+| PC-18 | Bargained reductions shown as discounts, higher prices allowed and below-cost protection | Founder explicitly deferred October1 until scanning is finished; future pricing/cost-reference review required, outside current M8 corrections |
+
+## PC-17 — Keep checkout compact and product edits local
+
+Founder feedback, 2026-10-01, while independently exploring the current app:
+
+- Checkout should show the basket, totals and payment/completion controls without
+  forcing a scroll through the catalogue. Remove the inline search/results list
+  from that final surface; a compact Add another item action opens a distinct
+  product picker/search and returns to the SAME preserved basket after selection
+  or cancellation. Do not delete manual product selection or require scanning.
+- Use product-facing language: Edit product, Product discount and equivalent
+  product/item wording where line currently means a basket item. Internal sale
+  line types/schema are not renamed for copy alone.
+- Cancelling/discarding one product edit restores that row's previous values and
+  returns to the basket; other rows, prices, quantities and payment input survive.
+  Keep editing leaves changes in place. Whole-sale discard remains a separate,
+  explicit action, never a hidden consequence of leaving one product form.
+- Quantity belongs directly on each cart row: decrement, current quantity and
+  increment, with direct numeric entry by tapping the quantity for large orders.
+  Preserve supported fractional package quantities, exact arithmetic, overflow
+  rejection and clear zero/removal handling; do not silently round or discard a
+  row. Price/discount editing remains separate and accessible.
+
+Read-only source evidence: SellScreen's dirty line draft currently publishes
+discardSaleDraft to the route guard; SellRoute's usePreventRemove consumes it
+before leaving the route. saleDraftExitCopy explicitly describes discarding both
+line AND sale. The local confirmDiscardLine/cancelLineConfiguration path instead
+closes the form while preserving the cart. This distinction is a credible source
+explanation, not proof of the founder's exact control sequence. Confirm header,
+Android back, local Cancel and tab exit independently rather than replacing all
+exit semantics with a blanket guard bypass.
+
+Disposition: **founder-deferred until scanning is finished**, not implemented.
+This supersedes the earlier proposed M8 correction placement. Ending the live
+exploration hold does not authorize starting this deferred sales/checkout work.
+Coordinator owns the smallest separate plan/ticket/flow update when revisited.
+Actual-route regressions must cover multiple products, unsaved edit cancellation
+through each relevant exit, existing-row quantity changes and stale Undo, picker
+return/cancel, exact totals/snapshots, keyboard/large text/accessibility, and
+payment access for a large catalogue. No business migration is presently implied.
+
+## PC-18 — Make negotiation visible without inventing costs
+
+Founder feedback, 2026-10-01: a negotiated reduction from NGN5,000 to NGN3,000
+should be visible as a NGN2,000 discount per unit, rather than hiding it by simply
+rewriting the reference price. Selling above the reference price remains allowed;
+there is no upper selling-price cap. The founder also requests protection against
+selling below cost, with a clear explanation. The final request retains both
+selling-price and discount editing; quantity moves to the cart under PC-17.
+
+Disposition: **founder-deferred until scanning is finished**, with durable
+accounting/product choices still unresolved. Outside current M8 corrections;
+do not implement a blanket cost-floor block during scanner diagnosis.
+Existing D-036 persists unit price plus an absolute per-sale-row discount in exact
+minor units. For several units, a per-unit negotiated reduction must become the
+correct whole-row discount without double subtraction. Preserve original reference
+and confirmed sale facts, historical snapshots and M8-14's already-net summary;
+do not rewrite catalogue price/history merely because one sale was negotiated.
+
+Coordinator must resolve the reference (catalogue/package price versus the row's
+prior confirmed price), increased-price handling, interactions with a separately
+entered discount and quantity changes, and exact fractional-money validation.
+Cost protection must use an explicitly approved store/package cost reference and
+unit conversion: latest replacement cost is not automatically historical/weighted
+COGS, and FEFO quantity allocation is not financial costing. Do not treat an
+unknown/unavailable cost as zero or force cost entry during price-only temporary
+selling. A universal rejection rule would conflict with the approved sell-first,
+enrich-later/unknown-cost flow unless that exception is resolved explicitly.
+No accounting/costing decision, schema, domain enforcement or founder approval of
+an unresolved cost definition is asserted by this backlog entry.
+
+When separately resumed after scanning: propose the smallest compatible rule and any genuinely blocking founder
+choice before updating DECISION_LOG/PRD/architecture or implementing a financial
+guard. Tests must exercise reduced/increased/reference prices, one/several and
+fractional package quantities, explicit discount interaction, quantity edits,
+known versus unknown costs, store/currency isolation, exact completed snapshots,
+replay and summary totals. UI-only validation cannot establish a durable financial
+invariant. Keep all runtime changes on hold while the founder explores.
 
 ## PC-13 — October 1 scanner exploration corrections
 
