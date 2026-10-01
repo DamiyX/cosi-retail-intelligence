@@ -395,10 +395,12 @@ capture/display overhead on available devices. Target sizes are not passed tests
 
 ## M8-14 — Show discounts separately in Today's Summary
 
-Status: Source implemented for PC-14; 11 focused tests/three suites, mobile typecheck and zero-warning lint pass. Combined validation and independent/native acceptance remain pending.
+Status: Source implemented for PC-14; 11 focused tests/three suites, mobile typecheck and zero-warning lint pass. Combined632-test validation/Doctor/dependency check/export passed; independent/native acceptance remains pending.
 Blocked by: Existing completed-sale/summary data only. Execute after M8-10..13 for sequential ownership, not because scanner logic is a semantic prerequisite.
 Delivers: retailer sees today's total Discounts given and understands Sales value is after discounts; summary remains compact.
 
 - [ ] Aggregate existing immutable completed-sale discount totals with the current authorized store-local-day/currency query and safe-integer utilities. Show Discounts given and label existing sales value as after discounts; do not subtract discounts again from net sales or tracked margin/expenses. No migration, sale write, accounting/costing change or product ranking redesign.
 - [ ] Cover mixed discounted/undiscounted, paid/partial/credit completed sales, empty day, other stores/days/drafts exclusion, timezone boundaries, arithmetic overflow and refresh after completion. Existing receipts/history retain individual line detail; no crowded per-product discount dashboard. Older completed records remain readable.
 - [ ] Summary data and component tests prove exact discounted amount and unchanged sales value/cost coverage/margin/withdrawals/expense semantics. Focused tests/typecheck/lint and final combined root validation/export pass with actual evidence. Native display/refresh remains a separate phone check; no device evidence inferred from mocks.
+
+M8-10..14 stopped source packet (2026-10-01): runtime8efb1e0; focused25/30/19/33/11 checks overlap. One fresh root validation passed632 tests/77 suites, eight live PostgreSQL tests/two suites skipped; all workspace typecheck/zero-warning lint, Doctor21/21, existing dependency check and Android export passed. No migration or new dependency. Independent/native acceptance checkboxes remain unchecked. Read the superseding October handoff; native storage/audio/photo clarity/accessibility/standalone and provider/rollout gates remain open.

@@ -518,7 +518,7 @@ preserved. Compatible repeated additions accumulate in one row; different
 package/price/discount or rounding semantics remain separate. Undo of an increment
 restores the prior quantity instead of deleting the whole product row.
 
-Pending October1 M8-12/D-050: all products with an available identification photo
+Source implemented October1 M8-12/D-050 (independent/native acceptance pending): all products with an available identification photo
 show it alongside their name in catalogue, sale search, basket and detail. Temporary
 cart items use a compact Unfinished product label, quantity and price.
 Tap the photo to enlarge it in a dismissible view; keep Edit/Remove separate.
@@ -526,7 +526,7 @@ Do not use raw generated ID suffixes as the main visible cart identifier. Stored
 labels and immutable receipt descriptions remain intact. Missing/no-photo cases
 remain usable and truthful, never displaying another product's image.
 
-Pending M8-13: ordinary Add product has a visible Add product photo control,
+Source implemented M8-13 (independent/native acceptance pending): ordinary Add product has a visible Add product photo control,
 thumbnail preview and Retake; detail has Add photo or Change photo. Use the
 existing camera, keep changes optional, and preserve the old attached photo if
 a replacement is cancelled/fails. No text field for file paths or mandatory

@@ -1313,10 +1313,10 @@ facts, store-scoped, and out of ordinary business sync JSON. The M8 plan defines
 staging/recovery and missing-file tests. Private upload/restore is not delivered
 by this amendment; the architecture's offline media workflow remains its route.
 
-**D-050 scope extension (2026-10-01, planned):** the same private store-scoped
+**D-050 scope extension (2026-10-01, source implemented; audit/native pending):** the same private store-scoped
 photo can identify any StoreProduct, including named/enriched records, and serve
 as its current thumbnail. Normal creation/detail photo controls and consistent
-list/search/cart presentation are pending M8-12/13. Reuse existing attachment/
+list/search/cart presentation are implemented in M8-12/13; native acceptance is pending. Reuse existing attachment/
 replacement rules; no business-schema migration or shared-platform image truth
 is implied. A thumbnail is not a multi-view recognition reference set.
 

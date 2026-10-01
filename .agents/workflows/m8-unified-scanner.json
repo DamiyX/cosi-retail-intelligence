@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m8-10-14-feedback-corrections-delegated",
+  "current_state": "m8-10-14-stopped-source-handoff-independent-reaudit-pending",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
@@ -42,7 +42,16 @@
     "coordinator-documentation-packet-preserved-5f92566",
     "sdk57-requested-and-required-transitive-patches-aligned-824b2af",
     "sdk57-fresh-validation-593-doctor-21-and-export-passed",
-    "sdk57-compatibility-independently-reaudited"
+    "sdk57-compatibility-independently-reaudited",
+    "coordinator-october-packet-preserved-4e1b4ba",
+    "founder-model-policy-preserved-f9f78bf",
+    "m8-10-deliberate-scan-feedback-implemented-bc8ba86",
+    "m8-11-compatible-draft-accumulation-implemented-a5646c9",
+    "m8-12-bounded-photo-presentation-implemented-8e6602c",
+    "m8-13-normal-bounded-photo-entry-implemented-4aad10a",
+    "m8-14-net-sales-discount-summary-implemented-8efb1e0",
+    "m8-10-14-final-validation-632-passed",
+    "m8-10-14-doctor-21-dependency-check-export-passed"
   ],
   "owner": {
     "agent": "m8-coordinator",
@@ -52,6 +61,12 @@
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
   "lease": null,
   "evidence": [
+    {
+      "kind": "october-feedback-source-verification",
+      "source": "8efb1e0; docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md; docs/engineering/M8_IMPLEMENTATION_HANDOFF.md",
+      "result": "M8-10..14 sequential source commitsbc8ba86/a5646c9/8e6602c/4aad10a/8efb1e0. Planning/policy preserved separately4e1b4ba/f9f78bf. One final root validation passed632 tests/77 suites (12 contracts,150 domain,470 mobile), eight opt-in PostgreSQL tests/two suites skipped; all workspace typecheck/zero-warning lint. Doctor21/21, existing dependency check and Android export passed (1619 modules/29 assets/5.3MB). No new migration/dependency or native/live-provider evidence; source re-audit remains pending. All implementer commands/edits stop before coordinator notification; retained utility LAN Metro70408/PID12824 untouched.",
+      "observed_at": "2026-10-01T16:34:13.269Z"
+    },
     {
       "kind": "independent-compatibility-reaudit",
       "source": "9ec7449; runtime824b2af; docs/engineering/M8_INDEPENDENT_AUDIT.md",
@@ -376,10 +391,21 @@
         "procedure": "Existing implementer executes M8-10..14 sequentially after founder exploration ended; focused failing-before regressions, final root validation/Doctor/export and stopped coordinator re-audit.",
         "success_condition": "Source behavior, exact calculations/incremental Undo and thumbnail presentation/capture/encoded-byte-limit/cleanup/legacy compatibility verified; physical audio/native storage/clarity and standalone gates remain independently pending."
       },
-      "evidence": [],
+      "evidence": [
+        {
+          "source": "docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md; runtime8efb1e0",
+          "result": "Implementer focused M8-10..14 suites passed25/30/19/33/11 respectively (overlapping counts), with mobile typecheck and zero-warning lint. New boundaries cover explicit re-arm/audio readiness, exact draft/Undo, private photo presentation/normal capture/replacement,307200-byte/1024px rejection, legacy8MiB read/replay, tracked-cache cleanup and net-summary discounts. Combined checks running; independent acceptance remains pending."
+        },
+        {
+          "source": "8efb1e0; docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md; docs/engineering/M8_IMPLEMENTATION_HANDOFF.md",
+          "result": "M8-10..14 sequential source commitsbc8ba86/a5646c9/8e6602c/4aad10a/8efb1e0. Planning/policy preserved separately4e1b4ba/f9f78bf. One final root validation passed632 tests/77 suites (12 contracts,150 domain,470 mobile), eight opt-in PostgreSQL tests/two suites skipped; all workspace typecheck/zero-warning lint. Doctor21/21, existing dependency check and Android export passed (1619 modules/29 assets/5.3MB). No new migration/dependency or native/live-provider evidence; source re-audit remains pending. All implementer commands/edits stop before coordinator notification; retained utility LAN Metro70408/PID12824 untouched.",
+          "observed_at": "2026-10-01T16:34:13.269Z"
+        }
+      ],
       "limitations": [
-        "No source implementation or new test result yet; prior593 applies to runtime824b2af.",
-        "Native storage/photo/audio/standalone/provider gates remain independently open."
+        "Fresh632-test/static/Doctor/dependency/export evidence returned for8efb1e0; independent source re-audit pending, no self-acceptance. Prior593 is historical824b2af evidence.",
+        "Native storage/photo/audio/clarity/accessibility/standalone/provider gates remain independently open.",
+        "Supported bounded capture plus actual-byte rejection used; installed PictureRef save recycles bitmap and has no resize, so repeated same-capture encoding is not supported.50–150KiB target and native overhead/clarity are unmeasured."
       ],
       "blocker": null,
       "waiver": null
@@ -465,8 +491,8 @@
     "Live catalogue provider disabled: authorized public contact, ODbL reuse/attribution review and native HTTP/provider smoke remain unverified.",
     "October1 cached/default native DB handle failed prepareSync; separate connection quick_check passed, cause and clean-session photo/no-photo discriminator unresolved."
   ],
-  "next_action": "Founder explicitly finished independent exploration; hold released. Source implementer01a0ec1c-578c-7c41-b151-e803c9e5c548 owns M8-10..14 sequentially alone. Coordinator and phone utility stop until stopped handoff; coordinator then independently audits and routes physical retest. Preserve pending12-document packet and frozen baseline. Prior593 checks are historical, no fresh result. No new cloud job/spend, backend migration/provider/rollout/push/merge authorization. Native storage cause and other device gates remain unresolved.",
+  "next_action": "Stopped M8-10..14 source handoff on branch plan/m8-unified-scanner, runtime8efb1e0; final documentation HEAD/clean status supplied in notification. Coordinator independently audits frozen source, then owns a separate phone/native retest and Fanta/AirPro thumbnail fixtures. All existing approval and native/provider/rollout gate decisions retained. Utility-owned LAN Metro70408/PID12824 intentionally retained/untouched, not evidence. No new build/spend/backend/provider/rollout/push/merge authorization; implementer does not poll the audit.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-10-01T11:35:13Z",
+  "updated_at": "2026-10-01T16:34:13.269Z",
   "archived": false
 }

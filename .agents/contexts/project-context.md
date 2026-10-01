@@ -6,10 +6,10 @@ Original M8 implementer has implemented M8-06..09 after the phone utility stoppe
 at evidence HEAD 1e50d1b. Photo initially stays on the originating device; cloud
 backup/restore is not claimed. D-048 optional catalogue suggestions default to a disabled live provider pending contact/licence/native transport review. Scanner activity uses existing animation facilities. Coordinator audits after stopped handoff; source evidence
 for the earlier flow and native findings remain recorded, not new-flow acceptance.
-Current correction source adc8b8f has passed coordinator re-audit, full593-test
+Earlier correction source adc8b8f has passed coordinator re-audit, full593-test
 validation and Android export. SDK57 patch alignment is committed at824b2af;
-fresh Doctor21/21, dependency check and Android export pass. Existing APK native
-modules remain unchanged; compatibility handoff awaits coordinator review and
+historical593 validation, Doctor21/21, dependency check and Android export pass. Existing APK native
+modules remain unchanged; compatibility source review passed and
 provider/native gates remain open. New offline/shared-catalogue, code-targeting
 and structured-QR ideas are proposals PC-10/11/12 in PRODUCT_CHANGE_BACKLOG.
 For local Docker startup/recovery read docs/engineering/LOCAL_DOCKER_WORKFLOW.md;
@@ -18,9 +18,11 @@ it contains the initial laptop's bounded preserved-runtime workaround.
 **Status:** Active  
 **Scope:** Whole project  
 **Project ID:** COSI  
-**Updated:** 2026-09-30  
+**Updated:** 2026-10-01  
 **Confidence:** High for approved product and architecture; explicit unknowns
 remain below.
+
+**October1 source update:** D-049/D-050/M8-10..14 are implemented through runtime8efb1e0: deliberate scan feedback/re-arm, exact compatible draft accumulation/Undo, all-product private thumbnails/enlargement, ordinary Add/detail photo controls with new300KiB/1024px limits and legacy reads, and separate Today discount totals. Independent source re-audit and native storage/audio/photo/clarity/accessibility acceptance remain pending. Latest checks/ownership are in PROJECT_STATE and M8_IMPLEMENTATION_HANDOFF; prior593 is historical.
 
 ## Runtime Summary
 

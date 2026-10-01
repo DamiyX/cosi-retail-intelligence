@@ -1,8 +1,8 @@
-# M8 SDK57 patch handoff — coordinator compatibility review pending
+# M8 October founder feedback handoff — independent re-audit pending
 
-Latest handoff date: 2026-09-30. Frozen runtime review target: **824b2af**.
+Latest handoff date: 2026-10-01. Frozen runtime review target: **8efb1e0**.
 Checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m8-planning`; branch `plan/m8-unified-scanner`.
-Read the **Superseding SDK57 compatibility handoff** at the end for current results/gates. Amendment corrections at adc8b8f passed coordinator re-audit; compatibility review and physical/provider gates remain separate. Earlier handoffs below are preserved historical records. The final documentation HEAD/clean status is delivered in the coordinator notification after commit/checks.
+Read the **Superseding October feedback handoff** at the end for M8-10..14 results and gates. Older handoffs remain historical;593 belongs to824b2af. Final documentation HEAD/clean status is delivered in the stopped coordinator notification. M8 source/native acceptance remains coordinator-owned.
 
 ---
 # M8 correction handoff — independent re-audit pending
@@ -142,3 +142,29 @@ Fresh verification on pinned Node24.21.0/npm11.19.0:
 All four command logs are named cosi-m8-sdk57-patches-* under C:\Users\doyew\AppData\Local\Temp. Runtime unchanged after verification. Documentation records current state, version/required-transitive rationale, historical attribution and remaining gates. Final docs HEAD/clean status and schema/diff checks are delivered after commit; implementer then stops all checkout commands/edits before notifying the authorized coordinator.
 
 Existing APK's native modules remain unchanged. Galaxy unexpected codes, consistent beep, camera/photo/files, continuous-basket, accessibility and standalone offline acceptance remain unresolved/unperformed as previously recorded. Live provider disabled; associations and ordinary automatic addition off; server migration undeployed. No new APK/native build/spend, phone/Metro development server, Docker startup/repair, provider request/account, deployment, push/merge or new milestone. PC-10/11/12 remain proposals and overnight automation paused. Coordinator owns compatibility review and separately authorized native/provider next steps; M8 acceptance is not claimed.
+
+## Superseding October feedback handoff — 2026-10-01
+
+Runtime review target:8efb1e071b259b9b7304813e320c9e89dc7dfcc2. Same task branch/checkout and sequential implementer; resumed as GPT-6.1 Sol HIGH under founder/coordinator policy. Coordinator planning/native documentation baseline preserved exactly in4e1b4ba; founder model/handoff policy packet separately preserved inf9f78bf. Both are separate from runtime changes.
+
+| Ticket | Source commit | Result |
+| --- | --- | --- |
+| M8-10 | bc8ba86 | Explicit re-arm/Single cancel; bounded initial match/neutral code cue, later form addition silent |
+| M8-11 | a5646c9 | Exact compatible draft accumulation; incremental Undo; edits replace; durable sale/ledger/outbox/replay |
+| M8-12 | 8e6602c | All-product private photo/name presentation, separate enlargement/Close/back, bounded mounted/paged checks |
+| M8-13 | 4aad10a | Optional named onboarding/photo preview/retake and detail Add/Change; new300KiB/1024px writes, legacy8MiB reads, tracked capture cleanup |
+| M8-14 | 8efb1e0 | Compact Today Discounts given and already-net Sales value (after discounts), no double subtraction |
+
+No migration/new dependency or change to business transaction semantics, costing, RecognitionService, sync, product/package ownership, provider defaults or rollout controls. Existing schema26 and completed snapshots are retained. Generated stored labels remain unique; compact cart display does not rewrite receipts. Native photo editing uses existing client.photos/adapter, not another DB handle.
+
+Focused suites passed25/30/19/33/11 tests respectively; counts overlap. Per-ticket mobile typecheck/zero-warning lint passed. Genuine before-change failures covered draft row count, repeated file checks, over-limit encoded photos and missing summary discount field. Initial inconclusive scanner timeout and fixture corrections are documented honestly in M8_IMPLEMENTATION_EVIDENCE; no native failing-before claim.
+
+One final npm run validate against8efb1e0 exited0:12 contracts +150 domain +470 mobile =632 passing tests/77 passing suites. Eight opt-in PostgreSQL tests/two mobile suites skipped; no new live backend pass. All workspace typecheck and zero-warning lint passed. Mobile duration415.646s; existing suspended-resource/act/list timing warnings remain harness limitations. Doctor21/21 and existing expo install --check pass with unchanged Expo-core exclusion. Android export passes1619 modules/29 assets/5.3MB bundle entry-724c56fee05607e6e4d0183a3a6463c4.hbc. This is a source export, not a new APK. Logs are cosi-m8-october-final-{validate,doctor,install-check,export}.log in C:\Users\doyew\AppData\Local\Temp. Prior593 applies only to824b2af.
+
+New photo acceptance checks actual encoded bytes/dimensions and enforces307200bytes/1024px independently of camera UI. Legacy valid files retain8MiB/4096 read/replay policy. Installed SDK57 PictureRef.savePictureAsync has no resize, converts quality with quality.toInt()*100 and recycles the bitmap; repeated same-capture encoding is not safely supported here. Ordinary processed capture uses the largest supported <=1024 size/quality0.65, then actual staging checks; unsupported/high-detail/oversized outputs expose honest retry/no-photo fallback. No large original is persisted as a fallback.50–150KiB tuning, readable Fanta/AirPro previews, actual orientation/clarity/memory and capture/display overhead still require native evidence. File-header/byte fixtures and camera mocks do not establish these results.
+
+Cached/default native prepareSync NPE remains unresolved. Separate-connection quick_check and clean-process catalogue/scanning recovery do not establish its cause; unknown-flow controlled photo/no-photo discriminator is incomplete. Initializer ownership inspection found no concrete app-owned cause, so no speculative connection-policy workaround was introduced. Existing APK is still source4d6521e with older native patch versions. Decoder/first-beep reliability, TalkBack/large text, standalone first-use offline detection, amended photo retention/replacement, broader physical flows and provider contact/licence/native transport gates remain open. Ordinary automatic basket addition, scanner associations and live provider remain off. Source criteria have passing evidence; composite M8 independent/native acceptance is not passed or waived.
+
+PROJECT_STATE, ticket statuses, workflow/index, active contexts and D-050 delivery notes are updated; existing independent audit findings/approval decisions are preserved. Workflow schemas and approval/gate invariance checked. Final documentation HEAD/clean guard is supplied in the stopped notification; no runtime changes after8efb1e0.
+
+All implementer edits and check commands stop before the authorized coordinator message. Explicit exception: utility-owned retained LAN Metro70408/PID12824 remains untouched; no live-reload claim. No phone/adb/inspector/fixture, Docker startup/repair, cloud/native build/spend, backend deployment/provider enablement, upload/enrollment, push/merge/reset, new agent/chat or M9 work. Coordinator independently reviews this frozen source after stopped handoff, then owns a separate native retest and Fanta/AirPro thumbnail fixture preparation. Implementer does not poll that audit or resume work without a new authorized assignment.
