@@ -1,14 +1,57 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import { AccessibilityInfo, AppState, type AppStateStatus } from 'react-native';
+import { AccessibilityInfo, AppState, StyleSheet, type AppStateStatus } from 'react-native';
 import BarcodeCamera from '../src/features/scanning/BarcodeCamera';
 let mockGranted = true;
 let mockDetection!: (event: { type: string; data: string }) => void;
+let mockCameraProps: { zoom: number; enableTorch: boolean };
 jest.mock('expo-camera', () => {
   const { View, Text } = jest.requireActual<typeof import('react-native')>('react-native');
-  return { useCameraPermissions: () => [{ granted: mockGranted, canAskAgain: true }, jest.fn()], CameraView: ({ onCameraReady, onMountError, onBarcodeScanned }: { onCameraReady(): void; onMountError(): void; onBarcodeScanned(event: { type: string; data: string }): void }) => {
+  return { useCameraPermissions: () => [{ granted: mockGranted, canAskAgain: true }, jest.fn()], CameraView: ({ onCameraReady, onMountError, onBarcodeScanned, zoom, enableTorch }: { zoom: number; enableTorch: boolean; onCameraReady(): void; onMountError(): void; onBarcodeScanned(event: { type: string; data: string }): void }) => {
+    mockCameraProps = { zoom, enableTorch };
     mockDetection = onBarcodeScanned;
     return <View testID="barcode-preview" onLayout={onCameraReady}><Text onPress={onMountError}>Fail camera</Text></View>;
   } };
+});
+it('offers bounded accessible zoom only after readiness while preserving the torch and detector', async () => {
+  const motion = jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
+  const detected = jest.fn();
+  const view = render(<BarcodeCamera active onDetection={detected} />);
+  expect(screen.getByRole('button', { name: 'Zoom in' }).props.accessibilityState.disabled).toBe(true);
+  const target = StyleSheet.flatten(screen.getByRole('button', { name: 'Zoom in' }).props.style);
+  expect(target.minHeight).toBeGreaterThanOrEqual(48);
+  expect(target.minWidth).toBeGreaterThanOrEqual(48);
+  fireEvent(screen.getByTestId('barcode-preview'), 'layout');
+  await act(async () => {});
+  fireEvent.press(screen.getByRole('button', { name: 'Zoom in' }));
+  expect(mockCameraProps.zoom).toBe(0.1);
+  expect(screen.getByLabelText('Camera zoom setting 10 percent')).toBeTruthy();
+  fireEvent.press(screen.getByText('Torch on'));
+  expect(mockCameraProps.enableTorch).toBe(true);
+  expect(mockCameraProps.zoom).toBe(0.1);
+  for (let i = 0; i < 12; i++) fireEvent.press(screen.getByRole('button', { name: 'Zoom in' }));
+  expect(mockCameraProps.zoom).toBe(1);
+  expect(screen.getByRole('button', { name: 'Zoom in' }).props.accessibilityState.disabled).toBe(true);
+  fireEvent.press(screen.getByRole('button', { name: 'Reset zoom' }));
+  expect(mockCameraProps.zoom).toBe(0);
+  expect(screen.getByRole('button', { name: 'Zoom out' }).props.accessibilityState.disabled).toBe(true);
+  expect(screen.getAllByTestId('barcode-preview')).toHaveLength(1);
+  expect(detected).not.toHaveBeenCalled();
+  act(() => mockDetection({ type: 'upc_a', data: '036000291452' }));
+  expect(detected).toHaveBeenCalledTimes(1);
+  const stale = mockDetection;
+  mockGranted = false;
+  view.rerender(<BarcodeCamera active onDetection={detected} />);
+  act(() => stale({ type: 'upc_a', data: '036000291452' }));
+  expect(detected).toHaveBeenCalledTimes(1);
+  mockGranted = true;
+  view.rerender(<BarcodeCamera active onDetection={detected} />);
+  expect(screen.getByRole('button', { name: 'Zoom in' }).props.accessibilityState.disabled).toBe(true);
+  fireEvent(screen.getByTestId('barcode-preview'), 'layout');
+  fireEvent.press(screen.getByText('Fail camera'));
+  act(() => mockDetection({ type: 'upc_a', data: '036000291452' }));
+  expect(detected).toHaveBeenCalledTimes(1);
+  expect(screen.queryByText('Zoom in')).toBeNull();
+  view.unmount(); motion.mockRestore();
 });
 beforeEach(() => { mockGranted = true; Object.defineProperty(AppState, 'currentState', { configurable: true, value: 'active' }); });
 it('shows framing only after readiness, retains controls and removes it on pause/error', async () => {
