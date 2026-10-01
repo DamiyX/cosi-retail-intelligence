@@ -39,6 +39,7 @@ export interface BusinessSummary {
   currencyCode: string;
   range: BusinessSummaryRange;
   salesValueMinor: number;
+  discountsGivenMinor: number;
   transactionCount: number;
   recordedExpensesMinor: number;
   ownerWithdrawalsMinor: number;
@@ -215,6 +216,7 @@ export function getBusinessSummary(adapter: DatabaseAdapter, input: BusinessSumm
   const withdrawals = listOwnerWithdrawalsByStoreInRange(adapter, store.id, range.startUtc, range.endUtc);
 
   const salesValueMinor = sumAmounts(sales.map((sale) => sale.totalMinor), 'Summary sales value');
+  const discountsGivenMinor = sumAmounts(sales.map((sale) => sale.discountTotalMinor), 'Summary discounts given');
   const recordedExpensesMinor = sumAmounts(expenses.map((expense) => expense.amountMinor), 'Summary recorded expenses');
   const ownerWithdrawalsMinor = sumAmounts(withdrawals.map((withdrawal) => withdrawal.amountMinor), 'Summary owner withdrawals');
 
@@ -265,6 +267,7 @@ export function getBusinessSummary(adapter: DatabaseAdapter, input: BusinessSumm
     currencyCode: store.currencyCode,
     range,
     salesValueMinor,
+    discountsGivenMinor,
     transactionCount: sales.length,
     recordedExpensesMinor,
     ownerWithdrawalsMinor,

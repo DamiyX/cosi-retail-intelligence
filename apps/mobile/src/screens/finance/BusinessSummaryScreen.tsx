@@ -59,8 +59,9 @@ export default function BusinessSummaryScreen({ client, isFocused = true, onBack
         <SecondaryButton title="Back" onPress={onBack} />
       </View>
       <View style={styles.card}>
-        <Text style={styles.cardLabel}>Sales value</Text>
+        <Text style={styles.cardLabel}>Sales value (after discounts)</Text>
         <Text style={styles.cardValue}>{money(summary.salesValueMinor, summary.currencyCode)}</Text>
+        <Text style={styles.cardHint}>Discounts given: {money(summary.discountsGivenMinor, summary.currencyCode)}</Text>
         <Text style={styles.cardHint}>Includes completed credit sales; this is not cash received.</Text>
       </View>
       <View style={styles.grid}>

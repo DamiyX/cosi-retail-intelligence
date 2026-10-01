@@ -4,6 +4,10 @@ import { createCatalogueClient } from '../src/catalogue/client';
 import { getBusinessSummary, recordExpense, recordOwnerWithdrawal } from '../src/finance';
 import {
   createPayment,
+  createDevice,
+  createStore,
+  createCustomerAccount,
+  createReceivable,
   createSale,
   createSaleItem,
   createSaleItemCostSnapshot,
@@ -19,6 +23,7 @@ function summarySaleAt(
   priceMinor: number,
   coverageStatus: 'AVAILABLE' | 'UNAVAILABLE',
   occurredAt: string,
+  discountMinor = 0,
 ) {
   const sale = createSale(fixture.adapter, {
     id: testId(suffix),
@@ -27,7 +32,8 @@ function summarySaleAt(
     createdByUserId: fixture.context.owner.id,
     occurredAt,
     currencyCode: fixture.context.store.currencyCode,
-    subtotalMinor: priceMinor,
+    subtotalMinor: priceMinor + discountMinor,
+    discountTotalMinor: discountMinor,
     totalMinor: priceMinor,
     createdAt: occurredAt,
     completedAt: occurredAt,
@@ -41,8 +47,9 @@ function summarySaleAt(
     quantityPackagesMicros: MICROS_PER_UNIT,
     conversionToBaseSnapshotMicros: product.basePackage.conversionToBaseMicros,
     quantityBaseMicros: MICROS_PER_UNIT,
-    unitPriceMinor: priceMinor,
-    grossTotalMinor: priceMinor,
+    unitPriceMinor: priceMinor + discountMinor,
+    grossTotalMinor: priceMinor + discountMinor,
+    discountAmountMinor: discountMinor,
     netTotalMinor: priceMinor,
     unitCostBaseSnapshotMinor: coverageStatus === 'AVAILABLE' ? 100 : null,
     cogsAmountMinor: coverageStatus === 'AVAILABLE' ? 100 : null,
@@ -67,6 +74,18 @@ function summarySaleAt(
 }
 
 describe('M6-03 daily business summary', () => {
+  it('exposes completed-sale discounts separately while keeping net sales and covered margin unchanged', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      const catalogue = createCatalogueClient(fixture.adapter, fixture.context.store, fixture.context.device, deterministicIds(14500));
+      const product = catalogue.createTemporaryProduct({ name: 'Discounted product' });
+      summarySaleAt(fixture, product, 14700, 300, 'AVAILABLE', '2026-09-18T12:00:00.000Z', 50);
+      const result = getBusinessSummary(fixture.adapter, { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, userId: fixture.context.owner.id, localDate: '2026-09-18' });
+      expect(result.discountsGivenMinor).toBe(50);
+      expect(result.salesValueMinor).toBe(300);
+      expect(result.trackedGrossMarginMinor).toBe(200);
+    } finally { fixture.closeAndDelete(); }
+  });
   it('keeps owner financial summaries unavailable to staff before M11 permissions', () => {
     const fixture = openCatalogueFixture();
     try {
@@ -98,12 +117,26 @@ describe('M6-03 daily business summary', () => {
       const rice = catalogue.createTemporaryProduct({ name: 'Rice' });
       const beans = catalogue.createTemporaryProduct({ name: 'Beans' });
       const boundary = catalogue.createTemporaryProduct({ name: 'Boundary item' });
-      const includedAtStart = summarySaleAt(fixture, rice, 12200, 300, 'AVAILABLE', '2026-09-17T23:00:00.000Z');
+      const includedAtStart = summarySaleAt(fixture, rice, 12200, 300, 'AVAILABLE', '2026-09-17T23:00:00.000Z', 10);
       summarySaleAt(fixture, rice, 12300, 300, 'AVAILABLE', '2026-09-18T12:00:00.000Z');
-      summarySaleAt(fixture, beans, 12400, 500, 'UNAVAILABLE', '2026-09-18T13:00:00.000Z');
-      const excludedAtEnd = summarySaleAt(fixture, boundary, 12500, 900, 'UNAVAILABLE', '2026-09-18T23:00:00.000Z');
+      summarySaleAt(fixture, beans, 12400, 500, 'UNAVAILABLE', '2026-09-18T13:00:00.000Z', 30);
+      const excludedAtEnd = summarySaleAt(fixture, boundary, 12500, 900, 'UNAVAILABLE', '2026-09-18T23:00:00.000Z', 99);
       expect(includedAtStart.totalMinor).toBe(300);
       expect(excludedAtEnd.totalMinor).toBe(900);
+      createPayment(fixture.adapter, { id: testId(12202), saleId: testId(12200), method: 'CASH', amountMinor: 300, currencyCode: 'NGN', recordedByUserId: fixture.context.owner.id });
+      createPayment(fixture.adapter, { id: testId(12302), saleId: testId(12300), method: 'CREDIT', amountMinor: 300, currencyCode: 'NGN', recordedByUserId: fixture.context.owner.id });
+      const customer = createCustomerAccount(fixture.adapter, { id: testId(12303), storeId: fixture.context.store.id, name: 'Partial customer' });
+      const receivable = createReceivable(fixture.adapter, { id: testId(12304), storeId: fixture.context.store.id, saleId: testId(12300), customerAccountId: customer.id, originalAmountMinor: 300 });
+      // Existing read-model fixture for a later partial collection; no new payment command is introduced.
+      fixture.adapter.run("UPDATE receivables SET status = 'PARTIALLY_PAID', outstanding_amount_minor = 200 WHERE id = ?", [receivable.id]);
+      const otherStore = createStore(fixture.adapter, { id: testId(12800), name: 'Other store', currencyCode: 'NGN', countryCode: 'NG', timezone: 'Africa/Lagos' });
+      const otherDevice = createDevice(fixture.adapter, { id: testId(12801), storeId: otherStore.id, platform: 'ANDROID', appVersion: 'test' });
+      createStoreMember(fixture.adapter, { id: testId(12804), storeId: otherStore.id, userId: fixture.context.owner.id, role: 'OWNER' });
+      createSale(fixture.adapter, { id: testId(12802), storeId: otherStore.id, deviceId: otherDevice.id, createdByUserId: fixture.context.owner.id,
+        currencyCode: 'NGN', occurredAt: '2026-09-18T12:00:00.000Z', subtotalMinor: 1000, discountTotalMinor: 999, totalMinor: 1 });
+      createSale(fixture.adapter, { id: testId(12803), storeId: fixture.context.store.id, deviceId: fixture.context.device.id, createdByUserId: fixture.context.owner.id,
+        currencyCode: 'NGN', occurredAt: '2026-09-18T12:00:00.000Z', subtotalMinor: 1000, discountTotalMinor: 999, totalMinor: 1, status: 'VOIDED' });
+      summarySaleAt(fixture, boundary, 12810, 500, 'UNAVAILABLE', '2026-09-17T22:59:59.999Z', 88);
 
       createPayment(fixture.adapter, {
         id: testId(12402),
@@ -141,6 +174,7 @@ describe('M6-03 daily business summary', () => {
       expect(summary.range.startUtc).toBe('2026-09-17T23:00:00.000Z');
       expect(summary.range.endUtc).toBe('2026-09-18T23:00:00.000Z');
       expect(summary.salesValueMinor).toBe(1100);
+      expect(summary.discountsGivenMinor).toBe(40);
       expect(summary.transactionCount).toBe(3);
       expect(summary.recordedExpensesMinor).toBe(50);
       expect(summary.ownerWithdrawalsMinor).toBe(75);
@@ -199,6 +233,8 @@ describe('M6-03 daily business summary', () => {
       });
       expect(summary.range.startUtc).toBe('2026-03-08T05:00:00.000Z');
       expect(summary.range.endUtc).toBe('2026-03-09T04:00:00.000Z');
+      expect(summary.discountsGivenMinor).toBe(0);
+      expect(summary.salesValueMinor).toBe(0);
     } finally {
       fixture.closeAndDelete();
     }
@@ -227,5 +263,16 @@ describe('M6-03 daily business summary', () => {
     } finally {
       fixture.closeAndDelete();
     }
+  });
+
+  it('fails safely when discounts overflow even though net sales remain within range', () => {
+    const fixture = openCatalogueFixture();
+    try {
+      for (const suffix of [14900, 14901]) createSale(fixture.adapter, { id: testId(suffix), storeId: fixture.context.store.id,
+        deviceId: fixture.context.device.id, createdByUserId: fixture.context.owner.id, currencyCode: 'NGN', occurredAt: '2026-09-18T12:00:00.000Z',
+        subtotalMinor: Number.MAX_SAFE_INTEGER, discountTotalMinor: Number.MAX_SAFE_INTEGER, totalMinor: 0 });
+      expect(() => getBusinessSummary(fixture.adapter, { storeId: fixture.context.store.id, deviceId: fixture.context.device.id,
+        userId: fixture.context.owner.id, localDate: '2026-09-18' })).toThrow('Summary discounts given');
+    } finally { fixture.closeAndDelete(); }
   });
 });

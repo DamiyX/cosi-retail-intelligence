@@ -395,7 +395,7 @@ capture/display overhead on available devices. Target sizes are not passed tests
 
 ## M8-14 — Show discounts separately in Today's Summary
 
-Status: Founder requested October1, PC-14; bounded correction to existing M6 summary in the current founder-feedback packet. Not implemented/tested; exploration hold released by founder through verification chat.
+Status: Source implemented for PC-14; 11 focused tests/three suites, mobile typecheck and zero-warning lint pass. Combined validation and independent/native acceptance remain pending.
 Blocked by: Existing completed-sale/summary data only. Execute after M8-10..13 for sequential ownership, not because scanner logic is a semantic prerequisite.
 Delivers: retailer sees today's total Discounts given and understands Sales value is after discounts; summary remains compact.
 

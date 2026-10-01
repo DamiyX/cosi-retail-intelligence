@@ -10,6 +10,7 @@ function summary(): BusinessSummary {
     currencyCode: 'NGN',
     range: { localDate: '2026-09-18', startUtc: '2026-09-17T23:00:00.000Z', endUtc: '2026-09-18T23:00:00.000Z' },
     salesValueMinor: 250000,
+    discountsGivenMinor: 500,
     transactionCount: 4,
     recordedExpensesMinor: 5000,
     ownerWithdrawalsMinor: 2500,
@@ -87,6 +88,8 @@ describe('HomeScreen', () => {
 
     expect(screen.getByText('Home')).toBeTruthy();
     expect(screen.getByText('₦2,500.00')).toBeTruthy();
+    expect(screen.getByText('Sales value (after discounts)')).toBeTruthy();
+    expect(screen.getByText('Discounts given: ₦5.00')).toBeTruthy();
     expect(screen.getByText('₦50.00')).toBeTruthy();
     expect(screen.getByText('Most frequently sold today')).toBeTruthy();
     expect(screen.getByText('Rice · 3 completed sale appearances')).toBeTruthy();
@@ -127,7 +130,7 @@ describe('HomeScreen', () => {
       onOpenSummary={() => undefined}
       onSeeAttention={() => undefined}
     />);
-    currentSummary = { ...currentSummary, salesValueMinor: 300000 };
+    currentSummary = { ...currentSummary, salesValueMinor: 300000, discountsGivenMinor: 1000 };
     view.rerender(<HomeScreen
       financeClient={financeClient}
       inventoryClient={inventoryClient}
@@ -140,6 +143,7 @@ describe('HomeScreen', () => {
       onSeeAttention={() => undefined}
     />);
     await waitFor(() => expect(screen.getByText('₦3,000.00')).toBeTruthy());
+    expect(screen.getByText('Discounts given: ₦10.00')).toBeTruthy();
     expect(getBusinessSummary).toHaveBeenCalled();
     expect(getAttentionOverview).toHaveBeenCalled();
   });

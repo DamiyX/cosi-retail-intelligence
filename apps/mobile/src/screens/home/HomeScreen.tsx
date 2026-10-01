@@ -97,8 +97,9 @@ export default function HomeScreen({
             <Text style={styles.sectionMeta}>{summary.range.localDate} · store-local day</Text>
           </View>
           <View style={styles.heroCard}>
-            <Text style={styles.cardLabel}>Sales value</Text>
+            <Text style={styles.cardLabel}>Sales value (after discounts)</Text>
             <Text style={styles.heroValue}>{money(summary.salesValueMinor, summary.currencyCode)}</Text>
+            <Text style={styles.cardHint}>Discounts given: {money(summary.discountsGivenMinor, summary.currencyCode)}</Text>
             <Text style={styles.cardHint}>Includes completed credit sales; not cash received or profit.</Text>
           </View>
           <View style={styles.metricGrid}>
