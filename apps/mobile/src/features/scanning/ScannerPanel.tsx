@@ -21,6 +21,7 @@ export interface ScannerPanelProps {
   session: ScanSession;
   active: boolean;
   onCandidate(candidate: RecognitionCandidate): boolean;
+  onCodeRead?(isCurrent: () => boolean): void;
   onSearch(detection?: Pick<BarcodeInput, 'symbology' | 'value'>): void;
   onCreate?(detection?: Pick<BarcodeInput, 'symbology' | 'value'>): void;
   onUseCode?(detection: Pick<BarcodeInput, 'symbology' | 'value'>): void;
@@ -33,7 +34,7 @@ export interface ScannerPanelProps {
   onToggleSound?(): void;
 }
 
-export default function ScannerPanel({ service, session, active, onCandidate, onSearch, onCreate, onUseCode, onCancel, basketMode, onModeChange, summary, onUndo, muted, onToggleSound }: ScannerPanelProps) {
+export default function ScannerPanel({ service, session, active, onCandidate, onCodeRead, onSearch, onCreate, onUseCode, onCancel, basketMode, onModeChange, summary, onUndo, muted, onToggleSound }: ScannerPanelProps) {
   const [detection, setDetection] = useState<Pick<BarcodeInput, 'symbology' | 'value'>>();
   const [result, setResult] = useState<RecognitionResult | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
@@ -45,6 +46,7 @@ export default function ScannerPanel({ service, session, active, onCandidate, on
     return () => { alive.current = false; session.cancel(); subscription.remove(); };
   }, [session, service, active]);
   const detect = (detection: Pick<BarcodeInput, 'symbology' | 'value'>) => {
+    if (!active) return;
     const key = barcodeIdentityKey(detection.symbology, detection.value) ?? `${detection.symbology}:${detection.value}`;
     const generation = session.begin(key);
     if (generation === null) return;
@@ -54,6 +56,9 @@ export default function ScannerPanel({ service, session, active, onCandidate, on
     void service.recognize({ ...detection, sessionId: 'sale', requestId: String(generation) }).then(next => {
       if (!alive.current || !session.isCurrent(generation)) return;
       setResult(next);
+      if (next.status !== 'STRONG' && barcodeIdentityKey(detection.symbology, detection.value)) {
+        onCodeRead?.(() => alive.current && session.isCurrent(generation));
+      }
       if (next.status === 'STRONG' && onCandidate(next.candidate)) setResult(null);
     }).catch(() => {
       if (alive.current && session.isCurrent(generation)) setFailure('Products could not be read. Your basket is preserved.');

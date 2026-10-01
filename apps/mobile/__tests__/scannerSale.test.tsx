@@ -17,6 +17,31 @@ jest.mock('../src/features/scanning/BarcodeCamera', () => ({
   </>,
 }));
 
+it('re-arms the same code only on deliberate Single cancel/re-entry and does not beep again on Add', async () => {
+  const fixture = openCatalogueFixture();
+  try {
+    createTemporaryProduct(fixture.adapter, { storeId: fixture.context.store.id, deviceId: fixture.context.device.id,
+      name: 'A', barcode: '036000291452', barcodeType: 'UPC', barcodeForBasePackage: true, defaultSellingPriceMinor: 10000 }, { generateId: deterministicIds(1000) });
+    const { unmount } = render(<SellScreen client={createDatabaseSalesClient(fixture.adapter)} initialScan />);
+    await screen.findByText('Scan A');
+    await act(async () => { fireEvent.press(screen.getByText('Scan A')); });
+    expect(mockBeep).toHaveBeenCalledTimes(1);
+    fireEvent.press(screen.getByText('Cancel'));
+    await screen.findByText('Scan A');
+    await act(async () => { fireEvent.press(screen.getByText('Scan A')); });
+    expect(screen.getByText('Add to cart')).toBeTruthy();
+    expect(mockBeep).toHaveBeenCalledTimes(2);
+    fireEvent.press(screen.getByText('Add to cart'));
+    expect(mockBeep).toHaveBeenCalledTimes(2);
+    fireEvent.press(screen.getByText('Scan next item'));
+    await screen.findByText('Scan A');
+    await act(async () => { fireEvent.press(screen.getByText('Scan A')); });
+    expect(screen.getByText('Add to cart')).toBeTruthy();
+    expect(mockBeep).toHaveBeenCalledTimes(3);
+    unmount();
+  } finally { fixture.closeAndDelete(); }
+});
+
 it('adds A-A-A once, A-B twice, explicit A again once, and Undo without completing a sale', async () => {
   const fixture = openCatalogueFixture();
   try {
@@ -57,7 +82,8 @@ it('cancelling an unknown item preserves the existing basket and ends only that 
     fireEvent.press(screen.getByText('Cancel'));
     expect(screen.getByText('Cart (1)')).toBeTruthy();
     expect(screen.queryByText('Scan a product')).toBeNull();
-    expect(mockBeep).toHaveBeenCalledTimes(1);
+    expect(mockBeep).toHaveBeenCalledTimes(2);
+    expect(mockBeep).toHaveBeenLastCalledWith('code-read', expect.any(Function));
     expect(fixture.adapter.getAllRows('SELECT id FROM product_identifiers')).toHaveLength(1);
     unmount();
   } finally { fixture.closeAndDelete(); }
@@ -88,7 +114,8 @@ it('audit: cancelling unknown creation clears its barcode from subsequent manual
     fireEvent.press(screen.getByText(screen.queryByText('Scan a product') ? 'Sell this item' : 'Add product'));
     expect(screen.getByText('Scanned QR: B')).toBeTruthy();
     fireEvent.press(screen.getByText('Cancel'));
-    fireEvent.press(screen.getByText(screen.queryByText('Scan a product') ? 'Sell this item' : 'Add product'));
+    fireEvent.press(screen.getByText('Back to basket'));
+    fireEvent.press(screen.getByText('Add product'));
     expect(screen.queryByText('Scanned QR: B')).toBeNull();
     if (screen.queryByText('Continue without photo')) fireEvent.press(screen.getByText('Continue without photo'));
     fireEvent.changeText(screen.getByTestId('quick-add-price'), '2');

@@ -340,7 +340,7 @@ SDK57 maintenance return (2026-09-30): runtime824b2af aligns camera57.0.6/consta
 
 ## M8-10 — Recognize the next deliberate scan and give honest feedback
 
-Status: Coordinator-sized under founder-delegated ticket judgment; requested by founder on October 1, D-049. Not implemented or tested. Source edits wait until founder's independent phone session is finished.
+Status: Source implemented under D-049; 25 focused tests, mobile typecheck and zero-warning lint pass. Native first-beep/stability and independent acceptance remain pending.
 Blocked by: Existing M8-01/02/08 source; no new schema or provider prerequisite.
 Delivers: reopening a scan accepts the same product, Single cancellation returns to scanning, and sound matches the current mode without a second beep.
 

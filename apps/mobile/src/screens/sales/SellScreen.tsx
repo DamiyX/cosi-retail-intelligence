@@ -5,7 +5,7 @@ import {
   DomainError,
   parseQuantityDecimal,
 } from '@retail/domain';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   BackHandler,
@@ -113,6 +113,7 @@ export default function SellScreen({
   const [scanning, setScanning] = useState(initialScan);
   const [muted, setMuted] = useState(false);
   const playScanFeedback = useScanFeedback(scannerEnabled && !muted && isFocused);
+  const feedbackIntent = useRef(0);
   const [scanSession] = useState(() => new ScanSession());
   const [basketMode, setBasketMode] = useState(false);
   const [resumeScanner, setResumeScanner] = useState(false);
@@ -175,6 +176,7 @@ export default function SellScreen({
   // Cancel/discard ends the unresolved scan intent, not the existing basket.
   // Search -> selection and saved Quick Add deliberately do not use this exit.
   const endScanIntent = useCallback(() => {
+    feedbackIntent.current++;
     scanSession.cancel();
     setScanning(false);
     setScanIdentifier(undefined);
@@ -194,6 +196,18 @@ export default function SellScreen({
     setQuickAddDiscard(null);
     setViewMode('cart');
   }, [endScanIntent, setViewMode]);
+
+  const reopenScan = useCallback(() => {
+    endScanIntent(); scanSession.repeatExplicitly(); setScanning(true);
+  }, [endScanIntent, scanSession]);
+  const cancelLineConfiguration = useCallback(() => {
+    closeLineConfiguration();
+    if (scanLine && !basketMode) reopenScan();
+  }, [closeLineConfiguration, scanLine, basketMode, reopenScan]);
+  const cancelQuickAdd = useCallback(() => {
+    closeQuickAdd();
+    if (scanLine && !basketMode) reopenScan();
+  }, [closeQuickAdd, scanLine, basketMode, reopenScan]);
 
   const discardSaleDraft = useCallback((): void => {
     // If Quick Add is open, let it leave its local form before this screen
@@ -266,18 +280,18 @@ export default function SellScreen({
 
   const confirmDiscardLine = useCallback(() => {
     if (!lineFormDirty) {
-      closeLineConfiguration();
+      cancelLineConfiguration();
       return;
     }
     Alert.alert('Discard line?', 'Your uncompleted line changes will be lost.', [
       { text: 'Keep editing', style: 'cancel' },
-      { text: 'Discard', style: 'destructive', onPress: closeLineConfiguration },
+      { text: 'Discard', style: 'destructive', onPress: cancelLineConfiguration },
     ]);
-  }, [closeLineConfiguration, lineFormDirty]);
+  }, [cancelLineConfiguration, lineFormDirty]);
 
   const confirmDiscardQuickAdd = useCallback(() => {
     if (!quickAddDiscard) {
-      closeQuickAdd();
+      cancelQuickAdd();
       return;
     }
     Alert.alert('Discard product?', 'Your product entries will be lost.', [
@@ -287,11 +301,11 @@ export default function SellScreen({
         style: 'destructive',
         onPress: () => {
           quickAddDiscard();
-          closeQuickAdd();
+          cancelQuickAdd();
         },
       },
     ]);
-  }, [closeQuickAdd, quickAddDiscard]);
+  }, [cancelQuickAdd, quickAddDiscard]);
 
   useEffect(() => {
     if (!isFocused) {
@@ -344,7 +358,7 @@ export default function SellScreen({
       pkgs = client.getProductPackages(hit.storeProductId);
     } catch {
       setPackageReadFailure({ hit, existingLine });
-      return;
+      return false;
     }
     setPackageReadFailure(null);
     setAvailablePackages(pkgs);
@@ -372,10 +386,12 @@ export default function SellScreen({
     setLineErrors({});
     setLineFormDirty(false);
     setConfiguringProduct(hit);
+    return true;
   }, [client]);
 
   // Change selected package in line configuration
   const configureScannedCandidate = (candidate: RecognitionCandidate) => {
+    const intent = ++feedbackIntent.current;
     try {
       const hit = client.getProductById?.(candidate.storeProductId);
       if (!hit || hit.variantId !== candidate.productVariantId) throw new Error('Product unavailable');
@@ -393,16 +409,17 @@ export default function SellScreen({
           lineTotalMinor: calculated.netTotalMinor, calculated };
         calculateSaleTotals([...lines, line].map(item => item.calculated));
         setLines(current => [...current, line]);
-        playScanFeedback();
+        playScanFeedback('match', () => feedbackIntent.current === intent);
         return true;
       }
-      startConfiguringLine(hit);
+      if (!startConfiguringLine(hit)) { setScanning(false); return false; }
       setScanLine(true);
       setScanIdentifier(undefined);
       setResumeScanner(basketMode);
       setSelectedPackage(exact ?? null);
       setUnitPriceText(exact?.sellingPriceMinor === null || exact?.sellingPriceMinor === undefined ? '' : formatMinorForEdit(exact.sellingPriceMinor));
       setScanning(false);
+      if (!basketMode) playScanFeedback('match', () => feedbackIntent.current === intent);
       return false;
     } catch {
       setQuickAddSavedNotice('This scanned product could not be loaded safely. Search products or retry. Your basket is preserved.');
@@ -585,7 +602,7 @@ export default function SellScreen({
     }
 
     setLines(candidateLines);
-    if (scanLine || resumeScanner) playScanFeedback();
+    feedbackIntent.current++;
     setScanLine(false);
     setScanIdentifier(undefined);
     if (resumeScanner) { setScanning(true); setResumeScanner(false); }
@@ -747,7 +764,7 @@ export default function SellScreen({
       lineTotalMinor: calculated.netTotalMinor, calculated };
     calculateSaleTotals([...lines.filter(item => item.id !== line.id), line].map(item => item.calculated));
     setLines(current => current.some(item => item.id === line.id) ? current : [...current, line]);
-    if (scanLine) playScanFeedback();
+    feedbackIntent.current++;
     setQuickAddDiscard(null);
     setViewMode('cart');
     setSearchQuery('');
@@ -803,6 +820,7 @@ export default function SellScreen({
       summary={`${lines.length} lines · ${displayMoney(totals.totalMinor, client.storeCurrencyCode)}${lines.length ? ` · Last added: ${lines[lines.length - 1]!.productName}` : ''}`}
       onUndo={() => setLines(current => current.slice(0, -1))}
       onCandidate={configureScannedCandidate} onSearch={keepDetection}
+      onCodeRead={isCurrent => playScanFeedback('code-read', isCurrent)}
       onCreate={detection => { keepDetection(detection); setViewMode('quick_add'); }}
       onCancel={endScanIntent} />;
   }
@@ -816,7 +834,7 @@ export default function SellScreen({
         saleShortcut
         onSaleReady={addQuickSale}
         onSaved={handleQuickAddSaved}
-        onCancel={closeQuickAdd}
+        onCancel={cancelQuickAdd}
         onDirtyDraftChange={handleQuickAddDraftChange}
         isFocused={isFocused}
       />
@@ -913,6 +931,7 @@ export default function SellScreen({
           {editingLineId ? 'Edit line' : 'Add to sale'}
         </Text>
         <Text style={styles.productNameHeading}>{configuringProduct.productName}</Text>
+        {scanLine && !scanIdentifier ? <Text>Product matched. Review and add it to the basket.</Text> : null}
         {scanIdentifier ? <View>
           <Text>Scanned {scanIdentifier.type}: {scanIdentifier.value}</Text>
           {scanAssociationsVerified && catalogueClient ? <SecondaryButton title="Save barcode for this product and selected package" onPress={() => {
@@ -1045,7 +1064,7 @@ export default function SellScreen({
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       {/* Top Header */}
       <View style={styles.topHeader}>
-        {scannerEnabled && client.recognition ? <SecondaryButton title="Scan next item" onPress={() => { endScanIntent(); setScanning(true); }} /> : null}
+        {scannerEnabled && client.recognition ? <SecondaryButton title="Scan next item" onPress={reopenScan} /> : null}
         <View style={styles.titleArea}>
           <Text accessibilityRole="header" style={styles.title}>
             Sell
