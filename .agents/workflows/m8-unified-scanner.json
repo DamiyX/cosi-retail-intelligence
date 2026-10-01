@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "bounded-native-cue-review-returned-m8-15-16-source-next",
+  "current_state": "m8-15-16-source-awaiting-stopped-coordinator-audit",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
@@ -58,7 +58,13 @@
     "temporary-default-off-cue-trace-implemented-caa7003",
     "cue-trace-focused77-mobile-typecheck-zero-warning-lint-passed",
     "temporary-cue-trace-independent-review-70-tests-passed",
-    "bounded-native-trace-stopped-and-independently-reviewed"
+    "bounded-native-trace-stopped-and-independently-reviewed",
+    "pending-coordinator-native-eight-file-packet-preserved-4e74be1",
+    "m8-15-temporary-diagnostic-retired-41463fb-e1acccc",
+    "m8-16-preview-zoom-and-accessible-controls-implemented-4e5863f",
+    "m8-15-16-focused37-mobile-typecheck-zero-warning-lint-passed",
+    "m8-15-16-final-root-validation-640-passed",
+    "m8-15-16-final-android-source-export-passed"
   ],
   "owner": {
     "agent": "m8-coordinator",
@@ -68,6 +74,12 @@
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
   "lease": null,
   "evidence": [
+    {
+      "kind": "m8-15-16-stopped-source-packet",
+      "source": "41463fb/e1acccc/4e5863f; docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md; docs/engineering/M8_IMPLEMENTATION_HANDOFF.md",
+      "result": "Diagnostic helper/test/runtime metadata/flag retired and ordinary API restored. No established causal sound fix; ranked hypotheses and ONE two-Single native-output/audibility proposal returned. Preview-only bounded pinch and accessible48dp controls use current APIs with stale/cancel guards; real point-focus unsupported, native bridge/build proposal needs explicit review. M8-15 28 tests/five suites and M8-16 37/eight with strict mobile typecheck/zero-warning lint passed. Fresh root validate exit0:640 tests/79 suites, eight opt-in PostgreSQL tests/two suites skipped, all workspace typecheck/zero-warning lint. Android source export exit0:1620 modules/29 assets/5.3MB bundle, not APK. Existing React act warnings remain. Source self-review only; native and independent acceptance open; PC17/18/guides/identity/rollout deferred.",
+      "observed_at": "2026-10-01T20:07:40.558Z"
+    },
     {
       "kind": "bounded-native-cue-review",
       "source": "docs/engineering/M8_ANDROID_VERIFICATION.md; M8_INDEPENDENT_AUDIT.md; local sanitized trace",
@@ -545,8 +557,8 @@
     "Live catalogue provider disabled: authorized public contact, ODbL reuse/attribution review and native HTTP/provider smoke remain unverified.",
     "October1 cached/default native DB handle failed prepareSync; separate connection quick_check passed, cause and clean-session photo/no-photo discriminator unresolved."
   ],
-  "next_action": "Existing source chat01a0ec1c-578c-7c41-b151-e803c9e5c548 Sol HIGH handles tickets M8-15/16: preserve pending docs; remove temporary trace; repair only supported audio mechanism or return one bounded discriminator/proposal; implement existing-API pinch/accessibility zoom and truthful focus feasibility. No phone/server/Docker/build/spend/native dependency/backend/provider/association/push/merge/PC17/18. Stop and directly return source handoff for coordinator audit. Native acceptance stays open.",
+  "next_action": "After implementer final clean guard and authorized stopped report, coordinator independently audits source4e5863f/diagnostic retirement. Utility only resumes with coordinator-scoped physical zoom/accessibility/clarity/audio procedure. Real tap-focus native bridge/build proposal requires explicit review; no fake focus, new build/spend, source/phone concurrency, provider/association rollout or PC17/18/guide implementation. All native gates remain open.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-10-01T19:16:42.812Z",
+  "updated_at": "2026-10-01T20:07:40.558Z",
   "archived": false
 }

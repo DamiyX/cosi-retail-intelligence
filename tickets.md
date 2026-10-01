@@ -407,7 +407,7 @@ M8-10..14 stopped source packet (2026-10-01): runtime8efb1e0; focused25/30/19/33
 
 ## M8-15 — Restore reliable initial scan feedback and retire the temporary trace
 
-Status: Assigned for source investigation/correction; first-cue physical gate unresolved.
+Status: Source implemented through41463fb/e1acccc/4e5863f; diagnostic retired; no established causal sound repair. Independent review and first-cue physical gate unresolved.
 Blocked by: stopped bounded native observation and coordinator review (complete). Extends M8-10; no database dependency.
 Delivers: ordinary scanning retains one optional cue at recognition, without temporary diagnostics or a checkout delay; the outstanding first-cue failure has an evidence-backed correction or explicit bounded unresolved handoff.
 
@@ -419,7 +419,7 @@ Delivers: ordinary scanning retains one optional cue at recognition, without tem
 
 ## M8-16 — Zoom the live scanner without losing or changing a sale
 
-Status: Founder-authorized pinch zoom; real tap-to-focus feasibility unresolved; guide resizing deferred.
+Status: Pinch/accessibility zoom source implemented at4e5863f, pending independent/native review. Installed point-focus API unavailable; explicit-review native proposal returned. Guide resizing deferred.
 Blocked by: existing M8 camera/lifecycle and source baseline. M8-15 precedes this only for sequential ownership, not a semantic dependency.
 Delivers: retailer can use a two-finger pinch on the live preview to enlarge a distant code, with an accessible non-gesture alternative; camera limitations remain honest.
 
@@ -428,3 +428,5 @@ Delivers: retailer can use a two-finger pinch on the live preview to enlarge a d
 - [ ] Inspect real Android touch-focus support. Do not claim autofocus toggle/hard-coded point equals focus at the tapped point, reset the camera to fake a focus action, or add a success reticle with no real metering. If exact tap focus is unsupported, preserve request in PC11 and return smallest native-change/build proposal for explicit review; do not introduce it during this ticket.
 - [ ] Tests prove two-touch zoom changes/bounds/cancellation, accessible alternative, inactive/stale guards, torch/detection and basket preservation; focused scanner tests/typecheck/zero-warning lint pass. Native gesture/focus/clarity acceptance is a later phone check, not mock proof.
 - [ ] Preserve independent snapshot/money/quantity/outbox/domain behavior. Do not implement resizable guides, PC17/18 checkout or TrackB/M12 recognition. Stop after source handoff; coordinator audits before returning to phone.
+
+M8-15/16 source packet (2026-10-01): preserved eight-file coordinator/native packet4e74be1; retirement41463fb/e1acccc; zoom4e5863f. Focused28/five and37/eight counts overlap; mobile typecheck/zero-warning lint passed. Fresh root validation640 tests/79 suites with eight opt-in PostgreSQL tests/two suites skipped, all workspace typecheck/zero-warning lint and Android source export1620 modules/29 assets/5.3MB passed. Details/limits in latest evidence/handoff. Checkbox acceptance stays coordinator-owned and unchecked: sound cause, real native gestures/TalkBack/clarity/focus and independent audit remain open. No native patch/build or deferred guide/PC17/18 work.
