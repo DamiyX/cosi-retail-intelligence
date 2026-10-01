@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
-import { AccessibilityInfo, AppState } from 'react-native';
+import { AccessibilityInfo, AppState, type View } from 'react-native';
+import PreviewZoomSlider from '../src/features/scanning/PreviewZoomSlider';
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
 import { createDatabaseSalesClient } from '../src/sales/client';
 import SellScreen from '../src/screens/sales/SellScreen';
@@ -21,7 +22,7 @@ jest.mock('expo-camera', () => {
   };
 });
 
-it('pinch/buttons preserve a real basket, duplicate guard and SQLite business facts', async () => {
+it('slider/endpoints preserve a real basket, duplicate guard and SQLite business facts', async () => {
   Object.defineProperty(AppState, 'currentState', { configurable: true, value: 'active' });
   const motion = jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
   const fixture = openCatalogueFixture();
@@ -39,22 +40,23 @@ it('pinch/buttons preserve a real basket, duplicate guard and SQLite business fa
     fireEvent(screen.getByTestId('native-barcode-preview'), 'layout');
     fireEvent.press(screen.getByRole('button', { name: 'Zoom in' }));
     expect(mockZoom).toBe(0.1);
-    const touch = (distance: number) => ({ nativeEvent: { touches: [
-      { identifier: 1, target: 10, pageX: 0, pageY: 0 }, { identifier: 2, target: 10, pageX: distance, pageY: 0 },
-    ] } });
-    const preview = screen.getByTestId('barcode-zoom-preview');
+    const touch = (x: number) => ({ nativeEvent: { touches: [{ identifier: 1, target: 10, pageX: x, pageY: 30 }] } });
+    const preview = screen.getByTestId('preview-zoom-track');
+    const node = screen.UNSAFE_getByType(PreviewZoomSlider).props.control.trackRef.current as View;
+    jest.spyOn(node, 'measure').mockImplementation(callback => callback(0, 0, 100, 48, 50, 20));
+    act(() => preview.props.onLayout({ nativeEvent: { layout: { width: 100 } } }));
     // RNTL fireEvent probes responder predicates without a native event, so
-    // exercise the actual mounted preview handlers with two-touch events.
+    // exercise the actual mounted slider handlers with a single-thumb event.
     expect(preview.props.onStartShouldSetResponder(touch(100))).toBe(true);
     act(() => preview.props.onResponderGrant(touch(100)));
-    act(() => preview.props.onResponderMove(touch(200)));
-    expect(mockZoom).toBe(0.35);
+    act(() => preview.props.onResponderMove(touch(120)));
+    expect(mockZoom).toBe(0.75);
     expect(screen.getByText(/1 lines · ₦100.00/)).toBeTruthy();
     expect(mockBeep).toHaveBeenCalledTimes(1);
     await act(async () => { mockDetection({ type: 'upc_a', data: '036000291452' }); });
     expect(screen.getByText(/1 lines · ₦100.00/)).toBeTruthy();
     expect(mockBeep).toHaveBeenCalledTimes(1);
-    fireEvent.press(screen.getByRole('button', { name: 'Reset zoom' }));
+    for (let i = 0; i < 10; i++) fireEvent.press(screen.getByRole('button', { name: 'Zoom out' }));
     expect(mockZoom).toBe(0);
     expect(facts()).toEqual(before);
     fireEvent.press(screen.getByText('Back to basket'));

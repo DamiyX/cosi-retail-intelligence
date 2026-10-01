@@ -1,94 +1,115 @@
 import { act, renderHook } from '@testing-library/react-native';
-import { AppState, type GestureResponderEvent } from 'react-native';
+import { AppState, type GestureResponderEvent, type LayoutChangeEvent, type View } from 'react-native';
 import { usePreviewZoom } from '../src/features/scanning/usePreviewZoom';
 
-function event(distance: number, ids = [1, 2], targets = [10, 10]): GestureResponderEvent {
-  return { nativeEvent: { touches: ids.map((identifier, index) => ({ identifier, target: targets[index], pageX: index * distance, pageY: 0 })) } } as unknown as GestureResponderEvent;
+type Measure = Parameters<View['measure']>[0];
+const touch = (x: number, id = 1, count = 1, target = 10, locationX = 0) => ({ nativeEvent: { touches: Array.from({ length: count }, (_, n) => ({ identifier: id + n, pageX: x, pageY: 30, target, locationX })) } }) as unknown as GestureResponderEvent;
+const layout = (width: number) => ({ nativeEvent: { layout: { width } } }) as LayoutChangeEvent;
+beforeEach(() => Object.defineProperty(AppState, 'currentState', { configurable: true, value: 'active' }));
+function setup() {
+  const hook = renderHook(({ available }: { available: boolean }) => usePreviewZoom(available), { initialProps: { available: true } });
+  const callbacks: Measure[] = [];
+  hook.result.current.trackRef.current = { measure: (callback: Measure) => callbacks.push(callback) } as unknown as View;
+  act(() => hook.result.current.trackHandlers.onLayout(layout(100)));
+  const measured = (left = 50, width = 100, height = 48) => act(() => callbacks.shift()!(0, 0, width, height, left, 20));
+  return { ...hook, callbacks, measured };
 }
-beforeEach(() => { Object.defineProperty(AppState, 'currentState', { configurable: true, value: 'active' }); });
 
-it('zooms relative to a stable two-finger start, tolerates ordering and clamps finite extremes', () => {
-  const { result, unmount } = renderHook(() => usePreviewZoom(true));
-  act(() => result.current.gestureHandlers.onResponderGrant(event(100)));
-  act(() => result.current.gestureHandlers.onResponderMove(event(200, [2, 1])));
-  expect(result.current.zoom).toBe(0.25);
-  act(() => result.current.gestureHandlers.onResponderMove(event(400)));
+it('uses measured root coordinates for track and child touches, with no thumb-grab jump', () => {
+  const { result, measured, unmount } = setup();
+  act(() => result.current.trackHandlers.onResponderGrant(touch(100, 1, 1, 20, 2)));
+  expect(result.current.zoom).toBe(0);
+  measured();
   expect(result.current.zoom).toBe(0.5);
-  act(() => result.current.gestureHandlers.onResponderMove(event(1000000)));
+  // Touch eight pixels right of thumb center: retain value on grant.
+  act(() => result.current.trackHandlers.onResponderGrant(touch(108, 1, 1, 99, 8)));
+  measured();
+  expect(result.current.zoom).toBe(0.5);
+  act(() => result.current.trackHandlers.onResponderMove(touch(128, 1, 1, 10, 78)));
+  expect(result.current.zoom).toBe(0.75);
+  act(() => result.current.trackHandlers.onResponderMove(touch(1000)));
   expect(result.current.zoom).toBe(1);
-  act(() => result.current.gestureHandlers.onResponderMove(event(8)));
+  act(() => result.current.trackHandlers.onResponderMove(touch(-1000)));
   expect(result.current.zoom).toBe(0);
   unmount();
 });
 
-it('leaves one-finger scrolling, sibling controls and malformed/tiny/multi-touch inputs unclaimed', () => {
-  const { result, unmount } = renderHook(() => usePreviewZoom(true));
-  for (const input of [event(100, [1]), event(100, [1, 2, 3]), event(100, [1, 1]), event(100, [1, 2], [10, 11]), event(0), event(7), event(NaN), event(Infinity)]) {
-    expect(result.current.gestureHandlers.onStartShouldSetResponderCapture(input)).toBe(false);
-    expect(result.current.gestureHandlers.onMoveShouldSetResponder(input)).toBe(false);
-    act(() => { result.current.gestureHandlers.onResponderGrant(input); result.current.gestureHandlers.onResponderMove(event(200)); });
-    expect(result.current.zoom).toBe(0);
-  }
-  expect(result.current.gestureHandlers.onStartShouldSetResponder(event(100))).toBe(true);
+it('refreshes track origin after scroll and applies latest movement after async measurement', () => {
+  const { result, measured, unmount } = setup();
+  act(() => result.current.trackHandlers.onResponderGrant(touch(160)));
+  act(() => result.current.trackHandlers.onResponderMove(touch(180)));
+  measured(150);
+  expect(result.current.zoom).toBe(0.25);
   unmount();
 });
 
-it('cancels on finger replacement and starts the replacement pair without a jump', () => {
-  const { result, unmount } = renderHook(() => usePreviewZoom(true));
-  act(() => { result.current.gestureHandlers.onResponderGrant(event(100)); result.current.gestureHandlers.onResponderMove(event(200)); });
-  act(() => result.current.gestureHandlers.onResponderMove(event(400, [1, 3])));
-  expect(result.current.zoom).toBe(0.25);
-  act(() => result.current.gestureHandlers.onResponderMove(event(800)));
-  expect(result.current.zoom).toBe(0.25);
-  act(() => result.current.gestureHandlers.onResponderStart(event(400, [1, 3])));
-  expect(result.current.zoom).toBe(0.25);
-  act(() => result.current.gestureHandlers.onResponderMove(event(800, [1, 3])));
-  expect(result.current.zoom).toBe(0.5);
+it('rejects malformed/unmeasured/tiny tracks and multiple fingers', () => {
+  const { result, measured, unmount } = setup();
+  for (const input of [touch(NaN), touch(Infinity), touch(100, 1, 2), touch(100, 1, 0)]) {
+    expect(result.current.trackHandlers.onStartShouldSetResponder(input)).toBe(false);
+    act(() => result.current.trackHandlers.onResponderGrant(input));
+  }
+  for (const size of [0, 20, NaN, Infinity]) {
+    act(() => result.current.trackHandlers.onLayout(layout(size)));
+    expect(result.current.trackHandlers.onMoveShouldSetResponder(touch(100))).toBe(false);
+  }
+  act(() => result.current.trackHandlers.onLayout(layout(100)));
+  act(() => result.current.trackHandlers.onResponderGrant(touch(100)));
+  measured(50, 20);
+  expect(result.current.zoom).toBe(0);
   unmount();
 });
 
-it('cancels after touch end, termination, invalid movement, layout and explicit controls', () => {
-  const { result, unmount } = renderHook(() => usePreviewZoom(true));
-  const cancellations = [
-    () => result.current.gestureHandlers.onResponderEnd(),
-    () => result.current.gestureHandlers.onResponderRelease(),
-    () => result.current.gestureHandlers.onResponderTerminate(),
-    () => result.current.gestureHandlers.onTouchCancel(),
-    () => result.current.gestureHandlers.onLayout(),
-    () => result.current.gestureHandlers.onResponderMove(event(0)),
-    () => result.current.reset(),
-  ];
-  for (const cancel of cancellations) {
-    act(() => { result.current.gestureHandlers.onResponderGrant(event(100)); cancel(); result.current.gestureHandlers.onResponderMove(event(200)); });
+it('ignores stale measurements after release, cancel, layout, replacement or endpoint step', () => {
+  const { result, measured, unmount } = setup();
+  for (const cancel of [
+    () => result.current.trackHandlers.onResponderRelease(),
+    () => result.current.trackHandlers.onResponderEnd(),
+    () => result.current.trackHandlers.onResponderTerminate(),
+    () => result.current.trackHandlers.onTouchCancel(),
+    () => result.current.trackHandlers.onLayout(layout(100)),
+    () => result.current.trackHandlers.onResponderMove(touch(100, 2)),
+    () => result.current.trackHandlers.onResponderStart(touch(100, 1, 2)),
+  ]) {
+    act(() => { result.current.trackHandlers.onResponderGrant(touch(100)); cancel(); });
+    measured();
+    act(() => result.current.trackHandlers.onResponderMove(touch(140)));
     expect(result.current.zoom).toBe(0);
   }
-  act(() => { result.current.gestureHandlers.onResponderGrant(event(100)); result.current.zoomIn(); result.current.gestureHandlers.onResponderMove(event(400)); });
+  act(() => { result.current.trackHandlers.onResponderGrant(touch(100)); result.current.zoomIn(); });
+  measured();
   expect(result.current.zoom).toBe(0.1);
-  act(() => { for (let i = 0; i < 20; i++) result.current.zoomIn(); });
-  expect(result.current.zoom).toBe(1);
-  act(() => { for (let i = 0; i < 20; i++) result.current.zoomOut(); });
-  expect(result.current.zoom).toBe(0);
   unmount();
 });
 
-it('blocks unavailable/background/unmounted work and cancels across availability changes', () => {
-  const { result, rerender, unmount } = renderHook(({ available }: { available: boolean }) => usePreviewZoom(available), { initialProps: { available: true } });
-  act(() => result.current.gestureHandlers.onResponderGrant(event(100)));
-  const previousPreview = result.current;
+it('old measurement cannot override a newly granted finger or unavailable/unmounted preview', () => {
+  const { result, rerender, callbacks, measured, unmount } = setup();
+  act(() => { result.current.trackHandlers.onResponderGrant(touch(100)); result.current.trackHandlers.onResponderGrant(touch(140, 2)); });
+  measured(); expect(result.current.zoom).toBe(0);
+  measured(); expect(result.current.zoom).toBe(1);
+  const stale = result.current;
+  act(() => result.current.trackHandlers.onResponderGrant(touch(100)));
   rerender({ available: false });
-  act(() => result.current.zoomIn());
-  expect(result.current.gestureHandlers.onMoveShouldSetResponderCapture(event(100))).toBe(false);
+  measured(); expect(result.current.zoom).toBe(1);
   rerender({ available: true });
-  act(() => { previousPreview.zoomIn(); previousPreview.gestureHandlers.onResponderGrant(event(100)); previousPreview.gestureHandlers.onResponderMove(event(200)); });
-  expect(previousPreview.gestureHandlers.onStartShouldSetResponder(event(100))).toBe(false);
-  act(() => result.current.gestureHandlers.onResponderMove(event(200)));
+  act(() => stale.zoomOut()); expect(result.current.zoom).toBe(1);
+  expect(stale.trackHandlers.onStartShouldSetResponder(touch(100))).toBe(false);
+  act(() => result.current.trackHandlers.onResponderGrant(touch(100)));
+  unmount(); act(() => callbacks.shift()!(0, 0, 100, 48, 50, 20));
+});
+
+it('adjustable actions and endpoints clamp and remain silent in background/disabled state', () => {
+  const { result, rerender, unmount } = setup();
+  const action = (name: string) => ({ nativeEvent: { actionName: name } }) as Parameters<typeof result.current.onAccessibilityAction>[0];
+  act(() => { for (let i = 0; i < 20; i++) result.current.onAccessibilityAction(action('increment')); });
+  expect(result.current.zoom).toBe(1);
+  act(() => { for (let i = 0; i < 20; i++) result.current.onAccessibilityAction(action('decrement')); });
   expect(result.current.zoom).toBe(0);
   Object.defineProperty(AppState, 'currentState', { configurable: true, value: 'background' });
-  act(() => { result.current.zoomIn(); result.current.gestureHandlers.onResponderGrant(event(100)); result.current.gestureHandlers.onResponderMove(event(200)); });
-  expect(result.current.zoom).toBe(0);
+  act(() => result.current.zoomIn()); expect(result.current.zoom).toBe(0);
+  expect(result.current.trackHandlers.onStartShouldSetResponderCapture(touch(100))).toBe(false);
+  rerender({ available: false });
   Object.defineProperty(AppState, 'currentState', { configurable: true, value: 'active' });
-  const stale = result.current;
+  act(() => result.current.zoomIn()); expect(result.current.zoom).toBe(0);
   unmount();
-  act(() => { stale.zoomIn(); stale.gestureHandlers.onResponderGrant(event(100)); stale.gestureHandlers.onResponderMove(event(200)); });
-  expect(stale.gestureHandlers.onStartShouldSetResponder(event(100))).toBe(false);
 });
