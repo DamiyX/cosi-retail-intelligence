@@ -91,4 +91,3 @@ it('evaluates freshness once at request and once after seek, without replaying a
   expect(mockPlayers[0]!.play).not.toHaveBeenCalled();
   unmount();
 });
-
