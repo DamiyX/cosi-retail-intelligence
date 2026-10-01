@@ -423,7 +423,7 @@ export default function ProductDetailScreen({
             </View>
           )}
           {failure !== null ? <ErrorPanel title="Not saved" message={failure} /> : null}
-          <ProductPhoto photos={client.photos} productId={detail.product.id} />
+          <ProductPhoto photos={client.photos} productId={detail.product.id} productName={detail.variant.name} refreshKey={detail} />
           {detail.product.isTemporary && !editing && client.suggestions ? <SavedSuggestion key={`${client.storeId}:${detail.product.id}`} service={client.suggestions} productId={detail.product.id} onUse={suggestion => { beginEdit(); setName(suggestion.name); setUsingSuggestion(suggestion.name); }} /> : null}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Codes</Text>

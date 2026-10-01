@@ -5,6 +5,7 @@ import { createDatabaseSalesClient } from '../src/sales/client';
 import { type PhotoFiles } from '../src/media/productPhotos';
 import type { ProductPhotoCameraProps } from '../src/media/ProductPhotoCamera';
 import ProductPhoto from '../src/media/ProductPhoto';
+import ProductsListScreen from '../src/screens/products/ProductsListScreen';
 import QuickAddProductScreen from '../src/screens/products/QuickAddProductScreen';
 import SellScreen from '../src/screens/sales/SellScreen';
 import { deterministicIds, openCatalogueFixture } from './catalogueSupport';
@@ -96,5 +97,56 @@ it('a stale photo callback after unmount cannot stage or attach an abandoned pho
     act(() => callback('file:///cache/stale.jpg'));
     expect(stage).not.toHaveBeenCalled();
     expect(s.f.adapter.getAllRows('SELECT id FROM media_assets')).toHaveLength(0);
+  } finally { s.f.closeAndDelete(); }
+});
+
+it('presents two distinct unfinished photos and an enriched photo in actual search/cart without changing receipts', () => {
+  const s = setup();
+  try {
+    const graphs = ['Fanta', '', ''].map(name => s.catalogue.createTemporaryProduct({ name, generateTemporaryLabel: !name,
+      defaultSellingPriceMinor: 10000, localPhotoId: s.photos.stage('file:///cache/capture.jpg') }));
+    s.catalogue.markProductEnriched({ storeProductId: graphs[0]!.storeProduct.id });
+    const sales = createDatabaseSalesClient(s.f.adapter);
+    const { unmount } = render(<SellScreen client={sales} catalogueClient={s.catalogue} />);
+    for (const graph of graphs) {
+      fireEvent.press(screen.getByText(graph.variant.name));
+      fireEvent.press(screen.getByText('Add to cart'));
+    }
+    expect(screen.getByText('Cart (3)')).toBeTruthy();
+    expect(screen.getAllByText('Unfinished product')).toHaveLength(2);
+    fireEvent.press(screen.getAllByLabelText('Enlarge fanta photo')[0]!);
+    expect(screen.getByLabelText('Fanta enlarged photo')).toBeTruthy();
+    fireEvent.press(screen.getByText('Close photo'));
+    expect(screen.getByText('Cart (3)')).toBeTruthy();
+    fireEvent.press(screen.getByText(/^Complete sale ·/));
+    const items = s.f.adapter.getAllRows<{ product_name_snapshot: string; quantity_packages_micros: number }>('SELECT product_name_snapshot, quantity_packages_micros FROM sale_items');
+    expect(items.map(item => item.product_name_snapshot).sort()).toEqual(graphs.map(graph => graph.variant.name).sort());
+    expect(items.every(item => item.quantity_packages_micros === 1000000)).toBe(true);
+    expect(graphs.every(graph => s.photos.read(graph.storeProduct.id).status === 'available')).toBe(true);
+    unmount();
+  } finally { s.f.closeAndDelete(); }
+});
+
+it('virtualizes a large catalogue and keeps photo taps separate from product selection', () => {
+  const s = setup();
+  try {
+    s.catalogue.createTemporaryProduct({ name: 'Named', defaultSellingPriceMinor: 100 });
+    const template = s.catalogue.listProducts('')[0]!;
+    const hits = Array.from({ length: 1000 }, (_, index) => ({ ...template, product: { ...template.product, id: String(index) }, variantName: `Named ${index}`, isTemporary: false }));
+    jest.spyOn(s.catalogue, 'listProducts').mockReturnValue(hits);
+    const read = jest.spyOn(s.photos, 'read').mockImplementation(id => ({ status: 'available', uri: `file:///private/${id}.jpg` }));
+    const open = jest.fn();
+    const { rerender, unmount } = render(<ProductsListScreen client={s.catalogue} onOpenProduct={open} onAddProduct={jest.fn()} />);
+    expect(read.mock.calls.length).toBeLessThanOrEqual(8);
+    const calls = read.mock.calls.length;
+    rerender(<ProductsListScreen client={s.catalogue} onOpenProduct={open} onAddProduct={jest.fn()} />);
+    expect(read.mock.calls.length).toBe(calls);
+    fireEvent.press(screen.getByLabelText('Enlarge named 0 photo'));
+    expect(open).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('Named 0 enlarged photo')).toBeTruthy();
+    fireEvent.press(screen.getByText('Close photo'));
+    fireEvent.press(screen.getByText('Named 0'));
+    expect(open).toHaveBeenCalledWith('0');
+    unmount();
   } finally { s.f.closeAndDelete(); }
 });

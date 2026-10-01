@@ -34,6 +34,7 @@ import type { SaleDraftExit } from '../../sales/draftExit';
 import { EmptyState, ErrorPanel, Field, PrimaryButton, SecondaryButton, StatusNote } from '../../ui/components';
 import { displayMoney, formatMinorForEdit, parseMajorUnitsToMinor } from '../../ui/money';
 import { theme } from '../../ui/theme';
+import ProductPhoto, { productDisplayName } from '../../media/ProductPhoto';
 import QuickAddProductScreen from '../products/QuickAddProductScreen';
 import SaleDetailScreen from './SaleDetailScreen';
 import SaleHistoryScreen from './SaleHistoryScreen';
@@ -127,7 +128,11 @@ export default function SellScreen({
   const searchResults = productSearch.results;
 
   // Cart & Line Items
+  const photos = catalogueClient?.storeId === client.storeId ? catalogueClient.photos ?? client.photos : client.photos;
+  const [cartPage, setCartPage] = useState(0);
   const [lines, setLines] = useState<CartLine[]>([]);
+  const lastCartPage = Math.max(0, Math.ceil(lines.length / 20) - 1);
+  const visibleCartPage = Math.min(cartPage, lastCartPage);
   const [lastAddition, setLastAddition] = useState<DraftAddition | null>(null);
   const addDraftLine = (line: CartLine) => {
     const addition = insertDraftLine(lines, line);
@@ -206,6 +211,7 @@ export default function SellScreen({
     quickAddDiscard?.();
     setQuickAddDiscard(null);
     setLines([]);
+    setCartPage(0);
     scanSession.repeatExplicitly();
     closeLineConfiguration();
     setCustomerName('');
@@ -704,6 +710,7 @@ export default function SellScreen({
       setCompletedSale(graph);
       endScanIntent();
       setLines([]);
+    setCartPage(0);
       setCustomerName('');
       setSelectedCustomerId(null);
       setPaymentMethod('CASH');
@@ -1081,7 +1088,7 @@ export default function SellScreen({
             </Pressable>
           </View>
 
-          {lines.map((line) => {
+          {lines.slice(visibleCartPage * 20, (visibleCartPage + 1) * 20).map((line) => {
             const lineTotalFormatted = displayMoney(line.lineTotalMinor, client.storeCurrencyCode);
             const unitPriceFormatted = displayMoney(line.unitPriceMinor, client.storeCurrencyCode);
             const discountFormatted =
@@ -1092,7 +1099,8 @@ export default function SellScreen({
             return (
               <View key={line.id} style={styles.cartLineCard}>
                 <View style={styles.cartLineMain}>
-                  <Text style={styles.cartLineName}>{line.productName}</Text>
+                  <ProductPhoto photos={photos} productId={line.storeProductId} productName={productDisplayName(line.productName)} compact />
+                  <Text style={styles.cartLineName}>{productDisplayName(line.productName)}</Text>
                   <Text style={styles.cartLineMeta}>
                     {line.quantityText} {line.packageName} @ {unitPriceFormatted}
                   </Text>
@@ -1164,6 +1172,12 @@ export default function SellScreen({
         </View>
       ) : null}
 
+      {lines.length > 20 ? <View>
+        <Text>Basket page {visibleCartPage + 1} of {lastCartPage + 1}</Text>
+        {visibleCartPage > 0 ? <SecondaryButton title="Previous basket items" onPress={() => setCartPage(visibleCartPage - 1)} /> : null}
+        {visibleCartPage < lastCartPage ? <SecondaryButton title="Next basket items" onPress={() => setCartPage(visibleCartPage + 1)} /> : null}
+      </View> : null}
+
       {/* Catalogue Search / Add Item Section */}
       <View style={styles.searchSection}>
         <Text style={styles.sectionTitle}>
@@ -1219,8 +1233,8 @@ export default function SellScreen({
                 : null;
 
               return (
+                <View key={hit.storeProductId}>
                 <Pressable
-                  key={hit.storeProductId}
                   accessibilityRole="button"
                   accessibilityLabel={`${hit.productName}${hit.isTemporary ? ', Temporary' : ''}`}
                   onPress={() => startConfiguringLine(hit)}
@@ -1237,6 +1251,8 @@ export default function SellScreen({
                   </View>
                   {price ? <Text style={styles.hitPrice}>{price}</Text> : null}
                 </Pressable>
+                <ProductPhoto photos={photos} productId={hit.storeProductId} productName={hit.productName} compact />
+                </View>
               );
             })}
           </View>

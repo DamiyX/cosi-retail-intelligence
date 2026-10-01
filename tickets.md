@@ -366,7 +366,7 @@ Out of scope: combining completed transactions, discount allocation redesign, pa
 
 ## M8-12 — Identify products by their photos across catalogue and selling
 
-Status: Founder requested October1; coordinator-sized under delegated judgment. Not implemented or tested; source edits remain held during phone exploration.
+Status: Source implemented under D-050; 19 focused tests/three suites and mounted-snapshot regression passed. Mobile typecheck and zero-warning lint passed. Independent/native acceptance remains pending.
 Blocked by: Existing M8-07 private-photo storage. No semantic dependence on M8-10/11; execute after them to preserve sequential ownership of the Sell flow.
 Delivers: named and unfinished products with photos are visually distinguishable in catalogue, sale search, basket and detail; tapping a thumbnail shows the whole photo. D-050 extends the original temporary-cart request.
 

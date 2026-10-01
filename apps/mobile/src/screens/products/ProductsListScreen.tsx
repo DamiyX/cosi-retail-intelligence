@@ -112,26 +112,29 @@ export default function ProductsListScreen({
       ) : (
         <FlatList
           data={state.hits}
+          initialNumToRender={8} maxToRenderPerBatch={8} windowSize={5}
           keyExtractor={(hit) => hit.product.id}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => {
             const label = statusLabel(item);
             const price = displayMoney(item.preferredSellingPriceMinor, client.storeCurrencyCode);
             return (
+              <View style={styles.row}>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={`${item.variantName}${label ? `, ${label}` : ''}`}
                 onPress={() => onOpenProduct(item.product.id)}
-                style={styles.row}
+                style={{ minHeight: theme.minTouchTarget }}
               >
                 <Text style={styles.rowName}>{item.variantName}</Text>
-                {item.isTemporary ? <ProductPhoto photos={client.photos} productId={item.product.id} compact /> : null}
                 {label ? <Text style={styles.rowStatus}>{label}</Text> : null}
                 {item.preferredPackageName ? (
                   <Text style={styles.rowMeta}>Sold per {item.preferredPackageName}</Text>
                 ) : null}
                 {price ? <Text style={styles.rowMeta}>Selling price: {price}</Text> : null}
               </Pressable>
+              <ProductPhoto photos={client.photos} productId={item.product.id} productName={item.variantName} refreshKey={state.hits} compact />
+              </View>
             );
           }}
         />
