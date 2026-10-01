@@ -9,6 +9,14 @@ import { jpegDimensions } from '../src/media/photoFormat';
 import { deterministicIds, openCatalogueFixture, reopenDatabase, testId } from './catalogueSupport';
 
 const jpeg = Uint8Array.from([255,216,255,192,0,11,8,0,100,0,200,1,1,17,0,255,217]);
+function boundedJpeg(size: number, width = 1024, height = 768): Uint8Array {
+  const bytes = new Uint8Array(size);
+  bytes.set(jpeg.slice(0, -2));
+  bytes[7] = height >> 8; bytes[8] = height & 255;
+  bytes[9] = width >> 8; bytes[10] = width & 255;
+  bytes.set([255, 217], size - 2);
+  return bytes;
+}
 function filePort(root: string): PhotoFiles {
   mkdirSync(root, { recursive: true });
   return {
@@ -42,6 +50,71 @@ function setup() {
   }, { generateId: deterministicIds(1000), operationId });
   return { f, root, source, files, photos, create, close: () => { f.closeAndDelete(); rmSync(root, { recursive: true, force: true }); rmSync(source, { force: true }); } };
 }
+
+it('rejects encoded thumbnails above 300 KiB or 1024 pixels even when the camera boundary is bypassed', () => {
+  const s = setup();
+  try {
+    writeFileSync(s.source, boundedJpeg(307201));
+    expect(() => s.photos.stage(s.source)).toThrow('bounds');
+    writeFileSync(s.source, boundedJpeg(100000, 1025, 768));
+    expect(() => s.photos.stage(s.source)).toThrow('bounds');
+    expect(s.f.adapter.getAllRows('SELECT id FROM media_assets')).toHaveLength(0);
+    expect(s.files.list()).toHaveLength(0);
+  } finally { s.close(); }
+});
+
+it('accepts exact byte limits and portrait/landscape dimensions without changing the encoded aspect', () => {
+  const s = setup();
+  try {
+    for (const [size, width, height] of [[307199, 1024, 768], [307200, 768, 1024]]) {
+      writeFileSync(s.source, boundedJpeg(size!, width!, height!));
+      const id = s.photos.stage(s.source);
+      expect(s.files.inspect(`${id}.jpg`)).toMatchObject({ size, width, height });
+      expect(s.photos.preview(id).status).toBe('available');
+    }
+    expect(s.f.adapter.getAllRows('SELECT id FROM media_assets')).toHaveLength(2);
+  } finally { s.close(); }
+});
+
+it('retains legacy large-image reads/replay and retries a committed replacement even after its file disappears', () => {
+  const s = setup();
+  try {
+    const asset = s.photos.stage(s.source);
+    const product = s.create(asset);
+    // Simulate a previously valid committed legacy attachment, without rewriting it in production.
+    writeFileSync(join(s.root, `${asset}.jpg`), boundedJpeg(MAX_PHOTO_BYTES, 2048, 1536));
+    const legacy = s.files.inspect(`${asset}.jpg`)!;
+    s.f.adapter.run('UPDATE media_assets SET byte_size = ?, width = ?, height = ?, checksum = ? WHERE id = ?', [legacy.size, legacy.width, legacy.height, legacy.checksum, asset]);
+    expect(s.photos.read(product.storeProduct.id).status).toBe('available');
+    expect(s.create(asset).storeProduct.id).toBe(product.storeProduct.id);
+    const replacement = s.photos.stage(s.source);
+    s.photos.replace(product.storeProduct.id, replacement);
+    s.files.remove(`${replacement}.jpg`);
+    expect(() => s.photos.replace(product.storeProduct.id, replacement)).not.toThrow();
+    s.photos.discard(replacement);
+    expect(s.f.adapter.getFirstRow<{ id: string }>('SELECT id FROM media_assets WHERE store_product_id = ?', [product.storeProduct.id])?.id).toBe(replacement);
+    expect(s.files.inspect(`${asset}.jpg`)).toEqual(legacy);
+  } finally { s.close(); }
+});
+
+it('enforces new-attachment limits for pre-existing staging and rolls back a failed replacement atomically', () => {
+  const s = setup();
+  try {
+    const old = s.photos.stage(s.source);
+    const product = s.create(old);
+    const staged = s.photos.stage(s.source);
+    writeFileSync(join(s.root, `${staged}.jpg`), boundedJpeg(307201));
+    const info = s.files.inspect(`${staged}.jpg`)!;
+    s.f.adapter.run('UPDATE media_assets SET byte_size = ?, width = ?, height = ?, checksum = ? WHERE id = ?', [info.size, info.width, info.height, info.checksum, staged]);
+    expect(() => s.photos.assertReady(staged)).toThrow('bounds');
+    expect(() => s.photos.replace(product.storeProduct.id, staged)).toThrow('bounds');
+    expect(() => createTemporaryProduct(s.f.adapter, { storeId: s.f.context.store.id, deviceId: s.f.context.device.id,
+      name: 'Rejected large attachment', localPhotoId: staged }, { generateId: deterministicIds(2000), operationId: testId(9001) })).toThrow('bounds');
+    expect(s.photos.read(product.storeProduct.id).uri).toContain(old);
+    expect(s.f.adapter.getAllRows('SELECT id FROM store_products')).toHaveLength(1);
+    expect(s.f.adapter.getAllRows('SELECT operation_id FROM outbox_operations')).toHaveLength(1);
+  } finally { s.close(); }
+});
 
 it('client replay succeeds after a committed identification photo becomes unavailable', () => {
   const s = setup();

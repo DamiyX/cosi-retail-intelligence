@@ -12,13 +12,13 @@ class PhotoCameraBoundary extends Component<{ children: ReactNode }, { failed: b
   static getDerivedStateFromError() { return { failed: true }; }
   render() { return this.state.failed ? <Text>Photo camera unavailable in this build. Continue without photo.</Text> : this.props.children; }
 }
-export default function ProductPhotoStep({ active, onCaptured, onContinue, onCancel }: ProductPhotoCameraProps & { onContinue(): void; onCancel(): void }) {
+export default function ProductPhotoStep({ active, onCaptured, onContinue, onCancel, continueTitle = 'Continue without photo' }: ProductPhotoCameraProps & { onContinue(): void; onCancel(): void; continueTitle?: string }) {
   return <View style={{ gap: 12 }}>
-    <Text accessibilityRole="header">Identify this product later</Text>
-    <Text>Take a photo so you can finish this product later. Fit the whole product in the frame.</Text>
+    <Text accessibilityRole="header">Product photo</Text>
+    <Text>Fit the whole product in the frame so you can identify it later.</Text>
     <Text>Private photo on this device only. Photo backup and restore on another phone are unavailable.</Text>
     <PhotoCameraBoundary><Suspense fallback={<Text>Opening photo camera…</Text>}><Camera active={active} onCaptured={onCaptured} /></Suspense></PhotoCameraBoundary>
-    <SecondaryButton title="Continue without photo" onPress={onContinue} />
+    <SecondaryButton title={continueTitle} onPress={onContinue} />
     <SecondaryButton title="Cancel" onPress={onCancel} />
   </View>;
 }

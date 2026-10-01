@@ -1,6 +1,6 @@
 import { DomainError, formatQuantityMicros, parseQuantityDecimal } from '@retail/domain';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Alert, BackHandler, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { CatalogueClient, ProductDetail } from '../../catalogue/client';
 import type { IdentifierType, PurchasePriceHistoryRow } from '../../db/repositories';
@@ -11,6 +11,7 @@ import ScannerPanel from '../../features/scanning/ScannerPanel';
 import { ScanSession } from '../../features/scanning/session';
 import { generateMobileId } from '../../crypto/mobileIds';
 import ProductPhoto from '../../media/ProductPhoto';
+import ProductPhotoEditor from '../../media/ProductPhotoEditor';
 import { SavedSuggestion } from '../../catalogue/lookup/SuggestionCard';
 
 interface ProductDetailScreenProps {
@@ -88,6 +89,7 @@ export default function ProductDetailScreen({
 }: ProductDetailScreenProps) {
   const [screen, setScreen] = useState<ScreenState>(() => loadScreen(client, productId));
   const [editing, setEditing] = useState(false);
+  const [editingPhoto, setEditingPhoto] = useState(false);
   const [usingSuggestion, setUsingSuggestion] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [localSku, setLocalSku] = useState('');
@@ -105,9 +107,19 @@ export default function ProductDetailScreen({
   const [saving, setSaving] = useState(false);
   const [confirmingDeactivate, setConfirmingDeactivate] = useState(false);
   const reorderProductIdRef = useRef<string | null>(null);
+  const loadedScope = useRef({ client, productId });
+  useLayoutEffect(() => {
+    if (loadedScope.current.client === client && loadedScope.current.productId === productId) return;
+    loadedScope.current = { client, productId };
+    setEditingPhoto(false);
+    setScreen(loadScreen(client, productId));
+  }, [client, productId]);
 
   const state = screen.detail;
   const detail = state.detail;
+  const photoStatus = useMemo(() => {
+    try { return detail ? client.photos?.read(detail.product.id).status : 'none'; } catch { return 'missing'; }
+  }, [client.photos, detail]);
   const priceHistory = screen.priceHistory;
   useEffect(() => {
     if (!detail || reorderProductIdRef.current === detail.product.id) {
@@ -424,6 +436,13 @@ export default function ProductDetailScreen({
           )}
           {failure !== null ? <ErrorPanel title="Not saved" message={failure} /> : null}
           <ProductPhoto photos={client.photos} productId={detail.product.id} productName={detail.variant.name} refreshKey={detail} />
+          {client.photos ? <>
+            <SecondaryButton title={photoStatus === 'none' ? 'Add photo' : 'Change photo'} onPress={() => setEditingPhoto(true)} />
+            <Modal visible={editingPhoto} onRequestClose={() => setEditingPhoto(false)}>
+              {editingPhoto ? <ProductPhotoEditor key={`${client.storeId}:${detail.product.id}`} photos={client.photos} productId={detail.product.id}
+                onCancel={() => setEditingPhoto(false)} onSaved={() => { refresh(); setEditingPhoto(false); }} /> : null}
+            </Modal>
+          </> : null}
           {detail.product.isTemporary && !editing && client.suggestions ? <SavedSuggestion key={`${client.storeId}:${detail.product.id}`} service={client.suggestions} productId={detail.product.id} onUse={suggestion => { beginEdit(); setName(suggestion.name); setUsingSuggestion(suggestion.name); }} /> : null}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Codes</Text>

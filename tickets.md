@@ -378,7 +378,7 @@ Delivers: named and unfinished products with photos are visually distinguishable
 
 ## M8-13 — Add or change a product thumbnail through normal onboarding
 
-Status: Founder requested October1; D-050 and coordinator-delegated sizing. Not implemented/tested. Source edits remain held during phone exploration.
+Status: Source implemented under D-050; 33 focused tests/four suites, mobile typecheck and zero-warning lint pass. Native clarity/size/onboarding/restart and independent acceptance remain pending.
 Blocked by: Existing M8-07 camera/private-photo persistence; M8-12 provides the consistent presentation. Execute after M8-10..12 under the same sequential source ownership.
 Delivers: an ordinary named product can be created with a photo; an existing named/temporary/enriched product can receive or replace its photo without repeating product creation.
 

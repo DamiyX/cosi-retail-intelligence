@@ -3,7 +3,16 @@ import { requireId } from '../db/repositories/common';
 import { generateMobileId } from '../crypto/mobileIds';
 
 export const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
+export const MAX_THUMBNAIL_BYTES = 300 * 1024;
+export const MAX_THUMBNAIL_EDGE = 1024;
 export interface PhotoInfo { size: number; width: number; height: number; checksum: string }
+export function assertNewThumbnail(info: PhotoInfo): void {
+  if (!Number.isInteger(info.size) || info.size <= 0 || info.size > MAX_THUMBNAIL_BYTES ||
+      !Number.isInteger(info.width) || !Number.isInteger(info.height) || info.width <= 0 || info.height <= 0 ||
+      info.width > MAX_THUMBNAIL_EDGE || info.height > MAX_THUMBNAIL_EDGE || !info.checksum) {
+    throw new Error('Photo exceeds thumbnail storage bounds (1024 pixels, 300 KiB). Retry or continue without photo.');
+  }
+}
 export interface PhotoFiles {
   stage(sourceUri: string, key: string): PhotoInfo;
   inspect(key: string): PhotoInfo | null;
@@ -17,11 +26,15 @@ export interface ProductPhotos {
   stage(uri: string): string;
   discard(id: string): void;
   assertReady(id: string): void;
+  preview(id: string): PhotoView;
   read(productId: string): PhotoView;
   replace(productId: string, stagedId: string): void;
   recover(): void;
 }
 export function attachProductPhoto(db: DatabaseAdapter, storeId: string, productId: string, assetId: string): void {
+  const asset = db.getFirstRow<AssetRow>('SELECT * FROM media_assets WHERE id = ? AND store_id = ?', [requireId(assetId), storeId]);
+  if (!asset || (asset.store_product_id !== null && asset.store_product_id !== productId)) throw new Error('Photo unavailable for this store/product.');
+  if (asset.store_product_id === null) assertNewThumbnail({ size: asset.byte_size, width: asset.width, height: asset.height, checksum: asset.checksum });
   const result = db.run('UPDATE media_assets SET store_product_id = ? WHERE id = ? AND store_id = ? AND (store_product_id IS NULL OR store_product_id = ?)', [productId, requireId(assetId), storeId, productId]);
   if (result.changes !== 1) throw new Error('Photo unavailable for this store/product.');
 }
@@ -55,7 +68,7 @@ export function createProductPhotos(db: DatabaseAdapter, storeId: string, files:
       }
       try {
         const info = files().stage(sourceUri, key);
-        if (!Number.isInteger(info.size) || info.size <= 0 || info.size > MAX_PHOTO_BYTES || !Number.isInteger(info.width) || !Number.isInteger(info.height) || info.width <= 0 || info.height <= 0 || info.width > 4096 || info.height > 4096 || !info.checksum) throw new Error('Photo exceeds storage bounds.');
+        assertNewThumbnail(info);
         db.run('INSERT INTO media_assets(id, store_id, file_key, byte_size, width, height, checksum, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [id, storeId, key, info.size, info.width, info.height, info.checksum, new Date(now()).toISOString()]);
         return id;
       } catch (error) {
@@ -67,7 +80,16 @@ export function createProductPhotos(db: DatabaseAdapter, storeId: string, files:
       }
     },
     discard,
-    assertReady(id) { const asset = row(id); if (!asset || !available(asset)) throw new Error('Photo missing or damaged. Retry or continue without photo.'); },
+    assertReady(id) {
+      const asset = row(id);
+      if (!asset || !available(asset)) throw new Error('Photo missing or damaged. Retry or continue without photo.');
+      if (asset.store_product_id === null) assertNewThumbnail({ size: asset.byte_size, width: asset.width, height: asset.height, checksum: asset.checksum });
+    },
+    preview(id) {
+      const asset = row(id);
+      if (!asset) return { status: 'none' };
+      try { return available(asset) ? { status: 'available', uri: files().uri(asset.file_key) } : { status: 'missing' }; } catch { return { status: 'missing' }; }
+    },
     read(productId) {
       ownsProduct(productId);
       const asset = db.getFirstRow<AssetRow>('SELECT * FROM media_assets WHERE store_id = ? AND store_product_id = ?', [storeId, productId]);
@@ -77,7 +99,11 @@ export function createProductPhotos(db: DatabaseAdapter, storeId: string, files:
     replace(productId, stagedId) {
       ownsProduct(productId);
       const staged = row(stagedId);
-      if (!staged || (staged.store_product_id !== null && staged.store_product_id !== productId) || !available(staged)) throw new Error('Photo unavailable for this store/product.');
+      if (!staged || (staged.store_product_id !== null && staged.store_product_id !== productId)) throw new Error('Photo unavailable for this store/product.');
+      // A reported-after-commit retry must not depend on optional file availability.
+      if (staged.store_product_id === productId) return;
+      assertNewThumbnail({ size: staged.byte_size, width: staged.width, height: staged.height, checksum: staged.checksum });
+      if (!available(staged)) throw new Error('Photo unavailable for this store/product.');
       db.transaction(() => {
         db.run('UPDATE media_assets SET store_product_id = NULL WHERE store_id = ? AND store_product_id = ? AND id <> ?', [storeId, productId, stagedId]);
         attachProductPhoto(db, storeId, productId, stagedId);

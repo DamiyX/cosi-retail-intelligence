@@ -2,6 +2,8 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AppState, Linking, Text, View } from 'react-native';
 import { ErrorPanel, PrimaryButton, SecondaryButton } from '../ui/components';
+import { discardCameraCapture } from './nativePhotoFiles';
+import { MAX_THUMBNAIL_EDGE } from './productPhotos';
 
 export interface ProductPhotoCameraProps {
   active: boolean;
@@ -51,7 +53,7 @@ function ReadyPhotoCamera({ onCaptured }: Pick<ProductPhotoCameraProps, 'onCaptu
     try {
       const sizes = await camera.current!.getAvailablePictureSizesAsync();
       const size = sizes.map(value => ({ value, dimensions: value.split('x').map(Number) }))
-        .filter(({ dimensions: [width, height] }) => width! > 0 && height! > 0 && width! <= 2048 && height! <= 2048)
+        .filter(({ dimensions: [width, height] }) => width! > 0 && height! > 0 && width! <= MAX_THUMBNAIL_EDGE && height! <= MAX_THUMBNAIL_EDGE)
         .sort((a, b) => b.dimensions[0]! * b.dimensions[1]! - a.dimensions[0]! * a.dimensions[1]!)[0]?.value;
       if (!size) throw new Error('A bounded photo size is unavailable.');
       if (alive.current && token === generation.current) { setPictureSize(size); setReady(true); }
@@ -64,12 +66,16 @@ function ReadyPhotoCamera({ onCaptured }: Pick<ProductPhotoCameraProps, 'onCaptu
     const token = generation.current;
     inFlight.current = true;
     setBusy(true);
+    let capturedUri: string | undefined;
     try {
       const result = await camera.current!.takePictureAsync({ quality: 0.65, exif: false, base64: false });
+      capturedUri = result.uri;
       if (alive.current && token === generation.current && AppState.currentState === 'active') onCaptured(result.uri);
-    } catch {
-      if (alive.current && token === generation.current) setFailure('Photo could not be saved. Check device storage, retry or continue without photo.');
+    } catch (error) {
+      if (alive.current && token === generation.current) setFailure(error instanceof Error && error.message.includes('thumbnail storage bounds')
+        ? error.message : 'Photo could not be saved. Check device storage, retry or continue without photo.');
     } finally {
+      if (capturedUri) discardCameraCapture(capturedUri);
       inFlight.current = false;
       if (alive.current && token === generation.current) setBusy(false);
     }

@@ -7,12 +7,15 @@ import type { ProductPhotoCameraProps } from '../src/media/ProductPhotoCamera';
 import ProductPhoto from '../src/media/ProductPhoto';
 import ProductsListScreen from '../src/screens/products/ProductsListScreen';
 import QuickAddProductScreen from '../src/screens/products/QuickAddProductScreen';
+import ProductDetailScreen from '../src/screens/products/ProductDetailScreen';
 import SellScreen from '../src/screens/sales/SellScreen';
 import { deterministicIds, openCatalogueFixture } from './catalogueSupport';
 let mockPhotoCallback: ((uri: string) => void) | undefined;
+let mockCameraUnavailable = false;
 jest.mock('../src/media/ProductPhotoCamera', () => {
   const { Text } = jest.requireActual<typeof import('react-native')>('react-native');
   return { __esModule: true, default: ({ onCaptured }: ProductPhotoCameraProps) => {
+    if (mockCameraUnavailable) throw new Error('Native camera module unavailable');
     mockPhotoCallback = onCaptured;
     return <Text onPress={() => onCaptured('file:///cache/capture.jpg')}>Take product photo</Text>;
   } };
@@ -149,4 +152,113 @@ it('virtualizes a large catalogue and keeps photo taps separate from product sel
     expect(open).toHaveBeenCalledWith('0');
     unmount();
   } finally { s.f.closeAndDelete(); }
+});
+
+it('ordinary named onboarding previews/retakes and retries a committed save without duplicating product/photo/outbox', async () => {
+  const s = setup();
+  try {
+    const saved = jest.fn().mockImplementationOnce(() => { throw new Error('navigation interrupted after save'); });
+    const { unmount } = render(<QuickAddProductScreen client={s.catalogue} onSaved={saved} onCancel={jest.fn()} />);
+    fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Named product');
+    fireEvent.press(screen.getByText('Add product photo'));
+    await screen.findByText('Take product photo'); fireEvent.press(screen.getByText('Take product photo'));
+    const first = screen.getByLabelText('Product photo preview').props.source.uri;
+    fireEvent.press(screen.getByText('Retake product photo'));
+    fireEvent.press(screen.getByText('Cancel'));
+    expect(screen.getByLabelText('Product photo preview').props.source.uri).toBe(first);
+    fireEvent.press(screen.getByText('Retake product photo'));
+    await screen.findByText('Take product photo'); fireEvent.press(screen.getByText('Take product photo'));
+    expect(screen.getByLabelText('Product photo preview').props.source.uri).not.toBe(first);
+    expect(s.saved.size).toBe(1);
+    fireEvent.press(screen.getByText('Save product'));
+    fireEvent.press(screen.getByText('Try again'));
+    expect(saved).toHaveBeenCalledTimes(2);
+    expect(saved.mock.calls[1]![0]).toBe(saved.mock.calls[0]![0]);
+    expect(s.f.adapter.getAllRows('SELECT id FROM store_products')).toHaveLength(1);
+    expect(s.f.adapter.getAllRows('SELECT operation_id FROM outbox_operations')).toHaveLength(1);
+    expect(s.f.adapter.getAllRows('SELECT id FROM media_assets')).toHaveLength(1);
+    expect(s.photos.read(saved.mock.calls[0]![0]).status).toBe('available');
+    unmount(); expect(s.saved.size).toBe(1);
+  } finally { s.f.closeAndDelete(); }
+});
+
+it.each([false, true])('detail edits photos on temporary/enriched records (enriched=%s) and keeps the old attachment on cancel/failure', async enriched => {
+  const s = setup();
+  try {
+    const graph = s.catalogue.createTemporaryProduct({ name: 'Detail product', localPhotoId: s.photos.stage('file:///cache/capture.jpg'), defaultSellingPriceMinor: 100 });
+    if (enriched) s.catalogue.markProductEnriched({ storeProductId: graph.storeProduct.id });
+    const productId = graph.storeProduct.id;
+    const old = s.photos.read(productId).uri;
+    const sale = createDatabaseSalesClient(s.f.adapter).completeSale({ lines: [{ storeProductId: productId, packageUnitId: graph.basePackage.id, quantityPackagesMicros: 1000000, unitPriceMinor: 100 }], payment: { method: 'CASH' } });
+    const snapshots = s.f.adapter.getAllRows('SELECT * FROM sale_items WHERE sale_id = ?', [sale.sale.id]);
+    const { unmount } = render(<ProductDetailScreen client={s.catalogue} productId={productId} onBack={jest.fn()} onAddPackage={jest.fn()} onEditPackage={jest.fn()} />);
+    fireEvent.press(screen.getByText('Change photo'));
+    await screen.findByText('Take product photo'); fireEvent.press(screen.getByText('Take product photo'));
+    const stale = mockPhotoCallback!;
+    fireEvent.press(screen.getByText('Cancel'));
+    expect(s.photos.read(productId).uri).toBe(old);
+    act(() => stale('file:///cache/abandoned.jpg'));
+    expect(s.saved.size).toBe(1);
+    fireEvent.press(screen.getByText('Change photo'));
+    await screen.findByText('Take product photo'); fireEvent.press(screen.getByText('Take product photo'));
+    const replace = jest.spyOn(s.photos, 'replace').mockImplementationOnce(() => { throw new Error('SQL full'); });
+    fireEvent.press(screen.getByText('Save photo'));
+    expect(screen.getByText('Photo not saved')).toBeTruthy();
+    expect(s.photos.read(productId).uri).toBe(old);
+    fireEvent.press(screen.getByText('Try again'));
+    replace.mockRestore();
+    expect(s.photos.read(productId).uri).not.toBe(old);
+    expect(screen.getByLabelText('Product identification photo').props.source.uri).toBe(s.photos.read(productId).uri);
+    expect(s.f.adapter.getAllRows('SELECT * FROM sale_items WHERE sale_id = ?', [sale.sale.id])).toEqual(snapshots);
+    expect(s.f.adapter.getAllRows('SELECT id FROM store_products')).toHaveLength(1);
+    unmount();
+  } finally { s.f.closeAndDelete(); }
+});
+
+it('detail Add photo supports a no-photo product and drops captured callbacks after store switch', async () => {
+  const s = setup();
+  try {
+    const graph = s.catalogue.createTemporaryProduct({ name: 'No photo' });
+    const view = render(<ProductDetailScreen client={s.catalogue} productId={graph.storeProduct.id} onBack={jest.fn()} onAddPackage={jest.fn()} onEditPackage={jest.fn()} />);
+    fireEvent.press(screen.getByText('Add photo'));
+    await screen.findByText('Take product photo'); fireEvent.press(screen.getByText('Take product photo'));
+    fireEvent.press(screen.getByText('Save photo'));
+    expect(s.photos.read(graph.storeProduct.id).status).toBe('available');
+    fireEvent.press(screen.getByText('Change photo'));
+    await screen.findByText('Take product photo'); const staleDetail = mockPhotoCallback!;
+    const next = s.catalogue.createTemporaryProduct({ name: 'Next product' });
+    const detailStage = jest.spyOn(s.photos, 'stage');
+    view.rerender(<ProductDetailScreen client={s.catalogue} productId={next.storeProduct.id} onBack={jest.fn()} onAddPackage={jest.fn()} onEditPackage={jest.fn()} />);
+    act(() => staleDetail('file:///cache/wrong-product.jpg'));
+    expect(detailStage).not.toHaveBeenCalled();
+    expect(screen.getByText('Next product')).toBeTruthy();
+    expect(s.photos.read(next.storeProduct.id).status).toBe('none');
+    detailStage.mockRestore(); view.unmount();
+    const quick = render(<QuickAddProductScreen client={s.catalogue} saleShortcut onSaved={jest.fn()} onCancel={jest.fn()} />);
+    await screen.findByText('Take product photo'); const stale = mockPhotoCallback!;
+    const stage = jest.spyOn(s.photos, 'stage');
+    quick.rerender(<QuickAddProductScreen client={{ ...s.catalogue, storeId: 'different-store' }} saleShortcut onSaved={jest.fn()} onCancel={jest.fn()} />);
+    act(() => stale('file:///cache/wrong-store.jpg'));
+    expect(stage).not.toHaveBeenCalled(); quick.unmount();
+  } finally { s.f.closeAndDelete(); }
+});
+
+it('ordinary named creation still saves without a photo when the camera module is unavailable', async () => {
+  const s = setup();
+  const errors = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  try {
+    mockCameraUnavailable = true;
+    const saved = jest.fn();
+    const view = render(<QuickAddProductScreen client={s.catalogue} onSaved={saved} onCancel={jest.fn()} />);
+    fireEvent.changeText(screen.getByTestId('quick-add-name'), 'Manual product');
+    fireEvent.press(screen.getByText('Add product photo'));
+    await screen.findByText('Photo camera unavailable in this build. Continue without photo.');
+    fireEvent.press(screen.getByText('Continue without photo'));
+    fireEvent.press(screen.getByText('Save product'));
+    expect(saved).toHaveBeenCalledTimes(1);
+    expect(s.photos.read(saved.mock.calls[0]![0]).status).toBe('none');
+    expect(s.f.adapter.getAllRows('SELECT id FROM media_assets')).toHaveLength(0);
+    expect(s.f.adapter.getAllRows('SELECT id FROM store_products')).toHaveLength(1);
+    view.unmount();
+  } finally { mockCameraUnavailable = false; errors.mockRestore(); s.f.closeAndDelete(); }
 });

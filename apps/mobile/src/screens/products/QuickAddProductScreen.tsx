@@ -10,6 +10,8 @@ import { parseMajorUnitsToMinor } from '../../ui/money';
 import { ErrorPanel, Field, PrimaryButton, SecondaryButton } from '../../ui/components';
 import { theme } from '../../ui/theme';
 import ProductPhotoStep from '../../media/ProductPhotoStep';
+import ProductPhotoPreview from '../../media/ProductPhotoPreview';
+import type { PhotoView } from '../../media/productPhotos';
 
 interface QuickAddProductScreenProps {
   client: CatalogueClient;
@@ -47,7 +49,11 @@ function friendlyFieldError(error: DomainError): { field: keyof FieldErrors; mes
   return null;
 }
 
-export default function QuickAddProductScreen({
+export default function QuickAddProductScreen(props: QuickAddProductScreenProps) {
+  return <QuickAddProductForm key={props.client.storeId} {...props} />;
+}
+
+function QuickAddProductForm({
   client,
   initialName = '',
   onSaved,
@@ -67,11 +73,14 @@ export default function QuickAddProductScreen({
   const photoRef = useRef<string | undefined>(undefined);
   const [photoStep, setPhotoStep] = useState(saleShortcut);
   const [photoId, setPhotoId] = useState<string>();
+  const [photoPreview, setPhotoPreview] = useState<PhotoView>({ status: 'none' });
   const acceptingPhoto = useRef(false);
+  const currentClient = useRef(client);
   useLayoutEffect(() => {
+    currentClient.current = client;
     acceptingPhoto.current = photoStep && isFocused;
     return () => { acceptingPhoto.current = false; };
-  }, [isFocused, photoStep]);
+  }, [client, isFocused, photoStep]);
   const [quantity, setQuantity] = useState('1');
   const [sellingPrice, setSellingPrice] = useState('');
   const [name, setName] = useState(initialName);
@@ -89,7 +98,7 @@ export default function QuickAddProductScreen({
 
   const photos = client.photos;
   useEffect(() => {
-    if (saleShortcut && photos) {
+    if (photos) {
       try { photos.recover(); } catch { /* Failure must not prevent checkout. */ }
     }
     return () => {
@@ -105,6 +114,7 @@ export default function QuickAddProductScreen({
     }
     photoRef.current = undefined;
     setPhotoId(undefined);
+    setPhotoPreview({ status: 'none' });
     setPhotoStep(false);
     setFailure(null);
   };
@@ -205,14 +215,18 @@ export default function QuickAddProductScreen({
       <Text style={styles.note}>{saleShortcut ? 'Enter the selling price. Finish product details later in Products → Temporary. Payment completes normally.' : 'Only a name is required. The product saves on this device.'}</Text>
       {initialIdentifier ? <Text>Scanned {initialIdentifier.type}: {initialIdentifier.value}{!allowScannedAssociation ? '\nBarcode saving is unavailable in this build. You can save and sell this product without attaching the code.' : ''}</Text> : null}
       {photoStep ? <ProductPhotoStep active={isFocused} onCaptured={uri => {
-        if (!acceptingPhoto.current) return;
+        if (!acceptingPhoto.current || currentClient.current !== client) return;
         if (!photos) throw new Error('Photo storage unavailable.');
         const id = photos.stage(uri);
+        const previous = photoRef.current;
         acceptingPhoto.current = false;
         photoRef.current = id;
+        if (previous) { try { photos.discard(previous); } catch { /* Recovery retains referenced assets. */ } }
         setPhotoId(id);
+        try { setPhotoPreview(photos.preview(id)); } catch { setPhotoPreview({ status: 'missing' }); }
         setPhotoStep(false);
-      }} onContinue={withoutPhoto} onCancel={cancel} /> : <>
+      }} onContinue={withoutPhoto} onCancel={saleShortcut ? cancel : () => setPhotoStep(false)} /> : <>
+      {photoId ? <ProductPhotoPreview key={photoId} photo={photoPreview} /> : null}
       {saleShortcut ? <Text>{photoId ? 'Identification photo ready on this device.' : 'No identification photo saved.'}</Text> : null}
       {requireSellingPrice || saleShortcut ? <Field label="Selling price" value={sellingPrice} onChangeText={setSellingPrice} keyboardType="decimal-pad" testID="quick-add-price" /> : null}
       {saleShortcut ? <Field label="Quantity" value={quantity} onChangeText={setQuantity} keyboardType="decimal-pad" testID="quick-add-quantity" /> : null}
@@ -293,8 +307,8 @@ export default function QuickAddProductScreen({
           accessibilityHint="Save this product on this device"
         />
         <SecondaryButton title="Cancel" onPress={cancel} />
-        {saleShortcut && !productSaved ? <SecondaryButton title="Retake product photo" onPress={() => { withoutPhoto(); setPhotoStep(true); }} /> : null}
-        {saleShortcut && photoId && !productSaved ? <SecondaryButton title="Continue without photo" onPress={withoutPhoto} /> : null}
+        {!productSaved && photos ? <SecondaryButton title={photoId || saleShortcut ? 'Retake product photo' : 'Add product photo'} onPress={() => setPhotoStep(true)} /> : null}
+        {photoId && !productSaved ? <SecondaryButton title="Continue without photo" onPress={withoutPhoto} /> : null}
       </View>
       </>}
     </ScrollView>
