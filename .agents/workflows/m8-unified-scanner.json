@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "october2-slider-revision-and-bounded-cue-candidate-source-next",
+  "current_state": "m8-17-slider-and-m8-18-cue-candidate-awaiting-stopped-source-audit",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
@@ -66,7 +66,14 @@
     "m8-15-16-final-root-validation-640-passed",
     "m8-15-16-final-android-source-export-passed",
     "m8-15-16-independent-source-review-19-tests-passed",
-    "october2-stopped-native-feedback-and-slider-preference-reviewed"
+    "october2-stopped-native-feedback-and-slider-preference-reviewed",
+    "october2-eight-file-coordinator-native-packet-preserved-db01e3d",
+    "m8-17-accessible-thumb-slider-implemented-86974a2",
+    "m8-17-focused38-typecheck-zero-warning-lint-passed",
+    "m8-18-reversible300ms-cue-candidate-implemented-6082253",
+    "m8-18-original-byte-rollback-pcm-check-and-focused28-passed",
+    "m8-17-18-final-validation-641-passed",
+    "m8-17-18-final-android-source-export-passed"
   ],
   "owner": {
     "agent": "m8-coordinator",
@@ -76,6 +83,12 @@
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
   "lease": null,
   "evidence": [
+    {
+      "kind": "m8-17-18-source-candidate-handoff",
+      "source": "db01e3d/86974a2/6082253; docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md; docs/engineering/M8_IMPLEMENTATION_HANDOFF.md",
+      "result": "Pinch/labeled row replaced with measured preview-local single-thumb slider, magnifier,48dp +/- and adjustable semantics. Stale measure/finger/lifecycle guards; basket/one-camera/torch/detector/business preserved. No established causal audio fix: ONE300ms continuous880Hz/330Hz candidate at unchanged gain/playback policy, originals byte-exact and restore verified. M8-17 38/eight with typecheck/zero-warning lint; M8-18 28/five and independent PCM/syntax/write/check/restore passed. Fresh final root validate641 tests/79 suites, all workspace typecheck/zero-warning lint; eight opt-in PostgreSQL tests/two suites skipped. Android source export1621 modules/29 assets/5.3MB including candidate WAVs passed, not APK/native pass; existing React act notices retained. Source self-check only; native candidate accept-or-revert and real-focus approval remain open; guides/PC17/18/recognition/rollout deferred.",
+      "observed_at": "2026-10-01T23:45:13.372Z"
+    },
     {
       "kind": "founder-model-escalation",
       "source": "direct coordinator human message2026-10-02",
@@ -582,8 +595,8 @@
     "Live catalogue provider disabled: authorized public contact, ODbL reuse/attribution review and native HTTP/provider smoke remain unverified.",
     "October1 cached/default native DB handle failed prepareSync; separate connection quick_check passed, cause and clean-session photo/no-photo discriminator unresolved."
   ],
-  "next_action": "Existing implementer01a0ec1c-578c-7c41-b151-e803c9e5c548 Sol XHIGH under explicit October2 founder approval owns M8-17 slider and M8-18 bounded sound investigation/candidate. Preserve pending docs, no phone/Metro or native package/policy/build/backend/rollout. Stop with tests/evidence, clearly distinguish candidate from fix; coordinator audits before any phone retry. Genuine tap focus requires explicit founder decision; guide resize/PC17/18 deferred.",
+  "next_action": "After implementer STOPPED clean handoff, coordinator independently audits slider/cue source6082253 and exact rollback. Utility only proceeds with founder draft/reload consent and runtime confirmation to ONE bounded first/repeat cue accept-or-revert/slider procedure; first silent verified cue stops and returns for original rollback, no blind retry loop. Real focus native extension/build approval unanswered. Source/phone concurrency, build/spend/backend/provider/association/ordinary rollout, guides/PC17/18/TrackB/OCR/models remain forbidden in this scope; default Sol HIGH after bounded XHIGH assignment.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-10-01T23:09:46.422Z",
+  "updated_at": "2026-10-01T23:45:13.372Z",
   "archived": false
 }

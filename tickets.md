@@ -435,7 +435,7 @@ M8-15/16 coordinator source review (2026-10-01): retirement and zoom source inde
 
 ## M8-17 — Replace pinch zoom with a thumb-operated preview slider
 
-Status: Founder-authorized preference revision, 2026-10-02; supersedes M8-16 pinch/buttons interaction, not its accepted lifecycle/business guards.
+Status: Slider source implemented86974a2, superseding pinch/buttons while preserving lifecycle/business guards.38 focused tests/typecheck/zero-warning lint passed; independent/native review pending.
 Blocked by: stopped source/native review (complete). Same camera API; no schema or native dependency.
 Delivers: one-thumb zoom adjustment inside live preview at bottom of framing guides, magnifier and minus/plus ends, without a second screen or long labels.
 
@@ -447,7 +447,7 @@ Delivers: one-thumb zoom adjustment inside live preview at bottom of framing gui
 
 ## M8-18 — Test a longer single recognition cue as a reversible candidate
 
-Status: Coordinator-scoped mitigation experiment under founder's requested beep correction; no confirmed cause or native sound fix.
+Status: ONE reversible300ms cue candidate implemented6082253; no demonstrated cause or native sound fix.28 focused checks and exact original/PCM/rollback passed; coordinator/native accept-or-revert pending.
 Blocked by: completed trace review/retirement (complete). Execute after M8-17 for sole source ownership only.
 Delivers: bounded candidate against the short100ms-cue startup/perception hypothesis, to be accepted or reverted based on first-scan phone evidence.
 
@@ -457,3 +457,5 @@ Delivers: bounded candidate against the short100ms-cue startup/perception hypoth
 - [ ] Report explicitly as candidate/mitigation, with100->300ms change and no causal claim. Coordinator audits before phone owner runs controlled first-versus-repeat audible checks. If first-cue still silent, revert this candidate or return an evidence-based next decision; do not keep lengthening/gaining/replaying in a loop. Native gate stays open until actual result.
 
 October2 founder-approved model override: M8-17/18 assigned to existing implementer on GPT-6.1 Sol XHIGH, explicitly no Astra; restore default HIGH for later coding assignments. The proposed300ms sound experiment must first undergo the escalated technical review; replace/reject it if evidence supports a smaller safer repair. Do not claim any mitigation a cause/fix before native first-cue acceptance, or make unapproved global/native policy changes.
+
+M8-17/18 stopped source packet (2026-10-02): packetdb01e3d; slider86974a2; cue candidate6082253. Original8efb1e0 assets exactly recoverable via scanner-cue-candidate.mjs --restore; no JS/gain/deadline/audio-focus policy change. Focused38/eight plus28/five overlap; asset checks passed. Fresh final validation641 tests/79 suites, all workspace typecheck/zero-warning lint and Android source export1621 modules/29 assets/5.3MB passed; eight opt-in PostgreSQL tests/two suites skipped. Details/limits in latest evidence/handoff. Checkbox acceptance unchanged/coordinator-owned; native sound/slider and focus approval not passed.
