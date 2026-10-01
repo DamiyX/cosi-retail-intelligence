@@ -353,7 +353,7 @@ Out of scope: decoder/ROI redesign, automatic timeout re-arming, recognition mod
 
 ## M8-11 — Accumulate compatible products within the same basket
 
-Status: Coordinator-sized under founder-delegated ticket judgment; D-049. Not implemented or tested.
+Status: Source implemented under D-049; 30 focused tests and mobile typecheck pass, corrected import-order warning and fresh zero-warning lint pass. Independent/native acceptance pending.
 Blocked by: Existing M3/M8 draft paths. No semantic dependence on M8-10, but ownership is sequential 10 then 11 because both extend the Sell flow.
 Delivers: five deliberate identical scans show one row with quantity five; Fanta quantity ten plus one deliberate addition shows eleven; alternating Fanta/AirPro leaves two compatible rows.
 

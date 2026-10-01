@@ -59,7 +59,7 @@ it('adds A-A-A once, A-B twice, explicit A again once, and Undo without completi
     expect(screen.getByText(/2 lines · ₦200.00/)).toBeTruthy();
     fireEvent.press(screen.getByText('Scan again'));
     await act(async () => { fireEvent.press(screen.getByText('Scan A')); });
-    expect(screen.getByText(/3 lines · ₦300.00/)).toBeTruthy();
+    expect(screen.getByText(/2 lines · ₦300.00/)).toBeTruthy();
     expect(mockBeep).toHaveBeenCalledTimes(3);
     fireEvent.press(screen.getByText('Undo last addition'));
     expect(screen.getByText(/2 lines · ₦200.00/)).toBeTruthy();
@@ -180,3 +180,46 @@ for (const exit of ['line cancel', 'dirty line discard', 'dirty product discard'
     } finally { alert.mockRestore(); fixture.closeAndDelete(); }
   });
 }
+
+it('accumulates configured ten plus a scan, undoes only the increment, edits and completes one durable replayable line', async () => {
+  const fixture = openCatalogueFixture();
+  try {
+    const graph = createTemporaryProduct(fixture.adapter, { storeId: fixture.context.store.id, deviceId: fixture.context.device.id,
+      name: 'A', barcode: '036000291452', barcodeType: 'UPC', barcodeForBasePackage: true, defaultSellingPriceMinor: 10000 }, { generateId: deterministicIds(1000) });
+    const client = createDatabaseSalesClient(fixture.adapter);
+    const complete = jest.spyOn(client, 'completeSale');
+    const { unmount } = render(<SellScreen client={client} automaticScanAdditionVerified />);
+    fireEvent.press(screen.getByText('A'));
+    fireEvent.changeText(screen.getByTestId('line-quantity-input'), '10');
+    fireEvent.press(screen.getByText('Add to cart'));
+    fireEvent.press(screen.getByText('Scan next item'));
+    fireEvent.press(screen.getByText('Mode: Single item — switch to Basket'));
+    await screen.findByText('Scan A');
+    await act(async () => fireEvent.press(screen.getByText('Scan A')));
+    expect(screen.getByText(/1 lines · ₦1,100.00/)).toBeTruthy();
+    fireEvent.press(screen.getByText('Undo last addition'));
+    expect(screen.getByText(/1 lines · ₦1,000.00/)).toBeTruthy();
+    fireEvent.press(screen.getByText('Scan again'));
+    await act(async () => fireEvent.press(screen.getByText('Scan A')));
+    fireEvent.press(screen.getByText('Back to basket'));
+    fireEvent.press(screen.getByLabelText('Edit A'));
+    expect(screen.getByTestId('line-quantity-input').props.value).toBe('11');
+    fireEvent.changeText(screen.getByTestId('line-quantity-input'), '3');
+    fireEvent.press(screen.getByText('Update line'));
+    fireEvent.press(screen.getByText('Scan next item'));
+    fireEvent.press(screen.getByText('Undo last addition'));
+    expect(screen.getByText(/1 lines · ₦300.00/)).toBeTruthy();
+    fireEvent.press(screen.getByText('Back to basket'));
+    fireEvent.press(screen.getByText(/^Complete sale ·/));
+    expect(screen.getByText('Sale complete')).toBeTruthy();
+    const result = complete.mock.results[0]!.value as ReturnType<typeof client.completeSale>;
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]).toMatchObject({ quantityPackagesMicros: 3000000, unitPriceMinor: 10000, productNameSnapshot: 'A' });
+    expect(result.inventoryEvents[0]).toMatchObject({ storeProductId: graph.storeProduct.id, quantityBaseDeltaMicros: -3000000 });
+    const replay = client.completeSale({ ...complete.mock.calls[0]![0], operationId: result.outbox.operationId });
+    expect(replay.sale.id).toBe(result.sale.id);
+    expect(fixture.adapter.getAllRows('SELECT id FROM sales')).toHaveLength(1);
+    expect(fixture.adapter.getAllRows("SELECT operation_id FROM outbox_operations WHERE operation_type = 'COMPLETED_SALE_CREATED'")).toHaveLength(1);
+    unmount();
+  } finally { fixture.closeAndDelete(); }
+});

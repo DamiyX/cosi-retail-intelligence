@@ -38,23 +38,8 @@ import QuickAddProductScreen from '../products/QuickAddProductScreen';
 import SaleDetailScreen from './SaleDetailScreen';
 import SaleHistoryScreen from './SaleHistoryScreen';
 
-export interface CartLine {
-  id: string;
-  storeProductId: string;
-  productVariantId: string;
-  packageUnitId: string;
-  productName: string;
-  packageName: string;
-  conversionToBaseMicros: number;
-  quantityPackagesMicros: number;
-  quantityText: string;
-  unitPriceMinor: number;
-  unitPriceText: string;
-  discountAmountMinor: number;
-  discountText: string;
-  lineTotalMinor: number;
-  calculated: CalculatedSaleLine;
-}
+import { insertDraftLine, undoDraftAddition, type CartLine, type DraftAddition } from '../../sales/draft';
+export type { CartLine } from '../../sales/draft';
 
 interface SellScreenProps {
   client: SalesClient;
@@ -143,6 +128,12 @@ export default function SellScreen({
 
   // Cart & Line Items
   const [lines, setLines] = useState<CartLine[]>([]);
+  const [lastAddition, setLastAddition] = useState<DraftAddition | null>(null);
+  const addDraftLine = (line: CartLine) => {
+    const addition = insertDraftLine(lines, line);
+    setLines(addition.after);
+    setLastAddition(addition);
+  };
 
   // Line Configuration (Modal / Sub-form state)
   const [configuringProduct, setConfiguringProduct] = useState<SellableProductHit | null>(null);
@@ -407,8 +398,7 @@ export default function SellScreen({
           quantityPackagesMicros: 1000000, quantityText: '1', unitPriceMinor: exact.sellingPriceMinor,
           unitPriceText: formatMinorForEdit(exact.sellingPriceMinor), discountAmountMinor: 0, discountText: '',
           lineTotalMinor: calculated.netTotalMinor, calculated };
-        calculateSaleTotals([...lines, line].map(item => item.calculated));
-        setLines(current => [...current, line]);
+        addDraftLine(line);
         playScanFeedback('match', () => feedbackIntent.current === intent);
         return true;
       }
@@ -589,11 +579,13 @@ export default function SellScreen({
       calculated: calc,
     };
 
-    const candidateLines = editingLineId
-      ? lines.map((line) => (line.id === editingLineId ? newLine : line))
-      : [...lines, newLine];
     try {
-      calculateSaleTotals(candidateLines.map((line) => line.calculated));
+      if (editingLineId) {
+        const candidateLines = lines.map(line => line.id === editingLineId ? newLine : line);
+        calculateSaleTotals(candidateLines.map(line => line.calculated));
+        setLines(candidateLines);
+        setLastAddition(null);
+      } else addDraftLine(newLine);
     } catch (error) {
       setLineErrors({
         general: error instanceof Error ? error.message : 'This line would make the sale total unsafe.',
@@ -601,7 +593,6 @@ export default function SellScreen({
       return;
     }
 
-    setLines(candidateLines);
     feedbackIntent.current++;
     setScanLine(false);
     setScanIdentifier(undefined);
@@ -762,8 +753,7 @@ export default function SellScreen({
       quantityPackagesMicros: quantityMicros, quantityText: String(quantityMicros / 1000000),
       unitPriceMinor: price, unitPriceText: formatMinorForEdit(price), discountAmountMinor: 0, discountText: '',
       lineTotalMinor: calculated.netTotalMinor, calculated };
-    calculateSaleTotals([...lines.filter(item => item.id !== line.id), line].map(item => item.calculated));
-    setLines(current => current.some(item => item.id === line.id) ? current : [...current, line]);
+    if (!lines.some(item => item.id === line.id)) addDraftLine(line);
     feedbackIntent.current++;
     setQuickAddDiscard(null);
     setViewMode('cart');
@@ -817,8 +807,8 @@ export default function SellScreen({
     return <ScannerPanel service={client.recognition} session={scanSession} active={isFocused}
       muted={muted} onToggleSound={() => setMuted(value => !value)}
       basketMode={basketMode} onModeChange={setBasketMode}
-      summary={`${lines.length} lines · ${displayMoney(totals.totalMinor, client.storeCurrencyCode)}${lines.length ? ` · Last added: ${lines[lines.length - 1]!.productName}` : ''}`}
-      onUndo={() => setLines(current => current.slice(0, -1))}
+      summary={`${lines.length} lines · ${displayMoney(totals.totalMinor, client.storeCurrencyCode)}${lastAddition?.after === lines ? ` · Last added: ${lastAddition.added.productName}` : ''}`}
+      onUndo={() => { setLines(current => undoDraftAddition(current, lastAddition)); setLastAddition(null); }}
       onCandidate={configureScannedCandidate} onSearch={keepDetection}
       onCodeRead={isCurrent => playScanFeedback('code-read', isCurrent)}
       onCreate={detection => { keepDetection(detection); setViewMode('quick_add'); }}

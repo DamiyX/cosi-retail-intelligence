@@ -70,7 +70,7 @@ export default function ScannerPanel({ service, session, active, onCandidate, on
     <Text accessibilityRole="header">Scan a product</Text>
     <Text accessibilityLiveRegion="polite">{summary}</Text>
     {onToggleSound ? <SecondaryButton title={muted ? 'Sound off — enable beep' : 'Sound on — mute beep'} onPress={onToggleSound} /> : null}
-    <SecondaryButton title={basketMode ? 'Mode: Basket — switch to Single item' : 'Mode: Single item — switch to Basket'} onPress={() => onModeChange(!basketMode)} />
+    <SecondaryButton title={basketMode ? 'Mode: Basket — switch to Single item' : 'Mode: Single item — switch to Basket'} onPress={() => { session.cancel(); setBusy(false); onModeChange(!basketMode); }} />
     {basketMode ? <Text>Scan items into one basket. Review the basket before payment.</Text> : null}
     <CameraFailureBoundary><Suspense fallback={<Text>Opening camera…</Text>}>
       <BarcodeCamera active={active && !busy && result === null && failure === null} onDetection={detect} />
@@ -84,7 +84,7 @@ export default function ScannerPanel({ service, session, active, onCandidate, on
     <SecondaryButton title="Scan again" onPress={() => { session.repeatExplicitly(); setResult(null); setFailure(null); setDetection(undefined); }} />
     <SecondaryButton title="Search products" onPress={() => onSearch(detection)} />
     {onCreate ? <SecondaryButton title="Sell this item" onPress={() => onCreate(detection)} /> : null}
-    <SecondaryButton title="Undo last addition" onPress={onUndo} />
+    <SecondaryButton title="Undo last addition" onPress={() => { session.cancel(); setBusy(false); onUndo(); }} />
     <SecondaryButton title="Back to basket" onPress={onCancel} />
   </ScrollView>;
 }
