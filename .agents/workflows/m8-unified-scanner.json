@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "reviewed-source-native-first-cue-failed-bounded-diagnosis-next",
+  "current_state": "bounded-intermittent-audio-diagnosis-returned-no-source-repair",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
@@ -52,7 +52,8 @@
     "m8-14-net-sales-discount-summary-implemented-8efb1e0",
     "m8-10-14-final-validation-632-passed",
     "m8-10-14-doctor-21-dependency-check-export-passed",
-    "m8-10-14-independent-source-reaudit-75-passed"
+    "m8-10-14-independent-source-reaudit-75-passed",
+    "m8-10-intermittent-cue-source-asset-native-path-diagnosis-returned"
   ],
   "owner": {
     "agent": "m8-coordinator",
@@ -62,6 +63,12 @@
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
   "lease": null,
   "evidence": [
+    {
+      "kind": "bounded-intermittent-cue-diagnosis",
+      "source": "runtime8efb1e0; preserved documentation4040d39; docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md; docs/engineering/M8_IMPLEMENTATION_HANDOFF.md",
+      "result": "Founder clarified intermittent Home-entry silence versus audible same-route Android-back re-entry. Static route/hook/native source trace and PCM byte analysis establish player lifecycle difference and non-silent valid100ms assets; they do not establish first-cue readiness/seek expiry or native output/focus cause. No justified source repair or temporary instrumentation implemented. Existing source audit/632 tests remain attributed historical checks of unchanged runtime, not rerun evidence. Correlated default-off trace/native observation is proposed for coordinator review; all gates/approvals preserved. Utility LAN Metro60684/PID31060 untouched; no phone/build/dependency/backend/data effects.",
+      "observed_at": "2026-10-01T17:07:39Z"
+    },
     {
       "kind": "october-feedback-source-verification",
       "source": "8efb1e0; docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md; docs/engineering/M8_IMPLEMENTATION_HANDOFF.md",
@@ -503,8 +510,8 @@
     "Live catalogue provider disabled: authorized public contact, ODbL reuse/attribution review and native HTTP/provider smoke remain unverified.",
     "October1 cached/default native DB handle failed prepareSync; separate connection quick_check passed, cause and clean-session photo/no-photo discriminator unresolved."
   ],
-  "next_action": "Same source implementation chat01a0ec1c-578c-7c41-b151-e803c9e5c548, GPT-6.1 Sol high, performs bounded M8-10 audio diagnosis; repair only an established mechanism or return a stopped minimally invasive native probe proposal. Coordinator/phone stop meanwhile. Preserve eight pending docs and app data; no new native build/spend/dependency/Docker/backend/push/merge/model escalation. Source audit remains scope-specific; native cue not passed.",
+  "next_action": "Coordinator reviews stopped bounded M8-10 audio diagnosis and proposed temporary default-off nonprivate cue trace covering Home/new-sale entry, header exit/re-entry and Android-back same-route repeat. Cause remains unestablished; runtime8efb1e0 and accepted source gate unchanged. Instrumentation/native work requires the next explicit scoped assignment; none performed here. Preserve app data, founder readiness/unfinished-session consent and retained utility Metro60684/PID31060. No new native build/spend/dependency/Docker/backend/push/merge/model escalation; native cue/storage/provider gates remain open.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-10-01T16:34:13.269Z",
+  "updated_at": "2026-10-01T17:07:39Z",
   "archived": false
 }
