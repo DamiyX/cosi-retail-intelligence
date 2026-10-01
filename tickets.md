@@ -404,3 +404,27 @@ Delivers: retailer sees today's total Discounts given and understands Sales valu
 - [ ] Summary data and component tests prove exact discounted amount and unchanged sales value/cost coverage/margin/withdrawals/expense semantics. Focused tests/typecheck/lint and final combined root validation/export pass with actual evidence. Native display/refresh remains a separate phone check; no device evidence inferred from mocks.
 
 M8-10..14 stopped source packet (2026-10-01): runtime8efb1e0; focused25/30/19/33/11 checks overlap. One fresh root validation passed632 tests/77 suites, eight live PostgreSQL tests/two suites skipped; all workspace typecheck/zero-warning lint, Doctor21/21, existing dependency check and Android export passed. No migration or new dependency. Coordinator independent source review passed with75 focused tests/10 suites; composite/native acceptance checkboxes remain unchecked. See M8_INDEPENDENT_AUDIT.md. Read the superseding October handoff; native storage/audio/photo clarity/accessibility/standalone and provider/rollout gates remain open.
+
+## M8-15 — Restore reliable initial scan feedback and retire the temporary trace
+
+Status: Assigned for source investigation/correction; first-cue physical gate unresolved.
+Blocked by: stopped bounded native observation and coordinator review (complete). Extends M8-10; no database dependency.
+Delivers: ordinary scanning retains one optional cue at recognition, without temporary diagnostics or a checkout delay; the outstanding first-cue failure has an evidence-backed correction or explicit bounded unresolved handoff.
+
+- [ ] Preserve the six complete playback traces and aggregated human failure as separate evidence. Investigate installed audio/focus/output lifecycle and the short100ms asset; do not infer cause from successful invocation, gain, age of APK or a green mock.
+- [ ] Repair only a demonstrated mechanism with the smallest local change and discriminating regression coverage. If source evidence cannot establish cause, stop this item's repair branch with ranked remaining hypotheses and ONE concrete bounded next observation/proposal. Do not label an untested mitigation a causal fix; no silent warm-up playback, repeated beep, arbitrary timeout/gain/audio-mode changes, new module or APK.
+- [ ] Remove temporary trace helper/tests/imports/markers/origin metadata/flag consumption while preserving original ordinary feedback API, currentness/cancellation semantics and all substantive re-arm/playback/sale regressions. Trace activation instructions become historical. No reset of accepted M8-10..14/business commits.
+- [ ] First and repeated Single/Basket recognition, background/unfocus/cancel/timeout/mute, unknown neutral feedback and silent later Add remain bounded and correct. Ordinary scanner/route/panel tests plus strict mobile typecheck/zero-warning lint pass. Source tests do not close the phone sound gate.
+- [ ] Return exact source diff, commands, repair versus hypothesis/mitigation, removal evidence and remaining physical checks. Stop for independent coordinator review; no phone commands or rollout.
+
+## M8-16 — Zoom the live scanner without losing or changing a sale
+
+Status: Founder-authorized pinch zoom; real tap-to-focus feasibility unresolved; guide resizing deferred.
+Blocked by: existing M8 camera/lifecycle and source baseline. M8-15 precedes this only for sequential ownership, not a semantic dependency.
+Delivers: retailer can use a two-finger pinch on the live preview to enlarge a distant code, with an accessible non-gesture alternative; camera limitations remain honest.
+
+- [ ] Use only existing React Native/installed CameraView APIs and dependencies. Pinch controls finite clamped normalized zoom, stable relative to gesture start; tiny/invalid distances, second-finger changes and gesture cancellation never cause runaway zoom or unintended detections/additions. Capture gestures only in the preview; preserve parent scrolling/buttons, torch, overlays and Single/Basket state.
+- [ ] Provide compact accessible zoom-in/out/reset controls or equivalent adjustable semantics, with finite bounds and no false optical-magnification claim. Preview pause/background/unmount/permission/error paths cancel gestures/stale work; only one camera remains active. No barcode cropping/ROI/package/association/provider policy change; framing stays decorative.
+- [ ] Inspect real Android touch-focus support. Do not claim autofocus toggle/hard-coded point equals focus at the tapped point, reset the camera to fake a focus action, or add a success reticle with no real metering. If exact tap focus is unsupported, preserve request in PC11 and return smallest native-change/build proposal for explicit review; do not introduce it during this ticket.
+- [ ] Tests prove two-touch zoom changes/bounds/cancellation, accessible alternative, inactive/stale guards, torch/detection and basket preservation; focused scanner tests/typecheck/zero-warning lint pass. Native gesture/focus/clarity acceptance is a later phone check, not mock proof.
+- [ ] Preserve independent snapshot/money/quantity/outbox/domain behavior. Do not implement resizable guides, PC17/18 checkout or TrackB/M12 recognition. Stop after source handoff; coordinator audits before returning to phone.

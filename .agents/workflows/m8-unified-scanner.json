@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "temporary-cue-trace-source-returned-awaiting-coordinator-review",
+  "current_state": "bounded-native-cue-review-returned-m8-15-16-source-next",
   "completed_states": [
     "accepted-m7-baseline-inspected",
     "existing-m8-worktree-fast-forwarded",
@@ -56,7 +56,9 @@
     "m8-10-intermittent-cue-source-asset-native-path-diagnosis-returned",
     "founder-release-documents-preserved-67ea903",
     "temporary-default-off-cue-trace-implemented-caa7003",
-    "cue-trace-focused77-mobile-typecheck-zero-warning-lint-passed"
+    "cue-trace-focused77-mobile-typecheck-zero-warning-lint-passed",
+    "temporary-cue-trace-independent-review-70-tests-passed",
+    "bounded-native-trace-stopped-and-independently-reviewed"
   ],
   "owner": {
     "agent": "m8-coordinator",
@@ -66,6 +68,18 @@
   "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
   "lease": null,
   "evidence": [
+    {
+      "kind": "bounded-native-cue-review",
+      "source": "docs/engineering/M8_ANDROID_VERIFICATION.md; M8_INDEPENDENT_AUDIT.md; local sanitized trace",
+      "result": "Independently parsed118 events11..128: five complete Single/one Basket play requests with playing/finished no captured drop/error; seventh capped. Aggregated human first-cue failures remain; no causal/audible/native acceptance. Utility actual-process trace=false/regenerated bundle recorded. Founder requests pinch/tap focus; no point-focus API exposed, guide resize/PC17/18 deferred. M8-15/16 source assignment follows, Sol HIGH, sequential.",
+      "observed_at": "2026-10-01T19:16:42.812Z"
+    },
+    {
+      "kind": "temporary-cue-trace-independent-review",
+      "source": "caa7003; stopped f6717b6; docs/engineering/M8_INDEPENDENT_AUDIT.md",
+      "result": "Guard/privacy/budget/lifecycle diff reviewed; independent70 tests/three suites exit0 in21.419s. Suitable for bounded diagnostic observation only; no causal beep repair/native acceptance/activation. Existing77/static results attributed implementer. Removal required after actual-process disable; PC17/18 deferred.",
+      "observed_at": "2026-10-01T18:44:58.828Z"
+    },
     {
       "kind": "temporary-cue-trace-source-verification",
       "source": "caa7003; preserved coordinator documents67ea903; docs/engineering/M8_IMPLEMENTATION_EVIDENCE.md; docs/engineering/M8_IMPLEMENTATION_HANDOFF.md",
@@ -531,8 +545,8 @@
     "Live catalogue provider disabled: authorized public contact, ODbL reuse/attribution review and native HTTP/provider smoke remain unverified.",
     "October1 cached/default native DB handle failed prepareSync; separate connection quick_check passed, cause and clean-session photo/no-photo discriminator unresolved."
   ],
-  "next_action": "Coordinator audits stopped temporary diagnostic sourcecaa7003 and focused77/static evidence, then assigns existing utility01a0efc0-c37e-7c83-9066-1d100b11a0d6 Sol medium to scoped activation/capture/disable. Actual scans/audibility require founder readiness/draft consent; max SIX Single matches across three routes and proposed up to TWO distinct-known Basket matches only if needed/confirmed, no sale/reset. Trace default off, MAX128 session events; flag must be disabled after observation and temporary helper/markers/logs/tests removed in subsequent coordinator-owned cleanup with ordinary regressions/static checks. PC-17/18 and scanner UX/identity corrections remain deferred/unassigned; no association/provider/ordinary rollout/build/spend/backend/push/merge/architecture/model escalation. Implementer stops, no polling or concurrent phone work.",
+  "next_action": "Existing source chat01a0ec1c-578c-7c41-b151-e803c9e5c548 Sol HIGH handles tickets M8-15/16: preserve pending docs; remove temporary trace; repair only supported audio mechanism or return one bounded discriminator/proposal; implement existing-API pinch/accessibility zoom and truthful focus feasibility. No phone/server/Docker/build/spend/native dependency/backend/provider/association/push/merge/PC17/18. Stop and directly return source handoff for coordinator audit. Native acceptance stays open.",
   "created_at": "2026-09-28T17:00:34Z",
-  "updated_at": "2026-10-01T17:54:04Z",
+  "updated_at": "2026-10-01T19:16:42.812Z",
   "archived": false
 }

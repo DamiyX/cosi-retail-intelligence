@@ -414,7 +414,7 @@ Founder input, 2026-09-30: packaging can have product, marketing, batch or seria
 codes side by side. Retailer should be able to narrow the scan area or use zoom
 to intentionally target one code, rather than hoping the first callback is right.
 
-Disposition: **priority M8 follow-up proposal, not implemented or accepted**.
+Disposition: **October1 pinch zoom authorized as M8-16; real tap-to-focus requested, feasibility/review pending; resizable guides explicitly deferred**. Founder wants two-finger/finger zoom and tapping to accelerate focus on blurry codes. Current installed Android CameraView has zoom but no exposed tapped-point metering API; mode toggling uses a fixed native point and is not equivalent. Implement bounded pinch/accessible zoom with existing stack; propose the smallest genuine focus extension before any native dependency/patch/build change. Source mocks cannot prove focus or optical clarity.
 M8-08's brackets/sweeping line are decorative; detection currently covers the
 whole preview. Do not claim shrinking a decorative frame changes detection.
 Review an accessible narrow-target/zoom interaction, validated detector bounds
