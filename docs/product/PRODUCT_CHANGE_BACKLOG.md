@@ -1,7 +1,7 @@
 <!-- M8 approval checkpoint 2026-09-29: founder approved the clarified plan, DESIGN and M8-01..05 (D-046). Earlier pending-review wording below is historical. One Astra low implementation chat; coordinator reviews after handoff only. -->
 # Product Change / UX Backlog and Impact Review
 
-**Updated:** 2026-09-30. **Owner:** coordinating product/planning/audit task.
+**Updated:** 2026-10-01. **Owner:** coordinating product/planning/audit task.
 **Status:** PC-03/PC-05/PC-06 are accepted in M5; PC-01/PC-01a and the M6 Home
 promotion of PC-05 are accepted in M6. Physical release-readiness checks remain
 carried. Future UX ideas retain their documented gates.
@@ -39,6 +39,112 @@ catalogue/inventory enrichment must preserve immediate sell-first value.
 | PC-06 | Multiple expiry groups per product; optional printed numbers, internal IDs, automatic assumed FEFO without ordinary checkout confirmation | Approved D-039; M5 receipt/sale extension, unknown residual, progressive physical classification; costing stays D-027/D-038/D-040 |
 | PC-07 | Important replacement-cost/personal/market movements on Home | M9 personal/M10 market; real comparable observations, coverage/freshness/consent; no simulation in M5/M6 |
 | PC-08 | Scan while selling; single-item and continuous basket modes; progressively complete catalogue and guided visual enrollment | Founder clarification 2026-09-28 below; barcode/QR sale, basket mode, feedback and temporary completion path in M8 proposal; visual/OCR/guided enrollment in Recognition Track B and M12 |
+| PC-13 | Explicit same-code re-entry, Single recognition beep, first-beep investigation and compatible repeated draft quantities | Founder requested October1; D-049/M8-10/11 planned, no source edits while founder independently explores the phone |
+| PC-14 | Show today's discounts separately from sales value | Founder requested October1; M8-14 is a bounded correction to existing M6 summary in the feedback packet, not a new milestone; not implemented |
+| PC-15 | Product thumbnails across list/search/cart/detail, tap-to-enlarge and normal Add/Change photo controls | Founder clarified all products October1; D-050/M8-12/13 prepared against existing M8-07 camera/storage, no source changes while phone exploration continues |
+| PC-16 | Small predictable thumbnail storage and bounded display work | Founder requested October1; D-050/M8-12/13 size/cleanup/legacy checks prepared; recognition reference/OCR compression remains separately benchmarked |
+
+## PC-13 — October 1 scanner exploration corrections
+
+Original founder wording was verified in the phone verification chat and supplied
+directly to coordinator. D-049 is the approved behavior authority; M8-10/11 hold
+execution and regression criteria. Do not duplicate their full specification here.
+First-addition silence is an unresolved native observation, not a proven load-race
+cause. Separately, unknown photo/product creation hit a native DB-handle failure;
+the clean UI-only restart test remains incomplete. Both native gates remain open.
+Founder explicitly remains exploring: retain the current app/Metro session and
+hold source changes until that session ends.
+
+Additional October1 sound clarification: unknown barcode should give a neutral
+code-read cue before photo/price input, rather than first beeping at Add to basket.
+D-049/M8-10 now distinguish this from a known-product match/addition cue, with no
+second form-submit beep. No-code photo capture remains separate from recognition.
+
+## PC-15 — Product photos for identification and onboarding
+
+Founder reports temporary creation now working in their independent exploration;
+exact storage/photo/restart discriminator is still unverified. Current generated
+label suffix is the last twelve characters of the StoreProduct ID, not an image
+number. Existing identification photos display in catalogue/detail, but current
+cart rows display product text without that photo and offer no photo enlargement.
+
+Founder subsequently clarified the scope applies to all products, not only unnamed
+temporary ones. Fanta/AirPro test fixtures lack photos because fixture creation
+supplied name/code only. Ordinary Add product also currently exposes no photo
+control, and existing detail has display but no add/change-photo action.
+
+Requested delivery is all-product thumbnail/name presentation across catalogue,
+sale search/cart/detail, compact unfinished label where appropriate, quantity/price
+and tap-to-enlarge, using existing private store-scoped attachments. Normal creation
+offers a photo control; existing detail allows Add/Change photo using the existing
+camera. D-050 is the approved scope, M8-12/13 the execution ledger. Keep generated identity and receipt snapshots;
+do not rename historical sales to current enriched descriptions. Missing/no-photo
+cases remain valid and do not block selling. New physical-test product preparation
+should include a thumbnail; existing Fanta/AirPro photo completion waits for the
+next authorized phone pass, not interruption of independent exploration.
+
+Founder reiterated that guided multi-angle reference enrollment should also be
+available for barcode/QR-bearing products, not only unbranded/no-code ones. That
+recognition requirement was already recorded in PC-08/SCANNING_ARCHITECTURE and
+remains Track B/M12. One thumbnail serves a human and is not a reference set or
+proof of visual recognition. No fixed image count, automatic video/multi-view
+capture, OCR/model/runtime selection, upload/backup or recognition truth is added
+to M8-12/13. The current app's no-code photo/price path is manual identification,
+not appearance recognition.
+
+## PC-14 — Today's discounts should be visible
+
+Founder wants the summary to state the discount amount even if individual
+discounted products are not listed there. Verified source: completed sales retain
+subtotal, discount total and net total; BusinessSummary currently sums completed
+net totals over the store-local day, while its interface/screen expose no separate
+discount metric. Therefore this is a presentation/read-model omission; no evidence
+yet establishes incorrect discount arithmetic in the founder's actual test sale.
+Uncompleted basket discounts are not part of today's completed-sales summary.
+
+Smallest proposed delivery: a compact Discounts given amount alongside clearly
+labelled Sales value after discounts, using the same authorized completed-sales
+query/day/currency and safe integer aggregation. For example, sales before
+discounts10,000 minus discounts1,000 yields sales value9,000. Do not subtract the
+discount again from net sales, tracked margin or expenses. Detailed product/line
+discounts belong in sale receipts/history rather than a crowded summary card.
+No business-table migration, costing/accounting change or historical rewrite is
+needed. This is a bounded follow-up to M6, not barcode/recognition behavior.
+
+Acceptance before shipping: mixed discounted/undiscounted and paid/credit completed
+sales produce the exact amount; empty-day amount is zero; other stores/days/drafts
+are excluded; safe-integer overflow follows existing rejection behavior. Verify
+summary refresh after completion and unchanged receipt/snapshots/net sales/margin.
+Implementation remains on hold during founder's live exploration; no test or
+phone result is claimed for this request.
+
+Execution update: founder ended exploration and explicitly permitted resumption
+through the verification chat. M8-14 now carries this bounded read-model/display
+correction after M8-10..13. The preceding hold is historical, not a current block;
+no implementation or new result is claimed by this planning update.
+
+## PC-16 — Keep product thumbnails small across camera/device qualities
+
+Founder highlights hundreds/thousands of products, varying camera resolution
+and limited phone storage. Current source already captures camera sizes up to2048
+and JPEG quality0.65, but stages/copies the encoded file unchanged and accepts
+up to8MiB. One returned131945-byte photo is historical evidence, not proof every
+phone/photo stays small. No normalization/transcoding library is installed.
+
+D-050 fixes the planned new-thumbnail budget; M8-12/13 hold execution/acceptance.
+Use existing camera size/encoding facilities where feasible, verify actual bytes,
+bound temporary storage and displayed-image work, preserve legacy images and keep
+selling independent of optional media. Original high-resolution photos should
+not accumulate beside their display copy. Existing Expo docs expose pictureSize,
+supported-size discovery and quality controls, but no fixed byte guarantee:
+[Expo Camera documentation](https://docs.expo.dev/versions/latest/sdk/camera/).
+Installed SDK also exposes PictureRef/savePictureAsync; native applicability,
+same-capture encoding and cleanup remain implementation/device checks, not proof.
+
+Recognition references and OCR require an independent bounded quality/diversity/
+storage evaluation in Track B/M12; do not reuse aggressively reduced thumbnails
+as the only reference or apply the display byte cap to recognition data blindly.
+No dependency, runtime, photo reprocessing/deletion or phone operation was performed.
 
 ## PC-08 — Founder scanner experience clarification, 2026-09-28
 

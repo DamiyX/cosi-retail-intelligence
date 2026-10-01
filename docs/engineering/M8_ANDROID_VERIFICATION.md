@@ -360,3 +360,319 @@ Source evidence includes a real-route test with both ordinary and isolated confi
 ## Required sequential basket retest after M8-06/07/08 — not executed
 
 Use the reviewed source in the existing isolated verification client only after coordinator approval. Record the source and build identity. Choose Basket; scan known A then B into the same cart without checkout between them. A-A-A stationary must yield one addition; explicit repeat or quantity handles another identical unit. Insert unknown C -> explicit whole-product photo -> price -> return to the same basket -> scan the next known item -> review/edit/Undo -> one explicit combined payment -> force-stop/reopen its receipt. Photograph a useful whole-product frame without a forced distance. Verify the device-local photo after restart in Temporary/detail/Complete details; rename and check unchanged receipt snapshots. Deny permission and exercise storage/missing-photo fallback without blocking selling. Verify active corner guides/line, processing and UNKNOWN pause, reduced motion, background/focus return and large text/TalkBack. These are future steps, not completed evidence. Existing unexpected detector values, first silent beep, unfinished-cart recreation loss and incomplete continuous/permission/accessibility checks remain open.
+
+## Daytime amendment device pass — 2026-09-30, in progress
+
+Authorized sequential utility resumed on plan/m8-unified-scanner at HEAD
+9ec7449, frozen runtime 824b2af. Four coordinator-owned pending documentation
+edits are preserved; only this native evidence document is editable in this lane.
+No source/config/dependency edits, new APK job, installation or data clearing.
+
+Installed package com.damiyx.retailintelligence.scannerverification remained
+0.0.1/code1 on SM-A156E Android 16/API36. Device base.apk SHA-256 directly
+matched 76f6d2ed882b3e89bb2d234ac00927728fc1d72944f11d2fb73cff8e114692dd:
+original build105bb294 from4d6521e. Existing camera/audio/filesystem classes
+and locked filesystem57.0.7 were checked; current camera57.0.6 changelog fixes
+iOS behavior, not a proven Galaxy correction. Native File/Directory construction,
+document/cache paths, available space, exists and copySync/moveSync/bytesSync
+API presence worked in this older binary. Actual capture/copy remains a separate
+check. This pass is current JavaScript on an older native APK, not a patched APK
+or standalone preview. Matching USB Metro8083 started; cold launch returned
+Status ok/MainActivity/2722ms and bundle1807 modules/10736ms.
+
+Native SQLite now records additive migrations25 local_product_photos and26
+local_catalogue_suggestions. Existing two fixture products, original completed
+sale70c46569-05e2-423f-84ed-e9276c0ef6c6, its two inventory events and three
+PENDING outbox operations remain. No photos existed at this baseline.
+An initial read-only utility query used a nonexistent sales column and failed;
+corrected utility query succeeded. No application defect or mutation is inferred.
+
+Authenticated read-only EAS usage at2026-09-30T11:26:25.418Z: Free, total
+BUILDS7/30, LOCAL_BUILDS0/10, zero overage count, total cost0. This aggregate
+allowance is not new build authorization or proof of remaining Android-specific
+allowance. The prior single included-job permission is consumed.
+
+Founder clarified that this phone supplies the laptop's internet by hotspot
+while away from home. A brief airplane-mode attempt was undone by the founder;
+readback was0. No further network/airplane/hotspot changes will be made. Offline
+checks are explicitly deferred for this session; online connectivity does not
+activate the disabled catalogue provider or associations. Initial Wi-Fi setting
+was0, mobile_data1, font_scale1.0, accessibility_enabled0, servicesnull.
+
+First controlled Fanta presentation in Basket mode: founder reported more than
+14 seconds of the green line moving up/down, no audible beep and no perceived
+successful scan. Native screenshot/UI nevertheless recorded exactly one Fanta
+line, NGN1,000, Last added Fanta, then UNKNOWN for unexpected EAN13
+5020001011527 and Camera paused. No additional line was observed. The ready
+preview had four white corners and a green line; paused result removed that
+preview and camera-service active clients were empty. This is an unresolved
+decode/feedback observation, not a clean stationary-repeat/continuous pass.
+Fresh UI dump could not idle during the animated ready preview, so screenshots
+were used; paused UI dump succeeded. Screenshot helper buffer was increased
+outside Git after a camera PNG exceeded its old1MB buffer; no source changed.
+
+Founder subsequently presented AirPro and heard its beep. Native screenshot
+confirmed the same basket at2 lines/NGN3,000/Last added AirPro with camera still
+active. Remaining open is expected in Basket mode. The user resumed/presented
+it after the Fanta pause; exact intervening button actions are not proven, so
+this is not an uninterrupted A-to-B detector-stability pass. The current known
+basket was not manually reconstructed. Corner guides/green line were visible
+while active and absent in the earlier paused result.
+
+The original completed-sale checkpoint was reread after migrations25/26:
+SHA-256150808148a92498814e8c0f3c7b74c135e499622bc826bcd072120901e43d9d5,
+identical to the prior pre/post-restart evidence before further fixture writes.
+Known-QR fixture M8-KNOWN-FANTA-20260930 was then attached to the existing Fanta
+can using the guarded existing native catalogue API, producing a PENDING
+PRODUCT_IDENTIFIER_ADDED. This is synthetic fixture preparation, not scanner
+association rollout or physical QR evidence; flags/provider remain off.
+Known/unknown QR images were generated outside Git using the existing QR
+encoder. Physical scanning remains a separate step.
+
+Third physical product was Whiteboard Cleaner, founder-reported printed code
+6920583012563. The current ready scanner decoded that exact EAN13, paused
+UNKNOWN/No safe product match, and retained2 lines/NGN3,000. Sell this item
+opened the separate explicit photo preview, with Take product photo enabled,
+Continue without photo, device-only/no-backup wording and barcode-saving-disabled
+warning. The barcode preview was no longer mounted. Capture remains pending.
+
+### Proposed standalone test build path — not applied or submitted
+
+The existing development client cannot prove standalone launch. A concrete
+candidate for coordinator/founder review is a new EAS profile extending
+scanner-verification with developmentClient:false (internal APK), inheriting
+scanner-verification environment and explicit opt-in. It would keep exact package
+com.damiyx.retailintelligence.scannerverification and use the existing EAS project
+and matching Android signing credential. This proposal changes no configuration
+in this utility pass and needs one new Android build job; prior one-job permission
+has been consumed. Ordinary preview has a different app ID and verification off,
+so it is not a substitute for this isolated automatic-basket test.
+
+Verified allowance is aggregate Free BUILDS7/30, zero overage/cost at11:26:25Z;
+Android-specific remaining allowance and eligible free-build availability must
+be confirmed before approval/submission. No cost guarantee or new approval is
+inferred. Before an authorized update, inspect new APK package/source/version,
+compare signer certificate with the installed package, and use a data-preserving
+same-package update only if compatible. Stop on a signing/version mismatch;
+never uninstall/clear data as a workaround. Retest embedded-JS launch without
+Metro and native patch behavior separately from the current older-APK evidence.
+
+## Home Wi-Fi continuation — 2026-10-01, in progress
+
+Founder explicitly paused the office session before photo capture. Last observed
+state was Whiteboard Cleaner photo preview with Take product photo enabled;
+no staged photo, and the scanned Fanta/AirPro basket atNGN3,000 was unfinished.
+The intervening preparation message did not authorize device activity. Founder
+explicitly resumed with continue on2026-10-01.
+
+Git remains plan/m8-unified-scanner/9ec7449, runtime824b2af. Four pending
+coordinator-owned documents retain their prior hashes; this evidence appendix
+is the only workspace edit in the utility lane. No commit or native build.
+At preflight no device was connected and no Metro8083 listener existed. Laptop
+is on home-router Wi-Fi. Enabling Android Wireless debugging made the expected
+RZCX22H432K device's TLS-connect service discoverable, but sharing a router does
+not itself establish paired adb control. Local ephemeral QR pairing was offered
+without requesting a pairing credential in chat. Scoped LAN Metro8083 was
+started with matching isolated environment/opt-in and associations false.
+
+Actual app/cart/photo retention remains to be recovered after pairing; the prior
+unfinished basket is not assumed durable across this interruption. Router Wi-Fi
+replaces the office phone-hotspot dependency. Connected LAN Metro checks remain
+online/development-client evidence; standalone offline cold launch and native
+patch acceptance still require their separate reviewed build path. No further
+airplane/mobile-data/hotspot changes are made in this continuation.
+
+### Home-router recovery and first continuous basket observations
+
+Ephemeral QR adb pairing succeeded with the same RZCX22H432K / SM-A156E device.
+The pairing helper exited and removed its temporary QR image. No pairing secret
+was requested in chat or retained in evidence. LAN Metro8083 runs current frozen
+JS824b2af with the existing isolated APK4d6521e. No USB reverse or new build.
+The native app process was absent at recovery; launcher opened the actual LAN
+server. The unfinished office basket did not survive: scanner showed0 lines/NGN0.
+That is the known memory-only draft limitation, not completed-sale data loss.
+An unprompted Single-item AirPro recognition opened Add to sale; utility cancelled
+without adding it, then opened scanner and explicitly selected Basket.
+
+Read-only runtime inspection initially closed WebSocket1006 with the old loopback
+Origin. A bounded helper probe exposed the origin requirement: Metro explicitly
+reported expected http://192.168.1.3:8083. Matching that configured origin restored
+Runtime.enable and evaluation1+1=2 over loopback. Only temporary helpers changed;
+no app, dependency, Metro policy or origin guard was changed. Native SQLite read
+then succeeded: migrations1-26, original completed sale70c46569 unchanged in count,
+no media rows, and four PENDING outbox rows including prior known-QR fixture.
+
+At approximately10:40 Lagos, founder presented only Fanta and held it for10 seconds
+without Scan again. Founder and native screenshot agree1 line/NGN1,000/Last added
+Fanta, with ready camera still active. Founder heard no beep. At10:41 founder then
+presented only AirPro without Scan again and reported a beep; native screenshot
+and founder agree2 lines/NGN3,000/Last added AirPro and active preview. No duplicate
+line or intervening utility resume action was observed in this controlled A-to-B
+sequence. This supports these two additions and bounded stationary observations;
+it does not establish general decoder accuracy or reliable first-addition audio.
+At10:42 native screenshot showed exact Whiteboard Cleaner EAN136920583012563,
+UNKNOWN/No safe product match/Camera paused, retaining2 lines/NGN3,000. Human
+confirmation and photo step continue next. No checkout or photo capture yet.
+
+Founder confirmed Whiteboard Cleaner paused the camera, displayed No safe product
+match and retained2 lines/NGN3,000/Last added AirPro. Utility opened Sell this item;
+at10:43 separate whole-product photo preview was ready with Take product photo
+and truthful device-only/no-backup wording. Explicit human capture was requested;
+no camera tap is inferred from preview alone. Pre-capture read confirms media[]
+and fileCount0. Read-only comparison of original completed-sale detail and its
+inventory events against the retained pre-QR checkpoint is exactly equal; outbox
+count changed3->4 only with the previously recorded PRODUCT_IDENTIFIER_ADDED.
+Four coordinator document SHA-256 hashes remain unchanged. Photo prompt pending.
+
+### Founder self-directed continuation and native storage failure — 2026-10-01
+
+After the photo prompt, founder independently reported first whole-product/front
+capture advanced to price/quantity with Retake/Continue without photo options.
+Founder observed one image only and suggested optional additional barcode/back
+photos as an observation, not an approved scope change. Single identification
+photo remains the implemented D-047 behavior; multi-view recognition is not proved.
+Founder then entered price/quantity, attempted Add to basket and repeated Retry;
+Not saved / Could not finish adding this item / basket preserved persisted.
+Exact typed values were not captured. Founder discarded the entry, repeated the
+flow, observed Photo unavailable / Photo could not be saved, and continued without
+photo. Price/quantity/retry still failed. Subsequent known Fanta/AirPro scans did
+not add or beep and displayed Product could not be read / basket preserved, then
+Local store unavailable. UNKNOWN intentionally has no successful-addition beep;
+these later known-item failures are separate from the earlier first silent beep.
+No successful combined checkout is claimed. Founder discard effects on the
+unfinished basket are not reconstructed as continuity evidence.
+
+At approximately11:00 Lagos, scoped Metro8083 still listened (PID12824) and the
+paired SM-A156E remained connected, app PID17726. Therefore active chat sampling
+was not required for the existing LAN server connection. Screenshot showed
+Products behind the native development menu, not a captured Local-store-error
+screen; the detailed UI failure sequence above is founder-reported evidence.
+Phone /data had2,101,508KiB available (99% used). No files were removed or storage
+reset performed. This does not establish low-space as the failure cause.
+
+Read-only default adapter access reproduced NativeDatabase.prepareSync rejected
+with java.lang.NullPointerException while resolving the existing store. A bounded
+comparison opened only a separate useNewConnection:true native SQLite connection,
+performed SELECTs/PRAGMA quick_check, and closed that separate connection in
+finally. It succeeded: quick_check=ok, exactly the original two fixture products,
+original completed sale70c46569, four existing PENDING outbox operations and one
+unattached media row. Photo692afb8d-eae8-470f-a280-c4a003d6e1e5 is131945bytes,
+1080x1440, with matching actual/row checksum b409862cf36e5937280f387351302505;
+store_product_id=null and photoFileCount1. This proves first photo staging and
+file verification occurred; product attachment, checkout/restart retention and
+second capture remain failed/unverified. No new temporary product or completed
+sale appeared in this read.
+
+Classification: reproduced native connection/handle failure; database-file
+corruption is not supported by this bounded integrity check. Cached native handle
+lifecycle is a hypothesis, not an established source bug. Earlier runtime helpers
+repeatedly opened default adapters, which share cached native database behavior;
+verification instrumentation may have contributed. Native source shows cached
+NativeDatabase reuse and sharedObjectDidRelease closing its binding. No controlled
+clean session without such debugger opens has yet distinguished instrumentation
+from app lifecycle/old-native-binary behavior. No code fix or native mismatch claim.
+
+Stop business writes/retries at this material native failure. Frozen runtime824b2af
+and old native APK4d6521e remain; coordinator owns diagnosis/repair assignment.
+Next evidence: data-preserving clean native session with no diagnostic reopening
+of the app's cached connection, using separate read-only handles only if needed;
+then repeated photo/no-photo creation and independent use without active chat.
+This utility does not grant new build/dependency/source-change permission.
+
+Founder asks to explore independently and report issues. No additional app access
+permission is needed. Existing development client requires the laptop LAN Metro
+server for loading JS; active assistant replies/debugger are unnecessary. A
+standalone embedded-JS APK remains a separate, unapproved build path. Scoped
+Metro8083 is intentionally retained for the explicitly requested independent
+session; it is not a stopped/standalone/offline result. Pairing trust remains,
+network/airplane/mobile-data/hotspot/font/audio/accessibility unchanged this turn.
+No reset, uninstall, clear data, source edit, installation, build, deployment or
+commit. No helper continues running. Utility commands/edits stop after final
+Git/hash verification and authorized coordinator notification.
+
+### UI-only restart and founder scanner observations — 2026-10-01
+
+Coordinator assigned a bounded clean-process discriminator and froze source edits.
+Founder explicitly answered Ready—restart the test app after notice that unfinished
+cart would be discarded. Scoped force-stop affected only scannerverification.
+First launcher command used a wrong activity namespace and returned Error type3;
+package resolver supplied actual .MainActivity, which launched COLD successfully
+in2259ms, new app PID2247. This was utility launch correction, not an app defect.
+At11:08 Lagos the development launcher listed the retained LAN server; utility
+tapped it. At11:09 native screenshot showed existing store Products with Fanta
+and another partially clipped existing product card. No inspector/CDP/runtime
+imports/SQLite adapter opens occurred in this fresh process. Metro status endpoint
+read once returned packager-status:running. No standalone/offline claim.
+
+Founder then explored scanner directly and supplied the following observations.
+These are human-reported steps, not scripted controlled reproductions or an exact
+sale count. Correct product name is AirPro despite voice transcription variations.
+Founder refined their audio observation: first Basket-mode addition is silent for
+either product; subsequent additions beep. Scan again can make a later scan beep.
+Earlier product-specific explanations were revised by founder to this first-use
+pattern. Native audio readiness root cause remains unresolved. Single-item scan
+opens Add to sale without beep, and Add to cart emits a beep. Founder wants a beep
+at initial successful recognition instead. Current approved M8 plan/design specify
+feedback after successful basket addition, so that requested timing is a product
+behavior change rather than evidence the existing single-item timing violated it.
+UNKNOWN/failed lookup still must not give misleading successful-addition feedback.
+
+Single-item cancel returns to Sell/Scan next item; founder requests return directly
+to scanner. More materially, reopening Scan next item will not detect the same
+prior product unless Scan again is pressed or a different barcode is presented.
+This also occurs after confirming an addition and then reopening for the same
+product. Read-only source inspection supports the mechanism: persistent ScanSession
+begin rejects lastKey; cancel clears busy/generation but preserves lastKey;
+repeatExplicitly clears lastKey. endScanIntent uses cancel, and Scan next item calls
+endScanIntent then setScanning(true), without repeatExplicitly. This source path
+explains preserved-key suppression across an explicit new scan action. Any fix
+must distinguish explicit reopening from stationary/focus/background suppression;
+no code was changed and no current automated test was run.
+
+Founder reports each intentional scan appends another cart line. Single item Fanta
+quantity10 then another Fanta scan quantity1 gives separate10/1 rows; alternating
+Fanta/AirPro produces many rows. Desired behavior: one row per matching product,
+with quantities accumulated (10+1=11; five can scans=5). Read-only source confirms
+configureScannedCandidate appends a new generated line and commitLine appends unless
+editing an existing line. Consolidation behavior needs coordinator/implementation
+review, preserving product/package identity, conversion snapshots, differing price
+and discount semantics, safe money/quantity arithmetic and meaningful Undo/edit.
+This is a founder change request, not permission to silently merge unlike lines.
+
+Founder authorizes routing all observations to coordinator and asks where broader
+app feedback belongs. This utility records evidence and routes repairs; coordinator
+can assign the implementation agent and owning non-scanner modules. No multi-photo
+or beep-timing/cart grouping implementation is authorized in this evidence-only lane.
+
+Controlled clean-session storage discriminator remains incomplete: catalogue list
+reopened and founder reports subsequent known additions/scanning, but no exact
+no-photo unknown input/result, fresh photo attachment, background/resume, combined
+checkout or reopened receipt/photo was supplied. Therefore failure not reproduced
+across the full clean sequence is NOT claimed, and cached-handle/instrumentation
+causality remains unproved. No diagnostic DB session was run after this UI sequence.
+No material native exception from this fresh process was reported/captured. Prior
+NPE/photo and preserved historical data evidence remain. Further scripted phone
+operations stop to hand the new findings to coordinator; do not interrupt founder's
+independent exploration with more resets or retries.
+
+Stopped handoff: same plan/m8-unified-scanner/9ec7449; frozen JS824b2af/native4d6521e.
+Only this evidence appendix changed. Five pending files remain; four coordinator
+files preserved, including current PROJECT_STATE hashFED0B988A4BCC43128419B1C189DC7A6DAA8B1DC776AAFF797675CEB7C9AF541.
+No commit/source/dependency/config/domain/schema/build/backend effect. Scoped Metro
+session70408/PID12824 intentionally retained for founder's independent session;
+no diagnostic helper or debugger remains active. Phone network/settings unchanged.
+Next owner coordinator: sequence a narrow re-arm/audio/cart behavior review and
+complete UI-only storage reproduction; no root-cause or M8 acceptance self-waiver.
+
+### Founder ends independent exploration — 2026-10-01
+
+Founder explicitly said feedback is complete, work may resume, and the utility
+may restart the app to show new changes. Read-only Git/project/coordinator status
+inspection found runtime still824b2af/HEAD9ec7449; D-049/D-050 and M8-10..13 are
+planned/unimplemented. All pending changes are documentation/planning/evidence,
+not a new app version. No restart/reload was performed to imply changes existed.
+Founder exploration hold is released; notify coordinator to sequence the approved
+implementation and stopped independent source audit before changed-app verification.
+Existing build/provider/deployment/reset constraints remain. Utility stops commands
+and edits after this note/final Git state and notification. Metro intentionally
+retained for the development client; no debugger or diagnostic helper activated.

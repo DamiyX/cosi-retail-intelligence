@@ -506,6 +506,33 @@ returns to that same basket after completion. One optional beep plus visible
 feedback follows a successful addition; provide mute and a torch control when
 available. No microphone permission is needed for this experience.
 
+Under founder amendment D-049 (October 1), Single mode instead beeps once when
+a safe product match opens its quantity/price form, without implying it is added
+or paid; adding that line does not beep twice. Basket feedback remains tied to
+immediate successful known addition. The founder additionally requests one neutral,
+distinct code-read cue for a valid UNKNOWN/AMBIGUOUS result before photo/price entry;
+this is not a product-match/addition cue. Later form Add to basket is silent.
+No-code photo capture does not imply recognition. Explicit Scan next item re-arms the previous code; confirmed
+scan-origin Single cancellation returns directly to the scanner with the basket
+preserved. Compatible repeated additions accumulate in one row; different
+package/price/discount or rounding semantics remain separate. Undo of an increment
+restores the prior quantity instead of deleting the whole product row.
+
+Pending October1 M8-12/D-050: all products with an available identification photo
+show it alongside their name in catalogue, sale search, basket and detail. Temporary
+cart items use a compact Unfinished product label, quantity and price.
+Tap the photo to enlarge it in a dismissible view; keep Edit/Remove separate.
+Do not use raw generated ID suffixes as the main visible cart identifier. Stored
+labels and immutable receipt descriptions remain intact. Missing/no-photo cases
+remain usable and truthful, never displaying another product's image.
+
+Pending M8-13: ordinary Add product has a visible Add product photo control,
+thumbnail preview and Retake; detail has Add photo or Change photo. Use the
+existing camera, keep changes optional, and preserve the old attached photo if
+a replacement is cancelled/fails. No text field for file paths or mandatory
+picture step before selling. Future guided multi-view reference enrollment is
+separate from these simple thumbnail controls.
+
 Hold a detection latch: the same stationary barcode cannot add repeatedly or
 rearm merely because time passed or the app resumed. A different accepted code,
 explicit Scan same item again or quantity edit expresses a new intention. Any

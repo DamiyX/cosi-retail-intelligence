@@ -76,6 +76,34 @@ addition. Sound is playback only; no microphone permission. Review any necessary
 playback dependency before installing it and allow mute. Do not play a success
 beep for a failed lookup or failed addition.
 
+October 1 amendment D-049 supersedes the preceding feedback timing for Single
+mode: beep once after a safe match is loaded for configuration, visibly distinguish
+recognition from basket addition, and do not beep again at Add to cart. Unknown
+valid barcode/QR results get one distinct neutral code-read cue before photo/price
+entry, not a product-match cue; later Add to basket is silent. Automatic Basket
+known addition retains its immediate successful-addition cue. No-code pictures
+are human references, not inferred recognition. Explicit Scan next item and confirmed
+scan-origin Single cancellation re-arm recognition; passive resume does not.
+Compatible new draft additions accumulate safely under D-049, including incremental
+Undo; unlike prices/packages/discounts and rounding-sensitive lines stay separate.
+Execution and focused regression criteria are M8-10/M8-11 in tickets.md.
+
+October1 photo presentation clarification is D-050/M8-12: the existing private
+photo identifies all products in list/search/cart/detail, with tap-to-enlarge,
+product name or compact unfinished label, quantity and price where applicable.
+Preserve stored identity/receipt snapshots; do not show UUID suffixes as primary
+visual identification. Missing/no-photo products retain an honest text fallback.
+M8-13 adds optional normal-creation and existing-detail Add/Change photo controls
+using the existing camera/storage service. No new migration/native dependency or
+upload. Guided multi-view recognition remains Track B/M12 and is not implemented
+by attaching one thumbnail, even for products with barcodes/QR codes.
+
+D-050 additionally governs the kilobyte-sized new-thumbnail policy: actual byte/
+dimension enforcement, bounded same-capture encoding/capture-cache cleanup and
+legacy readability. M8-12/13 require bounded image work and physical clarity/size
+measurements; reducing JPEG quality alone is not enough. Current runtime limits
+remain unchanged until approved source work resumes after founder exploration.
+
 Latch each accepted detection. A stationary barcode must not keep adding units,
 and a timeout alone is not proof that a new physical item was presented. Allow
 the next distinct accepted code, or explicit Scan same item again/quantity edit;

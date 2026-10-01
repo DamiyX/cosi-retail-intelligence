@@ -1,7 +1,7 @@
 # PROJECT_STATE — COSI
 
-Last updated: 2026-09-30
-Current milestone: M8 amendment corrections pass coordinator re-audit at adc8b8f; SDK57 patch alignment at824b2af passes fresh validation, Doctor21/21 and Android export. Coordinator compatibility review, disabled-provider and native gates remain. D-047/D-048 apply. M8 is not accepted.
+Last updated: 2026-10-01
+Current milestone: M8 feedback correction packet M8-10..14 is ready for sequential delegation after founder ended independent phone exploration. Runtime remains824b2af/HEAD9ec7449;593 tests, Doctor21/21 and Android export are prior evidence only. D-049/D-050 and PC-14 apply. October1 native connection failure remains unresolved. Disabled-provider, native and rollout gates remain; M8 is not accepted.
 
 ## Active source and ownership
 
@@ -25,6 +25,8 @@ Scanner associations and ordinary automatic basket addition remain default off. 
 
 ## Carried native findings
 
+October 1 home-router retest returned a material native connection failure: unknown-product photo/no-photo creation failed, then known products/local store could not be read. Utility reproduced a default-connection `NativeDatabase.prepareSync` NullPointerException; a separate connection reported `quick_check=ok` and retained the original sale/products/outbox plus one unattached staged photo. This is returned utility evidence, not proof of a root cause or full database integrity. Repeated debugger opens of the cached connection are a possible contributor. Coordinator reviewed the evidence appendix and adapter/native lifecycle source; a clean, data-preserving UI-only session is the next discriminator. No source repair, data reset or new APK has been applied. M8 acceptance remains blocked; see `M8_ANDROID_VERIFICATION.md` for exact provenance and deferred checks.
+
 The one zero-additional-cost isolated APK 105bb294-dce0-487c-ba87-d1620a40cd82 was built from 4d6521e and tested on SM-A156E Android 16. Camera/audio/filesystem classes are present, but this does not prove amended native invocation. No second build, installation, Metro or phone operation occurred during amendment implementation.
 
 Prior real Fanta/AirPro additions, unknown cancel, torch and one beep were observed. Three unexpected UPC/EAN values paused UNKNOWN without extra lines; stable detection and consistent beep remain unresolved. Large text was partial, TalkBack tutorial blocked evidence, exact settings return is unproven, and font configuration recreation lost the memory-only unfinished basket.
@@ -33,6 +35,14 @@ A manually reconstructed offline NGN 4,000 completed sale survived restart with 
 
 ## Next action
 
-Coordinator reviews the stopped SDK57 compatibility handoff and frozen runtime824b2af after the implementer commits evidence and stops checkout activity. Coordinator's prior ten-document packet is preserved in5f92566. Fresh validation/Doctor/dependency/export checks pass; no concurrent coordinator checkout work occurred. The founder resumed daytime source work; overnight automation stays paused. Standalone browsing/build and real native basket/photo/QR verification still require the reviewed build path and existing authorization limits; no new APK/build spend, deployment, rollout, Git push/merge, destructive reset or M9.
+Founder has now ended independent exploration and explicitly permitted resumption/restart through verification chat01a0efc0-c37e-7c83-9066-1d100b11a0d6; its stopped handoff confirms runtime still unchanged. The earlier exploration hold is released. Coordinator dispatches M8-10..14 to the existing source implementation chat, preserving its settings and all twelve pending documentation/planning edits. It owns source work alone while coordinator/phone utility stop. Require focused regressions, final validation and stopped report-back; coordinator then audits before a separate phone retest. Utility intentionally retains scoped LAN Metro70408/PID12824, but source work must not use live reload as native acceptance. Native-storage discriminator remains incomplete. No restart can show unimplemented changes. No new cloud build/spend, backend deployment, provider/rollout enablement, Git push/merge, destructive reset or new milestone is approved. Overnight automation remains paused.
 
 New founder catalogue/targeting/structured-QR inputs are preserved as PC-10/11/12 proposals in PRODUCT_CHANGE_BACKLOG, not implemented scope. Local Docker startup/recovery now routes through LOCAL_DOCKER_WORKFLOW, linked by AGENTS and DEVELOPMENT. No startup was executed.
+
+October1 additional summary feedback is PC-14 in PRODUCT_CHANGE_BACKLOG. Source inspection confirms today's sales value already sums completed net totals after discounts, but no separate discount metric is exposed. Proposed compact Discounts given read-model/UI follow-up needs no business migration and must not subtract discounts twice. No new source/UI behavior or test/phone result is claimed; founder's live exploration hold also applies here.
+
+Further October1 feedback adds M8-12/PC-15 temporary cart photos and tap-to-enlarge, plus D-049/M8-10 neutral unknown-code read feedback before photo/price entry without a second Add-to-basket beep. Existing catalogue/detail photo display does not cover cart rows. Founder reports temporary creation now works, but no controlled storage/photo/restart verification has superseded the carried NPE gate. Only plans/context changed; current app/source/Metro remain untouched while founder explores.
+
+Founder further clarified all products need thumbnail/name presentation and a visible normal onboarding/existing-detail photo control. D-050/M8-12/13 supersede the temporary-only presentation scope, reusing existing private camera/attachment/replacement without new business migration. Guided multi-view enrollment for products with or without barcode/QR remains Track B/M12, separate from one thumbnail and not yet implemented. Fanta/AirPro have no fixture photo yet; future phone fixture preparation should add it. Runtime changes and device operations remain held during founder exploration.
+
+PC-16/D-050 now specify planned small new thumbnails (50–150KiB normal target, hard300KiB/1024px), actual encoded-size checks, owned-temporary cleanup and bounded display work. Existing8MiB-valid assets remain readable; no silent rewriting or blanket legacy-limit reduction. M8-12/13 tests/native measurements must verify this; no runtime compression or phone change has been applied. Recognition reference/OCR budgets remain separate Track B/M12 work.

@@ -337,3 +337,68 @@ Acceptance:
 - Real SQLite + boundary/UI tests and fresh root validation, Doctor and Android export. Native/provider tests remain separately unverified; M8 acceptance is coordinator-owned.
 
 SDK57 maintenance return (2026-09-30): runtime824b2af aligns camera57.0.6/constants57.0.20/router57.0.24 and Router's required existing @expo/ui57.0.21 patch. Fresh593 tests, all workspace typecheck/lint, Doctor21/21, dependency check and Android export pass; eight opt-in PostgreSQL tests skipped. Current source handoff awaits coordinator compatibility review; existing APK/native/provider gates and PC-10/11/12 proposal status unchanged. See M8_IMPLEMENTATION_HANDOFF.md; no new feature or native build.
+
+## M8-10 — Recognize the next deliberate scan and give honest feedback
+
+Status: Coordinator-sized under founder-delegated ticket judgment; requested by founder on October 1, D-049. Not implemented or tested. Source edits wait until founder's independent phone session is finished.
+Blocked by: Existing M8-01/02/08 source; no new schema or provider prerequisite.
+Delivers: reopening a scan accepts the same product, Single cancellation returns to scanning, and sound matches the current mode without a second beep.
+
+- [ ] Actual Sell-route tests demonstrate same-code recognition after explicit Scan next item following Single cancel and successful addition; Basket stationary duplicates and passive focus/background resume remain suppressed, stale callbacks cannot add and existing cart/unknown-association cleanup survives.
+- [ ] Scan-origin Single cancellation (including confirmed dirty/back exit) returns directly to scanner; cancelled discard leaves the form, manual cancellation retains its behavior, and completed-payment/navigation exits never accidentally reopen the camera. Existing basket is preserved.
+- [ ] Single safe match gives one optional recognition beep and honest not-yet-added status; automatic Basket known addition gives one beep after validated addition during the scan. A valid current UNKNOWN/AMBIGUOUS barcode/QR result gives one distinct neutral code-read cue before photo/price entry, not a product-match/addition cue. Later known/unknown form Add to cart/Add to basket is silent. Invalid/duplicate/stale detections and failed lookup/write, muted/background/unmounted state never play success feedback. No-code photos do not imply recognition. Inspect first-use audio load/seek readiness before changing the hook; bounded cancellation prevents delayed/stale sounds and audio never blocks checkout.
+- [ ] Add failing-before/fixed-after route regressions plus audio first-ready/delayed-ready/mute/release/failure tests as justified by actual source mechanism. Focused tests, strict typecheck and zero-warning lint pass with actual evidence. No native first-beep/stability acceptance inferred from mocks; physical retest remains pending.
+
+Out of scope: decoder/ROI redesign, automatic timeout re-arming, recognition model/OCR, new audio/native dependency, cloud build or provider/backend enablement.
+
+## M8-11 — Accumulate compatible products within the same basket
+
+Status: Coordinator-sized under founder-delegated ticket judgment; D-049. Not implemented or tested.
+Blocked by: Existing M3/M8 draft paths. No semantic dependence on M8-10, but ownership is sequential 10 then 11 because both extend the Sell flow.
+Delivers: five deliberate identical scans show one row with quantity five; Fanta quantity ten plus one deliberate addition shows eleven; alternating Fanta/AirPro leaves two compatible rows.
+
+- [ ] Scanner auto-add and new configured additions use one tested draft rule: merge only matching store product/variant/package/conversion/unit price/descriptive snapshots, zero discounts and safe exact combined quantities/calculations whose totals/base quantity equal prior plus incoming. Reuse centralized money/quantity utilities. Differing commercial/snapshot facts or rounding-sensitive calculations remain separate; overflow rejects before mutation and preserves basket.
+- [ ] Editing a row replaces its quantity without double accumulation. Undo of the latest scan increments restores prior quantity and totals rather than removing the whole merged row; protect subsequent edits/removals/checkout/new-sale state from stale Undo. A new-row Undo removes only that addition. Last-added/running-count text accurately reflects the resulting basket.
+- [ ] Actual-route tests cover repeated and alternating scans, configured quantity10+1, package/price/discount distinctions, fractional exactness/rounding distinction, overflow, edit and incremental Undo. Existing temporary-product photo/price retry and cancellation behavior remains intact. Completing the merged draft produces correct immutable sale-line snapshots, quantities, inventory effects and one outbox operation; replay remains idempotent.
+- [ ] Focused tests and complete root validation pass; Expo Doctor/dependency check/Android export run once after the final source changes. Record only actual results. Device confirmation and the separate unresolved storage-handle failure remain required; no physical or standalone gate is waived.
+
+Out of scope: combining completed transactions, discount allocation redesign, package normalization, schema/migration, costing or sync changes, draft persistence across process restart, multi-photo enrollment, cloud build/push/deployment.
+
+## M8-12 — Identify products by their photos across catalogue and selling
+
+Status: Founder requested October1; coordinator-sized under delegated judgment. Not implemented or tested; source edits remain held during phone exploration.
+Blocked by: Existing M8-07 private-photo storage. No semantic dependence on M8-10/11; execute after them to preserve sequential ownership of the Sell flow.
+Delivers: named and unfinished products with photos are visually distinguishable in catalogue, sale search, basket and detail; tapping a thumbnail shows the whole photo. D-050 extends the original temporary-cart request.
+
+- [ ] Catalogue/sale-search/cart/detail resolve the existing store-scoped photo for temporary AND enriched products by product identity, with thumbnail and product name (compact Unfinished product label for generated-name cart entries), plus quantity/price where applicable. UUID suffixes are not primary visual identification. Preserve unique generated stored labels and historical receipt snapshots; no mandatory name, new migration, upload, remote image or business-outbox photo field.
+- [ ] Tap-to-enlarge uses a dismissible accessible image view with explicit Close, Android back, appropriate focus/large text and no basket mutation. Thumbnail press is distinct from row selection/Edit/Remove. Existing Temporary catalogue/detail photo display stays consistent; enrichment retains the image. Photo acquisition is M8-13; multi-view recognition is excluded.
+- [ ] Missing/damaged/no-photo states have a usable honest fallback; switching products/stores never reuses a stale image. Read-only lookup/verification errors do not block selling. Bound photo lookup/checksum work rather than repeating native file inspections on every price/quantity/total render or scanner frame; preserve file-integrity/privacy contracts.
+- [ ] A catalogue with hundreds/thousands of stored photo-bearing products does not eagerly decode every image or load all image bytes into JS. Bound visible/paged image work using existing list patterns; verify repeated renders do not reread/rechecksum every asset. No unmeasured smoothness/low-memory claim; native scroll/display checks remain separate.
+- [ ] Component/actual cart/catalogue/search regressions cover two different temporary products/photos and a named/enriched product, enlarge/close/back, no-photo/damaged fallback, enrichment and unchanged receipt descriptions/quantities/prices. Focused typecheck/lint/tests pass; run final root validation/export once after the full correction packet. Native photo creation/attachment/restart remains a separate required gate; founder-reported successful creation is not formal acceptance.
+
+## M8-13 — Add or change a product thumbnail through normal onboarding
+
+Status: Founder requested October1; D-050 and coordinator-delegated sizing. Not implemented/tested. Source edits remain held during phone exploration.
+Blocked by: Existing M8-07 camera/private-photo persistence; M8-12 provides the consistent presentation. Execute after M8-10..12 under the same sequential source ownership.
+Delivers: an ordinary named product can be created with a photo; an existing named/temporary/enriched product can receive or replace its photo without repeating product creation.
+
+- [ ] Ordinary Add product offers visible Add product photo, preview and Retake using the existing camera/service; no-code/price-first selling keeps its approved low-typing flow. Saving a new named product with a staged photo attaches it through the existing atomic creation command; retries do not duplicate product/outbox/photo. Skipping or denied-camera/missing-module fallback still permits product creation and selling.
+- [ ] Existing product detail offers Add photo/Change photo for either temporary or enriched records. Use existing store ownership, readiness checks and transactional replacement. Cancel/failed staging/save retains the old attachment; cleanup never deletes committed/replayed assets and conservatively reclaims only unreferenced staging. New image appears after refresh, enrichment retains it, old receipt descriptions/prices/quantities remain immutable.
+- [ ] All NEW ordinary/unknown thumbnail captures and replacements satisfy D-050's actual encoded limits before durable attachment: JPEG, preserved aspect/orientation, long edge<=1024px, hard<=307200bytes, normal tuning target50–150KiB. Existing camera is currently<=2048/quality0.65 with8MiB acceptance; quality-only changes do not satisfy the byte cap. Inspect existing SDK size/encoding options before implementation; bounded same-capture encoding is preferred over automatic re-capture or new native packages. Unsupported/oversized/error/cancel/stale work keeps old attachment or allows honest no-photo selling; never persists a large original as a fallback thumbnail.
+- [ ] Legacy valid images up to their prior8MiB bound still display/read/replay unchanged; separate new-write policy from legacy integrity checks. New staging enforces bytes/dimensions even if UI/native mocks bypass camera choices. Only the bounded image is durable; tracked capture/encoding temporaries are cleaned safely on success/cancel/failure without deleting unrelated app cache or committed attachments. Test actual just-below/at/above size boundaries, oversize/high-detail input, orientation, stale callbacks, disk errors, replacement rollback, cache cleanup and legacy compatibility. No arbitrary batch rewriting of existing assets or recognition-reference compression.
+- [ ] Focused repository/UI tests cover ordinary named creation/photo/retry, existing-product replacement, cancel/failure, cross-store rejection, missing native module/permission, stale/unmounted callbacks and no new photo data in business-sync envelopes. No new camera/media library, schema, gallery-picker scope, upload/backup or reference enrollment; privacy and bounds remain D-047.
+- [ ] Strict typecheck/zero-warning lint/focused tests pass; final combined validation/export follows this ticket. Native normal-onboarding/replace/relaunch and Fanta/AirPro thumbnail fixture completion require a later authorized phone pass. Do not operate on the founder's current live phone/session or claim native evidence during source work.
+
+Compression evidence before acceptance: actual encoded bytes/dimensions and staging
+cleanup, readable representative product previews/enlargements, and measured
+capture/display overhead on available devices. Target sizes are not passed tests.
+
+## M8-14 — Show discounts separately in Today's Summary
+
+Status: Founder requested October1, PC-14; bounded correction to existing M6 summary in the current founder-feedback packet. Not implemented/tested; exploration hold released by founder through verification chat.
+Blocked by: Existing completed-sale/summary data only. Execute after M8-10..13 for sequential ownership, not because scanner logic is a semantic prerequisite.
+Delivers: retailer sees today's total Discounts given and understands Sales value is after discounts; summary remains compact.
+
+- [ ] Aggregate existing immutable completed-sale discount totals with the current authorized store-local-day/currency query and safe-integer utilities. Show Discounts given and label existing sales value as after discounts; do not subtract discounts again from net sales or tracked margin/expenses. No migration, sale write, accounting/costing change or product ranking redesign.
+- [ ] Cover mixed discounted/undiscounted, paid/partial/credit completed sales, empty day, other stores/days/drafts exclusion, timezone boundaries, arithmetic overflow and refresh after completion. Existing receipts/history retain individual line detail; no crowded per-product discount dashboard. Older completed records remain readable.
+- [ ] Summary data and component tests prove exact discounted amount and unchanged sales value/cost coverage/margin/withdrawals/expense semantics. Focused tests/typecheck/lint and final combined root validation/export pass with actual evidence. Native display/refresh remains a separate phone check; no device evidence inferred from mocks.

@@ -118,10 +118,61 @@ When a major decision changes, update the affected source-of-truth document too.
 | D-046 | M8 barcode scanner, basket flow and camera/service boundary | ACTIVE |
 | D-047 | Price-first temporary selling and private identification photos | ACTIVE |
 | D-048 | Optional unconfirmed online catalogue suggestions | ACTIVE; live provider disabled |
+| D-049 | Explicit scanner re-entry, mode-specific feedback and compatible draft accumulation | ACTIVE; source/native verification pending |
+| D-050 | Product thumbnails across catalogue/sales, distinct from visual enrollment | ACTIVE; source/native verification pending |
 
 ---
 
 # 5. Decision Records
+
+## D-050 — Product Thumbnails Are Separate From Visual Enrollment
+
+**Status:** ACTIVE for the requested behavior; implementation/verification pending.  
+**Date:** 2026-10-01.  
+**Approval:** Founder explicitly clarified that named and unfinished products should show their pictures, new test products should have thumbnail photos, and ordinary product creation/existing-product details need a photo control.
+
+Extend D-047's existing private, store-scoped identification photo to any StoreProduct, whether temporary or enriched, with one current thumbnail. Ordinary creation offers Add product photo/preview/retake; existing detail offers Add photo/Change photo using the existing camera/staging service. Available photos appear beside product names in catalogue, sale search, basket and detail; unfinished items use a compact unfinished label rather than exposing an ID as the primary visual identifier. Tap-to-enlarge is dismissible and does not change cart state. Text-only receipts and immutable product-description snapshots stay intact.
+
+Reuse the existing device-local metadata/files and store ownership checks, atomic attachment/replacement and conservative cleanup. Missing, damaged or absent photos have truthful placeholders; selling and progressive onboarding remain possible without a picture. No public/shared product identity, image upload/backup, business-sync URI, new native library or business-table migration is introduced by this extension. It does not enroll a visual recognizer.
+
+One thumbnail identifies an item to a human. A bounded set of clear diverse reference views helps a future visual recognizer distinguish variant/package identity. That later enrollment experience applies to barcode/QR-bearing products too, as well as items without readable codes; it remains guided/adaptive and evidence-driven under Recognition Track B/M12, without blocking barcode selling. No fixed view count, model/runtime, OCR, automatic multi-view capture or recognition accuracy claim is approved here. See SCANNING_ARCHITECTURE enrollment guidance and PC-08/PC-15 for preserved intent.
+
+M8-12 covers presentation and M8-13 covers normal creation/existing-product photo entry. Both remain held while founder explores the current app; source/native gates and build limits are unchanged.
+
+**Thumbnail storage clarification, October1:** founder requires kilobyte-sized
+photos across low/high-camera-quality phones. Coordinator sets new-photo targets:
+JPEG preserving aspect ratio/orientation, longest edge at most1024 pixels, normally
+approximately50–150KiB, hard durable-write ceiling300KiB (307,200 bytes). The target
+range is a tuning goal, not a guaranteed size/clarity result. Check actual encoded
+dimensions/bytes before attachment; compression quality alone is not a size cap.
+Prefer available camera size/encoding facilities in the existing SDK, bounded
+re-encoding of the same captured image when supported, and graceful no-photo/old-
+photo fallback if requirements cannot be met. Do not install a new native image
+library without explicit review or repeatedly re-capture the object automatically.
+
+Retain only one bounded current image for thumbnail/enlargement, not a full-size
+original plus several duplicates. Clean only tracked app-owned capture/encoding
+temporaries; preserve committed/replayed attachments and existing recovery rules.
+Existing larger D-047 images remain readable under their old integrity limits;
+do not lower the legacy read limit, relabel them damaged or silently recompress/
+delete old assets. New creation/replacement uses the tighter policy. Recognition
+references/OCR have a separate later benchmarked quality/storage budget: never
+destroy or replace them with these display thumbnails. Tests/device measurements
+must verify size, recognizable enlargement and bounded storage/display work.
+
+## D-049 — Explicit Scanner Re-entry, Feedback and Compatible Draft Accumulation
+
+**Status:** ACTIVE for the requested behavior; implementation/verification pending.  
+**Date:** 2026-10-01.  
+**Approval:** Founder explicitly requested these corrections during independent phone exploration in verification chat `01a0efc0-c37e-7c83-9066-1d100b11a0d6`. Coordinator verified the original user message. This supplements D-046's feedback/draft behavior only; recognition, transaction and arithmetic contracts are unchanged.
+
+An explicit new scan action accepts the previous barcode again. Passive focus/background resume and stationary camera frames do not reset duplicate suppression. Cancelling a scan-origin Single-item line returns to the scanner after any required dirty-form confirmation; manual line cancellation keeps its existing behavior and the basket remains intact.
+
+Single mode emits one optional match beep after a safe product match is loaded for line configuration, with visible wording that the item is not yet in the basket. Automatic Basket known addition emits its beep after the validated mutation during that scan. October1 founder clarification additionally requires an initial sound for an unknown barcode: a distinct neutral code-read cue may accompany a valid, current UNKNOWN/AMBIGUOUS result, never implying identified product, inventory availability, basket addition or payment. Stationary duplicate detections remain silent. Later Add to cart/Add to basket from known or unknown configuration does not beep again. Invalid detections and failed lookups/mutations do not emit match/addition success feedback. Sound stays optional/nonblocking; first-use native readiness is investigated rather than assumed fixed. A no-code photo capture is not barcode recognition and must not falsely claim a product was identified.
+
+Repeated new additions in the current draft accumulate into one row only when store product, variant, package, conversion, unit price and descriptive snapshots match, both discounts are zero and centralized exact calculations preserve the summed prior/incoming amounts and base quantity. Otherwise keep separate rows; never silently change a price, discount or rounding result to combine them. Editing an existing row replaces its quantity rather than adding it again. Undo reverses the last addition/increment, preserving prior quantity and any later user edits. Completed receipts, ledger/outbox data and immutable historical lines are never rewritten.
+
+No migration, costing/sync change, new dependency, recognition runtime or rollout is authorized by this decision. Existing native-storage diagnosis, fresh-APK/standalone and disabled-provider gates remain open.
 
 ## D-048 — Optional Unconfirmed Online Catalogue Suggestions
 

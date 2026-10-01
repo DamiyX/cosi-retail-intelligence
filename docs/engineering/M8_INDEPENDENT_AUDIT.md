@@ -1,5 +1,38 @@
 # M8 independent audit — pass 1
 
+## Current compatibility re-audit — 2026-09-30, handoff9ec7449/source824b2af
+
+Decision: SDK57 compatibility maintenance passes independent source review.
+No additional source correction required in this bounded patch. M8 physical,
+live-provider and rollout acceptance remain open; this is not milestone closure.
+Implementer was stopped and checkout clean before inspection. No runtime edits
+or new full-suite run by coordinator in this pass: the reviewed immutable
+runtime patch and its fresh retained logs provide proportionate evidence.
+
+Confirmed exact lockfile comparison against5f92566: only apps/mobile workspace
+constraints and four existing package entries changed (camera57.0.6,
+constants57.0.20,router57.0.24,@expo/ui57.0.21). No added/removed package entry or
+unrelated constraint changed. Router requires the UI patch; installed package
+metadata and official SDK57 UI changelog were checked. No direct @expo/ui usage
+exists in COSI application/shared source. The published UI patch adds optional
+APIs/modifiers and an iOS touch fix; this does not prove native compatibility of
+the older installed APK or solve Galaxy decoder findings.
+
+Reviewed all four cosi-m8-sdk57-patches-* logs in the laptop Temp directory:
+root593 tests/75 suites with workspace typecheck and zero-warning lint passed,
+eight opt-in PostgreSQL tests/two suites skipped; Doctor21/21, install --check
+up to date and Android export passed. Existing act harness warnings remain.
+Confirmed runtime-only manifest/lockfile diff, preserved coordinator packet
+commit5f92566, documentation-only final9ec7449 and schema/diff checks. No new
+suppression or architecture change. Source:
+https://github.com/expo/expo/blob/sdk-57/packages/expo-ui/CHANGELOG.md.
+
+Next coordinator owns the native/provider/build-path review. No further
+implementer task dispatched. Existing native findings, disabled live adapter,
+undeployed server guard and default-off ordinary automatic addition/association
+gates remain. PC-10/11/12 are preserved proposals, not delivered capabilities.
+No phone/Docker/build/spend/hosted deployment/push/merge performed during review.
+
 ## Current coordinator re-audit — 2026-09-30, adc8b8f
 
 Decision: amendment corrections R1/R2/R3 pass source re-audit. M8 milestone,

@@ -995,6 +995,14 @@ capture are reliable for objects; never substitute a timed progress animation
 for sufficient clear, diverse references. A catalogue thumbnail is distinct
 from the recognition reference set.
 
+Founder reiterated on October1 that reference enrollment should serve products
+with barcode/QR identifiers as well as no-code products, so appearance can later
+provide another retrieval path. D-050 separately covers one ordinary human-facing
+thumbnail and its photo controls now; that photo is not proof of enrollment or
+recognition capability. Do not make multi-view enrollment a prerequisite for
+adding a product or barcode selling. Track B/M12 must validate guided capture,
+quality/diversity and variant/package ambiguity before integration.
+
 ---
 
 # 43. Enrollment Reference Limits
