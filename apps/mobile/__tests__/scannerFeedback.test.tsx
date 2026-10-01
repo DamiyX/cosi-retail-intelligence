@@ -1,37 +1,16 @@
 import { act, renderHook } from '@testing-library/react-native';
 import { AppState } from 'react-native';
 import { useScanFeedback } from '../src/features/scanning/useScanFeedback';
-import { createScanCueTrace, type CueTrace } from '../src/features/scanning/scanCueTrace';
-
-let mockTrace: CueTrace;
-jest.mock('../src/features/scanning/scanCueTrace', () => ({
-  ...jest.requireActual('../src/features/scanning/scanCueTrace'), scanCueTrace: {
-    get active() { return mockTrace.active; },
-    hook: () => mockTrace.hook(),
-    attempt: () => mockTrace.attempt(),
-    mark: (...args: Parameters<CueTrace['mark']>) => mockTrace.mark(...args),
-  },
-}));
-const isolated = { extra: { appEnvironment: 'scanner-verification', scannerVerificationBuild: true },
-  android: { package: 'com.damiyx.retailintelligence.scannerverification' } };
 
 const mockPlayers: ReturnType<typeof mockMakePlayer>[] = [];
 function mockMakePlayer() {
   return { volume: 1, isLoaded: true, seekTo: jest.fn().mockResolvedValue(undefined), play: jest.fn(), pause: jest.fn(), remove: jest.fn(),
-    addListener: jest.fn((_event: string, callback: (status: MockStatus) => void) => { mockCallbacks.push(callback); return { remove: jest.fn() }; }) };
+    addListener: jest.fn((_event: string, callback: (status: { isLoaded: boolean }) => void) => { mockCallbacks.push(callback); return { remove: jest.fn() }; }) };
 }
-type MockStatus = { isLoaded: boolean; playing?: boolean; didJustFinish?: boolean; error?: string | null };
-let mockCallbacks: ((status: MockStatus) => void)[] = [];
+let mockCallbacks: ((status: { isLoaded: boolean }) => void)[] = [];
 jest.mock('expo-audio', () => ({ createAudioPlayer: () => { const player = mockMakePlayer(); mockPlayers.push(player); return player; } }));
 beforeEach(() => { mockPlayers.length = 0; mockCallbacks = []; jest.useFakeTimers(); Object.defineProperty(AppState, 'currentState', { configurable: true, value: 'active' }); });
 afterEach(() => jest.useRealTimers());
-
-describe.each([{ tracing: false, logThrows: false }, { tracing: true, logThrows: false }, { tracing: true, logThrows: true }])(
-  'identical playback/drop oracles with diagnostic mode %j', ({ tracing, logThrows }) => {
-    beforeEach(() => {
-      mockTrace = createScanCueTrace(tracing ? 'true' : undefined, isolated,
-        () => { if (logThrows) throw new Error('diagnostic output unavailable'); });
-    });
 
 it('plays ready match and distinct neutral cues; mute releases both players', async () => {
   const { result, rerender, unmount } = renderHook<ReturnType<typeof useScanFeedback>, { enabled: boolean }>(({ enabled }) => useScanFeedback(enabled), { initialProps: { enabled: true } });
@@ -98,12 +77,13 @@ it('can replay after Android reports an ended but loaded asset', async () => {
   expect(mockPlayers[0]!.play).toHaveBeenCalledTimes(2);
   unmount();
 });
-it('observes freshness without evaluating the predicate again for diagnostics', async () => {
+
+it('evaluates freshness once at request and once after seek, without replaying a stale intent', async () => {
   const { result, unmount } = renderHook(() => useScanFeedback(true));
   let finish!: () => void;
   mockPlayers[0]!.seekTo.mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
   const current = jest.fn(() => true);
-  act(() => result.current('match', current, 'SINGLE_MATCH'));
+  act(() => result.current('match', current));
   expect(current).toHaveBeenCalledTimes(1);
   current.mockReturnValue(false);
   await act(async () => finish());
@@ -111,30 +91,4 @@ it('observes freshness without evaluating the predicate again for diagnostics', 
   expect(mockPlayers[0]!.play).not.toHaveBeenCalled();
   unmount();
 });
-it('does not probe diagnostic status when disabled and contains a throwing diagnostic status read', async () => {
-  const { result, unmount } = renderHook(() => useScanFeedback(true));
-  await act(async () => result.current());
-  const probe = jest.fn(() => { throw new Error('PRIVATE_NATIVE_STATUS'); });
-  const status = { isLoaded: true, get playing(): never { return probe(); } };
-  expect(() => act(() => mockCallbacks[0]!(status))).not.toThrow();
-  expect(probe).toHaveBeenCalledTimes(tracing ? 1 : 0);
-  expect(mockPlayers[0]!.play).toHaveBeenCalledTimes(1);
-  unmount();
-});
-});
 
-it('keeps one 128-event budget across actual hook remounts and sanitizes native error status', async () => {
-  const output = jest.fn(); mockTrace = createScanCueTrace('true', isolated, output);
-  for (let mount = 0; mount < 24; mount++) {
-    const { result, unmount } = renderHook(() => useScanFeedback(true, { focused: true, muted: false }));
-    await act(async () => result.current('match', () => true, 'BASKET_VALIDATED_ADD'));
-    act(() => mockCallbacks.at(-2)!({ isLoaded: true, playing: false, didJustFinish: true, error: 'PRIVATE_NATIVE_ERROR' }));
-    unmount();
-  }
-  expect(output).toHaveBeenCalledTimes(128);
-  const combined = output.mock.calls.flat().join('\n');
-  expect(combined).toContain('BASKET_VALIDATED_ADD'); expect(combined).toContain('"error":true');
-  expect(combined).not.toContain('PRIVATE_NATIVE_ERROR');
-  expect(combined).toContain('trace-limit'); expect(combined).toContain('"hook":2');
-  expect(mockPlayers.every(player => player.play.mock.calls.length <= 1 && player.remove.mock.calls.length === 1)).toBe(true);
-});

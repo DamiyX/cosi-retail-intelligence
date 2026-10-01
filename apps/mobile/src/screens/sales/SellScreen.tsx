@@ -22,7 +22,6 @@ import type { BarcodeInput, RecognitionCandidate } from '@retail/contracts';
 import ScannerPanel from '../../features/scanning/ScannerPanel';
 import { ScanSession } from '../../features/scanning/session';
 import { useScanFeedback } from '../../features/scanning/useScanFeedback';
-import { scanCueTrace } from '../../features/scanning/scanCueTrace';
 import { generateMobileId } from '../../crypto/mobileIds';
 import type { CustomerAccountRow, PaymentMethod } from '../../db/repositories';
 import type {
@@ -99,7 +98,7 @@ export default function SellScreen({
 }: SellScreenProps) {
   const [scanning, setScanning] = useState(initialScan);
   const [muted, setMuted] = useState(false);
-  const playScanFeedback = useScanFeedback(scannerEnabled && !muted && isFocused, { focused: isFocused, muted });
+  const playScanFeedback = useScanFeedback(scannerEnabled && !muted && isFocused);
   const feedbackIntent = useRef(0);
   const [scanSession] = useState(() => new ScanSession());
   const [basketMode, setBasketMode] = useState(false);
@@ -174,7 +173,6 @@ export default function SellScreen({
   // Search -> selection and saved Quick Add deliberately do not use this exit.
   const endScanIntent = useCallback(() => {
     feedbackIntent.current++;
-    scanCueTrace.mark('intent-ended');
     scanSession.cancel();
     setScanning(false);
     setScanIdentifier(undefined);
@@ -197,7 +195,6 @@ export default function SellScreen({
 
   const reopenScan = useCallback(() => {
     endScanIntent(); scanSession.repeatExplicitly(); setScanning(true);
-    scanCueTrace.mark('explicit-rearm');
   }, [endScanIntent, scanSession]);
   const cancelLineConfiguration = useCallback(() => {
     closeLineConfiguration();
@@ -408,7 +405,7 @@ export default function SellScreen({
           unitPriceText: formatMinorForEdit(exact.sellingPriceMinor), discountAmountMinor: 0, discountText: '',
           lineTotalMinor: calculated.netTotalMinor, calculated };
         addDraftLine(line);
-        playScanFeedback('match', () => feedbackIntent.current === intent, 'BASKET_VALIDATED_ADD');
+        playScanFeedback('match', () => feedbackIntent.current === intent);
         return true;
       }
       if (!startConfiguringLine(hit)) { setScanning(false); return false; }
@@ -418,7 +415,7 @@ export default function SellScreen({
       setSelectedPackage(exact ?? null);
       setUnitPriceText(exact?.sellingPriceMinor === null || exact?.sellingPriceMinor === undefined ? '' : formatMinorForEdit(exact.sellingPriceMinor));
       setScanning(false);
-      if (!basketMode) playScanFeedback('match', () => feedbackIntent.current === intent, 'SINGLE_MATCH');
+      if (!basketMode) playScanFeedback('match', () => feedbackIntent.current === intent);
       return false;
     } catch {
       setQuickAddSavedNotice('This scanned product could not be loaded safely. Search products or retry. Your basket is preserved.');
@@ -820,7 +817,7 @@ export default function SellScreen({
       summary={`${lines.length} lines · ${displayMoney(totals.totalMinor, client.storeCurrencyCode)}${lastAddition?.after === lines ? ` · Last added: ${lastAddition.added.productName}` : ''}`}
       onUndo={() => { setLines(current => undoDraftAddition(current, lastAddition)); setLastAddition(null); }}
       onCandidate={configureScannedCandidate} onSearch={keepDetection}
-      onCodeRead={isCurrent => playScanFeedback('code-read', isCurrent, 'CODE_READ')}
+      onCodeRead={isCurrent => playScanFeedback('code-read', isCurrent)}
       onCreate={detection => { keepDetection(detection); setViewMode('quick_add'); }}
       onCancel={endScanIntent} />;
   }

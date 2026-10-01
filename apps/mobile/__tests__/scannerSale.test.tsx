@@ -26,7 +26,6 @@ it('re-arms the same code only on deliberate Single cancel/re-entry and does not
     await screen.findByText('Scan A');
     await act(async () => { fireEvent.press(screen.getByText('Scan A')); });
     expect(mockBeep).toHaveBeenCalledTimes(1);
-    expect(mockBeep).toHaveBeenLastCalledWith('match', expect.any(Function), 'SINGLE_MATCH');
     fireEvent.press(screen.getByText('Cancel'));
     await screen.findByText('Scan A');
     await act(async () => { fireEvent.press(screen.getByText('Scan A')); });
@@ -56,7 +55,6 @@ it('adds A-A-A once, A-B twice, explicit A again once, and Undo without completi
     for (let i = 0; i < 3; i++) await act(async () => { fireEvent.press(screen.getByText('Scan A')); });
     expect(screen.getByText(/1 lines · ₦100.00/)).toBeTruthy();
     expect(mockBeep).toHaveBeenCalledTimes(1);
-    expect(mockBeep).toHaveBeenLastCalledWith('match', expect.any(Function), 'BASKET_VALIDATED_ADD');
     await act(async () => { fireEvent.press(screen.getByText('Scan B')); });
     expect(screen.getByText(/2 lines · ₦200.00/)).toBeTruthy();
     fireEvent.press(screen.getByText('Scan again'));
@@ -85,7 +83,7 @@ it('cancelling an unknown item preserves the existing basket and ends only that 
     expect(screen.getByText('Cart (1)')).toBeTruthy();
     expect(screen.queryByText('Scan a product')).toBeNull();
     expect(mockBeep).toHaveBeenCalledTimes(2);
-    expect(mockBeep).toHaveBeenLastCalledWith('code-read', expect.any(Function), 'CODE_READ');
+    expect(mockBeep).toHaveBeenLastCalledWith('code-read', expect.any(Function));
     expect(fixture.adapter.getAllRows('SELECT id FROM product_identifiers')).toHaveLength(1);
     unmount();
   } finally { fixture.closeAndDelete(); }
