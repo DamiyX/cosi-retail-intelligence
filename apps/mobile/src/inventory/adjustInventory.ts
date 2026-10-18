@@ -1,3 +1,4 @@
+import { captureCommandActor, type CommandActorOptions, assertCurrentActor } from '../storeContext/access';
 import { convertPackagesToBase, DomainError } from '@retail/domain';
 
 import { generateMobileId } from '../crypto/mobileIds';
@@ -129,6 +130,8 @@ function fingerprint(input: ReturnType<typeof normalizeInput>): RequestFingerpri
 }
 
 function assertOwner(adapter: DatabaseAdapter, input: ReturnType<typeof normalizeInput>): string {
+  assertCurrentActor(adapter, input, true);
+
   const store = getStoreById(adapter, input.storeId);
   if (!store || store.status !== 'ACTIVE') throw new DomainError('INVALID_VALUE', 'Store does not exist or is not active.');
   const device = getDeviceById(adapter, input.deviceId);
@@ -162,11 +165,12 @@ function replayGraph(adapter: DatabaseAdapter, outbox: OutboxOperationRow, reque
 export function recordInventoryAdjustment(
   adapter: DatabaseAdapter,
   rawInput: RecordInventoryAdjustmentInput,
-  options: { generateId?: () => string } = {},
+  options: CommandActorOptions & { generateId?: () => string } = {},
 ): InventoryAdjustmentGraph {
   const input = normalizeInput(rawInput);
   // Operation IDs are not authorization tokens. Resolve the owner boundary
   // before returning any replayed graph, then repeat it inside the write tx.
+  const actor = captureCommandActor(adapter, input, options.actorContext, true);
   assertOwner(adapter, input);
   const replayed = findExpectedOutboxReplay(adapter, {
     operationId: input.operationId,
@@ -178,6 +182,7 @@ export function recordInventoryAdjustment(
   if (replayed) return replayGraph(adapter, replayed, fingerprint(input));
   const generateId = options.generateId ?? generateMobileId;
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor, true);
     const memberId = assertOwner(adapter, input);
     const occurredAt = input.occurredAt ?? nowIso();
     const adjustment = createInventoryAdjustment(adapter, {

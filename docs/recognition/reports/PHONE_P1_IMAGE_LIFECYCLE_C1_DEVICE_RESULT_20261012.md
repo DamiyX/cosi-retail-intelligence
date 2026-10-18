@@ -1,0 +1,20 @@
+# P1 lifecycle C1 actual phone result
+
+2026-10-12. Independent coordinator decision: VERIFIED FOR GENERATED SCOPE. Audited isolated APK installed on selected Samsung Galaxy A15 SM-A156E, Android16/API36/arm64. Installation exact SHA2563fd8690cfb9c3b2b2a777eb855687191c6b546d8bc533c62873a0420a2b312f8. No business app, private photo, camera or model calls. Prior failed a1 and empty file preserved.
+
+ONE image batch completed42 cases/211 entries. Native reported batch3570.13ms is descriptive, not full recognition/camera speed or memory acceptance. Durable result: 8,087,410 bytes, SHA256 332ed8881d3077ed3983e7b3589c302787f005f267877d490256c95e16c16284.
+
+1. Deliberate force-stop/restart recovered identical hash/size/42-case metadata without rerunning image work or inference.
+2. Local Downloads export request40000 completed; device and transferred full ZIP hash/size matched.
+3. Request40001: system picker opened, selected background test process deliberately killed and confirmed absent, then orphan SAVE completed once. Fresh app launch recovered same completed result and explicitly reported interrupted export; no orphan success. Its exact target was0bytes/empty SHA, retained without deletion.
+4. New explicit request40002 completed to a different filename; full transferred ZIP is byte-for-byte identical to40000. No second batch or automatic export.
+
+Unchanged comparator independently validated all211 exact entries/210 file hashes,42 IDs/dimensions/metadata/CRC/full RGB and602112-byte tensors, finite values, orientation/crop, center bilinear resize/letterbox, float conversion and eight guide mappings. All42 exact stages pass. Rows with mismatch against frozen comparisons: {"decodedUprightVsPillowRgb": 0, "resizeVsFrozenBilinearRgb": 0, "tensorVsFrozenBilinear": 0, "tensorVsFrozenPillowLanczos": 42}. Android JPEG decoding matched these particular generated fixtures; no general JPEG decoder equivalence claim. Bilinear-vs-Pillow Lanczos differences are descriptive and remain a real recipe difference; historical17/20 (85%) product ranking cannot be transferred to this phone preprocessing.
+
+Specification: durable result/recovery and stale-session separation passed this physical packet. Standards: existing pins, model/math/thresholds and isolation preserved; 811 stopped source records unchanged except coordinator workflow/PROJECT_STATE, 1304 frozen build records match. Fresh source review remains PHONE_P1_IMAGE_LIFECYCLE_C1_INDEPENDENT_REVIEW_20261012.md.
+
+Evidence: apps/recognition-lab/runs/phone-experiment/p1-image-lifecycle-device-20261012-a1, device-result.json, scoped app/picker receipts, two actual-device ZIPs and comparison/comparison.json. Exact filenames generated-image-lifecycle-c1-40000.zip and40002.zip contain complete results;40001.zip is intentionally empty. Initial no-USB preflight retained; later reconnect resumed same untouched packet. Host runner added a smaller scroll to capture offscreen receipts; no repeated batch/export/threshold change.
+
+Residual uncertainty: deliberate process death is not every possible Android low-memory event; interrupted save may leave an empty/partial selected document and requires a new explicit export. No true blocking-I/O cancellation, memory/thermal budgets, full photo recognition accuracy, multi-frame camera performance, UNKNOWN/calibration/holdout or M12/release acceptance. Core generated-engine9/9 historical evidence remains separate and no inference was repeated here.
+
+Next phase: controlled replay of the existing40 product photos/20 queries on the phone with original annotations and frozen references. Compare actual phone recipe rankings and latency to laptop baseline before live panning/multi-frame feasibility. Reuse existing photos, no recropping/new product collection required for this next comparison. Prepare and review its bounded private-photo/offline processing packet before execution; this generated-only packet does not authorize arbitrary photo import. No live scanning added now.

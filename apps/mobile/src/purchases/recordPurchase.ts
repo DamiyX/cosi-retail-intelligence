@@ -1,3 +1,4 @@
+import { captureCommandActor, type CommandActorOptions, assertCurrentActor } from '../storeContext/access';
 import {
   convertPackagesToBase,
   DomainError,
@@ -73,7 +74,7 @@ export interface RecordPurchaseInput {
   occurredAt?: string;
 }
 
-export interface RecordPurchaseOptions {
+export interface RecordPurchaseOptions extends CommandActorOptions {
   generateId?: () => string;
   operationId?: string;
 }
@@ -215,6 +216,8 @@ export function recordPurchase(
   const userId = requireId(input.userId);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
+  const actor = captureCommandActor(adapter, { storeId, deviceId, userId }, options.actorContext);
+
   const store = getStoreById(adapter, storeId);
   if (!store || store.status !== 'ACTIVE') {
     throw new DomainError('INVALID_VALUE', 'Store does not exist or is not active.');
@@ -256,6 +259,7 @@ export function recordPurchase(
   const purchaseId = generateId();
 
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor);
     // Repeat the ownership/active checks inside the write transaction so a
     // deactivated package or product can never be committed from stale UI.
     const transactionalLines = validateLines(adapter, storeId, input.lines);

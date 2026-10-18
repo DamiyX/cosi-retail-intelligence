@@ -1,0 +1,287 @@
+{
+  "schema_version": 1,
+  "task_id": "m10-market-price-infrastructure",
+  "workflow_id": "build-feature",
+  "mode": "implement",
+  "status": "pending",
+  "current_state": "source-accepted-C1-C2-closed-M11-held-live-gates-pending",
+  "completed_states": [
+    "actual-market-model-gaps-inspected",
+    "m10-source-policy-reviewed-and-four-vertical-tickets-prepared",
+    "m9-current-source-accepted-after-C1",
+    "M10-01-source-implemented",
+    "M10-02-source-implemented",
+    "M10-03-source-implemented",
+    "M10-04-local-evidence-complete-writer-stopped",
+    "coordinator-independent-source-audit-C1-C2-reproduced",
+    "M10-C1-C2-local-regressions-verified-writer-stopped",
+    "coordinator-C1-C2-independent-repair-review-accepted"
+  ],
+  "owner": {
+    "agent": "main-coordinator",
+    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
+    "worktree": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning"
+  },
+  "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
+  "lease": null,
+  "evidence": [
+    {
+      "kind": "planning",
+      "source": "docs/engineering/M10_MARKET_PRICE_PLAN.md; docs/decisions/DECISION_LOG.md D-051",
+      "result": "Actual private immutable false-consent facts preserved; new market eligibility source is prospective/revocable, identity/geography reviewed, source activation OFF. No fake data or live source gate.",
+      "observed_at": "2026-10-03T03:00:34.656Z"
+    },
+    {
+      "kind": "test",
+      "source": "M10_MARKET_PRICE_TICKETS.md M10-01",
+      "result": "14 synthetic/disposable SQLite tests pass; four workspace types/lint exit0; SQL NOT RUN.",
+      "observed_at": "2026-10-03T06:00:46.1553451Z"
+    },
+    {
+      "kind": "test",
+      "source": "M10_IMPLEMENTATION_HANDOFF.md",
+      "result": "M10-03 corrected35 mobile tests/three32.094s, all-workspace types/lint0; last equal-revision cache/microsecond cases included in final run. SQL NOT RUN. Doctor21/21, dependencies0, export0/1633modules/29assets/5.4MB. Current full mobile has stale complete-history expectation requiring authorized single-entry correction.",
+      "observed_at": "2026-10-03T06:37:57.8336608Z"
+    },
+    {
+      "kind": "command",
+      "source": "docs/engineering/M10_IMPLEMENTATION_HANDOFF.md",
+      "result": "Final full validation exited0: 1274 passed, 17 skipped (1291 total); all four workspace typechecks and zero-warning lint passed. Doctor21/21, dependencies0, Android export0. SQL NOT RUN; all live/physical/activation gates pending. Baseline553:543 unchanged/10 authorized deltas/no deletion;18 new files. Initial full failure retained; isolated sales correction25 pass. No M11 or external/Git effects.",
+      "observed_at": "2026-10-03T06:58:06.052Z"
+    },
+    {
+      "kind": "review",
+      "source": "docs/engineering/M10_INDEPENDENT_AUDIT.md; docs/engineering/M10_AUDIT_CORRECTIONS.md",
+      "result": "Coordinator87 focused tests/five suites pass; two independent actual-SQLite/UI regressions fail (12.902s; seven unrelated cases filtered out). Original553 baseline543 unchanged/10 authorized deltas/zero missing; old registry and approved assertion reconstructions match. Source acceptance withheld for C1 same-revision new key cache loss and C2 missing local product labels. SQL/live/native/activation NOT RUN. No M11.",
+      "observed_at": "2026-10-03T07:11:37.082Z"
+    },
+    {
+      "kind": "test",
+      "source": "docs/engineering/M10_AUDIT_CORRECTIONS.md",
+      "result": "C1/C2 repaired within ceiling;102 distinct market tests/five suites pass (mobile51/three30.924s;contracts13/one5.280s;domain38/one5.119s), no skips in these complete runs. All four workspace types/zero-warning lint passed, final mobile types/lint repeated after last test edit. Writer STOPPED; lease released; coordinator acceptance still withheld pending independent re-audit. Activation OFF; SQL/live/physical gates NOT RUN/pending. Fresh573 baseline563 unchanged/10 authorized deltas/zero missing/new; original553 manifest preserved as historical evidence.",
+      "observed_at": "2026-10-03T07:39:45.995Z"
+    },
+    {
+      "kind": "review",
+      "source": "docs/engineering/M10_INDEPENDENT_AUDIT.md",
+      "result": "Fresh coordinator51 mobile cases/three29.720s and original2 probes/two11.173s pass;7 unrelated probe cases filtered out; mobile types/zero-warning lint0. Fresh573 baseline563 unchanged/10 allowed deltas/zero missing/new; final hashes verified. C1/C2 closed, software source accepted only; OFF/live/physical/privacy pending; M11 held.",
+      "observed_at": "2026-10-03T07:45:35.236Z"
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "m9-source-accepted",
+      "claim": "M9 current-app source independently accepted.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Read main-coordinator M9 audit.",
+        "success_condition": "M9 current-app source independently accepted."
+      },
+      "evidence": [
+        {
+          "result": "M9 current-app source independently accepted.",
+          "source": "docs/engineering/M9_INTEGRATION_AUDIT.md",
+          "observed_at": "2026-10-03T03:00:34.656Z"
+        },
+        {
+          "result": "M9 earlier source acceptance superseded by reproduced account-status defect C1.",
+          "source": "docs/engineering/M9_INTEGRATION_CORRECTIONS.md",
+          "observed_at": "2026-10-03T03:07:58.356Z"
+        },
+        {
+          "result": "M9 C1 independently accepted; M10 source plan/ceiling reviewed, external activation OFF and policy provisional.",
+          "source": "docs/engineering/M9_INTEGRATION_AUDIT.md",
+          "observed_at": "2026-10-03T03:29:32.568Z"
+        }
+      ],
+      "limitations": [
+        "Source acceptance never implies live/physical/privacy/activation readiness."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m10-plan-reviewed",
+      "claim": "Coordinator reviewed source scope, provisional policy, privacy limits and ticket dependency chain.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "m9-source-accepted"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Inspect actual1–26 schema, M7 private facts, PRD/domain/offline/decisions and bounded official Supabase references.",
+        "success_condition": "Coordinator reviewed source scope, provisional policy, privacy limits and ticket dependency chain."
+      },
+      "evidence": [
+        {
+          "result": "Coordinator reviewed source scope, provisional policy, privacy limits and ticket dependency chain.",
+          "source": "docs/engineering/M10_MARKET_PRICE_PLAN.md",
+          "observed_at": "2026-10-03T03:00:34.656Z"
+        },
+        {
+          "result": "M9 C1 independently accepted; M10 source plan/ceiling reviewed, external activation OFF and policy provisional.",
+          "source": "docs/engineering/M9_INTEGRATION_AUDIT.md",
+          "observed_at": "2026-10-03T03:29:32.568Z"
+        }
+      ],
+      "limitations": [
+        "Source acceptance never implies live/physical/privacy/activation readiness."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m10-implementation",
+      "claim": "M10-01..04 implemented within source ceiling and actual local checks recorded.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "m10-plan-reviewed"
+      ],
+      "verification": {
+        "kind": "test",
+        "procedure": "Run ticket-focused and full documented checks; retain skips and pending SQL gates.",
+        "success_condition": "M10-01..04 implemented within source ceiling and actual local checks recorded."
+      },
+      "evidence": [
+        {
+          "result": "Final full validation exited0: 1274 passed, 17 skipped (1291 total); all four workspace typechecks and zero-warning lint passed. Doctor21/21, dependencies0, Android export0. SQL NOT RUN; all live/physical/activation gates pending. Implementer evidence only; coordinator acceptance pending.",
+          "source": "docs/engineering/M10_IMPLEMENTATION_HANDOFF.md",
+          "observed_at": "2026-10-03T06:58:06.052Z"
+        },
+        {
+          "source": "docs/engineering/M10_INDEPENDENT_AUDIT.md",
+          "result": "Fresh coordinator51 mobile cases/three29.720s and original2 probes/two11.173s pass;7 unrelated probe cases filtered out; mobile types/zero-warning lint0. Fresh573 baseline563 unchanged/10 allowed deltas/zero missing/new; final hashes verified. C1/C2 closed, software source accepted only; OFF/live/physical/privacy pending; M11 held.",
+          "observed_at": "2026-10-03T07:45:35.236Z"
+        }
+      ],
+      "limitations": [
+        "Source acceptance never implies live/physical/privacy/activation readiness."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "coordinator-source-audit",
+      "claim": "Main coordinator independently accepts stopped M10 source with no blocking source finding.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "m10-implementation"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Review actual stopped diff/hash/evidence and challenge privacy/consent/retry/cache assumptions.",
+        "success_condition": "Main coordinator independently accepts stopped M10 source with no blocking source finding."
+      },
+      "evidence": [
+        {
+          "source": "docs/engineering/M10_INDEPENDENT_AUDIT.md",
+          "result": "Two P2 source findings; source acceptance withheld.",
+          "observed_at": "2026-10-03T07:11:37.082Z"
+        },
+        {
+          "source": "docs/engineering/M10_INDEPENDENT_AUDIT.md",
+          "result": "Fresh coordinator51 mobile cases/three29.720s and original2 probes/two11.173s pass;7 unrelated probe cases filtered out; mobile types/zero-warning lint0. Fresh573 baseline563 unchanged/10 allowed deltas/zero missing/new; final hashes verified. C1/C2 closed, software source accepted only; OFF/live/physical/privacy pending; M11 held.",
+          "observed_at": "2026-10-03T07:45:35.236Z"
+        }
+      ],
+      "limitations": [
+        "Source acceptance never implies live/physical/privacy/activation readiness."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "live-authority-and-privacy",
+      "claim": "Real Auth/PostgreSQL/RLS/races/parity, reference/geography/privacy and explicit external activation approved.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "coordinator-source-audit"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Execute in approved isolated environment; founder/operator approve activation only after documented limits and privacy review.",
+        "success_condition": "Real Auth/PostgreSQL/RLS/races/parity, reference/geography/privacy and explicit external activation approved."
+      },
+      "evidence": [],
+      "limitations": [
+        "Source acceptance never implies live/physical/privacy/activation readiness."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "physical-release",
+      "claim": "Actual Android/offline/accessibility/second-laptop/release checks reviewed.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "coordinator-source-audit"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Founder-assisted physical checks; no source-export substitution.",
+        "success_condition": "Actual Android/offline/accessibility/second-laptop/release checks reviewed."
+      },
+      "evidence": [],
+      "limitations": [
+        "Source acceptance never implies live/physical/privacy/activation readiness."
+      ],
+      "blocker": null,
+      "waiver": null
+    }
+  ],
+  "artifacts": [
+    "docs/engineering/M10_MARKET_PRICE_PLAN.md",
+    "docs/engineering/M10_MARKET_PRICE_TICKETS.md",
+    "docs/engineering/PROJECT_STATE.md",
+    "docs/decisions/DECISION_LOG.md",
+    "docs/architecture/DOMAIN_DATA_MODEL.md",
+    "docs/architecture/OFFLINE_SYNC.md",
+    "docs/design/DESIGN.md",
+    "docs/engineering/M10_IMPLEMENTATION_HANDOFF.md",
+    "docs/engineering/M10_INDEPENDENT_AUDIT.md",
+    "docs/engineering/M10_AUDIT_CORRECTIONS.md"
+  ],
+  "approvals": [
+    {
+      "date": "2026-10-03",
+      "scope": "Founder authorizes unattended M9 audit then sequential M10/M11 planning/source implementation, routine judgement and coordinator-only audits. GPT-6.1 Sol HIGH. Physical checks pending. No external sharing/activation/hosted migration/Docker/spending/Git effects."
+    },
+    {
+      "date": "2026-10-03",
+      "scope": "Coordinator authorized only three full-current-schema expected values26->27 in catalogueLookup.test.ts:223 and m9SyncIntegration.test.tsx:143,226. No other test/runtime change."
+    },
+    {
+      "date": "2026-10-03",
+      "scope": "Coordinator authorized ONLY append {version:27,name:market_control_and_cache} to complete current history assertion sales.test.ts:118. Preserve all existing entries/test logic; let running failure finish first."
+    },
+    {
+      "date": "2026-10-03",
+      "scope": "Latest founder steering relayed by coordinator: DO NOT START M11. Finish existing approved M10 validation/corrections and STOPPED handoff, then hold; supersedes earlier M11 continuation approval. No M11 planning/tickets/workflow/source/delegation."
+    },
+    {
+      "date": "2026-10-03",
+      "scope": "Coordinator relayed founder-authorized C1/C2 only: same writer/model/checkout; market client/storage/screen/presentation/tests and assigned correction ledgers. No schema/contracts/SQL/business or old compatibility-test edits; stopped report-back authorized. No M11."
+    }
+  ],
+  "blockers": [
+    "External activation/privacy/live/native/physical gates remain pending; source planning does not pass them."
+  ],
+  "next_action": "Hold after M10 software source acceptance; pause unattended automation. All writers stopped. Founder must authorize further work; M11 has not been planned/ticketed/dispatched. Live/physical/privacy/activation/release gates remain pending.",
+  "created_at": "2026-10-03T03:00:34.656Z",
+  "updated_at": "2026-10-03T07:45:35.236Z",
+  "archived": false
+}

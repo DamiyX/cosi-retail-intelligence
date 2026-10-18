@@ -120,10 +120,46 @@ When a major decision changes, update the affected source-of-truth document too.
 | D-048 | Optional unconfirmed online catalogue suggestions | ACTIVE; live provider disabled |
 | D-049 | Explicit scanner re-entry, mode-specific feedback and compatible draft accumulation | ACTIVE; source/native verification pending |
 | D-050 | Product thumbnails across catalogue/sales, distinct from visual enrollment | ACTIVE; source/native verification pending |
+| D-051 | M10 revocable market eligibility over immutable private receipts | PROVISIONAL prototype source; external activation blocked |
 
 ---
 
 # 5. Decision Records
+
+## D-051 — M10 Revocable Market Eligibility Over Private Receipts
+
+**Status:** PROVISIONAL for prototype source implementation; not market activation.
+**Date:** 2026-10-03.
+**Authority:** Founder explicitly delegated unattended M9 audit then M10/M11
+planning/implementation, routine judgement and ticket sizing. Main coordinator
+owns audit. No real contribution/deployment/privacy approval is inferred.
+
+Keep original M4 observation consent=false and M7 immutable payloads unchanged.
+Market sharing has a separate server-authoritative, prospective OWNER consent
+generation with time/revision cutoffs, reviewed canonical package/zone mappings
+and private sanitized provenance. Nothing is eligible by migration, catalogue
+matching or ordinary business sync alone. Revoke excludes contributions and
+invalidates releases; re-enable never resurrects prior generations. Default
+client/server feature activation is OFF. No hosted effect in this source phase.
+
+For version1 prototype fixtures, one recent eligible observation per independent
+store/variant/package/zone/currency in30 days; fewer than five stores yields
+insufficient data without numeric price. Exact rational range/median; LIMITED
+coverage, explicit observed/calculated/window/expiry metadata. No fabricated
+trend, confidence percentage or current universal market price. These numbers
+are conservative prototype policy, not empirically validated market coverage.
+
+Removing retailer names and five-store suppression do not prove anonymity.
+Real SQL/Auth/RLS/privilege/concurrency/parity, approved reference/geography,
+privacy risk/retention/cohort review and explicit activation authorization are
+required before release. Previously cached aggregates cannot be instantly
+recalled offline. M9 remains private/local and independent of contribution.
+
+This additive market eligibility projection does not change costing, purchase
+atomicity, business sync, staff authority or recognition. Detailed source scope
+and prototype policy are in M10_MARKET_PRICE_PLAN.md. No significant dependency
+or provider replacement. Reconsider prototype privacy/threshold/window policy
+before any external release; do not treat PROVISIONAL as approved production.
 
 ## D-050 — Product Thumbnails Are Separate From Visual Enrollment
 
@@ -1839,3 +1875,136 @@ Update this file when:
 Do not rewrite historical entries to make old reasoning disappear.
 
 Preserve the decision trail.
+
+## D-052 — M11 source foundation and unpassed staff activation boundary
+
+**Status:** PROVISIONAL SOURCE CEILING. **Date:**2026-10-03.
+**Authority:**Founder explicitly said continue M11, lifting the prior hold;
+coordinator retains tickets/audits and GPT-6.1 Sol HIGH sequential implementation.
+This authorizes local source, not live accounts, role grants or deployment.
+
+Existing actor IDs and OWNER/ADMIN/STAFF membership vocabulary are retained.
+M11 hardens ACTIVE account/store/member/device and exact actor-device resolution,
+adds owner-only activity/check-attempt review, and a disabled default prototype
+for existing non-OWNER membership suspension/reactivation and device revocation.
+No account/invite creation, role change, ownership transfer or revoked-device
+reenrollment. No offline local request grants permission; only authoritative
+current owner status responses can confirm a control. Current business roles
+are not broadened; D-040/D-041/D-044 and M9/M10 OWNER boundaries prevail.
+
+Historical replay preserves inactive actors under D-045; it never authorizes new
+commands. M7 store-wide bootstrap/history is not a certified least-privilege staff
+feed. Real staff enrollment/session switching, limited data delivery and distinct
+staff blind assignments remain OPEN M11 gates, requiring explicit scoped design
+and live/security verification before activation. Do not mark whole M11 complete
+from source groundwork or silently move those requirements to M12.
+
+See M11_STAFF_PLAN/TICKETS for smallest source slices and evidence. No schema1–27
+rewrite, business-envelope change, finance/costing/recognition dependency change
+or persistent hosted effect. Necessary durable source control state may be added
+in migration28 with populated upgrade tests; server migrations authored only.
+
+## D-053 — Recognition lab airplane-mode policy correction
+
+**Status:** APPROVED BOUNDED IMPLEMENTATION; acceptance pending.
+**Date:** 2026-10-14, Africa/Lagos. **Authority:** Founder “ok proceed” after
+PHONE_P1_OFFLINE_GATE_REVIEW_20261014.md and explicit security-boundary approval
+question. Same stopped sole writer, Sol6.1 HIGH; independent coordinator audit
+precedes any replacement APK/device execution.
+
+For the isolated private-photo lab only, correct the saved-policy predicate:
+airplane ON, policy includes cell/Wi-Fi/Bluetooth, Wi-Fi saved state only 0 or 3,
+Bluetooth only 0 or 2. Special values are valid only in that context; enabled,
+override, missing, unknown or read-error states refuse. Admission and repeated
+cancellation must share the tested rule. Saved policy is not a live hardware
+oracle: retain explicit founder confirmation and scoped actual radio/cellular/
+network/tethering evidence, with polling/vendor/OS limits stated.
+
+No new permissions, native dependencies, INTERNET, automatic radio mutations,
+business/scanner/recognition-service contract, model/math/crop/ranking changes.
+Provide a bounded non-inference status check with clear refusals and no private
+store/decoder/model admission. Update truthful replay source fingerprint and
+produce a separate replacement APK; preserve original APKs, failed attempts,
+accepted C4 archive and all JPEG/control/box/baseline bytes. No test bypass,
+runtime inference or phone installation is authorized during implementation.
+Source/generated/build acceptance does not accept hardware or private quality.
+
+October14 independent C1 audit clarification: the actual Android airplane-policy
+list includes known optional `uwb` (`cell,bluetooth,uwb,wifi,wimax`). Recognize
+that token within the approved interpretation while retaining all required
+radios and unknown/duplicate/error refusal; this adds no radio API/permission.
+C1's synthetic fixture omitted it and falsely passed the device goal. C1 APK is
+not accepted; same-writer C2 correction and independent audit are required.
+
+## D-054 — Isolated P2 camera experiment and explicit producer-storage limit
+
+**Status:** APPROVED BOUNDED SOURCE IMPLEMENTATION; camera proof pending.
+**Date:**2026-10-15,Africa/Lagos. **Authority:**Founder explicitly selected
+“Approve this isolated camera experiment” after the concrete G0 question stated
+camera-only access, owned256MiB storage, SDK temporary files measured separately,
+no proven hard temporary-storage/total-memory cap, and later build/install/proof.
+
+P1 G1 review is accepted only for the frozen packet in
+PHONE_P1_OFFLINE_CONFIRMATION_RESULT_20261015.md. G0 choiceA is selected from
+PHONE_P2_03_G0_DECISION_20261015.md and supersedes the October14 draft's proposed
+all-inclusive256MiB claim for this isolated camera experiment only. Enforce256MiB
+on experiment-owned retained/staged/metadata/derivative/export storage, with exact
+reservation/atomic-write/residue accounting. SDK producer/cache exposure and peak
+memory are separate measurements without a proven application-wide hard cap.
+Do not imply24MiB headroom or the old19/20-file arithmetic proves a total bound.
+
+Use the installed Expo Camera only behind an explicit isolated camera-proof
+opt-in. CAMERA is the only new permission; retain no network/audio/gallery/media/
+location access, no upload and no ordinary/business app behavior change. Explicit
+permission/capture action, current native job, camera-callback provenance and
+canonical app-cache UUID JPEG/open-file checks form the approved experimental
+ingress boundary; directory membership is not sensor attestation. Bound accepted
+JPEG<=12MiB/header<=4,000,000pixels before bitmap allocation/admitted copy, retain
+strict observed metadata/EXIF refusal policy, and use the pinned CPU/bilinear
+recipe under separate camera source/evidence bindings. No model/provider/native
+dependency/lockfile change, silent image repair/downsample/recapture, forced drain,
+evidence eviction or business-data integration is approved.
+
+The256MiB owned cap includes unresolved reservations/partial writes, atomic
+metadata/new/backup files, retained data, derivatives and exports; derive the
+actual worst-case reservation from implementation. No115-capture capacity claim.
+SDK files outside that cap remain reported exposure; unknown/oversized production
+is retained refusal evidence rather than admission. Camera-wide allocation and
+cache durability remain unproved. The later physical generated-target packet
+must measure these limits and preserve every unknown/refusal.
+
+Same stopped implementation writer resumes for an exact source/generated-check
+slice, then sends a stopped handoff to the coordinator for independent audit.
+No APK/native build, installation, camera capture/private data/model execution or
+radio change is authorized in that source slice. G3 exact build/static APK and
+G4 finite generated-target proof follow their separate reviewed packets. This is
+not a final production camera-provider decision (DF-004 remains deferred), live
+recognition acceptance, permission to begin P2-04 or a waiver of physical proof.
+
+## D-055 — Test-only camera derivative and exact internal receiver guard
+
+**Status:** APPROVED BOUNDED G3-C2 CORRECTION; APK/physical proof pending.
+**Date:** 2026-10-17, Africa/Lagos. **Authority:** Founder answered “Okay, go ahead”
+to the concrete camera-only experiment correction proposal after the coordinator
+confirmed G3-C1's actual R8 failure and explained the native-source amendment.
+
+Permit a task-owned derivative of the installed Expo Camera 57.0.6 for this isolated
+build only. Remove scanner implementation/imports/callbacks/reflective availability
+and three scanner dependency declarations using the exact copied-source targets
+in PHONE_P2_03_G3_C2_PROPOSAL_20261017.md. Retain still-camera behavior and reject
+barcode scan/launch before URL/image work. Keep MIT notices and separate base/
+derivative fingerprints. Installed node_modules, production sources/package/lock,
+P1/G2 evidence, model/recipe and other module versions remain unchanged. No new
+provider, dependency version, fake SDK class, missing-class suppression or R8 bypass.
+
+Explicitly amend the literal only-CAMERA criterion: CAMERA remains the sole Android
+capability permission; also retain exactly this app's AndroidX
+DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION declaration/request with signature
+protection. No wildcard permission exception, guard stripping or additional Android
+capability. Original C1 assertion failure remains preserved and unaccepted.
+
+Same writer GPT-6.1 Sol High, fresh stage/evidence and finite coordinator lease,
+offline build/static checks, stopped handoff and independent coordinator audit.
+No phone/ADB/install/camera/private pixels/model/radio/Git or external effect.
+G4 physical proof and P2-04 remain held. D-054 storage/SDK-cache/RAM limits stand;
+this is not a permanent production provider choice or successful build acceptance.

@@ -1,3 +1,4 @@
+import { captureCommandActor, type CommandActorOptions, assertCurrentActor } from '../storeContext/access';
 import {
   calculateSaleLine,
   calculateSaleTotals,
@@ -80,7 +81,7 @@ export interface CompleteSaleInput {
   note?: string | null;
 }
 
-export interface CompleteSaleOptions {
+export interface CompleteSaleOptions extends CommandActorOptions {
   generateId?: () => string;
   operationId?: string;
 }
@@ -127,6 +128,8 @@ export function completeSale(
   const deviceId = requireId(input.deviceId);
   const userId = requireId(input.userId);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
+
+  const actor = captureCommandActor(adapter, { storeId, deviceId, userId }, options.actorContext);
 
   // 1. Validate store, device, user before resolving a replay. An operation
   // ID is not an authorization token: a caller on the same device must not be
@@ -260,6 +263,7 @@ export function completeSale(
 
   // 6. Commit atomic transaction
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor);
     // 6a. Create or select customer account if credit
     if (paymentMethod === 'CREDIT' && !customerAccount) {
       customerAccount = createCustomerAccount(adapter, {

@@ -1,3 +1,4 @@
+import { captureCommandActor, type CommandActorOptions, assertCurrentActor } from '../storeContext/access';
 import { DomainError } from '@retail/domain';
 
 import { generateMobileId } from '../crypto/mobileIds';
@@ -27,7 +28,7 @@ export interface RecordExpenseInput {
   occurredAt?: string;
 }
 
-export interface RecordExpenseOptions {
+export interface RecordExpenseOptions extends CommandActorOptions {
   operationId?: string;
   generateId?: () => string;
 }
@@ -86,6 +87,8 @@ function normalizeInput(input: RecordExpenseInput): NormalizedExpenseInput {
 }
 
 function assertOwner(adapter: DatabaseAdapter, input: NormalizedExpenseInput): string {
+  assertCurrentActor(adapter, input, true);
+
   const store = getStoreById(adapter, input.storeId);
   if (!store || store.status !== 'ACTIVE') {
     throw new DomainError('INVALID_VALUE', 'Store does not exist or is not active.');
@@ -160,6 +163,7 @@ export function recordExpense(
 ): RecordedExpenseGraph {
   const input = normalizeInput(rawInput);
   const operationId = options.operationId === undefined ? (options.generateId ?? generateMobileId)() : requireId(options.operationId);
+  const actor = captureCommandActor(adapter, input, options.actorContext, true);
   assertOwner(adapter, input);
   const replayed = findExpectedOutboxReplay(adapter, {
     operationId,
@@ -171,6 +175,7 @@ export function recordExpense(
   if (replayed) return rehydrateReplay(adapter, replayed, input);
 
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor, true);
     const memberId = assertOwner(adapter, input);
     const occurredAt = input.occurredAt ?? nowIso();
     const createdAt = nowIso();

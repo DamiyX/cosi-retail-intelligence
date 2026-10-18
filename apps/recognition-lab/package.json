@@ -1,0 +1,20 @@
+{
+  "name": "@retail/recognition-lab",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Synthetic tooling-only recognition evaluator; no production recognition.",
+  "engines": {
+    "node": "24.21.0",
+    "npm": "11.19.0"
+  },
+  "scripts": {
+    "typecheck": "node ../mobile/node_modules/typescript/bin/tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "test": "jest --runInBand",
+    "fixture": "node src/cli.ts run --manifest fixtures/dataset.json --dataset-root fixtures --split development --out runs/development"
+  },
+  "dependencies": {
+    "zod": "4.6.4"
+  }
+}

@@ -1,0 +1,19 @@
+# P2-03 G3-C2 result
+
+2026-10-18, Africa/Lagos. **Signed offline release built; final static evidence completed; independent acceptance pending.**
+
+APK: `C:\Users\doyew\Documents\DEV 2\COSI-m8-planning\apps\recognition-lab\runs\phone-experiment\p2-camera-build-g3-c2-20261017-a1\writer\recognition-camera-proof-release.apk`. 39,986,480 bytes; SHA256 `5d3ad41be4bbf3a8bc3f4836cf4c8f4c737692dfe07db6d86a9046c0f91826a9`. Certificate SHA256 `48550aec63c2b09f7746775002fbc93c3c2ceb95bc388be59e95bcd26a7e2d83`. ARM64, min 24 / target 36. Actual R8/release lint/assemble succeeded; no rebuild during continuation.
+
+Only the approved task-owned Expo Camera 57.0.6 derivative changed: six targets, three analyzers excluded, 806 indexed source files, still-photo helper body preserved. Derivative `187019dce6c54652bd3b61d5fa69d38534d3077f1b2d3bafc129451fc7a0d4a3`. Original recognition source `360042746d54c6c05cf2ed0e253e87709d05f5bf60357951daee56df7b5b9d0e`, model and recipe unchanged. Two authorized existing build helpers changed, three bounded helpers added; no production/installed source, dependency, package/lock or migration change.
+
+Static evidence: signature verification; ZIP and all 17 ELF 16 KiB alignment; two DEX/10,762 definitions officially cross-checked; no scanner SDK definitions/types/runtime dependencies; eight dependency scopes/138 external files ; 104 pinned assets ; 588-source Hermes bundle; actual isolated module registration; 116-coordinate runtime notice inventory ; 44 retained TFLite JNI signatures/exported symbols. All 583 native declarations are inventoried, not all dynamically tested. CAMERA plus exact own signature receiver guard only; backup/cleartext false.
+
+Focused checks passed: derivative 8, generated JVM 13, binary parser 12, SDK parser 6, original Jest config 3, signature guard 12, optional-string boundary 4, renewal binding 9; valid/invalid config isolation, typecheck and zero-warning lint. Earlier failures and helper corrections are preserved. No test thresholds/timeouts were changed; original cold UI 5 s failure remains.
+
+Preservation passed: source 966 under exact helper/coordinator exceptions; installed 2995 / broad 9008; assets 104; frozen 2984; original cache 866; short cache 893 originals plus indexed accepted additions; staged 163; derivative 806/JS 68; C1 Maven 471; toolchain 331 / short Gradle 314. Full stage 2955 entries, one nontraversed junction. Final STOP binds writer/stage/report inventories and exact hashes.
+
+Review items remain: stock optional AndroidX camera/window libraries and VENDOR_ACTION visibility against original no-optional-vendor wording; exact OkHttp Conscrypt provider reflection string (origin traced, no scanner SDK). Nothing was stripped or silently waived. Independent native/manifest/evidence audit and G4 remain required. No phone, image/model execution, install, network acquisition or Git effect. SDK cache/RAM bounds and physical loading/camera/offline/performance/accuracy remain unproved; geometry INCONCLUSIVE.
+
+Full evidence, failed attempts, exact scope and stopping contract: [C2 handoff](./PHONE_P2_03_G3_C2_HANDOFF_20261017.md). Coordinator owns PROJECT_STATE/lease updates. G4/P2-04 held. Writer stops after final STOP and sends the one authorized direct parent handoff; messaging success is confirmed separately by its tool result.
+
+Finalization note: first freeze attempt stopped before writing STOP because its drain guard matched an old numeric PID; a subsequent query found none. The revised guard binds old build PIDs to creation before the accepted build end, still checks every named build tool regardless of age, and saves the fresh drain result. Exact transient identity was not retained; PID reuse is a diagnosis of the helper risk, not a proved process identity. No process was killed or APK/source changed. Original finalizer and failure record are preserved.

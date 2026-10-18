@@ -1,0 +1,12 @@
+[
+  {
+    "candidate": "apps/recognition-lab/fixtures/r2/toy-a.json",
+    "bundle": "apps/recognition-lab/fixtures/r2/toy-a-development.json",
+    "config": "apps/recognition-lab/fixtures/r2/config.json"
+  },
+  {
+    "candidate": "apps/recognition-lab/fixtures/r2/toy-b.json",
+    "bundle": "apps/recognition-lab/fixtures/r2/toy-b-development.json",
+    "config": "apps/recognition-lab/fixtures/r2/config.json"
+  }
+]

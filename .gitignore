@@ -9,6 +9,12 @@ coverage/
 .env.*
 !.env.example
 **/android/
+!apps/mobile/recognition-native/recognition-experiment/android/
+apps/mobile/recognition-native/recognition-experiment/android/build/
+apps/mobile/recognition-native/recognition-experiment/android/.gradle/
+apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/build/
+apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/.gradle/
+apps/mobile/recognition-native/recognition-experiment/android/src/main/assets/
 **/ios/
 *.apk
 *.aab

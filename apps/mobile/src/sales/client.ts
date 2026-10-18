@@ -1,3 +1,4 @@
+import { assertCurrentActor, resolveCurrentActor, guardClient } from '../storeContext/access';
 import { createProductPhotos, type ProductPhotos } from '../media/productPhotos';
 import { createCatalogueSuggestions, type CatalogueSuggestions } from '../catalogue/lookup/suggestions';
 import type { CatalogueLookupAdapter } from '../catalogue/lookup/provider';
@@ -12,16 +13,12 @@ import {
 import { generateMobileId } from '../crypto/mobileIds';
 import type { DatabaseAdapter } from '../db/adapter';
 import {
-  getDeviceById,
   getInventoryBalanceByStoreProduct,
   getProductVariantById,
-  getStoreById,
   getStoreProductById,
-  listDevicesByStore,
   listPackageUnitsByVariant,
   listSalesByStore,
   listStorePackageSettings,
-  listStores,
   searchCustomerAccounts,
   searchStoreProducts,
   type CustomerAccountRow,
@@ -103,43 +100,8 @@ export function createDatabaseSalesClient(
   options: CreateSalesClientOptions = {},
 ): SalesClient {
   const generateId = options.generateId ?? generateMobileId;
-  const store = options.storeId
-    ? getStoreById(adapter, options.storeId)
-    : listStores(adapter)[0];
-  if (!store) {
-    throw new Error('Cannot create SalesClient: no store is provisioned.');
-  }
-  if (store.status !== 'ACTIVE') {
-    throw new Error('Cannot create SalesClient: store is not active.');
-  }
-
-  const device = options.deviceId
-    ? getDeviceById(adapter, options.deviceId)
-    : listDevicesByStore(adapter, store.id)[0];
-  if (!device || device.storeId !== store.id || device.status !== 'ACTIVE') {
-    throw new Error('Cannot create SalesClient: no active device is provisioned for this store.');
-  }
-
-  let userId = options.userId;
-  if (userId) {
-    const memberRow = adapter.getFirstRow<{ id: string }>(
-      `SELECT id FROM store_members WHERE store_id = ? AND user_id = ? AND status = 'ACTIVE' LIMIT 1;`,
-      [store.id, userId],
-    );
-    if (!memberRow) {
-      throw new Error('Cannot create SalesClient: user is not an active store member.');
-    }
-  } else {
-    const memberRow = adapter.getFirstRow<{ user_id: string }>(
-      `SELECT user_id FROM store_members WHERE store_id = ? AND status = 'ACTIVE' LIMIT 1;`,
-      [store.id],
-    );
-    if (!memberRow) {
-      throw new Error('Cannot create SalesClient: no active store member found.');
-    }
-    userId = memberRow.user_id;
-  }
-
+  const context = resolveCurrentActor(adapter, options, false);
+  const { store, device, userId } = context;
   const getPackagesForProduct = (storeProductId: string): SellablePackageOption[] => {
     const sp = getStoreProductById(adapter, storeProductId);
     if (!sp || sp.storeId !== store.id || sp.status !== 'ACTIVE') return [];
@@ -172,7 +134,7 @@ export function createDatabaseSalesClient(
   };
 
   const suggestions = createCatalogueSuggestions(adapter, store.id, options.lookupAdapter);
-  return {
+  return guardClient<SalesClient>({
     suggestions,
     storeId: store.id,
     storeName: store.name,
@@ -181,7 +143,7 @@ export function createDatabaseSalesClient(
     userId,
 
     recognition: createRecognitionService(adapter, store.id),
-    photos: createProductPhotos(adapter, store.id),
+    photos: createProductPhotos(adapter, store.id, undefined, undefined, undefined, context),
     getProductById(storeProductId) {
       const product = getStoreProductById(adapter, storeProductId);
       if (!product || product.storeId !== store.id || product.status !== 'ACTIVE') return null;
@@ -238,8 +200,8 @@ export function createDatabaseSalesClient(
         barcodeForBasePackage: input.barcodeForBasePackage,
         defaultSellingPriceMinor: input.defaultSellingPriceMinor,
       };
-      const graph = createTemporaryProduct(adapter, operation, { generateId, operationId: input.operationId,
-        validatePhoto: () => { if (input.localPhotoId) createProductPhotos(adapter, store.id).assertReady(input.localPhotoId); } });
+      const graph = createTemporaryProduct(adapter, operation, { generateId, actorContext: context, operationId: input.operationId,
+        validatePhoto: () => { if (input.localPhotoId) createProductPhotos(adapter, store.id, undefined, undefined, undefined, context).assertReady(input.localPhotoId); } });
       const code = input.lookupCode ?? (input.barcode ? { value: input.barcode, type: input.barcodeType ?? 'EAN' } : undefined);
       if (code) { try { suggestions.remember(graph.storeProduct.id, code); } catch { /* Optional lookup cannot delay checkout. */ } }
       return graph;
@@ -258,6 +220,7 @@ export function createDatabaseSalesClient(
         },
         {
           ...options,
+          actorContext: context,
           operationId: input.operationId ?? options.generateId?.(),
         },
       );
@@ -270,5 +233,5 @@ export function createDatabaseSalesClient(
     getSaleDetail(saleId: string): SaleDetail | null {
       return getSaleDetail(adapter, saleId, store.id);
     },
-  };
+  }, () => assertCurrentActor(adapter, context, false));
 }

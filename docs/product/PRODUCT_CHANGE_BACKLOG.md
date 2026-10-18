@@ -45,6 +45,7 @@ catalogue/inventory enrichment must preserve immediate sell-first value.
 | PC-16 | Small predictable thumbnail storage and bounded display work | M8-12/13 source enforces new300KiB/1024px limits and legacy reads; actual size/clarity/overhead still requires native measurement; recognition budgets separate |
 | PC-17 | Compact checkout, product language, scoped edit cancellation and inline quantity controls | Founder explicitly deferred October1 until scanning is finished; preserve as later sales/checkout work, outside current M8 corrections |
 | PC-18 | Bargained reductions shown as discounts, higher prices allowed and below-cost protection | Founder explicitly deferred October1 until scanning is finished; future pricing/cost-reference review required, outside current M8 corrections |
+| PC-19 | Recognize products held in a hand or against ordinary shop backgrounds; assess optional offline cutouts | October3 input; existing recognition evaluation conditions reinforced. Preprocessing feasibility only; higher-model planning awaits founder selection, no model/native dependency or feature adopted |
 
 ## PC-17 — Keep checkout compact and product edits local
 
@@ -451,3 +452,56 @@ distinguishes GTIN identity from batch/serial/expiry; [OFF licence guidance](htt
 requires review of dataset/content/image reuse terms before importing or distributing data.
 
 PC11 superseding founder input (2026-10-02): pinch and labeled zoom buttons withdrawn. M8-17 instead places one-thumb zoom slider inside preview near bottom of framing guides, minus/plus ends and magnifier. Normalized zoom remains camera API setting; no detector crop/ROI or guide-resize promise. Real tap-focus request remains pending native-extension review/approval; absence of focus in current version is known, not a new implemented regression.
+
+
+## October2 scanner feedback and Track B planning disposition
+
+Founder reports beep working in the current session; controlled native gates are
+not globally passed. PC-11 follow-up: genuine tap-to-focus with truthful visible
+feedback is pending, not implemented. Founder defers it to a later build/daytime.
+The current zoom slider overlaps the guide: next approved UI correction should
+place a visually thinner bar below the brackets, allowing more preview space
+while retaining accessible touch targets. No source changes authorized now.
+
+PC-08/PC-15 guided multi-view enrollment and visual identification now route to
+`docs/recognition/TRACK_B_PLAN.md`. Founder authorized Astra planning, followed
+by Sol6.1 HIGH implementation after its plan gate. Detailed R0 tickets are linked
+there; no model/runtime adoption, native build or production M12 integration is
+implied. Generic checkout PC-17/18 remains deferred.
+
+## PC-19 — Real shop backgrounds, hands and optional offline cutouts
+
+Founder input October3: photo collection pauses until the next morning's daylight.
+Retailers must be able to hold a product or use a shelf/counter without arranging
+a studio backdrop. Consider white/black/transparent backgrounds and whether a
+hand could help estimate size; detailed planning should use a founder-selected
+higher model if pursued. No automatic model escalation is authorized.
+
+Disposition: these real-world capture conditions already appear in
+RECOGNITION_TEST_PLAN section9 (clutter, partial occlusion, hand-held and shelf/
+table placement). The plain-background suggestion was for an initial quality
+rehearsal, not a mandatory enrollment UX. Capture originals and vary backgrounds
+across independent queries; include close-size products and keep UNKNOWN/manual
+choice when distinguishing evidence is missing. Do not use a palm as a reliable
+measurement reference or guess text hidden by fingers.
+
+Recommendation, not adopted implementation: benchmark unchanged images and a
+simple product crop first. Only compare subject masks/cutouts if real clutter
+failures justify it; report retrieval quality, lost label/shape detail, failure
+fallback, latency, storage and first-use offline asset availability. Keep original
+and derived images in one source family; no extra product/sample counts or split
+leakage. Thumbnail aesthetics and recognition preprocessing are separate outputs.
+Never invent hidden surfaces to clean a recognition input. Normal capture/selling
+must not depend on successful background removal.
+
+Short feasibility check October3, primary sources:
+[OpenCV GrabCut](https://docs.opencv.org/4.13.0/d8/d83/tutorial_py_grabcut.html)
+describes classical statistical foreground extraction with a user rectangle and
+possible correction strokes; extra manual cleanup conflicts with low-friction UX.
+[ML Kit subject segmentation](https://developers.google.com/ml-kit/vision/subject-segmentation)
+describes on-device processing but treats touching subjects as one, so hand/product
+separation is not guaranteed. Its
+[Android setup](https://developers.google.com/ml-kit/vision/subject-segmentation/android)
+uses a downloaded model and is beta; on-device does not establish fresh-install
+offline readiness. Neither library is selected or added to COSI. No dataset/model/
+device evidence establishes whether masks improve this project's recognition.

@@ -1,3 +1,4 @@
+import { assertCurrentActor } from '../storeContext/access';
 import { DomainError } from '@retail/domain';
 
 import type { DatabaseAdapter } from '../db/adapter';
@@ -147,6 +148,8 @@ function resolveRange(store: StoreRow, input: BusinessSummaryInput): BusinessSum
 }
 
 function assertReadableActor(adapter: DatabaseAdapter, input: BusinessSummaryInput): StoreRow {
+  assertCurrentActor(adapter, input, true);
+
   const store = getStoreById(adapter, input.storeId);
   if (!store || store.status !== 'ACTIVE') throw new DomainError('INVALID_VALUE', 'Store does not exist or is not active.');
   const device = getDeviceById(adapter, input.deviceId);

@@ -220,7 +220,7 @@ it('upgrades schema25 without changing an existing product, private photo, sale 
     createDatabaseSalesClient(legacy.adapter).completeSale({ lines: [{ storeProductId: product.storeProduct.id, packageUnitId: product.basePackage.id, quantityPackagesMicros: 1000000, unitPriceMinor: 125 }], payment: { method: 'CASH' } });
     const tables = ['store_products', 'product_variants', 'media_assets', 'sales', 'sale_items', 'inventory_events', 'outbox_operations'];
     const before = tables.map(table => legacy.adapter.getAllRows(`SELECT * FROM ${table}`));
-    expect(openDatabase(legacy.adapter).schemaVersion).toBe(26);
+    expect(openDatabase(legacy.adapter).schemaVersion).toBe(28);
     expect(tables.map(table => legacy.adapter.getAllRows(`SELECT * FROM ${table}`))).toEqual(before);
     expect(legacy.adapter.getAllRows('SELECT * FROM catalogue_lookup_suggestions')).toHaveLength(0);
   } finally { legacy.closeAndDelete(); }

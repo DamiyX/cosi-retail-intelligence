@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "kind": "GENERATED_CAPTURE_SCENARIO",
+  "nativeValidated": false,
+  "scenarioId": "never-finishing",
+  "sessionId": "scan-1",
+  "galleryRevision": "generated-gallery-v1",
+  "finalAtMs": 5000,
+  "gallery": [
+    {
+      "productId": "a",
+      "references": [
+        {
+          "id": "a1",
+          "values": [
+            1,
+            0
+          ]
+        },
+        {
+          "id": "a2",
+          "values": [
+            1,
+            0
+          ]
+        },
+        {
+          "id": "a3",
+          "values": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "a4",
+          "values": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "productId": "b",
+      "references": [
+        {
+          "id": "b1",
+          "values": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "b2",
+          "values": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "b3",
+          "values": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "b4",
+          "values": [
+            0,
+            1
+          ]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "atMs": 0,
+      "action": "REQUEST",
+      "ready": true,
+      "permission": true,
+      "offline": true
+    },
+    {
+      "atMs": 0,
+      "action": "CAPTURE",
+      "job": 1
+    },
+    {
+      "atMs": 3000,
+      "action": "POLL"
+    }
+  ]
+}

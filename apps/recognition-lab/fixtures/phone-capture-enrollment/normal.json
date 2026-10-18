@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "kind": "GENERATED_ENROLLMENT_FIXTURE",
+  "nativeValidated": false,
+  "fixtureId": "normal",
+  "products": [
+    {
+      "productId": "a",
+      "views": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "productId": "b",
+      "views": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "trialId": "trial-1",
+      "sessionId": "scan-1",
+      "mode": "NORMAL",
+      "truth": {
+        "kind": "KNOWN",
+        "productId": "a"
+      },
+      "vectors": [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "trialId": "trial-2",
+      "sessionId": "scan-2",
+      "mode": "NORMAL",
+      "truth": {
+        "kind": "UNKNOWN"
+      },
+      "vectors": [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    }
+  ],
+  "followupTrials": [
+    {
+      "trialId": "trial-3",
+      "sessionId": "scan-3",
+      "mode": "NORMAL",
+      "truth": {
+        "kind": "KNOWN",
+        "productId": "a"
+      },
+      "vectors": [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "trialId": "trial-4",
+      "sessionId": "scan-4",
+      "mode": "NORMAL",
+      "truth": {
+        "kind": "UNKNOWN"
+      },
+      "vectors": [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    }
+  ]
+}

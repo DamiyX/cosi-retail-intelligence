@@ -1464,6 +1464,18 @@ belongs in `SCANNING_ARCHITECTURE.md`.
 
 # 63. Price Observation Sync
 
+M10 D-051 is an additive prototype boundary: existing immutable M7 purchase
+envelopes and original consent=false observations are not rewritten. Separate
+online-confirmed OWNER market consent/generation/version and reviewed identity/
+zone authorize a restricted projection of accepted private facts. Market-only
+configuration/release requests reuse authenticated transport/identity checks;
+they do not replace the business outbox/push/pull protocol. Default activation
+OFF; local pending consent is never server authority. Cached validated releases
+are bounded/versioned/expired explicitly; tombstones remove numeric results,
+old/context-mismatched responses cannot restore them. Server revocation cannot
+instantly recall offline caches. Source scope/policy and unpassed live/privacy
+gates are recorded in M10_MARKET_PRICE_PLAN.md; no deployment implied.
+
 A completed PurchaseItem may produce:
 
 1. private store purchase history;
@@ -1858,3 +1870,12 @@ If the active AI coding agent discovers a conflict:
 7. implement.
 
 Old chat history is not the synchronization specification once this document exists.
+
+## M11 source controls and staff visibility gate (D-052)
+
+Current business envelopes/replay remain unchanged. Historical references retain
+inactive actors without granting current access. Member/device control requests
+are authoritative online owner decisions; durable local pending intent is not
+a permission. Existing whole-store bootstrap is not approved as a cashier feed.
+Real staff sessions/filtered visibility/assignee delivery remain explicit M11
+design and live-security gates. See M11_STAFF_PLAN; source controls default OFF.

@@ -1,3 +1,4 @@
+import { captureCommandActor, type CommandActorOptions, assertCurrentActor } from '../storeContext/access';
 import { DomainError, formatQuantityMicros } from '@retail/domain';
 
 import { generateMobileId } from '../crypto/mobileIds';
@@ -131,6 +132,8 @@ type ConditionCandidate = AttentionItem;
 type StockConditionKind = Extract<AttentionItemKind, 'LOW_STOCK' | 'ZERO_STOCK' | 'NEGATIVE_STOCK'>;
 
 function assertActor(adapter: DatabaseAdapter, input: AttentionActor, ownerOnly: boolean): { store: StoreRow; memberId: string } {
+  assertCurrentActor(adapter, input, ownerOnly);
+
   const store = getStoreById(adapter, requireId(input.storeId));
   if (!store || store.status !== 'ACTIVE') throw new DomainError('INVALID_VALUE', 'Store does not exist or is not active.');
   const device = getDeviceById(adapter, requireId(input.deviceId));
@@ -738,7 +741,7 @@ function assertReplayRequest(outbox: OutboxOperationRow, expected: Record<string
   return payload;
 }
 
-function settingsFingerprint(input: SaveAttentionSettingsInput): Record<string, unknown> {
+function settingsFingerprint(input: SaveAttentionSettingsInput, options: CommandActorOptions = {}): Record<string, unknown> {
   return { expiryLeadDays: input.expiryLeadDays };
 }
 
@@ -781,7 +784,8 @@ export function getAttentionOverview(adapter: DatabaseAdapter, input: AttentionA
   return overviewFor(adapter, store, mapSettings(store.id, getInventoryAttentionSettings(adapter, store.id)), input.now ?? nowIso());
 }
 
-export function saveAttentionSettings(adapter: DatabaseAdapter, input: SaveAttentionSettingsInput): SaveAttentionSettingsResult {
+export function saveAttentionSettings(adapter: DatabaseAdapter, input: SaveAttentionSettingsInput, options: CommandActorOptions = {}): SaveAttentionSettingsResult {
+  const actor = captureCommandActor(adapter, input, options.actorContext, true);
   assertActor(adapter, input, true);
   const operationId = requireId(input.operationId);
   const request = settingsFingerprint(input);
@@ -800,6 +804,7 @@ export function saveAttentionSettings(adapter: DatabaseAdapter, input: SaveAtten
     return { settings: settings as AttentionSettings, outbox: replayed };
   }
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor, true);
     const currentActor = assertActor(adapter, input, true);
     const saved = saveInventoryAttentionSettings(adapter, {
       storeId: input.storeId,
@@ -823,7 +828,8 @@ export function saveAttentionSettings(adapter: DatabaseAdapter, input: SaveAtten
   });
 }
 
-export function snoozeAttention(adapter: DatabaseAdapter, input: SnoozeAttentionInput, options: { generateId?: () => string } = {}): SnoozeAttentionResult {
+export function snoozeAttention(adapter: DatabaseAdapter, input: SnoozeAttentionInput, options: CommandActorOptions & { generateId?: () => string } = {}): SnoozeAttentionResult {
+  const actor = captureCommandActor(adapter, input, options.actorContext, true);
   const { store } = assertActor(adapter, input, true);
   const operationId = requireId(input.operationId);
   const request = snoozeFingerprint(input);
@@ -854,6 +860,7 @@ export function snoozeAttention(adapter: DatabaseAdapter, input: SnoozeAttention
   const due = resolveDue(input, at);
   const generateId = options.generateId ?? generateMobileId;
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor, true);
     const currentActor = assertActor(adapter, input, true);
     const settings = mapSettings(store.id, getInventoryAttentionSettings(adapter, store.id));
     const current = deriveCandidates(adapter, store, settings, at).find((candidate) => candidate.conditionKey === input.conditionKey);

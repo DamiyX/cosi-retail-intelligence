@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "storeScope": "synthetic-store",
+  "revision": "active-v1",
+  "products": [
+    { "productId": "a", "packageIds": ["single", "pack"], "recordedStock": 0 },
+    { "productId": "b", "packageIds": ["single-b"], "recordedStock": 12 },
+    { "productId": "c", "packageIds": ["single-c"], "recordedStock": 0 }
+  ]
+}

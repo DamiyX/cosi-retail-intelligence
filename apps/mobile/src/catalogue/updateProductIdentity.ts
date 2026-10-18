@@ -1,3 +1,4 @@
+import { captureCommandActor, assertCurrentActor, resolveCurrentActor } from '../storeContext/access';
 import { DomainError } from '@retail/domain';
 
 import { generateMobileId } from '../crypto/mobileIds';
@@ -53,6 +54,7 @@ export function updateProductIdentity(
   const generateId = options.generateId ?? generateMobileId;
   const storeId = requireId(input.storeId);
   const deviceId = requireId(input.deviceId);
+  const actor = captureCommandActor(adapter, resolveCurrentActor(adapter, { storeId, deviceId }), options.actorContext);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
   const replayed = findExpectedOutboxReplay(adapter, {
@@ -69,6 +71,7 @@ export function updateProductIdentity(
 
   const occurredAt = nowIso();
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor);
     const existing = requireOwnedProduct(adapter, storeId, input.storeProductId);
     const variant =
       input.name === undefined
@@ -121,6 +124,7 @@ export function addProductIdentifier(
   const generateId = options.generateId ?? generateMobileId;
   const storeId = requireId(input.storeId);
   const deviceId = requireId(input.deviceId);
+  const actor = captureCommandActor(adapter, resolveCurrentActor(adapter, { storeId, deviceId }), options.actorContext);
   const operationId = options.operationId === undefined ? (input.operationId ?? generateId()) : requireId(options.operationId);
 
   const replayed = findExpectedOutboxReplay(adapter, {
@@ -136,6 +140,7 @@ export function addProductIdentifier(
 
   const occurredAt = nowIso();
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor);
     const storeProduct = requireOwnedProduct(adapter, storeId, input.storeProductId);
     const variant = getProductVariantById(adapter, storeProduct.productVariantId);
     if (storeProduct.status !== 'ACTIVE' || !variant || variant.status !== 'ACTIVE' ||

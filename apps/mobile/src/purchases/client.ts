@@ -1,15 +1,12 @@
+import { assertCurrentActor, resolveCurrentActor, guardClient } from '../storeContext/access';
 import type { QuickAddInput, TemporaryProductGraph } from '../catalogue/client';
 import { createTemporaryProduct } from '../catalogue/createTemporaryProduct';
 import { generateMobileId } from '../crypto/mobileIds';
 import type { DatabaseAdapter } from '../db/adapter';
 import {
-  getDeviceById,
   getProductVariantById,
-  getStoreById,
   getStoreProductById,
-  listDevicesByStore,
   listPackageUnitsByVariant,
-  listStores,
   listSuppliersByStore,
   searchStoreProducts,
   type SupplierRow,
@@ -95,26 +92,9 @@ export function createDatabasePurchasesClient(
   options: CreatePurchasesClientOptions = {},
 ): PurchasesClient {
   const generateId = options.generateId ?? generateMobileId;
-  const store = options.storeId ? getStoreById(adapter, options.storeId) : listStores(adapter)[0];
-  if (!store || store.status !== 'ACTIVE') throw new Error('Cannot create PurchasesClient: no active store is provisioned.');
-  const device = options.deviceId ? getDeviceById(adapter, options.deviceId) : listDevicesByStore(adapter, store.id)[0];
-  if (!device || device.storeId !== store.id || device.status !== 'ACTIVE') throw new Error('Cannot create PurchasesClient: no active device is provisioned.');
-  let userId = options.userId;
-  if (userId) {
-    const member = adapter.getFirstRow<{ id: string }>(
-      `SELECT id FROM store_members WHERE store_id = ? AND user_id = ? AND status = 'ACTIVE' LIMIT 1;`,
-      [store.id, userId],
-    );
-    if (!member) throw new Error('Cannot create PurchasesClient: user is not an active store member.');
-  } else {
-    const member = adapter.getFirstRow<{ user_id: string }>(
-      `SELECT user_id FROM store_members WHERE store_id = ? AND status = 'ACTIVE' LIMIT 1;`,
-      [store.id],
-    );
-    if (!member) throw new Error('Cannot create PurchasesClient: no active store member found.');
-    userId = member.user_id;
-  }
-  return {
+  const context = resolveCurrentActor(adapter, options, false);
+  const { store, device, userId } = context;
+  return guardClient<PurchasesClient>({
     storeId: store.id,
     storeName: store.name,
     storeCurrencyCode: store.currencyCode,
@@ -153,11 +133,12 @@ export function createDatabasePurchasesClient(
         baseUnitSymbol: input.baseUnitSymbol,
         localSku: input.localSku,
         barcode: input.barcode,
-      }, { generateId });
+      }, { generateId, actorContext: context });
     },
     recordPurchase(input: RecordPurchaseScreenInput): CompletedPurchaseGraph {
       const operationOptions: RecordPurchaseOptions = {
         generateId,
+        actorContext: context,
         operationId: input.operationId,
       };
       return recordPurchase(adapter, {
@@ -176,5 +157,5 @@ export function createDatabasePurchasesClient(
     getPurchaseDetail(purchaseId: string): PurchaseDetail | null {
       return getPurchaseDetail(adapter, purchaseId, store.id);
     },
-  };
+  }, () => assertCurrentActor(adapter, context, false));
 }

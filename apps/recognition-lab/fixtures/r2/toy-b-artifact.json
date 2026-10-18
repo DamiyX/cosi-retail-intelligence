@@ -1,0 +1,5 @@
+{
+  "description": "Authored toy vector recipe, not model weights",
+  "sourceManifestSha256": "6b941fcaf47ae42ffebe5bfe9b608f638ba7700e7135e7d94ef8d00b7c25670f",
+  "recipe": "Authored R0 vectors plus trailing zero; no pixels or encoder."
+}

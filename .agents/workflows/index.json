@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-01T23:45:13.372Z",
+  "updated_at": "2026-10-03T08:33:58.438Z",
   "tasks": {
     "m1-domain-local-database": "m1-domain-local-database.json",
     "m2-catalogue-package-units": "m2-catalogue-package-units.json",
@@ -9,6 +9,10 @@
     "m5-inventory-reconciliation": "m5-inventory-reconciliation.json",
     "m6-expenses-business-summary": "m6-expenses-business-summary.json",
     "m7-offline-sync": "m7-offline-sync.json",
-    "m8-unified-scanner": "m8-unified-scanner.json"
+    "m8-unified-scanner": "m8-unified-scanner.json",
+    "recognition-track-b": "recognition-track-b.json",
+    "m9-personal-price-intelligence": "m9-personal-price-intelligence.json",
+    "m10-market-price-infrastructure": "m10-market-price-infrastructure.json",
+    "m11-staff-accountability": "m11-staff-accountability.json"
   }
 }

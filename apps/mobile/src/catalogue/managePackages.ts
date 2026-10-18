@@ -1,3 +1,4 @@
+import { captureCommandActor, assertCurrentActor, resolveCurrentActor } from '../storeContext/access';
 import { DomainError, moneyFromMajorUnits, parseQuantityDecimal } from '@retail/domain';
 
 import { generateMobileId } from '../crypto/mobileIds';
@@ -68,6 +69,7 @@ export function createPackage(
   const generateId = options.generateId ?? generateMobileId;
   const storeId = requireId(input.storeId);
   const deviceId = requireId(input.deviceId);
+  const actor = captureCommandActor(adapter, resolveCurrentActor(adapter, { storeId, deviceId }), options.actorContext);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
   const replayed = findExpectedOutboxReplay(adapter, {
@@ -79,6 +81,7 @@ export function createPackage(
 
   const occurredAt = nowIso();
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor);
     const storeProduct = requireOwnedProduct(adapter, storeId, input.storeProductId);
     const currency = requireStoreCurrency(adapter, storeId);
     const conversionMicros = parseQuantityDecimal(input.conversionText);
@@ -141,6 +144,7 @@ export function updatePackage(
   const generateId = options.generateId ?? generateMobileId;
   const storeId = requireId(input.storeId);
   const deviceId = requireId(input.deviceId);
+  const actor = captureCommandActor(adapter, resolveCurrentActor(adapter, { storeId, deviceId }), options.actorContext);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
   const replayed = findExpectedOutboxReplay(adapter, {
@@ -153,6 +157,7 @@ export function updatePackage(
 
   const occurredAt = nowIso();
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor);
     const existing = getPackageUnitById(adapter, input.packageUnitId);
     if (!existing) {
       throw new DomainError('INVALID_VALUE', 'Package unit does not exist.');
@@ -216,6 +221,7 @@ export function deactivatePackage(
   const generateId = options.generateId ?? generateMobileId;
   const storeId = requireId(input.storeId);
   const deviceId = requireId(input.deviceId);
+  const actor = captureCommandActor(adapter, resolveCurrentActor(adapter, { storeId, deviceId }), options.actorContext);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
   const replayed = findExpectedOutboxReplay(adapter, {
@@ -228,6 +234,7 @@ export function deactivatePackage(
 
   const occurredAt = nowIso();
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor);
     const existing = getPackageUnitById(adapter, input.packageUnitId);
     if (!existing) {
       throw new DomainError('INVALID_VALUE', 'Package unit does not exist.');

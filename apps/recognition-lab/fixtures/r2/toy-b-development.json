@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "adapter": "precomputed-output-v1",
+  "evidenceKind": "authored-toy",
+  "dataset": {
+    "datasetId": "r0-fixture",
+    "version": "v2",
+    "kind": "synthetic-tooling-only",
+    "manifestSha256": "6b941fcaf47ae42ffebe5bfe9b608f638ba7700e7135e7d94ef8d00b7c25670f"
+  },
+  "candidate": {
+    "candidateId": "authored-toy-b",
+    "version": "v1",
+    "declarationSha256": "a01eeff925f0355fae1920cd2a528462faaecbd9649b1566d2c2fd3953147839",
+    "artifactSha256": "e82342ede373b94faaedb590f6a83a7bb2a2b4e59f0e9d577a55a0fd7252923a",
+    "preprocessingId": "toy-b",
+    "preprocessingVersion": "v1",
+    "preprocessingSha256": "33539d525f2ef5eef4b86ecb9b9c862f7c8fc74d48197f04254fd1b6ca760436",
+    "space": "toy-b-v1",
+    "dimension": 4
+  },
+  "split": "development",
+  "provenance": {
+    "producer": "authored-fixture-generator-no-encoder",
+    "executionReference": null,
+    "recordedAt": null,
+    "reportedDurationMs": null
+  },
+  "outputs": [
+    {
+      "entryId": "ref-a",
+      "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327",
+      "output": {
+        "kind": "vector",
+        "space": "toy-b-v1",
+        "values": [
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "entryId": "ref-b",
+      "assetSha256": "51255f23f016db82277f391e9f9b68c46e82dbb490084ab03d9ed48fa31386f7",
+      "output": {
+        "kind": "vector",
+        "space": "toy-b-v1",
+        "values": [
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "entryId": "q-a",
+      "assetSha256": "abe006461d55259b54dd7fc20dfa874ceeed46fb107d89f2ace80d9005077871",
+      "output": {
+        "kind": "vector",
+        "space": "toy-b-v1",
+        "values": [
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "entryId": "q-u",
+      "assetSha256": "5d85b2b072bf1e66b10967f7c940b7c3523f302a03162c2307a03b6cc4299003",
+      "output": {
+        "kind": "vector",
+        "space": "toy-b-v1",
+        "values": [
+          -1,
+          -1,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "entryId": "q-error",
+      "assetSha256": "979c90c3f52e9f8eae4e403ab817680a9f28a6b43536482bb817e2147ae95851",
+      "output": {
+        "kind": "failure",
+        "code": "ADAPTER_ERROR"
+      }
+    },
+    {
+      "entryId": "ref-a-view2",
+      "assetSha256": "a843a8de46fbc3ff1ca3c48eeec0420dcd848b73e607e6900ee6e593ba0d2143",
+      "output": {
+        "kind": "vector",
+        "space": "toy-b-v1",
+        "values": [
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "entryId": "ref-a-view3",
+      "assetSha256": "5f748009327649b66152fdf9990379a56e97f638d98ed4b60f607d6d560b25e9",
+      "output": {
+        "kind": "vector",
+        "space": "toy-b-v1",
+        "values": [
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "entryId": "ref-a-pack",
+      "assetSha256": "b0bb62a8aca2b954d8d83f79ba7bc65728340b9e983062a1dbfa6c1b74dc1912",
+      "output": {
+        "kind": "vector",
+        "space": "toy-b-v1",
+        "values": [
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "entryId": "ref-c",
+      "assetSha256": "5136b50d6d9a2785db5cb385bcb2d7a5cff7cc852cdd1269d994da7c31b66801",
+      "output": {
+        "kind": "vector",
+        "space": "toy-b-v1",
+        "values": [
+          0.6,
+          0.8,
+          0,
+          0
+        ]
+      }
+    }
+  ]
+}

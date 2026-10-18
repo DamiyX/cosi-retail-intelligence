@@ -56,6 +56,18 @@ preferences. Apply it to existing and new agents:
   or poll/wait in loops. A direct report-back does not itself guarantee that the
   receiving chat is automatically resumed; report actual delivery/tool status.
 
+October2 bounded exception: founder authorized Astra for Track B planning only,
+then explicitly said begin. Track B implementation remains GPT-6.1 Sol HIGH.
+This exception does not authorize Astra for utilities or automatic later escalation.
+
+October4 founder clarification: all M8 planning, including the first real-photo
+experiment and its laptop tool, is to be done by Astra. The founder selected
+the main chat for independent planning/reconciliation; planning grants no install,
+download, implementation, inference or dispatch authority. Subsequent implementation
+and coordinator code audit use GPT-6.1 Sol HIGH, sequential stopped handoffs;
+the code audit precedes private-photo execution. Founder may later request Astra
+final review separately. Routine utilities retain the lower-effort policy above.
+
 This is a project preference, not a new architecture or milestone acceptance
 rule. If the host cannot change the current coordinator model/settings, tell the
 founder to select GPT-6.1 Sol high in the app; do not claim a switch occurred.
@@ -596,3 +608,12 @@ Repository documentation provides continuity of decisions.
 Tests provide continuity of expected behavior.
 
 The AI model is replaceable.
+
+## Track B R0 audit preference — founder instruction October2
+
+This packet only: before independently auditing the new R0 implementation chat,
+ask the founder to switch the coordinator to Terra MEDIUM if preferred. The
+coordinator cannot switch its own model. If the founder does not reply after a
+reasonable opportunity, Sol6.1 HIGH is the explicitly authorized fallback. A reply
+selecting a model controls the audit. This does not authorize auto-escalation or
+change the R0 implementer setting of Sol6.1 HIGH. Maintain sequential ownership.

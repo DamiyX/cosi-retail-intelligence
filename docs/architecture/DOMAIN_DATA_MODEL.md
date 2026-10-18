@@ -1113,6 +1113,19 @@ Owner withdrawal must remain distinct from ordinary operating expense.
 
 # 13. Price Intelligence Domain
 
+### M10 prototype source boundary — D-051
+
+Private immutable M4 purchase observations and their original consent=false
+facts remain unchanged. A separate revocable server market-consent generation,
+reviewed canonical variant/package mapping and geographic zone can make a
+prospective sanitized projection eligible. Never aggregate unrelated local
+variant IDs or infer shared identity from names/codes alone. Provenance/store
+linkage is restricted internal data, not irreversible anonymization. Released
+MarketPriceSignal is a derived versioned read model with expiry; source facts
+and M9 do not depend on release. Prototype policy/scope lives in D-051 and the
+M10 plan; all external contribution defaults OFF until activation/privacy/live
+verification gates pass. No source-only test proves real coverage or anonymity.
+
 ## 13.1 PriceObservation
 
 Represents one observed product purchase/restock price.
@@ -1724,3 +1737,11 @@ the active AI coding agent is allowed to recommend:
 - adding sync/internal metadata;
 
 but must explain any material departure from this logical model before changing the source-of-truth architecture.
+
+## M11 actor/access source ceiling (D-052)
+
+Existing User/StoreMember/Device and immutable performing IDs remain canonical.
+Current ACTIVE authorization is distinct from historical provenance. Owner-only
+activity/status control uses existing facts; pending local control cannot grant
+access. See M11_STAFF_PLAN for additive state only if needed, and OPEN real staff
+visibility/assignee gates. No new permission or staff deployment is claimed.

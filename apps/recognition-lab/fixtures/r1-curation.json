@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "datasetId": "r0-fixture",
+  "datasetVersion": "v2",
+  "manifestSha256": "6b941fcaf47ae42ffebe5bfe9b608f638ba7700e7135e7d94ef8d00b7c25670f",
+  "evidenceKind": "synthetic-tooling-only",
+  "entries": [],
+  "review": {
+    "reviewerId": null,
+    "decision": "pending",
+    "imageUsabilityInspected": false,
+    "rightsRecordsInspected": false,
+    "physicalIndependenceInspected": false
+  },
+  "holdoutSeal": null
+}

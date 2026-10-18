@@ -1,0 +1,728 @@
+{
+  "schemaVersion": 1,
+  "datasetId": "r0-fixture",
+  "version": "v2",
+  "kind": "synthetic-tooling-only",
+  "storeScope": "synthetic-store",
+  "adapter": {
+    "id": "authored-vector-v1",
+    "preprocessingId": "identity-v1",
+    "space": "synthetic-v1",
+    "dimension": 3
+  },
+  "products": [
+    {
+      "id": "a",
+      "packages": [
+        "single",
+        "pack"
+      ]
+    },
+    {
+      "id": "b",
+      "packages": [
+        "single-b"
+      ]
+    },
+    {
+      "id": "c",
+      "packages": [
+        "single-c"
+      ]
+    },
+    {
+      "id": "unknown",
+      "packages": [
+        "single-u"
+      ]
+    }
+  ],
+  "entries": [
+    {
+      "id": "ref-a",
+      "productId": "a",
+      "packageId": "single",
+      "role": "reference",
+      "split": "development",
+      "known": true,
+      "captureSession": "session-ref-a",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/ref-a.txt",
+        "sha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            1,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "ref-b",
+      "productId": "b",
+      "packageId": "single-b",
+      "role": "reference",
+      "split": "development",
+      "known": true,
+      "captureSession": "session-ref-b",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/ref-b.txt",
+        "sha256": "51255f23f016db82277f391e9f9b68c46e82dbb490084ab03d9ed48fa31386f7"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            0,
+            1,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "q-a",
+      "productId": "a",
+      "packageId": "single",
+      "role": "query",
+      "split": "development",
+      "known": true,
+      "captureSession": "session-q-a",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/q-a.txt",
+        "sha256": "abe006461d55259b54dd7fc20dfa874ceeed46fb107d89f2ace80d9005077871"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            1,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "q-u",
+      "productId": "unknown",
+      "packageId": "single-u",
+      "role": "query",
+      "split": "development",
+      "known": false,
+      "captureSession": "session-q-u",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/q-u.txt",
+        "sha256": "5d85b2b072bf1e66b10967f7c940b7c3523f302a03162c2307a03b6cc4299003"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            -1,
+            -1,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "q-error",
+      "productId": "a",
+      "packageId": "single",
+      "role": "query",
+      "split": "development",
+      "known": true,
+      "captureSession": "session-q-error",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/q-error.txt",
+        "sha256": "979c90c3f52e9f8eae4e403ab817680a9f28a6b43536482bb817e2147ae95851"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "failure",
+        "code": "ADAPTER_ERROR"
+      }
+    },
+    {
+      "id": "ref-a-view2",
+      "productId": "a",
+      "packageId": "single",
+      "role": "reference",
+      "split": "development",
+      "known": true,
+      "captureSession": "session-ref-a-view2",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/ref-a-view2.txt",
+        "sha256": "a843a8de46fbc3ff1ca3c48eeec0420dcd848b73e607e6900ee6e593ba0d2143"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            1,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "ref-a-view3",
+      "productId": "a",
+      "packageId": "single",
+      "role": "reference",
+      "split": "development",
+      "known": true,
+      "captureSession": "session-ref-a-view3",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/ref-a-view3.txt",
+        "sha256": "5f748009327649b66152fdf9990379a56e97f638d98ed4b60f607d6d560b25e9"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            1,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "ref-a-pack",
+      "productId": "a",
+      "packageId": "pack",
+      "role": "reference",
+      "split": "development",
+      "known": true,
+      "captureSession": "session-ref-a-pack",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/ref-a-pack.txt",
+        "sha256": "b0bb62a8aca2b954d8d83f79ba7bc65728340b9e983062a1dbfa6c1b74dc1912"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            0,
+            0,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "ref-c",
+      "productId": "c",
+      "packageId": "single-c",
+      "role": "reference",
+      "split": "development",
+      "known": true,
+      "captureSession": "session-ref-c",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/ref-c.txt",
+        "sha256": "5136b50d6d9a2785db5cb385bcb2d7a5cff7cc852cdd1269d994da7c31b66801"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            0.6,
+            0.8,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "cal-a",
+      "productId": "a",
+      "packageId": "single",
+      "role": "query",
+      "split": "calibration",
+      "known": true,
+      "captureSession": "session-cal-a",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/cal-a.txt",
+        "sha256": "90617073c678565199d47845743835732a3c6640ba36c528c64335d6d0d6e0a7"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            1,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "cal-lookalike",
+      "productId": "unknown",
+      "packageId": "single-u",
+      "role": "query",
+      "split": "calibration",
+      "known": false,
+      "captureSession": "session-cal-lookalike",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/cal-lookalike.txt",
+        "sha256": "877384727dc1f2bea0c533d2d3b0e34bf92127e9e617e96cfffe211d4f733787"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            1,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "cal-unknown",
+      "productId": "unknown",
+      "packageId": "single-u",
+      "role": "query",
+      "split": "calibration",
+      "known": false,
+      "captureSession": "session-cal-unknown",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/cal-unknown.txt",
+        "sha256": "e99370edd8101c6cdba654cee344c3b030ff6bfbe453f5fda6bd64f89d44368e"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            -1,
+            -1,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "hold-a",
+      "productId": "a",
+      "packageId": "single",
+      "role": "query",
+      "split": "holdout",
+      "known": true,
+      "captureSession": "session-hold-a",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/hold-a.txt",
+        "sha256": "381f247df637c8a8dd3053b245cbe434eb05c6db74035b595d7dbc1ea6d61ad1"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            1,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "hold-wrong-package",
+      "productId": "a",
+      "packageId": "pack",
+      "role": "query",
+      "split": "holdout",
+      "known": true,
+      "captureSession": "session-hold-wrong-package",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/hold-wrong-package.txt",
+        "sha256": "4312bc3ef01bd70634ffd26383a6fcd726261dfa27a5711e6dc044de6e00e10a"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            1,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "hold-lookalike",
+      "productId": "unknown",
+      "packageId": "single-u",
+      "role": "query",
+      "split": "holdout",
+      "known": false,
+      "captureSession": "session-hold-lookalike",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/hold-lookalike.txt",
+        "sha256": "a62738de54b6a1048b7d28759614976af9364500db349445045e0b9604172874"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            1,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "hold-unknown",
+      "productId": "unknown",
+      "packageId": "single-u",
+      "role": "query",
+      "split": "holdout",
+      "known": false,
+      "captureSession": "session-hold-unknown",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/hold-unknown.txt",
+        "sha256": "9b2b5a4c20bac97a0ab8b5beedf82665cac6fa1bf0014c1d7c3bd8964db7ed59"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            -1,
+            -1,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "hold-b",
+      "productId": "b",
+      "packageId": "single-b",
+      "role": "query",
+      "split": "holdout",
+      "known": true,
+      "captureSession": "session-hold-b",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/hold-b.txt",
+        "sha256": "a60435a4a24c4f12a58c1c89ccded774c440bda699afe24f6ba056193aecb052"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            0,
+            1,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "hold-tie",
+      "productId": "b",
+      "packageId": "single-b",
+      "role": "query",
+      "split": "holdout",
+      "known": true,
+      "captureSession": "session-hold-tie",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/hold-tie.txt",
+        "sha256": "05c8a16e42c64e9d18b4828f550197969e1553e0dc06e67d6251417eb5c16ac2"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            0.8944271909999159,
+            0.4472135954999579,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "hold-timeout",
+      "productId": "a",
+      "packageId": "single",
+      "role": "query",
+      "split": "holdout",
+      "known": true,
+      "captureSession": "session-hold-timeout",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/hold-timeout.txt",
+        "sha256": "87b2101761bd0b8b804b9c7a21e08fe95cc481930b27b9ffd9d5c542f288d373"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "failure",
+        "code": "TIMEOUT"
+      }
+    },
+    {
+      "id": "hold-package-tie",
+      "productId": "a",
+      "packageId": "single",
+      "role": "query",
+      "split": "holdout",
+      "known": true,
+      "captureSession": "session-hold-package-tie",
+      "packagingGeneration": "toy-generation",
+      "asset": {
+        "path": "assets/hold-package-tie.txt",
+        "sha256": "34be6855723cd23c637e79f245797d34696f0a880bfe3de374a05a0f58c6f005"
+      },
+      "capture": {
+        "device": "synthetic-node",
+        "lighting": "synthetic",
+        "view": "synthetic",
+        "occlusion": "none"
+      },
+      "rights": {
+        "permissionId": "authored-fixture",
+        "provenance": "authored-no-private-data"
+      },
+      "observation": {
+        "kind": "vector",
+        "vector": {
+          "space": "synthetic-v1",
+          "values": [
+            1,
+            0,
+            1
+          ]
+        }
+      }
+    }
+  ]
+}

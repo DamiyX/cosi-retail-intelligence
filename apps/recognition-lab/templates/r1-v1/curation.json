@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "datasetId": null,
+  "datasetVersion": null,
+  "manifestSha256": null,
+  "evidenceKind": "pending",
+  "entries": [],
+  "review": {
+    "reviewerId": null,
+    "decision": "pending",
+    "imageUsabilityInspected": false,
+    "rightsRecordsInspected": false,
+    "physicalIndependenceInspected": false
+  },
+  "holdoutSeal": null
+}

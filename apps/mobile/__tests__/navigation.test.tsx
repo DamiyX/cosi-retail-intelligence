@@ -8,6 +8,7 @@ import MoreScreen from '../app/(tabs)/more';
 import ProductsLayout from '../app/(tabs)/products/_layout';
 import ProductDetailRoute from '../app/(tabs)/products/[id]/index';
 import ProductsIndexRoute from '../app/(tabs)/products/index';
+import PersonalPriceChangesRoute from '../app/(tabs)/products/price-changes';
 import QuickAddRoute from '../app/(tabs)/products/new';
 import NewPackageRoute from '../app/(tabs)/products/[id]/packages/new';
 import EditPackageRoute from '../app/(tabs)/products/[id]/packages/[packageId]';
@@ -30,10 +31,12 @@ import BusinessSummaryRoute from '../app/summary';
 import CloudSyncRoute from '../app/sync';
 import type { IsolatedDatabase } from '../src/db/testing';
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
+import { getActiveBasePackageUnit } from '../src/db/repositories';
 import { openIsolatedDatabase } from '../src/db/testing';
 import { CURRENT_SCHEMA_VERSION, MIGRATIONS } from '../src/db';
+import { recordPurchase } from '../src/purchases/recordPurchase';
 import { provisionStoreContext } from '../src/storeContext/provisionStoreContext';
-import { deterministicIds } from './catalogueSupport';
+import { deterministicIds, testId } from './catalogueSupport';
 
 let mockDatabase: IsolatedDatabase | null = null;
 const mockSchemaVersion = CURRENT_SCHEMA_VERSION;
@@ -56,6 +59,7 @@ const ROUTES = {
   '(tabs)/more': MoreScreen,
   '(tabs)/products/_layout': ProductsLayout,
   '(tabs)/products/index': ProductsIndexRoute,
+  '(tabs)/products/price-changes': PersonalPriceChangesRoute,
   '(tabs)/products/new': QuickAddRoute,
   '(tabs)/products/[id]/index': ProductDetailRoute,
   '(tabs)/products/[id]/packages/new': NewPackageRoute,
@@ -121,6 +125,66 @@ describe('M2 tab navigation', () => {
     const router = renderRouter(ROUTES, { initialUrl: '/' });
     expect(await screen.findByText('Live today')).toBeTruthy();
     expect(router.getPathname()).toBe('/today');
+  });
+
+  it('opens Personal price changes from product detail and refreshes after returning to the route', async () => {
+    if (!mockDatabase) {
+      throw new Error('Test database is not open.');
+    }
+    const adapter = mockDatabase.adapter;
+    const store = adapter.getFirstRow<{ id: string }>('SELECT id FROM stores LIMIT 1;');
+    const device = adapter.getFirstRow<{ id: string; user_id: string }>('SELECT id, user_id FROM devices LIMIT 1;');
+    if (!store || !device || !device.user_id) {
+      throw new Error('Test store context is missing.');
+    }
+    const product = createTemporaryProduct(
+      adapter,
+      { storeId: store.id, deviceId: device.id, name: 'Price route item' },
+      { generateId: deterministicIds(3300) },
+    );
+    const base = getActiveBasePackageUnit(adapter, product.variant.id);
+    if (!base) {
+      throw new Error('Test product has no active base package.');
+    }
+
+    const router = renderRouter(ROUTES, { initialUrl: `/products/${product.storeProduct.id}` });
+    expect(await screen.findByText('Purchase cost change')).toBeTruthy();
+    fireEvent.press(screen.getByText('Personal price changes'));
+    expect(await screen.findByText('No purchase cost changes yet')).toBeTruthy();
+    expect(router.getPathname()).toBe('/products/price-changes');
+
+    testRouter.back();
+    expect(await screen.findByText('Purchase cost change')).toBeTruthy();
+    act(() => {
+      recordPurchase(adapter, {
+        storeId: store.id,
+        deviceId: device.id,
+        userId: device.user_id,
+        occurredAt: '2026-02-01T10:00:00.000Z',
+        lines: [{
+          storeProductId: product.storeProduct.id,
+          packageUnitId: base.id,
+          quantityPackagesMicros: 1_000_000,
+          enteredCostMinor: 100,
+        }],
+      }, { generateId: deterministicIds(3400), operationId: testId(3401) });
+      recordPurchase(adapter, {
+        storeId: store.id,
+        deviceId: device.id,
+        userId: device.user_id,
+        occurredAt: '2026-02-02T10:00:00.000Z',
+        lines: [{
+          storeProductId: product.storeProduct.id,
+          packageUnitId: base.id,
+          quantityPackagesMicros: 1_000_000,
+          enteredCostMinor: 150,
+        }],
+      }, { generateId: deterministicIds(3500), operationId: testId(3501) });
+    });
+
+    fireEvent.press(screen.getByText('Personal price changes'));
+    expect(await screen.findByText('Price route item')).toBeTruthy();
+    expect(router.getPathname()).toBe('/products/price-changes');
   });
 
   it('switches between Products and the live Home summary', async () => {

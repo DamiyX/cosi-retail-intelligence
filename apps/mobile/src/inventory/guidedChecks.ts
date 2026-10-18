@@ -1,3 +1,4 @@
+import { captureCommandActor, type CommandActorOptions, assertCurrentActor } from '../storeContext/access';
 import { DomainError } from '@retail/domain';
 
 import { generateMobileId } from '../crypto/mobileIds';
@@ -138,6 +139,8 @@ interface OutboxPayload {
 }
 
 function assertOwner(adapter: DatabaseAdapter, input: GuidedCheckActor): { memberId: string } {
+  assertCurrentActor(adapter, input, true);
+
   const store = getStoreById(adapter, requireId(input.storeId));
   if (!store || store.status !== 'ACTIVE') throw new DomainError('INVALID_VALUE', 'Store does not exist or is not active.');
   const device = getDeviceById(adapter, requireId(input.deviceId));
@@ -362,8 +365,9 @@ export function getGuidedCheckOverview(
 export function saveGuidedCheckSettings(
   adapter: DatabaseAdapter,
   input: SaveGuidedCheckSettingsInput,
+  options: CommandActorOptions = {},
 ): { settings: GuidedCheckSettings; outbox: OutboxOperationRow } {
-  const actor: GuidedCheckActor = input;
+  const actor = captureCommandActor(adapter, input, options.actorContext, true);
   assertOwner(adapter, actor);
   const operationId = requireId(input.operationId);
   const request = settingsFingerprint(input);
@@ -382,6 +386,7 @@ export function saveGuidedCheckSettings(
     return { settings: stored as GuidedCheckSettings, outbox: replayed };
   }
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor, true);
     const { memberId } = assertOwner(adapter, actor);
     const saved = saveInventoryCheckSettings(adapter, {
       storeId: input.storeId,
@@ -411,9 +416,9 @@ export function saveGuidedCheckSettings(
 export function generateGuidedChecks(
   adapter: DatabaseAdapter,
   input: GenerateGuidedChecksInput,
-  options: { generateId?: () => string } = {},
+  options: CommandActorOptions & { generateId?: () => string } = {},
 ): GuidedCheckGenerationResult {
-  const actor: GuidedCheckActor = input;
+  const actor = captureCommandActor(adapter, input, options.actorContext, true);
   const owner = assertOwner(adapter, actor);
   const operationId = requireId(input.operationId);
   const request = requestFingerprint(input);
@@ -442,6 +447,7 @@ export function generateGuidedChecks(
   const time = localTime(store.timezone, atIso);
   const generateId = options.generateId ?? generateMobileId;
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor, true);
     assertOwner(adapter, actor);
     const currentSettings = mapSettings(store.id, getInventoryCheckSettings(adapter, store.id));
     const before = overviewFor(adapter, actor, atIso);
@@ -516,9 +522,9 @@ export function generateGuidedChecks(
 export function replaceGuidedCheck(
   adapter: DatabaseAdapter,
   input: ReplaceGuidedCheckInput,
-  options: { generateId?: () => string } = {},
+  options: CommandActorOptions & { generateId?: () => string } = {},
 ): GuidedCheckReplacementResult {
-  const actor: GuidedCheckActor = input;
+  const actor = captureCommandActor(adapter, input, options.actorContext, true);
   const owner = assertOwner(adapter, actor);
   const assignmentId = requireId(input.assignmentId);
   const reasonCode = requireText(input.reasonCode.trim(), 'reasonCode', 64);
@@ -548,6 +554,7 @@ export function replaceGuidedCheck(
   }
   const generateId = options.generateId ?? generateMobileId;
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor, true);
     const current = getInventoryCheckAssignmentById(adapter, assignmentId);
     if (!current || current.storeId !== input.storeId) throw new DomainError('INVALID_VALUE', 'Guided check assignment does not belong to this store.');
     if (current.status !== 'PENDING') throw new DomainError('INVALID_VALUE', 'Only a pending guided check can be replaced.');

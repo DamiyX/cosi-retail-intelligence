@@ -1,0 +1,289 @@
+{
+  "schema_version": 1,
+  "task_id": "m11-staff-accountability",
+  "workflow_id": "build-feature",
+  "mode": "implement",
+  "status": "in_progress",
+  "current_state": "MAX-corrections-verified-unresolved-timing-risk-handoff",
+  "completed_states": [
+    "founder-M11-hold-lifted",
+    "actual-context-and-role-gaps-inspected",
+    "four-source-tickets-reviewed",
+    "m11-01-current-actor-source-self-check",
+    "m11-02-owner-activity-source-self-check",
+    "m11-03-disabled-control-source-self-check",
+    "m11-04-final-validation-and-stopped-return",
+    "C1-C5-and-confirmed-siblings-source-self-check",
+    "coordinator-C1-C5-correction-verification",
+    "MAX-independent-audit-and-coordinator-F1-F4-reproduction",
+    "MAX-F1-F4-source-self-check-and-stopped-return",
+    "coordinator-MAX-F1-F4-correction-verification"
+  ],
+  "owner": {
+    "agent": "main-coordinator",
+    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
+    "worktree": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning"
+  },
+  "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
+  "lease": null,
+  "evidence": [
+    {
+      "kind": "planning",
+      "source": "docs/engineering/M11_STAFF_PLAN.md; docs/decisions/DECISION_LOG.md D-052",
+      "result": "Inspected actor IDs, user/membership/device client gaps, owner-only finance/count decisions and unproven staff-wide sync visibility. Source foundation proceeds; real staff/assignment/live gates remain open.",
+      "observed_at": "2026-10-03T08:33:58.438Z"
+    },
+    {
+      "kind": "test",
+      "source": "docs/engineering/M11_IMPLEMENTATION_HANDOFF.md; C:/Users/doyew/AppData/Local/Temp/cosi-m11-source-20261003/m11-final-validate10.log",
+      "result": "1373 tests/123 suites pass; 17 tests/2 suites skipped; four-workspace types/lint0, Doctor21/21, dependency/export0. Source self-check only; all M11 coordinator/live/staff/assignment gates pending.",
+      "observed_at": "2026-10-03T12:31:54.169Z"
+    },
+    {
+      "kind": "review",
+      "source": "docs/engineering/M9_M11_INDEPENDENT_AUDIT_CORRECTIONS.md; C:/Users/doyew/AppData/Local/Temp/cosi-m9-m11-dual-audit-20261003/coordinator",
+      "result": "Two independent stopped reviews on identical598-file freeze; coordinator fresh authority5/5 and timestamp3/3 expected assertions fail, confirming C1-C5. Guided replacement unverified; M9 timeout unresolved. Source acceptance pending.",
+      "observed_at": "2026-10-03T13:08:26.018Z"
+    },
+    {
+      "kind": "test",
+      "source": "docs/engineering/M9_M11_CORRECTION_HANDOFF.md; C:\\Users\\doyew\\AppData\\Local\\Temp\\cosi-m9-m11-corrections-20261003/final-validate.log",
+      "result": "C1-C5 and confirmed siblings source self-check:143 mobile/200 domain focused pass; originalA5/B3 pass. Final validation exit0. M9 bounded timeout remains unexplained; independent acceptance pending.",
+      "observed_at": "2026-10-03T14:11:10.390Z"
+    },
+    {
+      "kind": "review",
+      "source": "docs/engineering/M9_M11_CORRECTION_VERIFICATION.md",
+      "result": "604-path corrected freeze verified before/after; original eight probes and permanent regressions pass:93 executions/six suites. C1-C5 closed for scoped repairs. Founder requests new independent Sol MAX review; final acceptance pending, M9 timing and real staff/live gates open.",
+      "observed_at": "2026-10-03T16:19:29.457Z"
+    },
+    {
+      "kind": "review",
+      "source": "docs/engineering/M9_M11_INDEPENDENT_AUDIT_CORRECTIONS.md",
+      "result": "MAX stopped on605 unchanged paths; coordinator unchanged original probes:4 reproduced failures,1 positive pass,3 filtered. F1-F4 scoped repairs required; C1-C5 remains verified. Two existing M9 timeouts unresolved.",
+      "observed_at": "2026-10-03T17:20:57.010Z"
+    },
+    {
+      "kind": "test",
+      "source": "docs/engineering/M9_M11_MAX_CORRECTION_HANDOFF.md; C:\\Users\\doyew\\AppData\\Local\\Temp\\cosi-m9-m11-max-corrections-20261003/final-validate.log",
+      "result": "F1-F4 scoped repairs/new34 cases; compatibility168/16, finalphoto30/2, originalF1-F3+positive4/2 pass. Final validate exit0. Original-limit timing INACTIVE15626ms FAIL/rational1635ms PASS; cause unresolved. Coordinator acceptance pending.",
+      "observed_at": "2026-10-03T18:22:55.665Z"
+    },
+    {
+      "kind": "review",
+      "source": "docs/engineering/M9_M11_MAX_CORRECTION_VERIFICATION.md",
+      "result": "Coordinator611-path freeze/preservation verified;49 fresh focused executions/seven suites pass,130 protected test/helper and194 prior evidence hashes unchanged. All confirmed repairs verified. Final source acceptance pending original-limit M9 timing cause/disposition; real staff/live gates remain open.",
+      "observed_at": "2026-10-03T18:32:23.408Z"
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "prior-source-accepted",
+      "claim": "M9/M10 source independently accepted; carried live gates not waived.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Follow M11_STAFF_PLAN and M11_STAFF_TICKETS; inspect actual source and only executed evidence.",
+        "success_condition": "M9/M10 source independently accepted; carried live gates not waived."
+      },
+      "evidence": [
+        {
+          "source": "docs/engineering/M11_STAFF_PLAN.md",
+          "result": "M9/M10 source independently accepted; carried live gates not waived.",
+          "observed_at": "2026-10-03T08:33:58.438Z"
+        }
+      ],
+      "limitations": [
+        "Source evidence does not pass live/security/physical/staff activation gates."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m11-source-plan-reviewed",
+      "claim": "Coordinator reviewed source ceiling, vertical tickets and dependency frontier.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "prior-source-accepted"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Follow M11_STAFF_PLAN and M11_STAFF_TICKETS; inspect actual source and only executed evidence.",
+        "success_condition": "Coordinator reviewed source ceiling, vertical tickets and dependency frontier."
+      },
+      "evidence": [
+        {
+          "source": "docs/engineering/M11_STAFF_PLAN.md",
+          "result": "Coordinator reviewed source ceiling, vertical tickets and dependency frontier.",
+          "observed_at": "2026-10-03T08:33:58.438Z"
+        }
+      ],
+      "limitations": [
+        "Source evidence does not pass live/security/physical/staff activation gates."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "m11-source-implementation",
+      "claim": "Four source tickets implemented and actual checks recorded.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "m11-source-plan-reviewed"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Follow M11_STAFF_PLAN and M11_STAFF_TICKETS; inspect actual source and only executed evidence.",
+        "success_condition": "Four source tickets implemented and actual checks recorded."
+      },
+      "evidence": [
+        {
+          "source": "docs/engineering/M9_M11_MAX_CORRECTION_VERIFICATION.md",
+          "result": "Foundation implementation and actual builder/fresh coordinator checks recorded; no whole-M11/live claim.",
+          "observed_at": "2026-10-03T18:32:23.408Z"
+        }
+      ],
+      "limitations": [
+        "Source evidence does not pass live/security/physical/staff activation gates."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "coordinator-source-audit",
+      "claim": "Main coordinator independently accepts stopped M11 source, no open blocking source finding.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "blocked",
+      "depends_on": [
+        "m11-source-implementation"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Follow M11_STAFF_PLAN and M11_STAFF_TICKETS; inspect actual source and only executed evidence.",
+        "success_condition": "Main coordinator independently accepts stopped M11 source, no open blocking source finding."
+      },
+      "evidence": [
+        {
+          "source": "docs/engineering/M9_M11_MAX_CORRECTION_VERIFICATION.md",
+          "result": "Scoped repairs verified, final source acceptance withheld for unresolved integration timing. No live/staff gate waived.",
+          "observed_at": "2026-10-03T18:32:23.408Z"
+        }
+      ],
+      "limitations": [
+        "Source evidence does not pass live/security/physical/staff activation gates."
+      ],
+      "blocker": "All confirmed defects repaired/verified, but original-limit M9 timing failures remain unexplained after one bounded diagnosis; final source acceptance requires causal resolution or explicit reviewed risk disposition.",
+      "waiver": null
+    },
+    {
+      "id": "staff-scope-and-assignment",
+      "claim": "Real staff permission/session/minimal visibility and distinct blind assignments approved and implemented.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "coordinator-source-audit"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Follow M11_STAFF_PLAN and M11_STAFF_TICKETS; inspect actual source and only executed evidence.",
+        "success_condition": "Real staff permission/session/minimal visibility and distinct blind assignments approved and implemented."
+      },
+      "evidence": [],
+      "limitations": [
+        "Source evidence does not pass live/security/physical/staff activation gates."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "live-authority-security",
+      "claim": "Actual Auth/SQL/RLS/concurrency/status revoke and staff-data visibility verified before activation.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "staff-scope-and-assignment"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Follow M11_STAFF_PLAN and M11_STAFF_TICKETS; inspect actual source and only executed evidence.",
+        "success_condition": "Actual Auth/SQL/RLS/concurrency/status revoke and staff-data visibility verified before activation."
+      },
+      "evidence": [],
+      "limitations": [
+        "Source evidence does not pass live/security/physical/staff activation gates."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "physical-release",
+      "claim": "Actual multi-device/offline/native/accessibility/second-laptop/release evidence reviewed.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "live-authority-security"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Follow M11_STAFF_PLAN and M11_STAFF_TICKETS; inspect actual source and only executed evidence.",
+        "success_condition": "Actual multi-device/offline/native/accessibility/second-laptop/release evidence reviewed."
+      },
+      "evidence": [],
+      "limitations": [
+        "Source evidence does not pass live/security/physical/staff activation gates."
+      ],
+      "blocker": null,
+      "waiver": null
+    }
+  ],
+  "artifacts": [
+    "docs/engineering/M11_STAFF_PLAN.md",
+    "docs/engineering/M11_STAFF_TICKETS.md",
+    "docs/engineering/PROJECT_STATE.md",
+    "docs/decisions/DECISION_LOG.md",
+    "docs/engineering/M11_IMPLEMENTATION_HANDOFF.md",
+    "docs/engineering/M9_M11_INDEPENDENT_AUDIT_CORRECTIONS.md",
+    "docs/engineering/M9_M11_CORRECTION_HANDOFF.md",
+    "docs/engineering/M9_M11_CORRECTION_VERIFICATION.md",
+    "docs/engineering/M9_M11_MAX_CORRECTION_HANDOFF.md",
+    "docs/engineering/M9_M11_MAX_CORRECTION_VERIFICATION.md"
+  ],
+  "approvals": [
+    {
+      "date": "2026-10-03",
+      "scope": "Founder continue m11 supersedes prior hold. Existing default separate implementation chat GPT-6.1 Sol HIGH, main-coordinator audits, stopped direct report-back and bounded correction loop; no external/Git/phone effects."
+    },
+    {
+      "date": "2026-10-03",
+      "scope": "Coordinator explicitly authorized reproduced guard-only catalogue/M9/local-enrollment/pilot corrections, exact intended-device/SQLite28/test compatibility exceptions, captured-member transaction rechecks and only the existing M9 account-status and catalogueLookupUi unsaved-offline cases15000ms tolerance, the latter after unchanged focused6/6 pass2713ms target15.04s suite with cleanup intact; preserve all other protected baseline. Existing stock-only member reads preserved. Real staff/session/feed/assignment and all live/native gates remain OPEN."
+    },
+    {
+      "date": "2026-10-03",
+      "scope": "Founder authorized two independent GPT-6.1 Sol HIGH M9-M11 audit chats; both stopped. Coordinator authorized bounded C1-C5 repairs/regressions and guided sibling reproduction only, no broader schema/protocol/roles/test-timeout/dependency/live change. Original audit evidence preserved."
+    },
+    {
+      "date": "2026-10-03",
+      "scope": "Coordinator permits ONLY shared productPhotos captured actor callback guard with catalogue/sales construction plumbing, two private purchase-history read ordering fixes, local market authority seams and bounded member/pending retry retrieval/UI. New tests allowed; no pre-existing test/config/schema/server/financial/native changes. Exact preservation baseline required."
+    }
+  ],
+  "blockers": [
+    "Staff session/least-privilege data delivery and distinct blind assignments remain open M11 extension gates.",
+    "Live/security/SQL/physical/activation gates require actual evidence, not mocks.",
+    "All confirmed source repairs verified; unexplained original-limit M9 test timing still blocks final source acceptance."
+  ],
+  "next_action": "All chats stopped; pause handoff automation. Await founder steering on bounded timing resolution/risk disposition and separately open real staff/live gates. No M12 or new audit/writer dispatch.",
+  "created_at": "2026-10-03T08:33:58.438Z",
+  "updated_at": "2026-10-03T18:32:23.408Z",
+  "archived": false
+}

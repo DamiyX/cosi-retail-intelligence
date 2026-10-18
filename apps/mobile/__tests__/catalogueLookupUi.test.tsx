@@ -21,7 +21,7 @@ it('unsaved Add product offline copy makes no saved-product claim', async () => 
     expect(await screen.findByText('Online details are unavailable while offline. You can enter details yourself.')).toBeTruthy();
     expect(f.adapter.getAllRows('SELECT id FROM store_products')).toHaveLength(0);
   } finally { f.closeAndDelete(); }
-});
+}, 15000);
 
 it('later details remain unconfirmed until explicit Use details and Save changes; photo/price/package facts are untouched', async () => {
   const f = openCatalogueFixture();

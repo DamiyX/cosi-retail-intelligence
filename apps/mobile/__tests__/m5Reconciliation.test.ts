@@ -6,6 +6,7 @@ import { classifyInventoryBatches } from '../src/inventory/classifyBatches';
 import { finalizeInventoryReconciliation, startInventoryReconciliation } from '../src/inventory/reconcileInventory';
 import {
   createStoreMember,
+  createDevice,
   createUser,
   getInventoryReconciliationById,
   getInventoryReconciliationLineById,
@@ -210,7 +211,8 @@ describe('M5 blind reconciliation checks', () => {
       expect(() => startInventoryReconciliation(fixture.adapter, { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, userId: staff.id, storeProductId: rice.storeProduct.id })).toThrow('Only an active store owner');
       const draft = client.startReconciliation(rice.storeProduct.id);
       client.submitReconciliation({ reconciliationId: draft.reconciliationId, expectedInventoryWatermark: draft.inventoryWatermark, expectedBatchWatermark: draft.batchWatermark, physicalBaseUnits: 35 * MICROS_PER_UNIT });
-      const staffClient = createDatabaseInventoryClient(fixture.adapter, { storeId: fixture.context.store.id, deviceId: fixture.context.device.id, userId: staff.id });
+      const staffDevice = createDevice(fixture.adapter, { id: testId(6182), storeId: fixture.context.store.id, userId: staff.id, platform: 'ANDROID', appVersion: 'synthetic' });
+      const staffClient = createDatabaseInventoryClient(fixture.adapter, { storeId: fixture.context.store.id, deviceId: staffDevice.id, userId: staff.id });
       expect(() => staffClient.finalizeReconciliation({ reconciliationId: draft.reconciliationId, operationId: testId(6190) })).toThrow('Only an active store owner');
       const before = countRows(fixture.adapter, 'inventory_adjustments');
       expect(() => client.finalizeReconciliation({ reconciliationId: draft.reconciliationId, operationId: testId(6191), packageUnitId: rice.basePackage.id, quantityPackageSnapshotMicros: 4 * MICROS_PER_UNIT, conversionToBaseSnapshotMicros: rice.basePackage.conversionToBaseMicros })).toThrow('does not exactly explain');

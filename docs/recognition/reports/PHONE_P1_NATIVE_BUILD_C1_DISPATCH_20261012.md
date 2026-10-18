@@ -1,0 +1,36 @@
+# P1 native C1: bounded correction and renewed ownership
+
+2026-10-12 Africa/Lagos. Existing founder build continuation persists. The
+coordinator reviewed the stopped build and selected the smaller internal Java
+helper correction rather than a compiler/toolchain change. This is the same
+isolated generated-runtime task, with a fresh exclusive lease and direct return.
+The original lease timing gap and all failed build/test evidence remain recorded.
+
+## Exact writer charter
+
+Resume the existing P1 native build as bounded corrections NB-C1/NB-C2/NB-C3, using GPT-6.1 Sol HIGH and the same C:/Users/doyew/Documents/DEV 2/COSI-m8-planning checkout/branch. Read PHONE_P1_NATIVE_BUILD_INDEPENDENT_REVIEW_20261012.md and PHONE_P1_NATIVE_BUILD_C1_DISPATCH_20261012.md. Founder already authorized downloads and continuation toward the isolated phone build, and subsequently asked the coordinator to resume unfinished work after checking it. This remains the same task. Direct coordinator completion is authorized and required.
+
+Writer01a1051f-0777-7573-ad09-0e550a4bd56a is sole C1 owner. You are not alone in the codebase; preserve all other work. Do not create agents/branches/worktrees. BEFORE any edits/build, verify holder and unexpired fresh lease. While holder remains you AND lease is still valid, you are specifically authorized to update only lease.expires_at to at most six hours from current UTC and updated_at, recording each renewal in this NEW C1 run. Renew before expiration when needed; this is a task-scoped lease update, not an automation/hook. If already expired or holder changes, STOP before mutation/build and report directly for coordinator renewal. A user message saying continue does not itself write a lease. Never alter prior expiry/stop receipts. At completion clear lease=NULL, current_state=phone-p1-native-build-c1-writer-stopped-await-audit, updated_at only; other fields remain coordinator-owned.
+
+Create NEW ignored runs/phone-experiment/p1-native-build-c1-20261012-a1 for all correction snapshots/logs/hashes. Preserve the complete stopped original run and its receipts. Snapshot every old source file you will change with a verified hash matching the frozen P1 record BEFORE editing, so the old source fingerprint remains reproducible as history. Current original Kotlin metadata failure and old UI timeout are not erased.
+
+NB-C1: implement the smallest Java-only Android CPU helper submodule inside recognition-native/recognition-experiment/android/cpu-runtime (or one equivalently named internal directory documented in the handoff). No Kotlin plugin in that helper. Move only LiteRT-dependent Interpreter/tensor execution into Java; use Java/Android standard argument/result types, no LiteRT/Kotlin types in the public helper signature. Keep fixture admission, one-worker/busy/closed/drain/promise semantics and exact model/input/hash/output checks. Use private LiteRT implementation dependency2.2.0 with the exact ai-delivery exclusion. Kotlin wrapper depends on the helper, not directly on LiteRT. Actual Kotlin compile classpath must exclude the incompatible API artifact/metadata; actual runtime/APK must still include the same verified runtime AAR/native payloads, expected model/assets/notices and reflection/JNI names. Keep application-only, one thread, XNNPACK off, no NNAPI/GPU/CompiledModel. No AAR/metadata modification, Kotlin/Expo/RN/JDK/AGP/runtime/model upgrade, skip flags, dontwarn, permissive excludes or secret fallback.
+
+Allowed source modifications only:
+- existing RecognitionExperimentModule.kt and recognition-experiment/android/build.gradle;
+- NEW internal Java helper Gradle/manifest/Java/test source under that module;
+- withRecognitionExperiment.js only helper settings registration and required isolate/build guard details;
+- .gitignore only helper generated build/cache/assets exclusions and necessary reviewable Java source exception;
+- recognitionExperimentRoot.test.tsx for NB-C2 and NEW narrowly matching helper/recognitionExperiment tests if meaningful;
+- phone-native-build-* wrappers only as necessary to use explicit NEW C1 output paths and inspect the corrected build. Do NOT rerun fixed old-output scripts into original frozen runs; read old baseline/assets/tool metadata only.
+- NEW docs/recognition/reports/PHONE_P1_NATIVE_BUILD_C1_HANDOFF_20261012.md and PHONE_P1_NATIVE_BUILD_C1_RESULT_20261012.md.
+No app.config/core/shared/domain/contracts/package/lock changes. Original public model/fixtures/notices/assets must remain byte-identical. Generated current apps/mobile/android is this task's build workspace, but old frozen generated-native snapshots stay immutable. Reuse accepted JDK/SDK/short Gradle/CMake caches without deleting or resetting them. No new major dependency/toolchain; any genuinely new prerequisite outside this helper needs concrete scope review. No recursive delete/clean-prebuild, global/account/service/cloud/Git/automation changes.
+
+NB-C2: coordinator's exact fresh command for the three recognition tests gave adapter/probe PASS and root FAIL: unchanged5000ms test timeout, suites2pass/1fail,16.045s. Preserve this failure. Use bounded diagnostics to establish whether cold React Native renderer setup or the async error interaction causes it. Make the mount/no-automatic-inference/failure assertions deterministic without relaxing timeout/global Jest configuration or assertions. Preserve mount assertion evidence if moving cold setup outside the interaction measurement. Do not loop until green or report a warmed run as cold performance. Source unit tests do not prove phone speed.
+
+Run affected tests/typecheck/zero-warning lint. Build actual helper Java and wrapper Kotlin; save module-level compile and runtime dependency receipts, not just app-level ones. Run a real release/R8 pipeline. If another material blocker appears, retain exact diagnostics; implement only evidence-driven repairs inside this allowlist, no silent broader change. A successful evidence-only task does not count as APK success.
+
+Final checks: actual signed internal-test arm64 standalone APK path/hash/source/model/fixture bindings, aapt2 merged manifest/components/providers/permissions and no forbidden network/storage/foreground/NPU/vendor declarations, no business/Router/Supabase JS root, both helper/module absent from ordinary config/autolink/entry, no Play/GMS runtime classes/artifacts, correct R8/reflection/JNI retention, full notices/assets, signature and ZIP/ELF16KB checks for every packaged native payload. Keep actual APK size separate from installed-size/memory/device budgets. No ordinary-app acceptance from only config proof, no inference/device parity from compilation.
+
+No phone install/launch/device/model/private-photo inference/camera/enrollment in C1. Follow prior bounded build authority and test signer rules; do not seek credentials or print signing secrets. Reuse validated cached inputs, preserve old evidence/source snapshots and all unrelated protected bytes. End with current source/artifact/preservation inventories and direct STOPPED/leaseNULL handoff to coordinator01a098ef-d830-7531-bca7-2d66b0a5b587 containing exact C1 result/handoff file, real APK if built or exact remaining blockers, checks and limitations. Direct delivery is required, not just a file in your own chat. Do not claim acceptance yourself.
+

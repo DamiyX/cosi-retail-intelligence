@@ -1,5 +1,7 @@
 import type { DatabaseAdapter } from './adapter';
 import { DatabaseError } from './errors';
+import { marketMigration } from '../market/migration';
+import { staffMigration } from '../staff/migration';
 
 export interface Migration {
   /** 1-based, contiguous position in the registry. */
@@ -2792,6 +2794,9 @@ export const MIGRATIONS: Migration[] = [
   ],
   },
 ];
+
+MIGRATIONS.push(marketMigration);
+MIGRATIONS.push(staffMigration);
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;
 

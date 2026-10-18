@@ -1,0 +1,4 @@
+[
+  { "version": "cosine-max-product-package-v1", "unknownBelow": 0.5, "strongAt": 0.9, "productMargin": 0.1, "packageMargin": 0.1 },
+  { "version": "cosine-max-product-package-v1", "unknownBelow": 0.8, "strongAt": 0.99, "productMargin": 0.5, "packageMargin": 0.3 }
+]

@@ -1,3 +1,5 @@
+import { assertCurrentActor, resolveCurrentActor, guardClient } from '../storeContext/access';
+import { DomainError } from '@retail/domain';
 import { createProductPhotos, type PhotoFiles, type ProductPhotos } from '../media/productPhotos';
 import { createCatalogueSuggestions, type CatalogueSuggestions } from './lookup/suggestions';
 import type { CatalogueLookupAdapter, LookupCode } from './lookup/provider';
@@ -41,20 +43,17 @@ import {
 import {
   getProductVariantById,
   getStoreProductById,
-  listDevicesByStore,
   listPackageUnitsByVariant,
   listProductIdentifiers,
   listStores,
   listStorePackageSettings,
   listStoreProducts,
-  listPurchasePriceHistoryByStoreProduct,
   type DeviceRow,
   type PackageUnitRow,
   type ProductIdentifierRow,
   type ProductLifecycleFilter,
   type ProductSearchHit,
   type ProductVariantRow,
-  type PurchasePriceHistoryRow,
   type StorePackageSettingRow,
   type StoreProductRow,
   type StoreRow,
@@ -115,7 +114,6 @@ export interface CatalogueClient {
   listProducts(query: string, filter?: ProductLifecycleFilter): ProductSearchHit[];
   createTemporaryProduct(input: QuickAddInput): TemporaryProductGraph;
   getProductDetail(productId: string): ProductDetail | null;
-  getPurchasePriceHistory(storeProductId: string): PurchasePriceHistoryRow[];
   updateProductIdentity(
     input: Omit<UpdateProductIdentityInput, 'storeId' | 'deviceId'> & { storeProductId: string },
   ): ProductIdentityResult;
@@ -139,34 +137,20 @@ export interface CatalogueClient {
   updateReorderLevel(input: ProductReorderLevelInput): ProductReorderLevelResult;
 }
 
-function resolveCatalogueUser(adapter: DatabaseAdapter, storeId: string, device: DeviceRow): string {
-  if (device.userId !== null) {
-    return device.userId;
-  }
-  const owner = adapter.getFirstRow<{ user_id: string }>(
-    `SELECT user_id FROM store_members
-     WHERE store_id = ? AND role = 'OWNER' AND status = 'ACTIVE'
-     ORDER BY created_at ASC LIMIT 1;`,
-    [storeId],
-  );
-  if (!owner) {
-    throw new Error('Cannot update reorder threshold: no active store owner is available.');
-  }
-  return owner.user_id;
-}
-
 export function createCatalogueClient(
   adapter: DatabaseAdapter,
   store: StoreRow,
-  device: DeviceRow,
+  device: DeviceRow & { localEnrollmentDeviceId?: string },
   generateId: () => string = generateMobileId,
   photoFiles?: () => PhotoFiles,
   lookupAdapter?: CatalogueLookupAdapter,
 ): CatalogueClient {
-  const catalogueUserId = resolveCatalogueUser(adapter, store.id, device);
-  const photos = createProductPhotos(adapter, store.id, photoFiles, generateId);
+  const context = resolveCurrentActor(adapter, { storeId: store.id, deviceId: device.id, userId: device.userId ?? '',
+    localEnrollmentDeviceId: device.localEnrollmentDeviceId });
+  const catalogueUserId = context.userId;
+  const photos = createProductPhotos(adapter, store.id, photoFiles, generateId, undefined, context);
   const suggestions = createCatalogueSuggestions(adapter, store.id, lookupAdapter);
-  return {
+  return guardClient<CatalogueClient>({
     suggestions,
     storeId: store.id,
     recognition: createRecognitionService(adapter, store.id),
@@ -191,7 +175,7 @@ export function createCatalogueClient(
         barcodeForBasePackage: input.barcodeForBasePackage,
         defaultSellingPriceMinor: input.defaultSellingPriceMinor,
       };
-      const graph = createTemporaryProduct(adapter, operation, { generateId, operationId: input.operationId,
+      const graph = createTemporaryProduct(adapter, operation, { generateId, actorContext: context, operationId: input.operationId,
         validatePhoto: () => { if (input.localPhotoId) photos.assertReady(input.localPhotoId); } });
       const code = input.lookupCode ?? (input.barcode ? { value: input.barcode, type: input.barcodeType ?? 'EAN' } : undefined);
       if (code) { try { suggestions.remember(graph.storeProduct.id, code); } catch { /* Lookup never invalidates a durable product. */ } }
@@ -214,20 +198,13 @@ export function createCatalogueClient(
         settings: listStorePackageSettings(adapter, product.id),
       };
     },
-    getPurchasePriceHistory(storeProductId: string): PurchasePriceHistoryRow[] {
-      const product = getStoreProductById(adapter, storeProductId);
-      if (!product || product.storeId !== store.id) {
-        return [];
-      }
-      return listPurchasePriceHistoryByStoreProduct(adapter, store.id, product.id);
-    },
     updateProductIdentity(
       input: Omit<UpdateProductIdentityInput, 'storeId' | 'deviceId'> & { storeProductId: string },
     ): ProductIdentityResult {
       const result = updateProductIdentity(
         adapter,
         { ...input, storeId: store.id, deviceId: device.id },
-        { generateId },
+        { generateId, actorContext: context },
       );
       try { suggestions.decide(input.storeProductId, 'CORRECTED'); } catch { /* Name fingerprint still rejects late responses. */ }
       return result;
@@ -238,24 +215,24 @@ export function createCatalogueClient(
       return addProductIdentifier(
         adapter,
         { ...input, storeId: store.id, deviceId: device.id },
-        { generateId },
+        { generateId, actorContext: context },
       );
     },
     createPackage(
       input: Omit<CreatePackageInput, 'storeId' | 'deviceId'> & { storeProductId: string },
     ): PackageResult {
-      return createPackage(adapter, { ...input, storeId: store.id, deviceId: device.id }, { generateId });
+      return createPackage(adapter, { ...input, storeId: store.id, deviceId: device.id }, { generateId, actorContext: context });
     },
     updatePackage(
       input: Omit<UpdatePackageInput, 'storeId' | 'deviceId'> & { packageUnitId: string },
     ): PackageResult {
-      return updatePackage(adapter, { ...input, storeId: store.id, deviceId: device.id }, { generateId });
+      return updatePackage(adapter, { ...input, storeId: store.id, deviceId: device.id }, { generateId, actorContext: context });
     },
     deactivatePackage(input: Omit<DeactivatePackageInput, 'storeId' | 'deviceId'>): PackageResult {
       return deactivatePackage(
         adapter,
         { ...input, storeId: store.id, deviceId: device.id },
-        { generateId },
+        { generateId, actorContext: context },
       );
     },
     markProductEnriched(
@@ -264,7 +241,7 @@ export function createCatalogueClient(
       return markProductEnriched(
         adapter,
         { ...input, storeId: store.id, deviceId: device.id },
-        { generateId },
+        { generateId, actorContext: context },
       );
     },
     setProductActive(
@@ -275,7 +252,7 @@ export function createCatalogueClient(
         adapter,
         { ...input, storeId: store.id, deviceId: device.id },
         active,
-        { generateId },
+        { generateId, actorContext: context },
       );
     },
     updateReorderLevel(input: ProductReorderLevelInput): ProductReorderLevelResult {
@@ -289,10 +266,11 @@ export function createCatalogueClient(
       };
       return updateReorderLevel(adapter, operation, {
         generateId,
+        actorContext: context,
         operationId: input.operationId,
       });
     },
-  };
+  }, () => assertCurrentActor(adapter, context));
 }
 
 export interface CurrentStoreContext {
@@ -302,20 +280,17 @@ export interface CurrentStoreContext {
 
 /**
  * Resolve the acting store context for the Products area. M2 assumes the
- * single-store retailer and uses the first store with its newest device;
- * onboarding defines real store switching later. Returns null when no
- * store exists so the UI can say so honestly instead of inventing one.
+ * single-store retailer and requires an unambiguous bound actor;
+ * onboarding defines real store switching later. Returns null when
+ * current authority is unavailable so the UI can say so honestly.
  */
 export function resolveCurrentStore(adapter: DatabaseAdapter): CurrentStoreContext | null {
-  const stores = listStores(adapter);
-  const store = stores[0];
-  if (!store) {
-    return null;
+  if (listStores(adapter).length === 0) return null;
+  try {
+    const { store, device } = resolveCurrentActor(adapter);
+    return { store, device };
+  } catch (error) {
+    if (error instanceof DomainError) return null;
+    throw error;
   }
-  const devices = listDevicesByStore(adapter, store.id);
-  const device = devices[0];
-  if (!device) {
-    return null;
-  }
-  return { store, device };
 }

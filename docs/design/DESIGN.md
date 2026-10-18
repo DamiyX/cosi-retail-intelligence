@@ -8,6 +8,18 @@
 
 ## Product Experience
 
+### M10 prototype market-price experience
+
+Use More -> Market prices, separate from personal M9 price changes, with current
+store/approved zone and experimental availability visible. One compact consent
+area explains contributed cost/package/zone facts and excluded private names/
+supplier/purchase details. Default OFF; explicit OWNER online confirmation;
+disabled/pending/conflict/failed controls are honest. No dense new Home cards,
+permanent tabs or sales interruption. Relevant approved product/package results
+show range/typical/window/observed/calculated freshness/LIMITED coverage/count
+meaning and saved/expired status. Missing mapping or sparse evidence shows no
+numeric price. Source baseline only: D-051 and M10 plan govern activation gates.
+
 COSI helps a retailer record daily work quickly, retain it without a network,
 and progressively gain control and price intelligence. The interface should
 feel calm, direct, and trustworthy during busy counter work. It must never make
@@ -575,3 +587,13 @@ Four visible corner brackets and one restrained sweeping line frame the live bar
 ## M8-09 — optional unconfirmed catalogue suggestions (D-048)
 
 Keep the selling shortcut photo + price + same basket. No online spinner or name requirement enters checkout. Later Temporary detail may show one compact inline card with proposed name, brand, size and source/attribution. Use details or Edit fills the actual editable name; Save confirms it using the existing command. Dismiss is persistent. Ordinary Add product shows the same card for a ready valid-barcode response, with existing typing remaining usable. Late results never write current form fields. Distinguish no result, offline/error/timeout, bounded retry and disabled provider truthfully; reduced confidence is explicit, not a success badge. No remote images, modal, package inference or visual recognition. Live default remains disabled under the provider review.
+
+## M11 owner accountability source slice (D-052)
+
+More -> Staff/activity:compact owner-only member/device list, current saved status
+and bounded action history/filter/See more. Show recorded actor/action/time and
+reasons for stock-check replacements, never misconduct labels. Minimum screens;
+no role picker or impersonation. Status controls clearly distinguish saved,
+unavailable, pending, confirmed and conflict; unavailable transport never claims
+a staff account is activated. Existing scanning/cart/product flows unchanged.
+See M11_STAFF_PLAN/TICKETS for source and remaining staff gates.

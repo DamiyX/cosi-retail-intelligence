@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "datasetId": "unfilled-r1-template",
+  "version": "unfilled-v1",
+  "kind": "synthetic-tooling-only",
+  "storeScope": "unfilled-store",
+  "adapter": { "id": "unselected", "preprocessingId": "unselected", "space": "unselected", "dimension": 1 },
+  "products": [],
+  "entries": []
+}

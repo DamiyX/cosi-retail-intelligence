@@ -1,5 +1,12 @@
 # Tickets: M8 Unified Scanner + Barcode
 
+Track B has separate phase ledgers in docs/recognition: corrected R0 tooling is
+accepted; R1–R4 preparation accepted; cycle stopped for founder final combined Astra audit.
+Handoff:docs/recognition/reports/R1_R4_REVIEW_HANDOFF.md.
+.agents/workflows/recognition-track-b.json records sequential R1–R4 preparation
+and source audits; real photos/device/accuracy gates remain pending. This does
+not replace these open M8 acceptance items or authorize M12 integration.
+
 **Amendment 2026-09-30:** D-047 authorizes price-first unknown-product selling
 with a private identification photo. M8-06 and M8-07 below extend the existing
 milestone. Native findings from HEAD 1e50d1b remain open; M8 is not accepted.

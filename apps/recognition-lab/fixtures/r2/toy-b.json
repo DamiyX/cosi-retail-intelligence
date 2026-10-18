@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "candidateId": "authored-toy-b",
+  "version": "v1",
+  "kind": "authored-toy",
+  "family": "Authored mathematical fixture; no real model family",
+  "artifact": {
+    "revision": "authored-recipe-v1",
+    "sha256": "e82342ede373b94faaedb590f6a83a7bb2a2b4e59f0e9d577a55a0fd7252923a",
+    "storageBytes": 240
+  },
+  "preprocessing": {
+    "id": "toy-b",
+    "version": "v1",
+    "descriptor": "Authored R0 vectors plus trailing zero; no pixels or encoder.",
+    "sha256": "33539d525f2ef5eef4b86ecb9b9c862f7c8fc74d48197f04254fd1b6ca760436"
+  },
+  "embedding": {
+    "space": "toy-b-v1",
+    "dimension": 4
+  },
+  "licences": {
+    "code": {
+      "status": "toy-only",
+      "reference": "Repository-authored fixture"
+    },
+    "weights": {
+      "status": "toy-only",
+      "reference": "No weights; authored mathematical values"
+    }
+  },
+  "runtime": {
+    "status": "toy-only",
+    "exportReference": "No export; authored output",
+    "runtimeReference": "No encoder; Node postprocessing only"
+  },
+  "review": {
+    "reviewerId": "fixture-author",
+    "exactBindingReference": "Public synthetic tooling-only fixture; no rights/model approval"
+  }
+}

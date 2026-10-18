@@ -1,0 +1,20 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+group = 'local.recognitionexperiment'
+version = '0.0.1'
+expoModule { canBePublished false }
+android {
+  namespace 'expo.modules.recognitionexperiment'
+  defaultConfig {
+    minSdk 24
+    versionCode 1
+    versionName '0.0.1'
+  }
+  androidResources { noCompress += ['tflite', 'f32le'] }
+}
+dependencies {
+  implementation project(':recognition-cpu-runtime')
+}
+dependencyLocking { lockAllConfigurations() }

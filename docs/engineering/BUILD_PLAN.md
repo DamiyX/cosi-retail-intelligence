@@ -775,6 +775,15 @@ One retailer with no network participants can still see meaningful purchase-cost
 
 # 23. M10 — Market Price Infrastructure
 
+October3 coordinator preparation: accepted M9 current-app source is documented
+in M9_INTEGRATION_AUDIT.md; physical/live gates remain carried. The M10 source
+contract and four sequential vertical tickets are M10_MARKET_PRICE_PLAN.md and
+M10_MARKET_PRICE_TICKETS.md, registered in its workflow. D-051 preserves private
+purchase/M7 facts and defines provisional prospective revocable eligibility,
+reviewed mappings/zones, sparse-data suppression and disabled external activation.
+Only a stopped main-coordinator audit can accept M10 source; live backend/privacy/
+reference/device/release gates remain separate. Root M8 ledger is preserved.
+
 ## Goal
 
 Build the first network-price layer carefully.
@@ -905,7 +914,14 @@ Prepare for real retailer pilots.
 
 # 27. Recognition Track B Milestones
 
-Track B begins around M1/M2 and runs independently.
+Track B was intended to begin around M1/M2. Actual October2 status: corrected R0
+lab tooling independently accepted; R1 preparation authorized in
+docs/recognition/TRACK_B_R1_PLAN.md and TRACK_B_R1_TICKETS.md. Founder permits
+sequential Sol6.1 HIGH preparation/implementation and audits through R4, deferring
+physical data/device checks until return. Code readiness and real-data/device
+acceptance are separate; missing physical evidence remains pending, not waived.
+M9 audit/M10/M11 do not block lab preparation; M12 keeps its integration gates.
+Keep work-milestone R0–R8 distinct from the test plan’s evaluation phases R0–R3.
 
 ```text
 R0 Recognition Lab Foundation
@@ -1669,3 +1685,11 @@ If implementation evidence shows the milestone order is inefficient:
 4. proceed.
 
 The plan is a controlled execution guide, not a reason to ignore better engineering evidence.
+
+### M11 rolling source plan — 2026-10-03
+
+Founder lifted M11 hold. D-052 and M11_STAFF_PLAN/TICKETS define source groundwork
+and coordinator audit. Existing actor/access gaps, owner activity/check review
+and disabled status controls proceed; real staff enrollment, minimum visible
+data and distinct blind assignments remain explicit OPEN M11 acceptance gates.
+No whole-M11/release claim from this foundation; no M12 started.

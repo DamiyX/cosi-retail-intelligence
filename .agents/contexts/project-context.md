@@ -1,4 +1,12 @@
+<!-- October3 current routing: founder authorized M11 continuation. Read PROJECT_STATE, M11_STAFF_PLAN/TICKETS and m11-staff-accountability.json. M9/M10 software source accepted; live gates pending. M11 implementation sequential, coordinator audits stopped returns. No real staff activation/assignee scope or M12 is claimed. -->
 # COSI Project Context and Decision Packet
+
+**October2 routing supersedes earlier current-priority prose:** source/phone agents
+are stopped. Track B corrected R0 source/tooling is independently accepted;
+R0-A2-01/02 resolved. See docs/recognition/reports/R0_A2_INDEPENDENT_REVIEW.md.
+R0–R4 preparation final audit and sequential FA-01/02/03/04 repairs independently accepted; all implementers stopped. See docs/recognition/reports/R1_R4_FINAL_AUDIT.md and correction independent reviews. Real dataset/models/actual inference/native/device/quality gates remain pending, not waived. Founder authorized Sol HIGH correction reviews after the Astra audit. No R5/M12 or physical action started. Synthetic/precomputed lab exists; no real visual model or production recognition implemented. PROJECT_STATE and recognition-track-b.json own current routing.
+Founder reports current beep works; focus/slider follow-ups are deferred and M8
+physical gates remain open. PROJECT_STATE.md owns latest status.
 
 **Active amendment 2026-09-30:** D-047 and M8_SCANNER_PLAN authorize price-first
 unknown-product selling with one private identification photo and later naming.

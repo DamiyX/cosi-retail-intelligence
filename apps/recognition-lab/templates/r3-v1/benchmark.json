@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "recordId": null,
+  "evidenceKind": "reported-physical-unverified",
+  "dataset": null,
+  "candidate": null,
+  "target": null,
+  "targetDeclarationSha256": null,
+  "device": null,
+  "provenance": null,
+  "inventory": [],
+  "trials": [],
+  "observations": {
+    "memoryBytes": { "idle": null, "loaded": null, "inference": null, "afterSustained": null },
+    "storageBytes": { "model": null, "runtimeIncrease": null, "cache": null, "references": null, "embeddings": null, "thumbnails": null, "ocr": null },
+    "extrapolatedStorageBytes": [],
+    "sustainedDurationMs": null,
+    "thermal": null,
+    "batteryDropPercent": null,
+    "droppedFrames": null,
+    "stability": null,
+    "offline": { "firstUseAirplane": null, "restartAirplane": null, "knownVisualAirplane": null, "assetsAvailableAirplane": null }
+  }
+}

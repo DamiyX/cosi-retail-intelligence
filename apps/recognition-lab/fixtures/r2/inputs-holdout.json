@@ -1,0 +1,12 @@
+[
+  {
+    "candidate": "apps/recognition-lab/fixtures/r2/toy-a.json",
+    "bundle": "apps/recognition-lab/fixtures/r2/toy-a-holdout.json",
+    "frozen": "apps/recognition-lab/runs/r2-calibration-a/frozen-candidate.json"
+  },
+  {
+    "candidate": "apps/recognition-lab/fixtures/r2/toy-b.json",
+    "bundle": "apps/recognition-lab/fixtures/r2/toy-b-holdout.json",
+    "frozen": "apps/recognition-lab/runs/r2-calibration-b/frozen-candidate.json"
+  }
+]

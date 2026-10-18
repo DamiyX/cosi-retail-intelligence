@@ -1,0 +1,68 @@
+[
+  {
+    "schemaVersion": 1,
+    "candidateId": "draft-family-1",
+    "version": "draft-v1",
+    "kind": "draft-unreviewed",
+    "family": "MobileNetV3-small family hypothesis",
+    "artifact": {
+      "revision": null,
+      "sha256": null,
+      "storageBytes": null
+    },
+    "preprocessing": null,
+    "embedding": null,
+    "licences": {
+      "code": {
+        "status": "unreviewed",
+        "reference": null
+      },
+      "weights": {
+        "status": "unreviewed",
+        "reference": null
+      }
+    },
+    "runtime": {
+      "status": "unreviewed",
+      "exportReference": null,
+      "runtimeReference": null
+    },
+    "review": {
+      "reviewerId": null,
+      "exactBindingReference": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "candidateId": "draft-family-2",
+    "version": "draft-v1",
+    "kind": "draft-unreviewed",
+    "family": "MobileCLIP image-text family hypothesis",
+    "artifact": {
+      "revision": null,
+      "sha256": null,
+      "storageBytes": null
+    },
+    "preprocessing": null,
+    "embedding": null,
+    "licences": {
+      "code": {
+        "status": "unreviewed",
+        "reference": null
+      },
+      "weights": {
+        "status": "unreviewed",
+        "reference": null
+      }
+    },
+    "runtime": {
+      "status": "unreviewed",
+      "exportReference": null,
+      "runtimeReference": null
+    },
+    "review": {
+      "reviewerId": null,
+      "exactBindingReference": null
+    }
+  }
+]

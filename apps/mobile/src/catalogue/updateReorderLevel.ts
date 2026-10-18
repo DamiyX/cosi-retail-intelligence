@@ -1,3 +1,4 @@
+import { captureCommandActor, assertCurrentActor } from '../storeContext/access';
 import { DomainError } from '@retail/domain';
 
 import { generateMobileId } from '../crypto/mobileIds';
@@ -56,6 +57,8 @@ function requestFor(input: UpdateReorderLevelInput): ReorderLevelRequest {
 }
 
 function assertOwner(adapter: DatabaseAdapter, input: UpdateReorderLevelInput): void {
+  assertCurrentActor(adapter, input, true);
+
   const storeId = requireId(input.storeId);
   const deviceId = requireId(input.deviceId);
   const userId = requireId(input.userId);
@@ -130,6 +133,7 @@ export function updateReorderLevel(
   const generateId = options.generateId ?? generateMobileId;
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
+  const actor = captureCommandActor(adapter, { storeId, deviceId, userId }, options.actorContext, true);
   assertOwner(adapter, { ...input, storeId, deviceId, userId, storeProductId });
   const replayed = findExpectedOutboxReplay(adapter, {
     operationId,
@@ -145,6 +149,7 @@ export function updateReorderLevel(
 
   const occurredAt = nowIso();
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor, true);
     assertOwner(adapter, { ...input, storeId, deviceId, userId, storeProductId });
     const existing = requireOwnedProduct(adapter, storeId, storeProductId);
     if (existing.version !== input.expectedVersion) {

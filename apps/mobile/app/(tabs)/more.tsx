@@ -65,7 +65,15 @@ export default function MoreScreen() {
         <Text style={styles.actionTitle}>Cloud sync</Text>
         <Text style={styles.actionBody}>Sign in, check pending work and retry when online</Text>
       </Pressable>
-      <Text style={styles.comingSoon}>Staff dispatch and supervisor review are intentionally deferred.</Text>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/market-prices')} style={styles.action}>
+        <Text style={styles.actionTitle}>Market prices</Text>
+        <Text style={styles.actionBody}>Review contribution and experimental market availability</Text>
+      </Pressable>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/staff-activity')} style={styles.action}>
+        <Text style={styles.actionTitle}>Staff and activity</Text>
+        <Text style={styles.actionBody}>Owner review of saved people, devices and recorded actions</Text>
+      </Pressable>
+      <Text style={styles.comingSoon}>Staff sign-in and different-staff assignments remain unavailable.</Text>
     </ScrollView>
   );
 }

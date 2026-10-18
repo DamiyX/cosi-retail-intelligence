@@ -1,3 +1,4 @@
+import { captureCommandActor, assertCurrentActor, resolveCurrentActor } from '../storeContext/access';
 import { DomainError } from '@retail/domain';
 
 import { generateMobileId } from '../crypto/mobileIds';
@@ -65,6 +66,7 @@ function changeLifecycle(
   const generateId = options.generateId ?? generateMobileId;
   const storeId = requireId(input.storeId);
   const deviceId = requireId(input.deviceId);
+  const actor = captureCommandActor(adapter, resolveCurrentActor(adapter, { storeId, deviceId }), options.actorContext);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
   const replayed = findExpectedOutboxReplay(adapter, {
@@ -85,6 +87,7 @@ function changeLifecycle(
 
   const occurredAt = nowIso();
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor);
     const existing = getStoreProductById(adapter, input.storeProductId);
     if (!existing || existing.storeId !== storeId) {
       throw new DomainError('INVALID_VALUE', 'Store product does not exist in this store.');

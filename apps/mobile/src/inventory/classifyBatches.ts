@@ -1,3 +1,4 @@
+import { captureCommandActor, type CommandActorOptions, assertCurrentActor } from '../storeContext/access';
 import {
   DomainError,
   normalizeBatchDate,
@@ -190,6 +191,8 @@ function replayGraph(adapter: DatabaseAdapter, outbox: OutboxOperationRow, reque
 }
 
 function assertOwner(adapter: DatabaseAdapter, input: ReturnType<typeof normalizeInput>): { memberId: string } {
+  assertCurrentActor(adapter, input, true);
+
   const store = getStoreById(adapter, input.storeId);
   if (!store || store.status !== 'ACTIVE') throw new DomainError('INVALID_VALUE', 'Store does not exist or is not active.');
   const device = getDeviceById(adapter, input.deviceId);
@@ -247,11 +250,12 @@ function appendSignedEntries(
 export function classifyInventoryBatches(
   adapter: DatabaseAdapter,
   input: ClassifyBatchInput,
-  options: { generateId?: () => string } = {},
+  options: CommandActorOptions & { generateId?: () => string } = {},
 ): BatchClassificationGraph {
   const request = normalizeInput(input);
   // A replayed operation is still a management read; an operation ID cannot
   // bypass the owner boundary.
+  const actor = captureCommandActor(adapter, request, options.actorContext, true);
   assertOwner(adapter, request);
   const replayed = findExpectedOutboxReplay(adapter, {
     operationId: request.operationId,
@@ -264,6 +268,7 @@ export function classifyInventoryBatches(
 
   const generateId = options.generateId ?? generateMobileId;
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor, true);
     const { memberId } = assertOwner(adapter, request);
     const currentInventoryWatermark = getInventoryLedgerWatermark(adapter, request.storeProductId);
     const currentBatchWatermark = getBatchInventoryWatermark(adapter, request.storeProductId);

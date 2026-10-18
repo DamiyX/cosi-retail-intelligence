@@ -5,6 +5,7 @@ import MoreScreen from '../app/(tabs)/more';
 import ProductsLayout from '../app/(tabs)/products/_layout';
 import ProductDetailRoute from '../app/(tabs)/products/[id]/index';
 import ProductsIndexRoute from '../app/(tabs)/products/index';
+import PersonalPriceChangesRoute from '../app/(tabs)/products/price-changes';
 import QuickAddRoute from '../app/(tabs)/products/new';
 import NewPackageRoute from '../app/(tabs)/products/[id]/packages/new';
 import EditPackageRoute from '../app/(tabs)/products/[id]/packages/[packageId]';
@@ -51,6 +52,7 @@ const ROUTES = {
   '(tabs)/more': MoreScreen,
   '(tabs)/products/_layout': ProductsLayout,
   '(tabs)/products/index': ProductsIndexRoute,
+  '(tabs)/products/price-changes': PersonalPriceChangesRoute,
   '(tabs)/products/new': QuickAddRoute,
   '(tabs)/products/[id]/index': ProductDetailRoute,
   '(tabs)/products/[id]/packages/new': NewPackageRoute,

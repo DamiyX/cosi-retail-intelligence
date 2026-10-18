@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "export": {
+    "id": "authored-export",
+    "version": "v1",
+    "sha256": "1e91d70ca6f3e955d8ea31139bc10475071fee1a1bb4fa26bbfc87dae42e358c",
+    "format": "toy-json",
+    "precision": "toy-f64",
+    "conversionMethodId": "authored-no-conversion",
+    "reviewReferenceId": "toy-only-no-native-review"
+  },
+  "runtime": {
+    "id": "authored-runtime-NOT-ANDROID",
+    "version": "v1",
+    "artifactSha256": "740a1702e93142ade1e142ec26d5bd8d2813dc4189e4cb48f939818f721b50b2",
+    "delegate": "none-authored",
+    "configurationSha256": "c3c8497df9357009b492504bfdea31331f34b3a7f94d455dceede317d41f5cc1",
+    "reviewReferenceId": "toy-only-no-runtime-review"
+  }
+}

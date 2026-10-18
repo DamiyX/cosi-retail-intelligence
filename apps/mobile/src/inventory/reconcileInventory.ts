@@ -1,3 +1,4 @@
+import { captureCommandActor, type CommandActorOptions, assertCurrentActor } from '../storeContext/access';
 import { convertPackagesToBase, DomainError } from '@retail/domain';
 
 import { generateMobileId } from '../crypto/mobileIds';
@@ -180,6 +181,8 @@ function safeNumber(value: bigint, field: string): number {
 }
 
 function assertOwner(adapter: DatabaseAdapter, storeId: string, deviceId: string, userId: string): OwnerContext {
+  assertCurrentActor(adapter, { storeId, deviceId, userId }, true);
+
   const store = getStoreById(adapter, storeId);
   if (!store || store.status !== 'ACTIVE') throw new DomainError('INVALID_VALUE', 'Store does not exist or is not active.');
   const device = getDeviceById(adapter, deviceId);
@@ -435,12 +438,13 @@ function replayGraph(adapter: DatabaseAdapter, outbox: OutboxOperationRow, reque
 export function startInventoryReconciliation(
   adapter: DatabaseAdapter,
   input: StartInventoryReconciliationInput,
-  options: { generateId?: () => string } = {},
+  options: CommandActorOptions & { generateId?: () => string } = {},
 ): ReconciliationDraft {
   const storeId = requireId(input.storeId);
   const deviceId = requireId(input.deviceId);
   const userId = requireId(input.userId);
   const storeProductId = requireId(input.storeProductId);
+  const actor = captureCommandActor(adapter, { storeId, deviceId, userId }, options.actorContext, true);
   const { memberId } = assertOwner(adapter, storeId, deviceId, userId);
   const product = getStoreProductById(adapter, storeProductId);
   if (!product || product.storeId !== storeId || product.status !== 'ACTIVE') throw new DomainError('INVALID_VALUE', 'Product does not belong to this store or is not active.');
@@ -466,6 +470,7 @@ export function startInventoryReconciliation(
   }
   const generateId = options.generateId ?? generateMobileId;
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor, true);
     const projection = getBatchProjectionForStoreProduct(adapter, storeProductId);
     const startedAt = nowIso();
     const reconciliation = createInventoryReconciliation(adapter, {
@@ -529,9 +534,12 @@ export function listOpenInventoryReconciliations(
 export function cancelInventoryReconciliation(
   adapter: DatabaseAdapter,
   input: { reconciliationId: string; storeId: string; deviceId: string; userId: string },
+  options: CommandActorOptions = {},
 ): ReconciliationDraft {
+  const actor = captureCommandActor(adapter, input, options.actorContext, true);
   assertOwner(adapter, input.storeId, input.deviceId, input.userId);
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor, true);
     const { reconciliation, line } = getSessionLine(adapter, input.reconciliationId, input.storeId);
     if (reconciliation.status !== 'IN_PROGRESS') throw new DomainError('INVALID_VALUE', 'This reconciliation is no longer open.');
     const cancelled = cancelReconciliationRow(adapter, { id: reconciliation.id, completedAt: nowIso() });
@@ -542,9 +550,10 @@ export function cancelInventoryReconciliation(
 export function submitInventoryReconciliation(
   adapter: DatabaseAdapter,
   rawInput: SubmitInventoryReconciliationInput & { storeId: string; deviceId: string; userId: string },
-  options: { generateId?: () => string } = {},
+  options: CommandActorOptions & { generateId?: () => string } = {},
 ): ReconciliationDraft {
   const { storeId, deviceId, userId } = rawInput;
+  const actor = captureCommandActor(adapter, { storeId, deviceId, userId }, options.actorContext, true);
   const { memberId } = assertOwner(adapter, storeId, deviceId, userId);
   const generateId = options.generateId ?? generateMobileId;
   const physical = canonicalInteger(rawInput.physicalBaseUnits, 'physicalBaseUnits', true);
@@ -553,6 +562,7 @@ export function submitInventoryReconciliation(
   if (!completeGroupCount && groupCounts.length > 0) throw new DomainError('INVALID_VALUE', 'Group counts require complete-count mode.');
   if (groupCounts.length > 100) throw new DomainError('INVALID_VALUE', 'A reconciliation cannot contain more than one hundred group counts.');
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor, true);
     const { reconciliation, line } = getSessionLine(adapter, rawInput.reconciliationId, storeId);
     if (reconciliation.status !== 'IN_PROGRESS') throw new DomainError('INVALID_VALUE', 'This reconciliation is no longer open.');
     const currentProjection = getBatchProjectionForStoreProduct(adapter, line.storeProductId);
@@ -643,9 +653,10 @@ function reconciliationSyncBaseline(
 export function finalizeInventoryReconciliation(
   adapter: DatabaseAdapter,
   rawInput: FinalizeInventoryReconciliationInput,
-  options: { generateId?: () => string } = {},
+  options: CommandActorOptions & { generateId?: () => string } = {},
 ): ReconciliationGraph {
   const input = normalizeFinalization(rawInput);
+  const actor = captureCommandActor(adapter, input, options.actorContext, true);
   assertOwner(adapter, input.storeId, input.deviceId, input.userId);
   const replayed = findExpectedOutboxReplay(adapter, {
     operationId: input.operationId,
@@ -657,6 +668,7 @@ export function finalizeInventoryReconciliation(
   if (replayed) return replayGraph(adapter, replayed, fingerprint(input));
   const generateId = options.generateId ?? generateMobileId;
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor, true);
     const { memberId } = assertOwner(adapter, input.storeId, input.deviceId, input.userId);
     const { reconciliation, line } = getSessionLine(adapter, input.reconciliationId, input.storeId);
     if (reconciliation.status !== 'IN_PROGRESS') throw new DomainError('INVALID_VALUE', 'This reconciliation is no longer open.');

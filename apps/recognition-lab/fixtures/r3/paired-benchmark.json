@@ -1,0 +1,1628 @@
+{
+  "schemaVersion": 1,
+  "recordId": "authored-r3-paired",
+  "evidenceKind": "authored-toy",
+  "dataset": {
+    "datasetId": "r0-fixture",
+    "version": "v2",
+    "kind": "synthetic-tooling-only",
+    "manifestSha256": "6b941fcaf47ae42ffebe5bfe9b608f638ba7700e7135e7d94ef8d00b7c25670f"
+  },
+  "candidate": {
+    "candidateId": "authored-toy-a",
+    "version": "v1",
+    "declarationSha256": "1a9d7f449f4b3fec6232960fdc36f5722a306c442922f32a1d8db8c2200f9a6a",
+    "artifactSha256": "3d795f77a7a548938074887a7ffc2087feeff6d382fed2b1ad3d64ac52dfcb9f",
+    "preprocessingId": "toy-a",
+    "preprocessingVersion": "v1",
+    "preprocessingSha256": "5ff591820d6f8922782d17fe24bbfaeadd458549b2b3a39792ae3ed8adbb41ee",
+    "space": "toy-a-v1",
+    "dimension": 3
+  },
+  "target": {
+    "schemaVersion": 1,
+    "export": {
+      "id": "authored-export",
+      "version": "v1",
+      "sha256": "1e91d70ca6f3e955d8ea31139bc10475071fee1a1bb4fa26bbfc87dae42e358c",
+      "format": "toy-json",
+      "precision": "toy-f64",
+      "conversionMethodId": "authored-no-conversion",
+      "reviewReferenceId": "toy-only-no-native-review"
+    },
+    "runtime": {
+      "id": "authored-runtime-NOT-ANDROID",
+      "version": "v1",
+      "artifactSha256": "740a1702e93142ade1e142ec26d5bd8d2813dc4189e4cb48f939818f721b50b2",
+      "delegate": "none-authored",
+      "configurationSha256": "c3c8497df9357009b492504bfdea31331f34b3a7f94d455dceede317d41f5cc1",
+      "reviewReferenceId": "toy-only-no-runtime-review"
+    }
+  },
+  "targetDeclarationSha256": "bed89f2cd088f0ab0e20fc813c820eec6b4fb8fdf0c39675efdcc65d53ed67cb",
+  "device": {
+    "pseudonym": "authored-device-NOT-A-PHONE",
+    "model": "authored-toy",
+    "androidVersion": "not-android",
+    "conditionId": "authored"
+  },
+  "provenance": {
+    "producerId": "public-authored-fixture",
+    "recordedAt": null,
+    "collectionReferenceId": "authored-no-collection",
+    "inventoryClaim": "supplied-record-only"
+  },
+  "inventory": [
+    {
+      "entryId": "ref-a",
+      "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+    },
+    {
+      "entryId": "ref-b",
+      "assetSha256": "51255f23f016db82277f391e9f9b68c46e82dbb490084ab03d9ed48fa31386f7"
+    },
+    {
+      "entryId": "q-a",
+      "assetSha256": "abe006461d55259b54dd7fc20dfa874ceeed46fb107d89f2ace80d9005077871"
+    },
+    {
+      "entryId": "q-u",
+      "assetSha256": "5d85b2b072bf1e66b10967f7c940b7c3523f302a03162c2307a03b6cc4299003"
+    },
+    {
+      "entryId": "ref-a-view2",
+      "assetSha256": "a843a8de46fbc3ff1ca3c48eeec0420dcd848b73e607e6900ee6e593ba0d2143"
+    },
+    {
+      "entryId": "ref-a-view3",
+      "assetSha256": "5f748009327649b66152fdf9990379a56e97f638d98ed4b60f607d6d560b25e9"
+    },
+    {
+      "entryId": "ref-a-pack",
+      "assetSha256": "b0bb62a8aca2b954d8d83f79ba7bc65728340b9e983062a1dbfa6c1b74dc1912"
+    },
+    {
+      "entryId": "ref-c",
+      "assetSha256": "5136b50d6d9a2785db5cb385bcb2d7a5cff7cc852cdd1269d994da7c31b66801"
+    }
+  ],
+  "trials": [
+    {
+      "id": "startup-cold-0",
+      "stage": "startup",
+      "phase": "cold",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "startup-warmup-0",
+      "stage": "startup",
+      "phase": "warmup",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "startup-warm-0",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "startup-warm-1",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 2
+      }
+    },
+    {
+      "id": "startup-warm-2",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 3
+      }
+    },
+    {
+      "id": "startup-warm-3",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 4
+      }
+    },
+    {
+      "id": "startup-warm-4",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 5
+      }
+    },
+    {
+      "id": "startup-warm-5",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 6
+      }
+    },
+    {
+      "id": "startup-warm-6",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 7
+      }
+    },
+    {
+      "id": "startup-warm-7",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 8
+      }
+    },
+    {
+      "id": "startup-warm-8",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 9
+      }
+    },
+    {
+      "id": "startup-warm-9",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 10
+      }
+    },
+    {
+      "id": "startup-warm-10",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 11
+      }
+    },
+    {
+      "id": "startup-warm-11",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 12
+      }
+    },
+    {
+      "id": "startup-warm-12",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 13
+      }
+    },
+    {
+      "id": "startup-warm-13",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 14
+      }
+    },
+    {
+      "id": "startup-warm-14",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 15
+      }
+    },
+    {
+      "id": "startup-warm-15",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 16
+      }
+    },
+    {
+      "id": "startup-warm-16",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 17
+      }
+    },
+    {
+      "id": "startup-warm-17",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 18
+      }
+    },
+    {
+      "id": "startup-warm-18",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 19
+      }
+    },
+    {
+      "id": "startup-warm-19",
+      "stage": "startup",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 20
+      }
+    },
+    {
+      "id": "camera-ready-cold-0",
+      "stage": "camera-ready",
+      "phase": "cold",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "camera-ready-warmup-0",
+      "stage": "camera-ready",
+      "phase": "warmup",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "camera-ready-warm-0",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "camera-ready-warm-1",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 2
+      }
+    },
+    {
+      "id": "camera-ready-warm-2",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 3
+      }
+    },
+    {
+      "id": "camera-ready-warm-3",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 4
+      }
+    },
+    {
+      "id": "camera-ready-warm-4",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 5
+      }
+    },
+    {
+      "id": "camera-ready-warm-5",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 6
+      }
+    },
+    {
+      "id": "camera-ready-warm-6",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 7
+      }
+    },
+    {
+      "id": "camera-ready-warm-7",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 8
+      }
+    },
+    {
+      "id": "camera-ready-warm-8",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 9
+      }
+    },
+    {
+      "id": "camera-ready-warm-9",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 10
+      }
+    },
+    {
+      "id": "camera-ready-warm-10",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 11
+      }
+    },
+    {
+      "id": "camera-ready-warm-11",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 12
+      }
+    },
+    {
+      "id": "camera-ready-warm-12",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 13
+      }
+    },
+    {
+      "id": "camera-ready-warm-13",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 14
+      }
+    },
+    {
+      "id": "camera-ready-warm-14",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 15
+      }
+    },
+    {
+      "id": "camera-ready-warm-15",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 16
+      }
+    },
+    {
+      "id": "camera-ready-warm-16",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 17
+      }
+    },
+    {
+      "id": "camera-ready-warm-17",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 18
+      }
+    },
+    {
+      "id": "camera-ready-warm-18",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 19
+      }
+    },
+    {
+      "id": "camera-ready-warm-19",
+      "stage": "camera-ready",
+      "phase": "warm",
+      "input": null,
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 20
+      }
+    },
+    {
+      "id": "inference-cold-0",
+      "stage": "inference",
+      "phase": "cold",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "inference-warmup-0",
+      "stage": "inference",
+      "phase": "warmup",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "inference-warm-0",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "inference-warm-1",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-b",
+        "assetSha256": "51255f23f016db82277f391e9f9b68c46e82dbb490084ab03d9ed48fa31386f7"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 2
+      }
+    },
+    {
+      "id": "inference-warm-2",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "q-a",
+        "assetSha256": "abe006461d55259b54dd7fc20dfa874ceeed46fb107d89f2ace80d9005077871"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 3
+      }
+    },
+    {
+      "id": "inference-warm-3",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "q-u",
+        "assetSha256": "5d85b2b072bf1e66b10967f7c940b7c3523f302a03162c2307a03b6cc4299003"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 4
+      }
+    },
+    {
+      "id": "inference-warm-5",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-view2",
+        "assetSha256": "a843a8de46fbc3ff1ca3c48eeec0420dcd848b73e607e6900ee6e593ba0d2143"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 6
+      }
+    },
+    {
+      "id": "inference-warm-6",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-view3",
+        "assetSha256": "5f748009327649b66152fdf9990379a56e97f638d98ed4b60f607d6d560b25e9"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 7
+      }
+    },
+    {
+      "id": "inference-warm-7",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-pack",
+        "assetSha256": "b0bb62a8aca2b954d8d83f79ba7bc65728340b9e983062a1dbfa6c1b74dc1912"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 8
+      }
+    },
+    {
+      "id": "inference-warm-8",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-c",
+        "assetSha256": "5136b50d6d9a2785db5cb385bcb2d7a5cff7cc852cdd1269d994da7c31b66801"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 9
+      }
+    },
+    {
+      "id": "inference-warm-9",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 10
+      }
+    },
+    {
+      "id": "inference-warm-10",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-b",
+        "assetSha256": "51255f23f016db82277f391e9f9b68c46e82dbb490084ab03d9ed48fa31386f7"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 11
+      }
+    },
+    {
+      "id": "inference-warm-11",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "q-a",
+        "assetSha256": "abe006461d55259b54dd7fc20dfa874ceeed46fb107d89f2ace80d9005077871"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 12
+      }
+    },
+    {
+      "id": "inference-warm-12",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "q-u",
+        "assetSha256": "5d85b2b072bf1e66b10967f7c940b7c3523f302a03162c2307a03b6cc4299003"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 13
+      }
+    },
+    {
+      "id": "inference-warm-14",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-view2",
+        "assetSha256": "a843a8de46fbc3ff1ca3c48eeec0420dcd848b73e607e6900ee6e593ba0d2143"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 15
+      }
+    },
+    {
+      "id": "inference-warm-15",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-view3",
+        "assetSha256": "5f748009327649b66152fdf9990379a56e97f638d98ed4b60f607d6d560b25e9"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 16
+      }
+    },
+    {
+      "id": "inference-warm-16",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-pack",
+        "assetSha256": "b0bb62a8aca2b954d8d83f79ba7bc65728340b9e983062a1dbfa6c1b74dc1912"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 17
+      }
+    },
+    {
+      "id": "inference-warm-17",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-c",
+        "assetSha256": "5136b50d6d9a2785db5cb385bcb2d7a5cff7cc852cdd1269d994da7c31b66801"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 18
+      }
+    },
+    {
+      "id": "inference-warm-18",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 19
+      }
+    },
+    {
+      "id": "inference-warm-19",
+      "stage": "inference",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-b",
+        "assetSha256": "51255f23f016db82277f391e9f9b68c46e82dbb490084ab03d9ed48fa31386f7"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 20
+      }
+    },
+    {
+      "id": "capture-to-result-cold-0",
+      "stage": "capture-to-result",
+      "phase": "cold",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "capture-to-result-warmup-0",
+      "stage": "capture-to-result",
+      "phase": "warmup",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "capture-to-result-warm-0",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "capture-to-result-warm-1",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-b",
+        "assetSha256": "51255f23f016db82277f391e9f9b68c46e82dbb490084ab03d9ed48fa31386f7"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 2
+      }
+    },
+    {
+      "id": "capture-to-result-warm-2",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "q-a",
+        "assetSha256": "abe006461d55259b54dd7fc20dfa874ceeed46fb107d89f2ace80d9005077871"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 3
+      }
+    },
+    {
+      "id": "capture-to-result-warm-3",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "q-u",
+        "assetSha256": "5d85b2b072bf1e66b10967f7c940b7c3523f302a03162c2307a03b6cc4299003"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 4
+      }
+    },
+    {
+      "id": "capture-to-result-warm-5",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-view2",
+        "assetSha256": "a843a8de46fbc3ff1ca3c48eeec0420dcd848b73e607e6900ee6e593ba0d2143"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 6
+      }
+    },
+    {
+      "id": "capture-to-result-warm-6",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-view3",
+        "assetSha256": "5f748009327649b66152fdf9990379a56e97f638d98ed4b60f607d6d560b25e9"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 7
+      }
+    },
+    {
+      "id": "capture-to-result-warm-7",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-pack",
+        "assetSha256": "b0bb62a8aca2b954d8d83f79ba7bc65728340b9e983062a1dbfa6c1b74dc1912"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 8
+      }
+    },
+    {
+      "id": "capture-to-result-warm-8",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-c",
+        "assetSha256": "5136b50d6d9a2785db5cb385bcb2d7a5cff7cc852cdd1269d994da7c31b66801"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 9
+      }
+    },
+    {
+      "id": "capture-to-result-warm-9",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 10
+      }
+    },
+    {
+      "id": "capture-to-result-warm-10",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-b",
+        "assetSha256": "51255f23f016db82277f391e9f9b68c46e82dbb490084ab03d9ed48fa31386f7"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 11
+      }
+    },
+    {
+      "id": "capture-to-result-warm-11",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "q-a",
+        "assetSha256": "abe006461d55259b54dd7fc20dfa874ceeed46fb107d89f2ace80d9005077871"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 12
+      }
+    },
+    {
+      "id": "capture-to-result-warm-12",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "q-u",
+        "assetSha256": "5d85b2b072bf1e66b10967f7c940b7c3523f302a03162c2307a03b6cc4299003"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 13
+      }
+    },
+    {
+      "id": "capture-to-result-warm-14",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-view2",
+        "assetSha256": "a843a8de46fbc3ff1ca3c48eeec0420dcd848b73e607e6900ee6e593ba0d2143"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 15
+      }
+    },
+    {
+      "id": "capture-to-result-warm-15",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-view3",
+        "assetSha256": "5f748009327649b66152fdf9990379a56e97f638d98ed4b60f607d6d560b25e9"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 16
+      }
+    },
+    {
+      "id": "capture-to-result-warm-16",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-pack",
+        "assetSha256": "b0bb62a8aca2b954d8d83f79ba7bc65728340b9e983062a1dbfa6c1b74dc1912"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 17
+      }
+    },
+    {
+      "id": "capture-to-result-warm-17",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-c",
+        "assetSha256": "5136b50d6d9a2785db5cb385bcb2d7a5cff7cc852cdd1269d994da7c31b66801"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 18
+      }
+    },
+    {
+      "id": "capture-to-result-warm-18",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 19
+      }
+    },
+    {
+      "id": "capture-to-result-warm-19",
+      "stage": "capture-to-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-b",
+        "assetSha256": "51255f23f016db82277f391e9f9b68c46e82dbb490084ab03d9ed48fa31386f7"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 20
+      }
+    },
+    {
+      "id": "stable-result-cold-0",
+      "stage": "stable-result",
+      "phase": "cold",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "stable-result-warmup-0",
+      "stage": "stable-result",
+      "phase": "warmup",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "stable-result-warm-0",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 1
+      }
+    },
+    {
+      "id": "stable-result-warm-1",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-b",
+        "assetSha256": "51255f23f016db82277f391e9f9b68c46e82dbb490084ab03d9ed48fa31386f7"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 2
+      }
+    },
+    {
+      "id": "stable-result-warm-2",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "q-a",
+        "assetSha256": "abe006461d55259b54dd7fc20dfa874ceeed46fb107d89f2ace80d9005077871"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 3
+      }
+    },
+    {
+      "id": "stable-result-warm-3",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "q-u",
+        "assetSha256": "5d85b2b072bf1e66b10967f7c940b7c3523f302a03162c2307a03b6cc4299003"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 4
+      }
+    },
+    {
+      "id": "stable-result-warm-5",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-view2",
+        "assetSha256": "a843a8de46fbc3ff1ca3c48eeec0420dcd848b73e607e6900ee6e593ba0d2143"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 6
+      }
+    },
+    {
+      "id": "stable-result-warm-6",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-view3",
+        "assetSha256": "5f748009327649b66152fdf9990379a56e97f638d98ed4b60f607d6d560b25e9"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 7
+      }
+    },
+    {
+      "id": "stable-result-warm-7",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-pack",
+        "assetSha256": "b0bb62a8aca2b954d8d83f79ba7bc65728340b9e983062a1dbfa6c1b74dc1912"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 8
+      }
+    },
+    {
+      "id": "stable-result-warm-8",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-c",
+        "assetSha256": "5136b50d6d9a2785db5cb385bcb2d7a5cff7cc852cdd1269d994da7c31b66801"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 9
+      }
+    },
+    {
+      "id": "stable-result-warm-9",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 10
+      }
+    },
+    {
+      "id": "stable-result-warm-10",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-b",
+        "assetSha256": "51255f23f016db82277f391e9f9b68c46e82dbb490084ab03d9ed48fa31386f7"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 11
+      }
+    },
+    {
+      "id": "stable-result-warm-11",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "q-a",
+        "assetSha256": "abe006461d55259b54dd7fc20dfa874ceeed46fb107d89f2ace80d9005077871"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 12
+      }
+    },
+    {
+      "id": "stable-result-warm-12",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "q-u",
+        "assetSha256": "5d85b2b072bf1e66b10967f7c940b7c3523f302a03162c2307a03b6cc4299003"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 13
+      }
+    },
+    {
+      "id": "stable-result-warm-14",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-view2",
+        "assetSha256": "a843a8de46fbc3ff1ca3c48eeec0420dcd848b73e607e6900ee6e593ba0d2143"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 15
+      }
+    },
+    {
+      "id": "stable-result-warm-15",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-view3",
+        "assetSha256": "5f748009327649b66152fdf9990379a56e97f638d98ed4b60f607d6d560b25e9"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 16
+      }
+    },
+    {
+      "id": "stable-result-warm-16",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a-pack",
+        "assetSha256": "b0bb62a8aca2b954d8d83f79ba7bc65728340b9e983062a1dbfa6c1b74dc1912"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 17
+      }
+    },
+    {
+      "id": "stable-result-warm-17",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-c",
+        "assetSha256": "5136b50d6d9a2785db5cb385bcb2d7a5cff7cc852cdd1269d994da7c31b66801"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 18
+      }
+    },
+    {
+      "id": "stable-result-warm-18",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-a",
+        "assetSha256": "a25383215c8aafce51889b7ae6be7fe17b6d40a84175346f8fa0f6e290ad1327"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 19
+      }
+    },
+    {
+      "id": "stable-result-warm-19",
+      "stage": "stable-result",
+      "phase": "warm",
+      "input": {
+        "entryId": "ref-b",
+        "assetSha256": "51255f23f016db82277f391e9f9b68c46e82dbb490084ab03d9ed48fa31386f7"
+      },
+      "methodId": "authored-no-clock",
+      "evidenceId": "authored-toy",
+      "outcome": {
+        "kind": "success",
+        "elapsedMs": 20
+      }
+    }
+  ],
+  "observations": {
+    "memoryBytes": {
+      "idle": {
+        "value": 100,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      },
+      "loaded": {
+        "value": 100,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      },
+      "inference": {
+        "value": 100,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      },
+      "afterSustained": {
+        "value": 100,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      }
+    },
+    "storageBytes": {
+      "model": {
+        "value": 200,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      },
+      "runtimeIncrease": {
+        "value": 200,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      },
+      "cache": {
+        "value": 200,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      },
+      "references": {
+        "value": 200,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      },
+      "embeddings": {
+        "value": 200,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      },
+      "thumbnails": {
+        "value": 200,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      },
+      "ocr": {
+        "value": 200,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      }
+    },
+    "extrapolatedStorageBytes": [],
+    "sustainedDurationMs": {
+      "value": 600000,
+      "methodId": "authored-no-measurement",
+      "evidenceId": "authored-toy"
+    },
+    "thermal": {
+      "value": "no-change-observed",
+      "methodId": "authored-no-measurement",
+      "evidenceId": "authored-toy"
+    },
+    "batteryDropPercent": {
+      "value": 0,
+      "methodId": "authored-no-measurement",
+      "evidenceId": "authored-toy"
+    },
+    "droppedFrames": {
+      "value": 0,
+      "methodId": "authored-no-measurement",
+      "evidenceId": "authored-toy"
+    },
+    "stability": {
+      "value": "stable-observed",
+      "methodId": "authored-no-measurement",
+      "evidenceId": "authored-toy"
+    },
+    "offline": {
+      "firstUseAirplane": {
+        "value": true,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      },
+      "restartAirplane": {
+        "value": true,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      },
+      "knownVisualAirplane": {
+        "value": true,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      },
+      "assetsAvailableAirplane": {
+        "value": true,
+        "methodId": "authored-no-measurement",
+        "evidenceId": "authored-toy"
+      }
+    }
+  }
+}

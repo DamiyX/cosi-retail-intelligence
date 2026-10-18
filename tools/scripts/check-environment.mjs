@@ -23,9 +23,13 @@ if (git.status !== 0) {
   console.log('OK ' + git.stdout.trim());
 }
 
-for (const [name, args] of [['adb', ['version']], ['java', ['-version']], ['docker', ['--version']]]) {
-  const result = spawnSync(name, args, { encoding: 'utf8', timeout: 10000 });
-  console.log(`${result.status === 0 ? 'AVAILABLE' : 'OPTIONAL MISSING'} ${name}`);
+if (process.argv.includes('--source-only')) {
+  console.log('SKIPPED optional adb/java/docker version probes (source-only validation).');
+} else {
+  for (const [name, args] of [['adb', ['version']], ['java', ['-version']], ['docker', ['--version']]]) {
+    const result = spawnSync(name, args, { encoding: 'utf8', timeout: 10000 });
+    console.log(`${result.status === 0 ? 'AVAILABLE' : 'OPTIONAL MISSING'} ${name}`);
+  }
 }
 console.log('EAS account, physical Android device, and a second laptop are separate acceptance checks.');
 process.exitCode = failed ? 1 : 0;

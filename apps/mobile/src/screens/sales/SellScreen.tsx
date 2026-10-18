@@ -782,7 +782,6 @@ export default function SellScreen({
     listProducts: () => [],
     createTemporaryProduct: (input) => client.createTemporaryProduct(input),
     getProductDetail: () => null,
-    getPurchasePriceHistory: () => [],
     updateProductIdentity: () => {
       throw new Error('Not implemented');
     },

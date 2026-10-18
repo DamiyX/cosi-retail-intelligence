@@ -1,14 +1,10 @@
+import { assertCurrentActor, resolveCurrentActor, guardClient } from '../storeContext/access';
 import { generateMobileId } from '../crypto/mobileIds';
 import type { DatabaseAdapter } from '../db/adapter';
 import {
-  getDeviceById,
   getPackageUnitById,
-  getStoreById,
   getStoreProductById,
-  listDevicesByStore,
   listStoreProducts,
-  listStores,
-  type DeviceRow,
   type InventoryAdjustmentReason,
   type PackageUnitRow,
   type StoreProductRow,
@@ -139,35 +135,6 @@ export interface CreateInventoryClientOptions {
   generateId?: () => string;
 }
 
-function resolveStore(adapter: DatabaseAdapter, storeId?: string): StoreRow {
-  const store = storeId ? getStoreById(adapter, storeId) : listStores(adapter)[0];
-  if (!store || store.status !== 'ACTIVE') throw new Error('Cannot create InventoryClient: no active store is provisioned.');
-  return store;
-}
-
-function resolveDevice(adapter: DatabaseAdapter, store: StoreRow, deviceId?: string): DeviceRow {
-  const device = deviceId ? getDeviceById(adapter, deviceId) : listDevicesByStore(adapter, store.id)[0];
-  if (!device || device.storeId !== store.id || device.status !== 'ACTIVE') throw new Error('Cannot create InventoryClient: no active device is provisioned.');
-  return device;
-}
-
-function resolveUser(adapter: DatabaseAdapter, store: StoreRow, userId?: string): string {
-  if (userId) {
-    const member = adapter.getFirstRow<{ id: string }>(
-      `SELECT id FROM store_members WHERE store_id = ? AND user_id = ? AND status = 'ACTIVE' LIMIT 1;`,
-      [store.id, userId],
-    );
-    if (!member) throw new Error('Cannot create InventoryClient: user is not an active store member.');
-    return userId;
-  }
-  const member = adapter.getFirstRow<{ user_id: string }>(
-    `SELECT user_id FROM store_members WHERE store_id = ? AND status = 'ACTIVE' ORDER BY role = 'OWNER' DESC, created_at ASC LIMIT 1;`,
-    [store.id],
-  );
-  if (!member) throw new Error('Cannot create InventoryClient: no active store member found.');
-  return member.user_id;
-}
-
 function activeProduct(adapter: DatabaseAdapter, store: StoreRow, storeProductId: string): StoreProductRow {
   const product = getStoreProductById(adapter, storeProductId);
   if (!product || product.storeId !== store.id || product.status !== 'ACTIVE') {
@@ -180,11 +147,10 @@ export function createDatabaseInventoryClient(
   adapter: DatabaseAdapter,
   options: CreateInventoryClientOptions = {},
 ): InventoryClient {
-  const store = resolveStore(adapter, options.storeId);
-  const device = resolveDevice(adapter, store, options.deviceId);
-  const userId = resolveUser(adapter, store, options.userId);
+  const context = resolveCurrentActor(adapter, options);
+  const { store, device, userId } = context;
   const generateId = options.generateId ?? generateMobileId;
-  return {
+  return guardClient<InventoryClient>({
     storeId: store.id,
     storeName: store.name,
     deviceId: device.id,
@@ -226,7 +192,7 @@ export function createDatabaseInventoryClient(
         expectedBatchWatermark: input.expectedBatchWatermark,
         mode: input.mode,
         groups: input.groups,
-      }, { generateId });
+      }, { generateId, actorContext: context });
     },
     classifyUnknown(input): BatchClassificationGraph {
       return this.classifyBatches({ ...input, mode: 'UNKNOWN' });
@@ -250,7 +216,7 @@ export function createDatabaseInventoryClient(
           quantityPackageSnapshotMicros: input.quantityPackageSnapshotMicros,
           conversionToBaseSnapshotMicros: input.conversionToBaseSnapshotMicros,
         }],
-      }, { generateId });
+      }, { generateId, actorContext: context });
     },
     startReconciliation(storeProductId: string, checkAssignmentId?: string | null): ReconciliationDraft {
       activeProduct(adapter, store, storeProductId);
@@ -260,7 +226,7 @@ export function createDatabaseInventoryClient(
         userId,
         storeProductId,
         checkAssignmentId,
-      }, { generateId });
+      }, { generateId, actorContext: context });
     },
     resumeReconciliation(reconciliationId: string): ReconciliationDraft {
       return getInventoryReconciliationDraft(adapter, {
@@ -284,7 +250,7 @@ export function createDatabaseInventoryClient(
         storeId: store.id,
         deviceId: device.id,
         userId,
-      }, { generateId });
+      }, { generateId, actorContext: context });
     },
     finalizeReconciliation(input): ReconciliationGraph {
       return finalizeInventoryReconciliation(adapter, {
@@ -293,7 +259,7 @@ export function createDatabaseInventoryClient(
         storeId: store.id,
         deviceId: device.id,
         userId,
-      }, { generateId });
+      }, { generateId, actorContext: context });
     },
     cancelReconciliation(reconciliationId: string): ReconciliationDraft {
       return cancelInventoryReconciliation(adapter, {
@@ -301,7 +267,7 @@ export function createDatabaseInventoryClient(
         storeId: store.id,
         deviceId: device.id,
         userId,
-      });
+      }, { actorContext: context });
     },
     getGuidedCheckOverview(now?: string): GuidedCheckOverview {
       return getGuidedCheckOverview(adapter, { storeId: store.id, deviceId: device.id, userId, now });
@@ -313,7 +279,7 @@ export function createDatabaseInventoryClient(
         storeId: store.id,
         deviceId: device.id,
         userId,
-      });
+      }, { actorContext: context });
     },
     generateGuidedChecks(input = {}) {
       return generateGuidedChecks(adapter, {
@@ -322,7 +288,7 @@ export function createDatabaseInventoryClient(
         storeId: store.id,
         deviceId: device.id,
         userId,
-      }, { generateId });
+      }, { generateId, actorContext: context });
     },
     replaceGuidedCheck(input) {
       return replaceGuidedCheck(adapter, {
@@ -331,7 +297,7 @@ export function createDatabaseInventoryClient(
         storeId: store.id,
         deviceId: device.id,
         userId,
-      }, { generateId });
+      }, { generateId, actorContext: context });
     },
     getAttentionOverview(now?: string): AttentionOverview {
       return getAttentionOverview(adapter, { storeId: store.id, deviceId: device.id, userId, now });
@@ -343,7 +309,7 @@ export function createDatabaseInventoryClient(
         storeId: store.id,
         deviceId: device.id,
         userId,
-      });
+      }, { actorContext: context });
     },
     snoozeAttention(input) {
       return snoozeAttention(adapter, {
@@ -352,7 +318,7 @@ export function createDatabaseInventoryClient(
         storeId: store.id,
         deviceId: device.id,
         userId,
-      }, { generateId });
+      }, { generateId, actorContext: context });
     },
-  };
+  }, () => assertCurrentActor(adapter, context));
 }

@@ -1,3 +1,4 @@
+import { captureCommandActor, type CommandActorOptions, assertCurrentActor, resolveCurrentActor } from '../storeContext/access';
 import { MICROS_PER_UNIT } from '@retail/domain';
 
 import { generateMobileId } from '../crypto/mobileIds';
@@ -30,7 +31,7 @@ import { attachProductPhoto } from '../media/productPhotos';
  * returned and no duplicate rows or envelopes are written.
  */
 
-export interface CatalogueOperationOptions {
+export interface CatalogueOperationOptions extends CommandActorOptions {
   /** Client ID provider; defaults to the Expo-backed mobile generator. */
   generateId?: () => string;
   /**
@@ -87,6 +88,7 @@ export function createTemporaryProduct(
   const generateId = options.generateId ?? generateMobileId;
   const storeId = requireId(input.storeId);
   const deviceId = requireId(input.deviceId);
+  const actor = captureCommandActor(adapter, resolveCurrentActor(adapter, { storeId, deviceId }), options.actorContext);
   const operationId = options.operationId === undefined ? generateId() : requireId(options.operationId);
 
   const replayed = findExpectedOutboxReplay(adapter, {
@@ -104,6 +106,7 @@ export function createTemporaryProduct(
 
   const occurredAt = nowIso();
   return adapter.transaction(() => {
+    assertCurrentActor(adapter, actor);
     const variantId = generateId();
     const packageId = generateId();
     const storeProductId = generateId();

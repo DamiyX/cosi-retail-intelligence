@@ -1,0 +1,273 @@
+{
+  "schema_version": 1,
+  "task_id": "m9-personal-price-intelligence",
+  "workflow_id": "build-feature",
+  "mode": "implement",
+  "status": "in_progress",
+  "current_state": "source-accepted-after-C1-physical-live-gates-pending",
+  "completed_states": [
+    "isolated-m9-main-coordinator-audit-complete",
+    "accepted-m7-current-app-baseline-inspected",
+    "m9-integration-tickets-prepared",
+    "M9-I1-implemented-self-checks-passed",
+    "M9-I2-implemented-self-checks-passed",
+    "C1-active-account-guard-implemented-self-checks-passed",
+    "main-coordinator-C1-correction-source-accepted"
+  ],
+  "owner": {
+    "agent": "main-coordinator",
+    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
+    "worktree": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning"
+  },
+  "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
+  "lease": null,
+  "evidence": [
+    {
+      "kind": "inspection",
+      "source": "COSI-m9-planning1c8de0d; M9_COORDINATOR_AUDIT.md",
+      "result": "Isolated41 focused/501 full tests,types/lint/export pass. Doctor20/21/dependency fail; current SDK patches protected. Actual current-app sync integration not yet proved.",
+      "observed_at": "2026-10-03T02:04:26Z"
+    },
+    {
+      "kind": "ownership",
+      "source": "Founder-authorized M9 implementation packet",
+      "result": "Sole implementation writer 01a0ff85-c793-7b63-8b59-cc06431dbed8; GPT-6.1 Sol HIGH. M9-I1 then M9-I2 only. Coordinator owns every independent audit/acceptance. Baseline 66ea3fc22595a48d7355d1729bb879496cc98896; TEMP/cosi-m9-current-integration-20261003/baseline-hashes.json.",
+      "observed_at": "2026-10-03T02:11:20.0467661Z"
+    },
+    {
+      "kind": "implementation-self-check",
+      "source": "docs/engineering/M9_INTEGRATION_HANDOFF.md",
+      "result": "1183 passed tests; 17 skipped; all four workspace typechecks and zero-warning lint passed; real M7 SQLite 2/2; Doctor21/21/dependency/export exit0; protected519/519. Writer 01a0ff85-c793-7b63-8b59-cc06431dbed8 stopped; no independent acceptance.",
+      "observed_at": "2026-10-03T03:45:47.744877+01:00"
+    },
+    {
+      "kind": "ownership",
+      "source": "Stopped handoff",
+      "result": "Sole writer 01a0ff85-c793-7b63-8b59-cc06431dbed8 released its lease. Main coordinator 01a098ef-d830-7531-bca7-2d66b0a5b587 owns every independent audit and acceptance.",
+      "observed_at": "2026-10-03T03:45:47.744877+01:00"
+    },
+    {
+      "kind": "independent-coordinator-audit",
+      "source": "docs/engineering/M9_INTEGRATION_AUDIT.md",
+      "result": "Main coordinator independently accepted actual M9 integration:68 fresh tests,519 protected hashes unchanged, exact/scope/current M7 SQLite pull/pending-local/echo/replay/restart paths reviewed. No production edit; physical/live gates pending.",
+      "observed_at": "2026-10-03T03:00:34.656Z"
+    },
+    {
+      "kind": "independent-coordinator-finding",
+      "source": "docs/engineering/M9_INTEGRATION_CORRECTIONS.md",
+      "result": "C1 reproduced:INACTIVE/SUSPENDED user with ACTIVE OWNER membership admitted at constructors and all four reads;2 expected failing real SQLite diagnostic tests,exit1. Earlier acceptance superseded;68 passing focused tests and519 old protected hashes remain valid within their scope.",
+      "observed_at": "2026-10-03T03:07:58.356Z"
+    },
+    {
+      "kind": "ownership",
+      "source": "Founder-authorized C1 correction packet",
+      "result": "Sole writer 01a0ff85-c793-7b63-8b59-cc06431dbed8; GPT-6.1 Sol HIGH; production ceiling priceIntelligence/client.ts only; fresh553-file Git tracked/non-ignored baseline at TEMP/cosi-m9-c1-correction-20261003/baseline-hashes.json. Main coordinator owns every independent audit and acceptance.",
+      "observed_at": "2026-10-03T03:11:36.5694300Z"
+    },
+    {
+      "kind": "implementation-self-check",
+      "source": "docs/engineering/M9_INTEGRATION_HANDOFF.md#c1-correction-stopped-return",
+      "result": "C1 production delta only centralized ACTIVE-account join. Final focused30/30 in5 suites, zero skips; four workspace typechecks and max-warnings=0 lint exit0; fresh546/546 protected hashes. Pre-fix permanent regressions4 failures/8 passes; initial test DTO typecheck exit2 corrected without protocol changes. Independent acceptance remains withheld.",
+      "observed_at": "2026-10-03T03:24:29.632697+00:00"
+    },
+    {
+      "kind": "ownership",
+      "source": "C1 stopped handoff",
+      "result": "Sole writer 01a0ff85-c793-7b63-8b59-cc06431dbed8 stopped all edits/commands and released lease; main coordinator alone verifies C1 and accepts source.",
+      "observed_at": "2026-10-03T03:24:29.632697+00:00"
+    },
+    {
+      "kind": "independent-coordinator-repair-audit",
+      "result": "Main coordinator accepts C1 after exact query-only delta review,16 fresh tests/three suites/22.142s/zero skips,546 protected hashes unchanged; valid M7 SUSPENDED context/local INACTIVE/restart/all reads/ACTIVE recovery/no-write UI covered. Earlier withholding superseded; physical/live/whole-app security gates pending.",
+      "source": "docs/engineering/M9_INTEGRATION_AUDIT.md",
+      "observed_at": "2026-10-03T03:29:32.568Z"
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "m7-source-accepted",
+      "claim": "Accepted M7 local source inherited from c817edb.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [],
+      "verification": {
+        "kind": "review",
+        "procedure": "Inspect actual current source/diff and recorded commands; independently review stopped handoff.",
+        "success_condition": "Accepted M7 local source inherited from c817edb."
+      },
+      "evidence": [
+        {
+          "result": "Current baseline66ea3fc inherits accepted source.",
+          "source": "docs/engineering/M9_INTEGRATION_PLAN.md",
+          "observed_at": "2026-10-03T02:04:26Z"
+        }
+      ],
+      "limitations": [
+        "Source acceptance is separate from physical/live/release readiness."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "integration-plan-reviewed",
+      "claim": "Bounded M9-I1/I2 preserve M8/Track B source and exact private read contract.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "m7-source-accepted"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Inspect actual current source/diff and recorded commands; independently review stopped handoff.",
+        "success_condition": "Bounded M9-I1/I2 preserve M8/Track B source and exact private read contract."
+      },
+      "evidence": [
+        {
+          "result": "Main coordinator prepared integration packet; no migration/dependency change.",
+          "source": "docs/engineering/M9_INTEGRATION_PLAN.md",
+          "observed_at": "2026-10-03T02:04:26Z"
+        }
+      ],
+      "limitations": [
+        "Source acceptance is separate from physical/live/release readiness."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "integration-implemented",
+      "claim": "Current app owner reads/presentation and actual SQLite pull/replay/echo/restart integration pass.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "integration-plan-reviewed"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Inspect actual current source/diff and recorded commands; independently review stopped handoff.",
+        "success_condition": "Current app owner reads/presentation and actual SQLite pull/replay/echo/restart integration pass."
+      },
+      "evidence": [
+        {
+          "result": "1183 passed tests; 17 skipped; all four workspace typechecks and zero-warning lint passed; real M7 SQLite 2/2; Doctor21/21/dependency/export exit0; protected519/519. Writer 01a0ff85-c793-7b63-8b59-cc06431dbed8 stopped; no independent acceptance.",
+          "source": "docs/engineering/M9_INTEGRATION_HANDOFF.md",
+          "observed_at": "2026-10-03T03:45:47.744877+01:00"
+        },
+        {
+          "result": "Main coordinator independently accepted actual M9 integration:68 fresh tests,519 protected hashes unchanged, exact/scope/current M7 SQLite pull/pending-local/echo/replay/restart paths reviewed. No production edit; physical/live gates pending.",
+          "source": "docs/engineering/M9_INTEGRATION_AUDIT.md",
+          "observed_at": "2026-10-03T03:00:34.656Z"
+        },
+        {
+          "result": "C1 reproduced:INACTIVE/SUSPENDED user with ACTIVE OWNER membership admitted at constructors and all four reads;2 expected failing real SQLite diagnostic tests,exit1. Earlier acceptance superseded;68 passing focused tests and519 old protected hashes remain valid within their scope.",
+          "source": "docs/engineering/M9_INTEGRATION_CORRECTIONS.md",
+          "observed_at": "2026-10-03T03:07:58.356Z"
+        },
+        {
+          "result": "C1 production delta only centralized ACTIVE-account join. Final focused30/30 in5 suites, zero skips; four workspace typechecks and max-warnings=0 lint exit0; fresh546/546 protected hashes. Pre-fix permanent regressions4 failures/8 passes; initial test DTO typecheck exit2 corrected without protocol changes. Independent acceptance remains withheld.",
+          "source": "docs/engineering/M9_INTEGRATION_HANDOFF.md#c1-correction-stopped-return",
+          "observed_at": "2026-10-03T03:24:29.632697+00:00"
+        },
+        {
+          "result": "Main coordinator accepts C1 after exact query-only delta review,16 fresh tests/three suites/22.142s/zero skips,546 protected hashes unchanged; valid M7 SUSPENDED context/local INACTIVE/restart/all reads/ACTIVE recovery/no-write UI covered. Earlier withholding superseded; physical/live/whole-app security gates pending.",
+          "source": "docs/engineering/M9_INTEGRATION_AUDIT.md",
+          "observed_at": "2026-10-03T03:29:32.568Z"
+        }
+      ],
+      "limitations": [
+        "Source acceptance is separate from physical/live/release readiness."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "coordinator-source-audit",
+      "claim": "Main coordinator independently accepts stopped current-app source with no blocking finding.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "met",
+      "depends_on": [
+        "integration-implemented"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Inspect actual current source/diff and recorded commands; independently review stopped handoff.",
+        "success_condition": "Main coordinator independently accepts stopped current-app source with no blocking finding."
+      },
+      "evidence": [
+        {
+          "result": "Main coordinator independently accepted actual M9 integration:68 fresh tests,519 protected hashes unchanged, exact/scope/current M7 SQLite pull/pending-local/echo/replay/restart paths reviewed. No production edit; physical/live gates pending.",
+          "source": "docs/engineering/M9_INTEGRATION_AUDIT.md",
+          "observed_at": "2026-10-03T03:00:34.656Z"
+        },
+        {
+          "result": "C1 reproduced:INACTIVE/SUSPENDED user with ACTIVE OWNER membership admitted at constructors and all four reads;2 expected failing real SQLite diagnostic tests,exit1. Earlier acceptance superseded;68 passing focused tests and519 old protected hashes remain valid within their scope.",
+          "source": "docs/engineering/M9_INTEGRATION_CORRECTIONS.md",
+          "observed_at": "2026-10-03T03:07:58.356Z"
+        },
+        {
+          "result": "C1 production delta only centralized ACTIVE-account join. Final focused30/30 in5 suites, zero skips; four workspace typechecks and max-warnings=0 lint exit0; fresh546/546 protected hashes. Pre-fix permanent regressions4 failures/8 passes; initial test DTO typecheck exit2 corrected without protocol changes. Independent acceptance remains withheld.",
+          "source": "docs/engineering/M9_INTEGRATION_HANDOFF.md#c1-correction-stopped-return",
+          "observed_at": "2026-10-03T03:24:29.632697+00:00"
+        },
+        {
+          "result": "Main coordinator accepts C1 after exact query-only delta review,16 fresh tests/three suites/22.142s/zero skips,546 protected hashes unchanged; valid M7 SUSPENDED context/local INACTIVE/restart/all reads/ACTIVE recovery/no-write UI covered. Earlier withholding superseded; physical/live/whole-app security gates pending.",
+          "source": "docs/engineering/M9_INTEGRATION_AUDIT.md",
+          "observed_at": "2026-10-03T03:29:32.568Z"
+        }
+      ],
+      "limitations": [
+        "Source acceptance is separate from physical/live/release readiness."
+      ],
+      "blocker": null,
+      "waiver": null
+    },
+    {
+      "id": "physical-device-checks",
+      "claim": "Founder-assisted native/offline/accessibility checks performed and reviewed.",
+      "owner": "main-coordinator",
+      "required": true,
+      "status": "pending",
+      "depends_on": [
+        "integration-implemented"
+      ],
+      "verification": {
+        "kind": "review",
+        "procedure": "Inspect actual current source/diff and recorded commands; independently review stopped handoff.",
+        "success_condition": "Founder-assisted native/offline/accessibility checks performed and reviewed."
+      },
+      "evidence": [],
+      "limitations": [
+        "Source acceptance is separate from physical/live/release readiness."
+      ],
+      "blocker": null,
+      "waiver": null
+    }
+  ],
+  "artifacts": [
+    "docs/engineering/M9_INTEGRATION_PLAN.md",
+    "docs/engineering/M9_INTEGRATION_TICKETS.md",
+    "docs/engineering/PROJECT_STATE.md",
+    "docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md",
+    "docs/engineering/M9_INTEGRATION_HANDOFF.md",
+    "docs/engineering/M9_INTEGRATION_AUDIT.md",
+    "docs/engineering/M9_INTEGRATION_CORRECTIONS.md"
+  ],
+  "approvals": [
+    {
+      "date": "2026-10-03",
+      "scope": "Founder authorizes M9 completion, sequential M10/M11 source work and coordinator audits. Implementer GPT-6.1 Sol HIGH; physical checks pending. No Docker, Metro/phone, hosted effect, spending, push/merge or architecture change."
+    }
+  ],
+  "blockers": [
+    "Carried physical/native/live/accessibility/second-laptop/release gates pending.",
+    "Pre-existing sibling account-guard observations need M11 actor/permission review before whole-app security acceptance."
+  ],
+  "next_action": "Delegate prepared M10-01..04 source to one separate GPT-6.1 Sol HIGH chat; coordinator stops while writer active.",
+  "created_at": "2026-10-03T02:04:26Z",
+  "updated_at": "2026-10-03T03:29:32.568Z",
+  "archived": false
+}

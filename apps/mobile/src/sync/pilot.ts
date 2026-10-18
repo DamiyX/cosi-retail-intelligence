@@ -1,7 +1,8 @@
 import { parseSyncOperationEnvelope } from '@retail/contracts';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import { resolveCurrentStore } from '../catalogue/client';
+import { DomainError } from '@retail/domain';
+import { resolveCurrentActor } from '../storeContext/access';
 import { generateMobileId } from '../crypto/mobileIds';
 import type { DatabaseAdapter } from '../db/adapter';
 import {
@@ -10,6 +11,7 @@ import {
   getSyncEntityVersion,
   getSyncStoreState,
   getUserById,
+  listStores,
   listActiveOutboxOperationsForEntity,
   listOpenSyncConflicts,
   quarantineOutboxConflict,
@@ -44,7 +46,17 @@ export interface PilotSyncOverview {
 }
 
 export function resolvePilotOwner(adapter: DatabaseAdapter): PilotOwnerContext | null {
-  const current = resolveCurrentStore(adapter);
+  const stores = listStores(adapter);
+  if (stores.length !== 1) return null;
+  const enrolled = getSyncStoreState(adapter, stores[0].id);
+  let current;
+  try {
+    // Restored remote devices are not the local enrollment identity. Invalid enrollment never falls back.
+    current = resolveCurrentActor(adapter, { storeId: stores[0].id, ...(enrolled ? { deviceId: enrolled.deviceId } : {}) }, true);
+  } catch (error) {
+    if (error instanceof DomainError) return null;
+    throw error;
+  }
   if (!current?.store.createdByUserId || current.device.userId !== current.store.createdByUserId) {
     return null;
   }
