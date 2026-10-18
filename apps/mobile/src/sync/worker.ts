@@ -3,7 +3,6 @@ import {
   MAX_PULL_CHANGES,
   MAX_PUSH_OPERATIONS,
   parseSyncOperationEnvelope,
-  type SyncEntityType,
   type SyncBootstrapRequest,
   type SyncPullRequest,
   type SyncPushRequest,
@@ -336,6 +335,7 @@ export class OfflineSyncWorker {
             localPayload: operation.payload,
             serverPayload: asServerPayload(ack.error),
             serverVersion: ack.serverVersion,
+            serverRevision: ack.serverRevision,
             createdAt: now,
           });
           markOutboxConflict(adapter, {
@@ -445,11 +445,11 @@ export class OfflineSyncWorker {
       ? existing
       : beginSyncBootstrap(adapter, { storeId, deviceId, bootstrapId, startedAt: now });
     let cursor: SyncBootstrapRequest['cursor'] = bootstrapState.snapshotRevision !== null &&
-      bootstrapState.snapshotAfterEntityType !== null && bootstrapState.snapshotAfterEntityId !== null
+      bootstrapState.snapshotCursorRevision > 0
       ? {
         snapshotRevision: bootstrapState.snapshotRevision,
-        afterEntityType: bootstrapState.snapshotAfterEntityType as SyncEntityType,
-        afterEntityId: bootstrapState.snapshotAfterEntityId,
+        afterRevision: bootstrapState.snapshotCursorRevision,
+        afterChangeIndex: bootstrapState.snapshotCursorChangeIndex,
       }
       : null;
     try {

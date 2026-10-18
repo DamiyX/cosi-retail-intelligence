@@ -21,7 +21,8 @@
     "mobile:export": "npm run export:android --workspace @retail/mobile",
     "mobile:doctor": "npm run doctor --workspace @retail/mobile",
     "mobile:build:development": "npm run build:development --workspace @retail/mobile",
-    "mobile:build:preview": "npm run build:preview --workspace @retail/mobile"
+    "mobile:build:preview": "npm run build:preview --workspace @retail/mobile",
+    "test:sync:local": "node tools/scripts/test-local-sync.mjs"
   },
   "overrides": {
     "react": "19.2.3",

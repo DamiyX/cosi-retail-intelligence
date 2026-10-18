@@ -30,8 +30,8 @@ const entityTypes = [
 const cursor = z.object({ revision: z.number().int().nonnegative(), changeIndex: z.number().int().nonnegative() }).strict();
 const bootstrapCursor = z.object({
   snapshotRevision: z.number().int().nonnegative(),
-  afterEntityType: z.enum(entityTypes),
-  afterEntityId: id,
+  afterRevision: z.number().int().nonnegative(),
+  afterChangeIndex: z.number().int().nonnegative(),
 }).strict();
 
 const operation = z.object({

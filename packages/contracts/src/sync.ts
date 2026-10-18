@@ -251,8 +251,8 @@ export const syncBootstrapRequestSchema = z
     cursor: z
       .object({
         snapshotRevision: nonNegativeIntegerSchema,
-        afterEntityType: z.enum(SYNC_ENTITY_TYPES),
-        afterEntityId: idSchema,
+        afterRevision: nonNegativeIntegerSchema,
+        afterChangeIndex: nonNegativeIntegerSchema,
       })
       .strict()
       .nullable(),
@@ -264,11 +264,13 @@ export type SyncBootstrapRequest = z.infer<typeof syncBootstrapRequestSchema>;
 
 export const syncBootstrapEntitySchema = z
   .object({
+    operationId: idSchema,
     storeId: idSchema,
     entityType: z.enum(SYNC_ENTITY_TYPES),
     entityId: idSchema,
     entityVersion: nonNegativeIntegerSchema,
     serverRevision: nonNegativeIntegerSchema,
+    changeIndex: nonNegativeIntegerSchema,
     payloadVersion: z.literal(SYNC_PAYLOAD_VERSION),
     payload: jsonObjectSchema,
   })

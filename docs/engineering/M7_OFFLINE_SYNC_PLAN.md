@@ -1,6 +1,6 @@
 # M7 Offline Sync Plan
 
-**Status:** Independent audit found blocking source gaps; PostgreSQL integration deferred. See `M7_INDEPENDENT_AUDIT.md`.  
+**Status:** Local PostgreSQL/endpoint integration and D-044 stale-reconciliation correction pass; native-device gate remains open. See `M7_INDEPENDENT_AUDIT.md`.  
 **Depends on:** independently accepted M6 source/automated scope.  
 **Boundary:** first controlled private-store sync only. No M8 scanner, shared
 market-price network, staff administration, recognition payloads, production
@@ -28,9 +28,9 @@ withdrawal completion.
   lifecycle states. M7 now adds the network worker, server cursor, pull applier,
   durable conflict store and remote server-version projection.
 - M7 Supabase migrations, RLS policies, sync functions and Edge Function shells
-  are present. Supabase CLI 2.117.0 is pinned. Docker Desktop is installed but
-  its engine does not start, so local PostgreSQL/pgTAP/Edge Function integration
-  checks remain an explicit acceptance gate rather than accepted evidence.
+  are present. Supabase CLI 2.117.0 is pinned. Docker-backed local migrations,
+  pgTAP and an Auth/Edge Function/PostgreSQL integration script now pass. The
+  expanded script covers D-044 stale cross-device counts; native use remains open.
 - The app currently provisions a local owner/store/member/device graph before
   customer authentication exists. M7 must not silently equate a local domain
   user ID with `auth.users.id` or invent final sign-in UX.
@@ -62,13 +62,12 @@ typecheck/lint, Expo Doctor 21/21, dependency check and Android export.
 
 The independent audit found that latest-document bootstrap omits original
 creation facts after a mutable edit, and the app has no integrated sync path.
-See `M7_INDEPENDENT_AUDIT.md`. The required database evidence has not been substituted with mocks. Both
-`supabase db lint --local --fail-on error` and
-`supabase test db --local supabase/tests/m7_sync.sql` attempted the local
-database and failed only because `127.0.0.1:54322` refused the connection while
-Docker is unavailable. Source acceptance and the independent audit remain open
-until a disposable local or explicitly authorized isolated hosted Postgres
-environment is available.
+Additive operation-history bootstrap and a narrow first-owner pilot connection
+path now correct these source gaps. The 2026-09-28 disposable local database
+reset, pgTAP, lint, security advisor and live endpoint checks passed. Source
+acceptance remains open pending native-device evidence. D-044's additive
+server guard now rejects stale cross-device physical reconciliations. See
+`M7_INDEPENDENT_AUDIT.md` for the exact checks and correction proposal.
 
 ### PostgreSQL shape
 

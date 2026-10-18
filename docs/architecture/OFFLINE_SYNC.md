@@ -1252,6 +1252,13 @@ begin incremental sync
 
 Bootstrap must establish a cursor consistent with the snapshot.
 
+For M7, reconstruction pages the immutable operation/change history through a
+fixed store revision, then stages and replays the complete ordered history in
+one local commit before activating that cursor. Taking only the latest document
+per entity is insufficient when a creation operation contains dependent rows
+that later edits omit. A failed page cannot expose a partial reconstructed
+store or advance its active cursor.
+
 ---
 
 # 53. Consistent Bootstrap
@@ -1758,6 +1765,17 @@ Do not accept local row order or device timestamps as a global count watermark,
 deduplicate physical observations by overwriting others, or silently recompute
 historical assumed allocations/COGS. Those server/conflict contracts remain M7
 gates before coordinated multi-device claims; M5 prepares immutable local facts.
+
+Under D-044, `RECONCILIATION_FINALIZED` carries `entities.syncBaseline`:
+`serverRevision` is the last fully applied pull cursor, and
+`predecessorOperationIds` names this device's product inventory/batch operations
+already reflected in the count but not covered by that cursor. The server
+checks product inventory movements and batch facts after the baseline under
+the store revision lock. It permits only verified same-device predecessors;
+another change, a missing/invalid baseline or an incomplete predecessor list
+returns a visible conflict without committing the reconciliation. Legacy
+queued counts require manual review rather than silent acceptance. Device-local
+watermarks still protect the time between count submission and local finalization.
 
 ---
 

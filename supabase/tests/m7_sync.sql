@@ -17,9 +17,9 @@ select has_function('public', 'sync_push', array['jsonb'], 'push RPC exists');
 select has_function('public', 'sync_pull', array['jsonb'], 'pull RPC exists');
 select has_function('public', 'sync_bootstrap', array['jsonb'], 'bootstrap RPC exists');
 
-select is_rls_enabled('public', 'stores', 'stores have RLS enabled');
-select is_rls_enabled('public', 'store_members', 'memberships have RLS enabled');
-select is_rls_enabled('public', 'sync_change_log', 'change log has RLS enabled');
+select ok((select relrowsecurity from pg_class where oid = 'public.stores'::regclass), 'stores have RLS enabled');
+select ok((select relrowsecurity from pg_class where oid = 'public.store_members'::regclass), 'memberships have RLS enabled');
+select ok((select relrowsecurity from pg_class where oid = 'public.sync_change_log'::regclass), 'change log has RLS enabled');
 
 select ok(
   not has_table_privilege('anon', 'public.sync_change_log', 'select'),

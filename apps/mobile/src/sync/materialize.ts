@@ -6,6 +6,7 @@ import {
 } from '@retail/contracts';
 
 import type { DatabaseAdapter } from '../db/adapter';
+import { finalizeBatchInventoryOperation } from '../db/repositories/batchTracking';
 
 type JsonRecord = Record<string, unknown>;
 
@@ -182,6 +183,8 @@ function tableForKey(operationType: SyncOperationType, key: string): string | nu
       return operationType === 'RECONCILIATION_FINALIZED'
         ? 'inventory_reconciliation_lines'
         : 'inventory_adjustment_lines';
+    case 'items':
+      return operationType === 'COMPLETED_PURCHASE_CREATED' ? 'purchase_items' : null;
     case 'lines':
       if (operationType === 'RECONCILIATION_FINALIZED') return 'inventory_reconciliation_lines';
       if (operationType === 'INVENTORY_ADJUSTMENT_CREATED') return 'inventory_adjustment_lines';
@@ -227,6 +230,44 @@ function scalarValue(value: unknown): string | number | null | undefined {
   return undefined;
 }
 
+function addRationalColumns(
+  row: Map<string, string | number | null>,
+  value: unknown,
+  prefix: string,
+  required: boolean,
+  signed = false,
+): void {
+  if (value === null && !required) {
+    row.set(`${prefix}_numerator`, null);
+    row.set(`${prefix}_denominator`, null);
+    return;
+  }
+  if (!isRecord(value) || typeof value.numerator !== 'string' || typeof value.denominator !== 'string'
+    || !(signed ? /^-?(0|[1-9]\d*)$/ : /^(0|[1-9]\d*)$/).test(value.numerator)
+    || !/^[1-9]\d*$/.test(value.denominator)) {
+    throw new Error(`Sync payload has an invalid ${prefix} rational.`);
+  }
+  row.set(`${prefix}_numerator`, value.numerator);
+  row.set(`${prefix}_denominator`, value.denominator);
+}
+
+function addCostRationals(
+  row: Map<string, string | number | null>,
+  table: string,
+  value: JsonRecord,
+): void {
+  if (table === 'cost_movements') {
+    addRationalColumns(row, value.value, 'value', true, true);
+    addRationalColumns(row, value.unitCost, 'unit_cost', false);
+  } else if (table === 'store_product_cost_states') {
+    addRationalColumns(row, value.remainingValue, 'remaining_value', true);
+    addRationalColumns(row, value.averageUnitCost, 'average_unit_cost', false);
+  } else if (table === 'sale_item_cost_snapshots') {
+    addRationalColumns(row, value.unitCost, 'unit_cost', false);
+    addRationalColumns(row, value.cogs, 'cogs', false);
+  }
+}
+
 function safeIdentifier(value: string): string {
   if (!/^[a-z_][a-z0-9_]*$/.test(value)) {
     throw new Error(`Unsafe SQLite identifier: ${value}`);
@@ -239,6 +280,7 @@ function upsertRow(
   tableName: string,
   value: JsonRecord,
   expectedStoreId: string,
+  deferBatchSeal = false,
 ): void {
   if (!ENTITY_TABLES.has(tableName)) return;
   const table = safeIdentifier(tableName);
@@ -252,6 +294,7 @@ function upsertRow(
     const scalar = scalarValue(rawValue);
     if (available.has(column) && scalar !== undefined) row.set(column, scalar);
   }
+  addCostRationals(row, table, value);
   if (available.has('store_id') && row.has('store_id') && row.get('store_id') !== expectedStoreId) {
     throw new Error(`Sync payload row for ${table} belongs to another store.`);
   }
@@ -272,6 +315,11 @@ function upsertRow(
   }
 
   if (!existing) {
+    if (deferBatchSeal) {
+      row.delete('sealed_at');
+      row.delete('sealed_entry_count');
+      row.delete('sealed_delta_base_micros');
+    }
     const insertColumns = [...row.keys()];
     adapter.run(
       `INSERT INTO ${table} (${insertColumns.map(safeIdentifier).join(', ')})
@@ -283,6 +331,7 @@ function upsertRow(
 
   const updateColumns = [...row.keys()].filter((column) => !primaryKeyColumns.includes(column));
   if (updateColumns.length === 0) return;
+  if (updateColumns.every((column) => (existing[column] ?? null) === (row.get(column) ?? null))) return;
   adapter.run(
     `UPDATE ${table} SET ${updateColumns.map((column) => `${safeIdentifier(column)} = ?`).join(', ')}
      WHERE ${primaryKeyColumns.map((column) => `${safeIdentifier(column)} = ?`).join(' AND ')};`,
@@ -307,6 +356,7 @@ export function materializeSyncOperation(
   adapter: DatabaseAdapter,
   envelope: SyncOperationEnvelope,
 ): void {
+  const batchSeals: { id: string; sealedAt: string; entryCount: number; delta: string }[] = [];
   const entries = Object.entries(envelope.entities).sort(
     ([left], [right]) => (KEY_PRIORITY[left] ?? 100) - (KEY_PRIORITY[right] ?? 100),
   );
@@ -314,7 +364,27 @@ export function materializeSyncOperation(
     const tableName = tableForKey(envelope.operationType, key);
     if (!tableName) continue;
     for (const row of rowsForValue(rawValue)) {
-      upsertRow(adapter, tableName, row, envelope.storeId);
+      const deferBatchSeal = tableName === 'batch_inventory_operations' && row.sealedAt !== null && row.sealedAt !== undefined;
+      if (deferBatchSeal) {
+        if (typeof row.id !== 'string' || typeof row.sealedAt !== 'string'
+          || !Number.isSafeInteger(row.sealedEntryCount) || typeof row.sealedDeltaBaseMicros !== 'string') {
+          throw new Error('Sync payload has an invalid batch operation seal.');
+        }
+        batchSeals.push({
+          id: row.id,
+          sealedAt: row.sealedAt,
+          entryCount: row.sealedEntryCount as number,
+          delta: row.sealedDeltaBaseMicros,
+        });
+      }
+      upsertRow(adapter, tableName, row, envelope.storeId, deferBatchSeal);
+    }
+  }
+  for (const expected of batchSeals) {
+    const sealed = finalizeBatchInventoryOperation(adapter, expected.id, expected.sealedAt);
+    if (sealed.sealedAt !== expected.sealedAt || sealed.sealedEntryCount !== expected.entryCount
+      || sealed.sealedDeltaBaseMicros !== expected.delta) {
+      throw new Error('Sync batch operation seal does not match its entry graph.');
     }
   }
 }

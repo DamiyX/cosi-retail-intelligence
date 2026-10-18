@@ -4,6 +4,7 @@ import {
 import { OfflineSyncWorker } from '../src/sync/worker';
 import { SyncTransportError, type SyncTransport } from '../src/sync/transport';
 import { createTemporaryProduct } from '../src/catalogue/createTemporaryProduct';
+import { updateProductIdentity } from '../src/catalogue/updateProductIdentity';
 import { MIGRATIONS, openDatabase } from '../src/db';
 import { openIsolatedDatabase } from '../src/db/testing';
 import {
@@ -312,17 +313,19 @@ describe('M7 offline sync local durability', () => {
               snapshotRevision: 5,
               entities: [{
                 storeId: fixture.context.store.id,
+                operationId: envelope.operationId,
                 entityType: 'EXPENSE' as const,
                 entityId,
                 entityVersion: 1,
                 serverRevision: 4,
+                changeIndex: 0,
                 payloadVersion: 1 as const,
                 payload: envelope,
               }],
               nextCursor: {
                 snapshotRevision: 5,
-                afterEntityType: 'EXPENSE' as const,
-                afterEntityId: entityId,
+                afterRevision: 4,
+                afterChangeIndex: 0,
               },
               hasMore: true,
             };
@@ -354,8 +357,8 @@ describe('M7 offline sync local durability', () => {
         { cursor: null },
         { cursor: {
           snapshotRevision: 5,
-          afterEntityType: 'EXPENSE',
-          afterEntityId: entityId,
+          afterRevision: 4,
+          afterChangeIndex: 0,
         } },
       ]);
       expect(getSyncBootstrapState(fixture.adapter, fixture.context.store.id)).toMatchObject({
@@ -400,17 +403,19 @@ describe('M7 offline sync local durability', () => {
             snapshotRevision: 8,
             entities: [{
               storeId: fixture.context.store.id,
+              operationId: envelope.operationId,
               entityType: 'PRODUCT_VARIANT' as const,
               entityId,
               entityVersion: 1,
               serverRevision: 7,
+              changeIndex: 0,
               payloadVersion: 1,
               payload: envelope,
             }],
             nextCursor: {
               snapshotRevision: 8,
-              afterEntityType: 'PRODUCT_VARIANT' as const,
-              afterEntityId: entityId,
+              afterRevision: 7,
+              afterChangeIndex: 0,
             },
             hasMore: true,
           };
@@ -454,43 +459,24 @@ describe('M7 offline sync local durability', () => {
     }
   });
 
-  it('commits bootstrap entities in server revision order across page order', async () => {
-    const fixture = openCatalogueFixture();
+  it('replays create then edit across pages without losing the base package or barcode', async () => {
+    const source = openCatalogueFixture();
+    const destination = openCatalogueFixture();
     try {
-      const variantId = testId(714);
-      const packageId = testId(715);
-      const variant = remoteProductEnvelope({
-        storeId: fixture.context.store.id,
-        deviceId: fixture.context.device.id,
-        operationId: testId(716),
-        entityId: variantId,
-      });
-      const packageEnvelope = {
-        payloadVersion: 1 as const,
-        operationType: 'PACKAGE_CREATED' as const,
-        operationId: testId(717),
-        storeId: fixture.context.store.id,
-        deviceId: fixture.context.device.id,
-        entityType: 'PACKAGE_UNIT' as const,
-        entityId: packageId,
-        baseServerVersion: null,
-        occurredAt: NOW,
-        entities: {
-          packageUnit: {
-            id: packageId,
-            productVariantId: variantId,
-            name: 'carton',
-            symbol: null,
-            conversionToBaseMicros: 1_000_000,
-            isBaseUnit: true,
-            isSellable: true,
-            isPurchasable: true,
-            status: 'ACTIVE',
-            createdAt: NOW,
-            updatedAt: NOW,
-          },
-        },
-      };
+      const graph = createTemporaryProduct(source.adapter, {
+        storeId: source.context.store.id,
+        deviceId: source.context.device.id,
+        name: 'Milo 400g',
+        barcode: '4006381333931',
+      }, { generateId: (() => { let next = 714; return () => testId(next++); })() });
+      const edit = updateProductIdentity(source.adapter, {
+        storeId: source.context.store.id,
+        deviceId: source.context.device.id,
+        storeProductId: graph.storeProduct.id,
+        name: 'Milo 400g tin',
+      }, { operationId: testId(719) });
+      const firstPayload = JSON.parse(graph.outbox.payload);
+      const secondPayload = JSON.parse(edit.outbox.payload);
       let page = 0;
       const transport: SyncTransport = {
         enroll: async () => { throw new Error('not used'); },
@@ -503,18 +489,20 @@ describe('M7 offline sync local durability', () => {
             payloadVersion: 1,
             snapshotRevision: 2,
             entities: [{
-              storeId: fixture.context.store.id,
-              entityType: 'PACKAGE_UNIT' as const,
-              entityId: packageId,
+              operationId: graph.outbox.operationId,
+              storeId: destination.context.store.id,
+              entityType: 'STORE_PRODUCT' as const,
+              entityId: graph.storeProduct.id,
               entityVersion: 1,
-              serverRevision: 2,
+              serverRevision: 1,
+              changeIndex: 0,
               payloadVersion: 1 as const,
-              payload: packageEnvelope,
+              payload: firstPayload,
             }],
             nextCursor: {
               snapshotRevision: 2,
-              afterEntityType: 'PACKAGE_UNIT' as const,
-              afterEntityId: packageId,
+              afterRevision: 1,
+              afterChangeIndex: 0,
             },
             hasMore: true,
           } : {
@@ -522,13 +510,15 @@ describe('M7 offline sync local durability', () => {
             payloadVersion: 1,
             snapshotRevision: 2,
             entities: [{
-              storeId: fixture.context.store.id,
-              entityType: 'PRODUCT_VARIANT' as const,
-              entityId: variantId,
-              entityVersion: 1,
-              serverRevision: 1,
+              operationId: edit.outbox.operationId,
+              storeId: destination.context.store.id,
+              entityType: 'STORE_PRODUCT' as const,
+              entityId: graph.storeProduct.id,
+              entityVersion: 2,
+              serverRevision: 2,
+              changeIndex: 0,
               payloadVersion: 1 as const,
-              payload: variant,
+              payload: secondPayload,
             }],
             nextCursor: null,
             hasMore: false,
@@ -536,21 +526,30 @@ describe('M7 offline sync local durability', () => {
         },
       };
       const worker = new OfflineSyncWorker({
-        adapter: fixture.adapter,
-        storeId: fixture.context.store.id,
-        deviceId: fixture.context.device.id,
+        adapter: destination.adapter,
+        storeId: destination.context.store.id,
+        deviceId: destination.context.device.id,
         sessionProvider: sessionProvider(),
         transport,
         now: () => NOW,
         idFactory: () => testId(718),
       });
-      expect(await worker.bootstrap()).toMatchObject({ status: 'SYNCED', pulled: 2 });
-      expect(fixture.adapter.getFirstRow<{ product_variant_id: string }>(
+      const result = await worker.bootstrap();
+      expect({ result, error: getSyncBootstrapState(destination.adapter, destination.context.store.id)?.lastErrorMessage })
+        .toMatchObject({ result: { status: 'SYNCED', pulled: 2 }, error: null });
+      expect(destination.adapter.getFirstRow<{ product_variant_id: string }>(
         'SELECT product_variant_id FROM package_units WHERE id = ?;',
-        [packageId],
-      )?.product_variant_id).toBe(variantId);
+        [graph.basePackage.id],
+      )?.product_variant_id).toBe(graph.variant.id);
+      expect(destination.adapter.getFirstRow<{ name: string }>(
+        'SELECT name FROM product_variants WHERE id = ?;', [graph.variant.id],
+      )?.name).toBe('Milo 400g tin');
+      expect(destination.adapter.getFirstRow<{ id: string }>(
+        'SELECT id FROM product_identifiers WHERE id = ?;', [graph.identifier!.id],
+      )?.id).toBe(graph.identifier?.id);
     } finally {
-      fixture.closeAndDelete();
+      source.closeAndDelete();
+      destination.closeAndDelete();
     }
   });
 

@@ -31,6 +31,7 @@ export {
   releaseExpiredOutboxLeases,
   markOutboxApplied,
   markOutboxConflict,
+  quarantineOutboxConflict,
   markOutboxEchoApplied,
   markOutboxPermanent,
   markOutboxRetryable,
@@ -208,6 +209,7 @@ export type { CreatePurchaseItemInput, PurchaseItemRow } from './purchaseItems';
 export {
   createPriceObservation,
   getPriceObservationById,
+  listPurchasePriceHistoryByStore,
   listPurchasePriceHistoryByStoreProduct,
   listPriceObservationsByPurchaseItemId,
   listPriceObservationsByStoreProduct,

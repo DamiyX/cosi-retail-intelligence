@@ -1,9 +1,9 @@
 # PROJECT_STATE — COSI
 
-Last updated: 2026-09-27  
-Current milestone: M7 independent audit in progress; source acceptance is
-blocked by bootstrap reconstruction and missing app integration, with the
-PostgreSQL test gate deferred. M8 scanner work remains deferred.
+Last updated: 2026-09-28  
+Current milestone: M7 independent audit. Local PostgreSQL and endpoint checks
+pass, including the stale-reconciliation correction; native-device acceptance remains open.
+M8 scanner work remains deferred.
 
 ## Current status
 
@@ -13,8 +13,30 @@ remain pending and are not implied by source acceptance.
 
 M7 initial source work is in commits `66507e6` through `e9ef793` (M7-01
 through M7-08). Independent audit found two blocking source gaps; see
-`M7_INDEPENDENT_AUDIT.md`. Audit corrections are present but not yet
-PostgreSQL-verified. Source acceptance is not claimed.
+`M7_INDEPENDENT_AUDIT.md`. Operation-history bootstrap and pilot app integration
+now have local source corrections and passing local server tests. The later
+stale-reconciliation finding and native checks keep M7 acceptance open.
+
+## Current verification checkpoint — 2026-09-28
+
+Docker-backed local Supabase is running. Clean reset applied all M7 migrations,
+including additive corrections for pgcrypto resolution, revoked-device
+re-enrolment and authenticated money-out actor checks. pgTAP passed 81 assertions
+across 9 files; scoped database lint and security advisors passed. The live
+local Auth → Edge Function → PostgreSQL test passed enrolment, store denial,
+idempotent push, pull, bootstrap, stale mutable conflict and sale/purchase graph
+replay. Root `npm run validate` passed 503 tests across 52 suites, strict
+typecheck and zero-warning lint. Expo Doctor passed 21/21, dependency check
+and Android export passed. No hosted service was modified.
+
+The audit reproduced a stale physical count being accepted after a sale on
+another device. D-044 and an additive migration now compare a server revision
+plus verified same-device predecessors under the store lock. The expanded live
+test passes the stale, forged, legacy, valid-predecessor and replay cases; see
+`M7_INDEPENDENT_AUDIT.md`. The connected Galaxy A15 has not
+been used to claim M7 native acceptance. The M9 isolated implementation now
+exists at `plan/m9-price-intelligence`/`1c8de0d`, but final M7 pull/echo
+integration and M9-04 remain open. M8 remains deferred.
 
 M5 closed at coordinator correction `9ba4801` with additive migration 15 durable
 reorder-threshold history. M6 implementation commits are `86e526b`, `1cce732`,
@@ -79,7 +101,7 @@ behind stable contracts and feature flags only after it is deliberately started.
 Concurrent writers must not edit shared catalogue, package-unit, sync or
 recognition contracts.
 
-## M7 implementation handoff
+## M7 implementation handoff (historical)
 
 `M7_OFFLINE_SYNC_PLAN.md` and `tickets.md` define eight sequential vertical
 tickets. Initial source covers the M2–M6 operation families and server
@@ -101,8 +123,35 @@ Supabase CLI 2.117.0 and Docker Desktop are installed. BIOS virtualization is
 enabled and WSL is updated to 2.7.13, but Docker Desktop fails during startup
 with stale Unix socket rename errors; `docker info` cannot connect to the
 engine. The founder deferred further Docker troubleshooting on 2026-09-27.
-No database/RLS/function acceptance is claimed. The source audit is underway;
-the current blocking findings are documented in `M7_INDEPENDENT_AUDIT.md`.
+No database/RLS/function acceptance is claimed. The two source findings and
+their corrections are documented in `M7_INDEPENDENT_AUDIT.md`.
+
+## M7 source correction checkpoint — 2026-09-27 (historical)
+
+- SQLite migration 20 stages ordered bootstrap operations; migration 21 retains
+  the exact server revision for conflict review. A new additive Supabase
+  migration pages `sync_change_log` to a fixed snapshot revision. No existing
+  migrations were rewritten.
+- More → Cloud sync now provides pilot owner sign-in/enrolment, foreground runs,
+  waiting-work status, manual retry and explicit mutable-conflict choices.
+  Supabase Auth sessions use `expo-secure-store`; public project URL/key are
+  supplied only through ignored build environment files.
+- Focused contract, bootstrap, pilot and navigation tests pass. `npm run
+  validate` passed Node/npm/Git checks, strict typecheck, zero-warning lint and
+  503 tests across 52 suites (7 contracts, 150 domain, 346 mobile). Expo
+  dependency check and Android export passed. A new native build is still required for SecureStore.
+- Pull and bootstrap now keep an unresolved local edit intact when further cloud
+  changes arrive; focused regression tests cover both paths. Missing cloud
+  session and account-check failures also persist a visible sync status.
+- The new `supabase/tests/m7_bootstrap_history.sql` pgTAP test is written but
+  unrun. Docker remains on hold by founder direction. No real Supabase sign-in,
+  Edge Function, migration, two-device or Galaxy test has been performed.
+
+At the 2026-09-27 checkpoint, M9 planning was complete separately at `plan/m9-price-intelligence` commit
+`1b37996` in `C:\Users\doyew\Documents\DEV 2\COSI-m9-planning`. Four tickets
+and the decision/UX/data boundaries are recorded there. Its plan requires M7
+acceptance and revalidation of the final purchase-observation pull contract
+before implementation. No M9 agent or production edit has started.
 
 ## Carried readiness gates
 
@@ -117,11 +166,10 @@ the current blocking findings are documented in `M7_INDEPENDENT_AUDIT.md`.
 
 ## Next action
 
-Correct the two M7 source blockers in `M7_INDEPENDENT_AUDIT.md` and rerun local
-checks. PostgreSQL migration/lint/pgTAP and endpoint evidence remain an open
-gate while Docker is on hold. Finalize M9 planning in the isolated worktree,
-then stop before creating an M9 implementation task so the founder can choose
-whether to resume Docker or begin M9. Do not start M8.
+Rebuild the Android client for
+SecureStore and perform the native-device sync/offline checks. Reconcile the
+isolated M9 branch onto accepted M7, then verify M9 pull/echo and M9-04 before
+claiming M9 acceptance. Do not start M8.
 
 A continuing agent must first read `AGENTS.md`, this file,
 `MULTI_AGENT_WORKFLOW.md`, `IMPLEMENTATION_AUDIT_WORKFLOW.md`, the workflow

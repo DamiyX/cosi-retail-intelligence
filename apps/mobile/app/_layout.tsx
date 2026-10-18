@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import { DatabaseProvider } from '../src/db/DatabaseContext';
 import { initializeAppDatabase, type DatabaseInitStatus } from '../src/db/initialize';
+import { PilotSyncScheduler } from '../src/sync/PilotSyncScheduler';
 
 export default function RootLayout() {
   const [databaseStatus] = useState<DatabaseInitStatus>(() => initializeAppDatabase());
@@ -25,6 +26,7 @@ export default function RootLayout() {
         </View>
       ) : (
         <DatabaseProvider adapter={databaseStatus.adapter}>
+          <PilotSyncScheduler />
           <Stack screenOptions={{ headerTintColor: '#174F46', contentStyle: { backgroundColor: '#F7F8F5' } }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="restock" options={{ title: 'Restock' }} />
@@ -40,6 +42,7 @@ export default function RootLayout() {
             <Stack.Screen name="withdrawal" options={{ title: 'Record owner withdrawal' }} />
             <Stack.Screen name="withdrawals" options={{ title: 'Withdrawal history' }} />
             <Stack.Screen name="summary" options={{ title: 'Today’s summary' }} />
+            <Stack.Screen name="sync" options={{ title: 'Cloud sync' }} />
           </Stack>
         </DatabaseProvider>
       )}

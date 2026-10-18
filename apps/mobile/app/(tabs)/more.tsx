@@ -1,10 +1,10 @@
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
 export default function MoreScreen() {
   const router = useRouter();
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text accessibilityRole="header" style={styles.title}>
         More
       </Text>
@@ -57,8 +57,12 @@ export default function MoreScreen() {
         <Text style={styles.actionTitle}>Today’s summary</Text>
         <Text style={styles.actionBody}>See sales, costs, coverage, and owner withdrawals for the store-local day</Text>
       </Pressable>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/sync')} style={styles.action}>
+        <Text style={styles.actionTitle}>Cloud sync</Text>
+        <Text style={styles.actionBody}>Sign in, check pending work and retry when online</Text>
+      </Pressable>
       <Text style={styles.comingSoon}>Staff dispatch and supervisor review are intentionally deferred.</Text>
-    </View>
+    </ScrollView>
   );
 }
 
