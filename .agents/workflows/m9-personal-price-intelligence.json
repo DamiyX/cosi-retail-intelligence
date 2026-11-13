@@ -4,7 +4,7 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "active",
-  "current_state": "m9-audit-corrections-committed-full-validation-pass-expo-sdk-mismatch-m7-device-gates-open",
+  "current_state": "isolated-source-reviewed-current-app-integration-required",
   "completed_states": [
     "m9-existing-price-observation-contract-inspected",
     "m9-product-data-design-reviewed",
@@ -12,7 +12,9 @@
     "m9-local-execution-exception-authorized",
     "m9-01-through-m9-03-implemented-locally-verification-blocked",
     "m9-04-local-boundaries-and-evidence-recorded",
-    "m9-independent-audit-findings-corrected-and-full-validation-run"
+    "m9-independent-audit-findings-corrected-and-full-validation-run",
+    "m9-expo-dependencies-aligned-and-validated",
+    "october3-main-coordinator-audit-501-tests-and-export-passed"
   ],
   "owner": {
     "agent": "coordinating-planner-independent-auditor",
@@ -121,27 +123,49 @@
         "npm exec --workspace @retail/mobile -- expo install --check and npm run mobile:doctor fail only the Expo SDK patch-version check: expo-linking 57.0.10 is below ~57.0.11 and expo-router 57.0.22 is below ~57.0.23. No dependency or lockfile changes were made.",
         "npm run check:environment passes Node 24.21.0, npm 11.19.0 and git; adb and Docker are available and optional Java is missing. No physical-device or airplane-mode evidence was collected. M7 pull/echo/replay remains unverified because this checkout contains no M7 pull applier and M7 acceptance remains deferred."
       ]
+    },
+    {
+      "kind": "verification",
+      "claim": "Coordinator aligned expo-linking to 57.0.11 and expo-router to 57.0.23 in the mobile manifest and lockfile. A clean npm ci from the updated lockfile passes. Afterward Expo dependency check passes, Expo Doctor passes 21/21, npm run validate passes typecheck, zero-warning lint and 501 tests across 53 suites, Android export passes at 1,408 modules/3.6 MB Hermes, and git diff --check passes. The mobile suite emits a non-failing React act warning in products.test.tsx. The alignment and this evidence are uncommitted.",
+      "path": "apps/mobile/package.json; package-lock.json; tickets.md; docs/engineering/PROJECT_STATE.md",
+      "observed_at": "2026-09-27T21:26:35Z",
+      "limitations": [
+        "M7 pull/echo/replay compatibility is unverified because the isolated M9 checkout has no M7 pull applier and M7 remains unaccepted.",
+        "No physical-device or airplane-mode verification was performed.",
+        "npm ci reports 22 dependency advisories (1 low, 21 moderate), not triaged in M9."
+      ]
+    },
+    {
+      "kind": "verification",
+      "claim": "Main coordinator direct isolated review and 41 focused/501 full tests, types/lint/export/diff pass; Doctor20/21 and dependency mismatch fail. No current-app sync or physical acceptance.",
+      "path": "docs/engineering/M9_COORDINATOR_AUDIT.md",
+      "observed_at": "2026-10-03T02:04:26Z"
     }
   ],
   "acceptance_gates": [
     {
       "id": "m7-independent-accepted",
-      "claim": "M7 offline sync, including immutable purchase observations, is independently accepted before M9 production edits.",
+      "claim": "M7 local source accepted on current application lineage at c817edb; this old isolated branch does not contain it.",
       "owner": "coordinator",
       "required": true,
-      "status": "blocked",
+      "status": "met",
       "depends_on": [],
       "verification": {
         "kind": "review",
         "procedure": "Read the final M7 workflow and independent audit; confirm purchase-observation push/pull/replay behavior and clean accepted baseline.",
         "success_condition": "M7 is accepted and its observation contract is stable for M9 reads."
       },
-      "evidence": [],
-      "limitations": [
-        "This gate remains unmet throughout the M9 local implementation.",
-        "The isolated M9 checkout has no M7 pull applier, so M7 pull/echo compatibility cannot be claimed from this branch."
+      "evidence": [
+        {
+          "result": "Coordinator inspected actual accepted M7/current M8 lineage and audit; current source integration still required.",
+          "source": "COSI-m0 c817edb; COSI-m8-planning66ea3fc; M9_COORDINATOR_AUDIT.md",
+          "observed_at": "2026-10-03T02:04:26Z"
+        }
       ],
-      "blocker": "M7 independent audit found source blockers and PostgreSQL/endpoint/device acceptance remains deferred. The founder's 2026-09-27 exception permits local M9 implementation only and does not satisfy this gate.",
+      "limitations": [
+        "M9 integration and carried live/native/release readiness are not passed by this local-source gate."
+      ],
+      "blocker": null,
       "waiver": null
     },
     {
@@ -254,7 +278,7 @@
       "claim": "Coordinator independently verifies exactness, privacy, offline behavior, UI truthfulness and M8 non-interference.",
       "owner": "coordinator",
       "required": true,
-      "status": "pending",
+      "status": "blocked",
       "depends_on": [
         "m9-implementation-assigned"
       ],
@@ -263,9 +287,17 @@
         "procedure": "Inspect implementation and rerun critical exact-rational, authorization, restart, sync and UI tests plus full validation.",
         "success_condition": "No blocking finding; source acceptance remains distinct from device/release evidence."
       },
-      "evidence": [],
-      "limitations": [],
-      "blocker": null,
+      "evidence": [
+        {
+          "result": "Independent source re-audit found the five initial findings corrected in 414b4dc. Coordinator aligned Expo patch dependencies; clean npm ci, full validation (501 tests), Expo Doctor (21/21), Expo dependency check, Android export, diff check and workflow JSON parse pass.",
+          "source": "Git diff 414b4dc and local verification on plan/m9-price-intelligence",
+          "observed_at": "2026-09-27T21:26:35Z"
+        }
+      ],
+      "limitations": [
+        "Source review does not verify M7-pulled observation, echo or replay behavior or physical-device airplane-mode behavior."
+      ],
+      "blocker": "M7 integration and physical-device checks are required before complete M9 acceptance.",
       "waiver": null
     }
   ],
@@ -295,7 +327,8 @@
     "apps/mobile/__tests__/shell.test.tsx",
     "apps/mobile/__tests__/m9PersonalPriceChanges.test.tsx",
     "apps/mobile/src/screens/products/ProductDetailScreen.tsx",
-    "apps/mobile/src/screens/home/HomeScreen.tsx"
+    "apps/mobile/src/screens/home/HomeScreen.tsx",
+    "docs/engineering/M9_COORDINATOR_AUDIT.md"
   ],
   "approvals": [
     {
@@ -313,15 +346,19 @@
     {
       "date": "2026-09-27",
       "scope": "Founder requested M9 planning be finalized after the M7 audit and an explicit pause before creating any M9 implementation agent, so the founder can choose Docker setup or M9 execution."
+    },
+    {
+      "date": "2026-10-03",
+      "scope": "Founder authorizes coordinator-owned M9 audit, sequential M10/M11 source implementation and direct coordinator audits; phone pending. GPT-6.1 Sol HIGH, no separate audit agent."
     }
   ],
   "blockers": [
-    "M7 independent audit has open source blockers and PostgreSQL/endpoint/device acceptance remains deferred; this M9 exception does not satisfy M7 acceptance or verify pull/echo behavior.",
-    "Expo dependency validation and Doctor fail because expo-linking@57.0.10 and expo-router@57.0.22 are below the installed Expo SDK's expected ~57.0.11 and ~57.0.23; no dependency updates were included in the audit-fix scope.",
-    "No physical-device or airplane-mode verification was performed."
+    "Current application M9 pull/pending-local/echo/replay integration remains unverified.",
+    "Physical/native/airplane/accessibility gates pending.",
+    "Isolated Doctor/dependency patches stale; use current app dependencies."
   ],
-  "next_action": "Independent coordinator re-audit of the current local M9 branch. Decide whether to align the two Expo patch versions and rerun Expo dependency validation/Doctor after any authorized dependency change. Keep M7 pull/echo/replay and physical-device/airplane-mode gates open; do not start M8 or M10.",
+  "next_action": "Read-only source reference for M9-I1/I2 integration in COSI-m8-planning. Main coordinator audits stopped handoff; M10 waits for M9 source acceptance.",
   "created_at": "2026-09-19T03:24:42Z",
-  "updated_at": "2026-09-27T21:15:34Z",
+  "updated_at": "2026-10-03T02:04:26Z",
   "archived": false
 }

@@ -1,0 +1,53 @@
+{
+  "label": "m9-planning",
+  "branch": "plan/m9-price-intelligence",
+  "head": "1c8de0dca595ce804b8db605ff763683220c6380",
+  "staged_paths": [],
+  "files": [
+    {
+      "path": ".agents/workflows/m9-personal-price-intelligence.json",
+      "status": " M",
+      "bytes": 21921,
+      "sha256": "999cdea995b9ba51b86c082c72b58d257a34b4c594bfdf927d5fb87e34e36a22"
+    },
+    {
+      "path": "apps/mobile/package.json",
+      "status": " M",
+      "bytes": 1438,
+      "sha256": "f1ba1869bbf7ae2d7833fcd9faf50639d7051c7682144711db35970d39c56345"
+    },
+    {
+      "path": "docs/engineering/IMPLEMENTATION_AUDIT_WORKFLOW.md",
+      "status": " M",
+      "bytes": 10382,
+      "sha256": "d7146c1d7299a82ee7b977d7c90cf18c37d968ced2ee680541c9224ec73c95d3"
+    },
+    {
+      "path": "docs/engineering/PROJECT_STATE.md",
+      "status": " M",
+      "bytes": 2601,
+      "sha256": "06081a62f16faf3edd213441d321ddfe077f79eba59be1b66a6724a038ba7ac1"
+    },
+    {
+      "path": "package-lock.json",
+      "status": " M",
+      "bytes": 792283,
+      "sha256": "76a1d5eff81c6f88baab78f9e2237baa7792d337ec62c33a55f631c67abdafe0"
+    },
+    {
+      "path": "tickets.md",
+      "status": " M",
+      "bytes": 10640,
+      "sha256": "d012912bbde25bd824878b2be495ad8f7119e36f41fb905728dbee18ac6b543f"
+    },
+    {
+      "path": "docs/engineering/M9_COORDINATOR_AUDIT.md",
+      "status": "??",
+      "bytes": 3762,
+      "sha256": "750e975162a53756b738d6e89fddff111d9498a4b1723e30cabba8461f9b4ff7"
+    }
+  ],
+  "excluded_changed": [],
+  "raw_zip_sha256": "213e65ca65a5c9a603df389085ed45ef2c9344177674215d72f12737a6bcb501",
+  "raw_zip_bytes": 193082
+}

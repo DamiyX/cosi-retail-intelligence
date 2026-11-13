@@ -16,9 +16,19 @@ the founder requests a separate task. The coordinator does not edit or audit
 the shared checkout while the implementer is writing. The next milestone's
 task starts only after independent acceptance and its own planning gates.
 
-The founder's current implementer selection is Luna at max effort. This is an
-execution preference, not an architecture requirement; follow later founder
-instructions and record the actual task identity.
+The founder's current implementation and code-correction selection is
+GPT-6.1 Sol HIGH. Earlier Luna/Terra preferences are superseded. Utilities follow
+the founder's current lower-effort policy; other models or escalation require
+explicit approval.
+
+October3 clarification: the main M0 coordinator performs every independent
+audit and owns acceptance. Do not create a separate audit chat or delegate this
+responsibility. A milestone implementer stops with evidence; the coordinator
+reviews it directly, sends concrete corrections to that same implementation
+chat if needed, and stops while implementation resumes. The Independent Auditor
+role below describes the coordinator's review responsibilities, not another
+agent to dispatch. Automatic receipt of a handoff does not guarantee automatic
+chat resumption; report the delivery status truthfully.
 
 For COSI, auditing only after M1–M3 or M1–M5 would allow a domain, package,
 transaction, costing, or inventory defect to spread into several dependent

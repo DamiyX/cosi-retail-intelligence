@@ -1,5 +1,17 @@
 # Tickets: M9 Personal Restock-Price Intelligence
 
+## Current coordinator checkpoint — October3
+
+Initial ticket evidence below is historical. M7 local source is accepted at
+c817edb and M8 is active in COSI-m8-planning. This isolated reference lacks the
+current pull/runtime integration, so M9-04 remains incomplete. Fresh coordinator
+validate passes501 tests/53 suites/types/lint; focused41 and Android export pass.
+Doctor20/21 and dependency check fail on stale constants/router patches; earlier
+21/21 remains historical. Current application M9_INTEGRATION_PLAN.md and
+M9_INTEGRATION_TICKETS.md own remaining integration. Main coordinator audits
+stopped handoff; physical/native checks pending.
+
+
 M9 turns the retailer's own immutable purchase observations into useful offline
 cost-change information. It follows
 `docs/engineering/M9_PERSONAL_PRICE_INTELLIGENCE_PLAN.md`. M9 normally depends
@@ -105,7 +117,7 @@ scanner/navigation redesign.
 
 ## M9-04 — Prove offline/sync compatibility and stop for audit
 
-**Status:** Incomplete; handoff for independent audit after local evidence update. **Dependency:** M9-01 through M9-03.  
+**Status:** Source audit passed; M7 integration and physical-device evidence remain incomplete. **Dependency:** M9-01 through M9-03.  
 **Delivers:** a recoverable M9 handoff whose claims match actual evidence.
 
 The OWNER-scoped product-history correction is committed locally as `7273eeb`;
@@ -129,19 +141,24 @@ unpushed.
   Product detail, navigation and shell suites pass (28 tests). `npm run validate`
   passes environment checks, both typechecks, zero-warning lint, 157 domain
   tests and 344 mobile tests (501 total across 53 suites). The coordinator ran
-  `npm ci` from the lockfile with exit 0 and no tracked changes. `npm exec
-  --workspace @retail/mobile -- expo install --check` and `npm run mobile:doctor`
-  fail only the Expo SDK patch check: `expo-linking@57.0.10` and
-  `expo-router@57.0.22` are installed, expected `~57.0.11` and `~57.0.23`.
-  `npm run mobile:export` passes with 1,408 Android modules and a 3.6 MB Hermes
-  bundle. No dependency or lockfile changes were made. `git diff --check`,
+  `npm ci` from the committed lockfile with exit 0. The coordinator then aligned
+  `expo-linking` to `57.0.11` and `expo-router` to `57.0.23` in the mobile
+  manifest and lockfile. After that change, the Expo dependency check passes,
+  `npm run mobile:doctor` passes 21/21, full `npm run validate` passes again,
+  and `npm run mobile:export` passes with 1,408 Android modules and a 3.6 MB
+  Hermes bundle. A second clean `npm ci` from the updated lockfile also passes,
+  followed by the same green validation, Doctor, dependency check and export.
+  The mobile suite emits a React `act(...)` warning in `products.test.tsx` but
+  no test fails. `npm ci` reports 22 dependency advisories (1 low, 21 moderate);
+  these were not triaged in M9. The dependency alignment is not yet committed.
+  `git diff --check`,
   workflow JSON/index/artifact checks pass, and migration source is unchanged
   from the branch base.
 - [x] Update tickets, PROJECT_STATE and workflow with actual commits, commands,
   results and limitations. No physical-device or airplane-mode evidence was
   collected; M7 pull/echo/replay remains unverified. The branch remains local
-  and unpushed. Stop for independent coordinator re-audit; do not start M10 or
-  M8.
+  and unpushed. The coordinator source re-audit found no further blocker after
+  the Expo alignment. Do not start M10 or M8.
 
 **Out of scope:** production deployment, hosted-service changes, physical-device
 release acceptance, M10 market infrastructure.
