@@ -1,0 +1,17 @@
+{
+  "label": "m0-working-copy",
+  "branch": "feat/m7-offline-sync",
+  "head": "c817edba514f509542eca3d32b3416e114634e92",
+  "staged_paths": [],
+  "files": [
+    {
+      "path": "app.json",
+      "status": "??",
+      "bytes": 16,
+      "sha256": "b7c55adf9886178318b9a475422a1a361cb6a3211b82f774104c77e460a1ec88"
+    }
+  ],
+  "excluded_changed": [],
+  "raw_zip_sha256": "13ad0d7dbe4486b9785b298f7cd8eb8fe48d340b21976b8f02f915bb802a4503",
+  "raw_zip_bytes": 132
+}
