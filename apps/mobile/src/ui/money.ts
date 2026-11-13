@@ -74,6 +74,15 @@ export function displayRationalMinorPerBaseUnit(
   denominator: string | null | undefined,
   currencyCode: string,
 ): string | null {
+  return displayRationalMinorAmount(numerator, denominator, currencyCode);
+}
+
+/** Display an exact rational price as currency, rounding only the screen value to one minor unit. */
+export function displayRationalMinorAmount(
+  numerator: string | null | undefined,
+  denominator: string | null | undefined,
+  currencyCode: string,
+): string | null {
   if (numerator === null || numerator === undefined || denominator === null || denominator === undefined) {
     return null;
   }

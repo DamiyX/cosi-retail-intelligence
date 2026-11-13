@@ -52,6 +52,7 @@ export default function ProductsLayout() {
       <CatalogueGate>
         <Stack screenOptions={{ headerTintColor: '#174F46', contentStyle: { backgroundColor: '#F7F8F5' } }}>
           <Stack.Screen name="index" options={{ title: 'Products' }} />
+          <Stack.Screen name="price-changes" options={{ title: 'Personal price changes' }} />
           <Stack.Screen name="new" options={{ headerShown: false }} />
           <Stack.Screen name="[id]/index" options={{ headerShown: false }} />
           <Stack.Screen name="[id]/packages/new" options={{ headerShown: false }} />

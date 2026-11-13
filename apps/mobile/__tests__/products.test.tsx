@@ -15,6 +15,7 @@ import {
   type TemporaryProductGraph,
 } from '../src/catalogue/client';
 import { createDatabasePurchasesClient } from '../src/purchases/client';
+import { createDatabasePersonalPriceClient, type PersonalPriceClient } from '../src/priceIntelligence/client';
 import { completeSale } from '../src/sales/completeSale';
 import { getActiveBasePackageUnit, type ProductLifecycleFilter, type ProductSearchHit } from '../src/db/repositories';
 import ProductDetailScreen from '../src/screens/products/ProductDetailScreen';
@@ -22,6 +23,13 @@ import PackageFormScreen from '../src/screens/products/PackageFormScreen';
 import ProductsListScreen from '../src/screens/products/ProductsListScreen';
 import QuickAddProductScreen from '../src/screens/products/QuickAddProductScreen';
 import { countRows, deterministicIds, openCatalogueFixture, type CatalogueFixture } from './catalogueSupport';
+
+function ownerPriceClient(fixture: CatalogueFixture): PersonalPriceClient {
+  return createDatabasePersonalPriceClient(fixture.adapter, {
+    storeId: fixture.context.store.id,
+    userId: fixture.context.owner.id,
+  });
+}
 
 function stubClient(overrides: Partial<CatalogueClient> = {}): CatalogueClient {
   return {
@@ -33,7 +41,6 @@ function stubClient(overrides: Partial<CatalogueClient> = {}): CatalogueClient {
       throw new Error('Stub catalogue cannot save.');
     },
     getProductDetail: (_productId: string): ProductDetail | null => null,
-    getPurchasePriceHistory: () => [],
     updateProductIdentity: (): ProductIdentityResult => {
       throw new Error('Stub catalogue cannot save.');
     },
@@ -343,6 +350,7 @@ describe('ProductDetailScreen', () => {
       render(
         <ProductDetailScreen
           client={catalogue}
+          priceClient={ownerPriceClient(fixture)}
           productId={graph.storeProduct.id}
           onBack={() => undefined}
           onAddPackage={() => undefined}
@@ -391,6 +399,7 @@ describe('ProductDetailScreen', () => {
       fractionalView = render(
         <ProductDetailScreen
           client={catalogue}
+          priceClient={ownerPriceClient(fractionalFixture)}
           productId={graph.storeProduct.id}
           onBack={() => undefined}
           onAddPackage={() => undefined}
@@ -435,6 +444,7 @@ describe('ProductDetailScreen', () => {
       zeroStockView = render(
         <ProductDetailScreen
           client={catalogue}
+          priceClient={ownerPriceClient(zeroStockFixture)}
           productId={graph.storeProduct.id}
           onBack={() => undefined}
           onAddPackage={() => undefined}
@@ -478,6 +488,7 @@ describe('ProductDetailScreen', () => {
       unknownView = render(
         <ProductDetailScreen
           client={catalogue}
+          priceClient={ownerPriceClient(unknownFixture)}
           productId={graph.storeProduct.id}
           onBack={() => undefined}
           onAddPackage={() => undefined}
@@ -521,6 +532,7 @@ describe('ProductDetailScreen', () => {
       render(
         <ProductDetailScreen
           client={catalogue}
+          priceClient={ownerPriceClient(fixture)}
           productId={graph.storeProduct.id}
           onBack={() => undefined}
           onAddPackage={() => undefined}
@@ -544,9 +556,9 @@ describe('ProductDetailScreen', () => {
       );
       const graph = catalogue.createTemporaryProduct({ name: 'Retry history' });
       let historyReads = 0;
-      const failingClient: CatalogueClient = {
-        ...catalogue,
-        getPurchasePriceHistory: () => {
+      const failingPriceClient: PersonalPriceClient = {
+        ...ownerPriceClient(fixture),
+        getProductPurchasePriceHistory: () => {
           historyReads += 1;
           if (historyReads === 1) throw new Error('History read failed in test.');
           return [];
@@ -554,7 +566,8 @@ describe('ProductDetailScreen', () => {
       };
       render(
         <ProductDetailScreen
-          client={failingClient}
+          client={catalogue}
+          priceClient={failingPriceClient}
           productId={graph.storeProduct.id}
           onBack={() => undefined}
           onAddPackage={() => undefined}

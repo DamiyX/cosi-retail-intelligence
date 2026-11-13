@@ -1,11 +1,13 @@
-import { DomainError, formatQuantityMicros, parseQuantityDecimal } from '@retail/domain';
+import { DomainError, formatQuantityMicros, MICROS_PER_UNIT, parseQuantityDecimal } from '@retail/domain';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { CatalogueClient, ProductDetail } from '../../catalogue/client';
 import type { IdentifierType, PurchasePriceHistoryRow } from '../../db/repositories';
+import type { PersonalPriceClient, PersonalPriceComparisonRecord } from '../../priceIntelligence/client';
+import { formatObservedDate, formatPercentageMagnitude } from '../../priceIntelligence/presentation';
 import { ErrorPanel, Field, PrimaryButton, SecondaryButton, StatusNote } from '../../ui/components';
-import { currencyMinorUnitLabel, displayMoney, displayRationalMinorPerBaseUnit, isUsableCurrentCost } from '../../ui/money';
+import { currencyMinorUnitLabel, displayMoney, displayRationalMinorAmount, displayRationalMinorPerBaseUnit, isUsableCurrentCost } from '../../ui/money';
 import { theme } from '../../ui/theme';
 
 interface ProductDetailScreenProps {
@@ -15,6 +17,9 @@ interface ProductDetailScreenProps {
   onBack: () => void;
   onAddPackage: () => void;
   onEditPackage: (packageUnitId: string) => void;
+  priceClient?: PersonalPriceClient | null;
+  priceClientFailure?: string | null;
+  onOpenPriceChanges?: () => void;
 }
 
 interface DetailState {
@@ -27,9 +32,15 @@ interface PriceHistoryState {
   failure: string | null;
 }
 
+interface PriceComparisonState {
+  record: PersonalPriceComparisonRecord | null;
+  failure: string | null;
+}
+
 interface ScreenState {
   detail: DetailState;
   priceHistory: PriceHistoryState;
+  priceComparison: PriceComparisonState;
 }
 
 const IDENTIFIER_TYPES: readonly { type: IdentifierType; label: string }[] = [
@@ -47,9 +58,9 @@ function load(client: CatalogueClient, productId: string): DetailState {
   }
 }
 
-function loadPriceHistory(client: CatalogueClient, productId: string): PriceHistoryState {
+function loadPriceHistory(client: PersonalPriceClient, productId: string): PriceHistoryState {
   try {
-    return { rows: client.getPurchasePriceHistory(productId), failure: null };
+    return { rows: client.getProductPurchasePriceHistory(productId) ?? [], failure: null };
   } catch (error) {
     return {
       rows: [],
@@ -58,14 +69,29 @@ function loadPriceHistory(client: CatalogueClient, productId: string): PriceHist
   }
 }
 
-function loadScreen(client: CatalogueClient, productId: string): ScreenState {
+function loadScreen(
+  client: CatalogueClient,
+  productId: string,
+  priceClient?: PersonalPriceClient | null,
+): ScreenState {
   const detail = load(client, productId);
   return {
     detail,
-    priceHistory: detail.detail
-      ? loadPriceHistory(client, detail.detail.product.id)
+    priceHistory: detail.detail && priceClient
+      ? loadPriceHistory(priceClient, detail.detail.product.id)
       : { rows: [], failure: null },
+    priceComparison: detail.detail && priceClient
+      ? loadPriceComparison(priceClient, detail.detail.product.id)
+      : { record: null, failure: null },
   };
+}
+
+function loadPriceComparison(client: PersonalPriceClient, storeProductId: string): PriceComparisonState {
+  try {
+    return { record: client.getProductPriceComparison(storeProductId), failure: null };
+  } catch {
+    return { record: null, failure: 'The saved purchase cost comparison could not be read from this device.' };
+  }
 }
 
 /**
@@ -80,8 +106,11 @@ export default function ProductDetailScreen({
   onBack,
   onAddPackage,
   onEditPackage,
+  priceClient = null,
+  priceClientFailure = null,
+  onOpenPriceChanges,
 }: ProductDetailScreenProps) {
-  const [screen, setScreen] = useState<ScreenState>(() => loadScreen(client, productId));
+  const [screen, setScreen] = useState<ScreenState>(() => loadScreen(client, productId, priceClient));
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [localSku, setLocalSku] = useState('');
@@ -100,6 +129,7 @@ export default function ProductDetailScreen({
   const state = screen.detail;
   const detail = state.detail;
   const priceHistory = screen.priceHistory;
+  const priceComparison = screen.priceComparison;
   useEffect(() => {
     if (!detail || reorderProductIdRef.current === detail.product.id) {
       return;
@@ -113,17 +143,24 @@ export default function ProductDetailScreen({
     setReorderError(null);
   }, [detail]);
   const refresh = useCallback((): void => {
-    setScreen(loadScreen(client, productId));
-  }, [client, productId]);
+    setScreen(loadScreen(client, productId, priceClient));
+  }, [client, productId, priceClient]);
   const retryPriceHistory = useCallback((): void => {
-    if (!detail) {
+    if (!detail || !priceClient) {
       return;
     }
     setScreen((current) => ({
       ...current,
-      priceHistory: loadPriceHistory(client, detail.product.id),
+      priceHistory: loadPriceHistory(priceClient, detail.product.id),
     }));
-  }, [client, detail]);
+  }, [detail, priceClient]);
+  const retryPriceComparison = useCallback((): void => {
+    if (!detail || !priceClient) return;
+    setScreen((current) => ({
+      ...current,
+      priceComparison: loadPriceComparison(priceClient, detail.product.id),
+    }));
+  }, [detail, priceClient]);
   const identityDirty = Boolean(
     editing && detail && (name !== detail.variant.name || localSku !== (detail.product.localSku ?? '')),
   );
@@ -520,50 +557,141 @@ export default function ProductDetailScreen({
             <SecondaryButton title="Add package" onPress={onAddPackage} />
           </View>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Purchase price history</Text>
-            <Text style={styles.line}>Store-private original purchase prices. Later product or package edits do not rewrite these facts.</Text>
-            {priceHistory.failure !== null ? (
+            <Text accessibilityRole="header" style={styles.sectionTitle}>Purchase cost change</Text>
+            {!priceClient ? (
+              <Text style={styles.line}>{priceClientFailure ?? 'Only an active store owner can read personal purchase costs.'}</Text>
+            ) : priceComparison.failure ? (
               <ErrorPanel
-                title="Purchase price history unavailable"
-                message="The saved purchase prices could not be read from this device."
-                onRetry={retryPriceHistory}
+                title="Purchase cost change unavailable"
+                message={priceComparison.failure}
+                onRetry={retryPriceComparison}
               />
-            ) : priceHistory.rows.length === 0 ? (
-              <Text style={styles.line}>No purchase price history yet.</Text>
+            ) : !priceComparison.record ? (
+              <Text style={styles.line}>No purchase cost observations are available for this product yet.</Text>
+            ) : priceComparison.record.comparison.kind === 'invalid' ? (
+              <ErrorPanel
+                title="Purchase cost change unavailable"
+                message="A saved cost could not be compared safely. The original purchase history remains available below."
+                onRetry={retryPriceComparison}
+              />
+            ) : priceComparison.record.comparison.kind === 'none' ? (
+              <Text style={styles.line}>
+                {priceComparison.record.comparison.reason === 'NO_VALID_OBSERVATION'
+                  ? priceComparison.record.historyCount === 0
+                    ? 'No purchase cost observations are recorded yet. Complete a restock to save the first one.'
+                    : 'No validated purchase cost is available to compare. Estimated or unavailable costs remain in purchase history.'
+                  : priceComparison.record.comparison.reason === 'ONE_VALID_OBSERVATION'
+                    ? 'One validated restock is recorded. Record another comparable restock to see whether its purchase cost changed.'
+                    : 'No earlier purchase observation in the same currency is available for comparison.'}
+              </Text>
+            ) : priceComparison.record.latest && priceComparison.record.previous ? (
+              <View style={styles.priceComparisonDetails}>
+                <Text style={styles.line}>
+                  Basis: {priceComparison.record.comparison.basis === 'PACKAGE'
+                    ? `Per ${priceComparison.record.latest.packageNameSnapshot}`
+                    : `Per base unit comparison across ${priceComparison.record.previous.packageNameSnapshot} and ${priceComparison.record.latest.packageNameSnapshot}`}
+                </Text>
+                <Text style={styles.line}>
+                  Previous: {displayRationalMinorAmount(
+                    priceComparison.record.comparison.basis === 'PACKAGE'
+                      ? priceComparison.record.previous.packageCostNumerator
+                      : priceComparison.record.previous.baseUnitCostNumerator,
+                    priceComparison.record.comparison.basis === 'PACKAGE'
+                      ? priceComparison.record.previous.packageCostDenominator
+                      : priceComparison.record.previous.baseUnitCostDenominator,
+                    priceComparison.record.previous.currencyCode,
+                  ) ?? 'Unavailable'} per {priceComparison.record.comparison.basis === 'PACKAGE'
+                    ? priceComparison.record.previous.packageNameSnapshot
+                    : 'base unit'}
+                </Text>
+                <Text style={styles.line}>
+                  Latest: {displayRationalMinorAmount(
+                    priceComparison.record.comparison.basis === 'PACKAGE'
+                      ? priceComparison.record.latest.packageCostNumerator
+                      : priceComparison.record.latest.baseUnitCostNumerator,
+                    priceComparison.record.comparison.basis === 'PACKAGE'
+                      ? priceComparison.record.latest.packageCostDenominator
+                      : priceComparison.record.latest.baseUnitCostDenominator,
+                    priceComparison.record.latest.currencyCode,
+                  ) ?? 'Unavailable'} per {priceComparison.record.comparison.basis === 'PACKAGE'
+                    ? priceComparison.record.latest.packageNameSnapshot
+                    : 'base unit'}
+                </Text>
+                {priceComparison.record.comparison.basis === 'BASE_UNIT' ? (
+                  <Text style={styles.line}>
+                    Observed package conversions: {formatQuantityMicros(priceComparison.record.previous.quantityPackagesMicros)} {priceComparison.record.previous.packageNameSnapshot} purchased (1 package = {formatQuantityMicros(priceComparison.record.previous.conversionToBaseSnapshotMicros)} {priceComparison.record.previous.conversionToBaseSnapshotMicros === MICROS_PER_UNIT ? 'base unit' : 'base units'}); then {formatQuantityMicros(priceComparison.record.latest.quantityPackagesMicros)} {priceComparison.record.latest.packageNameSnapshot} purchased (1 package = {formatQuantityMicros(priceComparison.record.latest.conversionToBaseSnapshotMicros)} {priceComparison.record.latest.conversionToBaseSnapshotMicros === MICROS_PER_UNIT ? 'base unit' : 'base units'}).
+                  </Text>
+                ) : null}
+                <Text style={styles.changeDirection}>
+                  {priceComparison.record.comparison.direction === 'INCREASE'
+                    ? 'Increase'
+                    : priceComparison.record.comparison.direction === 'DECREASE'
+                      ? 'Decrease'
+                      : 'Unchanged'}
+                  {formatPercentageMagnitude(priceComparison.record.comparison.percentageTenths)
+                    ? ` · ${formatPercentageMagnitude(priceComparison.record.comparison.percentageTenths)}`
+                    : ''}
+                </Text>
+                {priceComparison.record.comparison.percentageTenths === null ? (
+                  <Text style={styles.line}>Percentage change is unavailable because the previous purchase cost was zero.</Text>
+                ) : null}
+                <Text style={styles.line}>
+                  Previous observed: {formatObservedDate(priceComparison.record.previous.observedAt)} · Latest observed: {formatObservedDate(priceComparison.record.latest.observedAt)}
+                </Text>
+                <Text style={styles.line}>Latest supplier: {priceComparison.record.latest.supplierNameSnapshot ?? 'Not recorded'}</Text>
+              </View>
             ) : (
-              priceHistory.rows.map((entry) => (
-              <View key={entry.id} style={styles.historyRow}>
-                  <Text style={styles.line}>{entry.productNameSnapshot}</Text>
-                  <Text style={styles.line}>
-                    {formatQuantityMicros(entry.quantityPackagesMicros)} {entry.packageNameSnapshot} · 1 package = {formatQuantityMicros(entry.conversionToBaseSnapshotMicros)} base units
-                  </Text>
-                  <Text style={styles.line}>Entered {entry.costBasis.toLowerCase()} cost: {displayMoney(entry.enteredCostMinor, entry.currencyCode)}</Text>
-                  <Text style={styles.line}>Purchase total: {displayMoney(entry.totalPurchaseCostMinor, entry.currencyCode)}</Text>
-                  <Text style={styles.line}>
-                    Receipt cost estimate: {displayRationalMinorPerBaseUnit(
-                      entry.baseUnitCostNumerator,
-                      entry.baseUnitCostDenominator,
-                      entry.currencyCode,
-                    ) ?? 'Unavailable'} per base unit (display rounded to the nearest {currencyMinorUnitLabel(entry.currencyCode)})
-                  </Text>
-                  <Text style={styles.line}>
-                    Current cost availability: {isUsableCurrentCost({
-                      coverageStatus: entry.currentCostCoverageStatus,
-                      quantityCostedBaseMicros: entry.currentCostQuantityCostedBaseMicros,
-                      averageUnitCost: entry.currentCostAverageUnitCostNumerator && entry.currentCostAverageUnitCostDenominator
-                        ? {
-                            numerator: entry.currentCostAverageUnitCostNumerator,
-                            denominator: entry.currentCostAverageUnitCostDenominator,
-                          }
-                        : null,
-                    }) ? 'Estimated cost available for current stock' : 'Unavailable for current stock; do not infer profit'}
-                  </Text>
-                  <Text style={styles.line}>Supplier: {entry.supplierNameSnapshot ?? 'Not recorded'}</Text>
-                  <Text style={styles.line}>Observed: {new Date(entry.occurredAt).toLocaleString()} · Contribution: off</Text>
-                </View>
-              ))
+              <Text style={styles.line}>The saved purchase cost comparison is incomplete. Retry this read or review the full purchase history below.</Text>
             )}
+            {onOpenPriceChanges ? <SecondaryButton title="Personal price changes" onPress={onOpenPriceChanges} /> : null}
           </View>
+          {priceClient ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Purchase price history</Text>
+              <Text style={styles.line}>Store-private original purchase prices. Later product or package edits do not rewrite these facts.</Text>
+              {priceHistory.failure !== null ? (
+                <ErrorPanel
+                  title="Purchase price history unavailable"
+                  message="The saved purchase prices could not be read from this device."
+                  onRetry={retryPriceHistory}
+                />
+              ) : priceHistory.rows.length === 0 ? (
+                <Text style={styles.line}>No purchase price history yet.</Text>
+              ) : (
+                priceHistory.rows.map((entry) => (
+                  <View key={entry.id} style={styles.historyRow}>
+                    <Text style={styles.line}>{entry.productNameSnapshot}</Text>
+                    <Text style={styles.line}>
+                      Quantity: {formatQuantityMicros(entry.quantityPackagesMicros)} {entry.packageNameSnapshot} · 1 package = {formatQuantityMicros(entry.conversionToBaseSnapshotMicros)} {entry.conversionToBaseSnapshotMicros === MICROS_PER_UNIT ? 'base unit' : 'base units'}
+                    </Text>
+                    <Text style={styles.line}>Entered {entry.costBasis.toLowerCase()} cost: {displayMoney(entry.enteredCostMinor, entry.currencyCode)}</Text>
+                    <Text style={styles.line}>Purchase total: {displayMoney(entry.totalPurchaseCostMinor, entry.currencyCode)}</Text>
+                    <Text style={styles.line}>
+                      Receipt cost estimate: {displayRationalMinorPerBaseUnit(
+                        entry.baseUnitCostNumerator,
+                        entry.baseUnitCostDenominator,
+                        entry.currencyCode,
+                      ) ?? 'Unavailable'} per base unit (display rounded to the nearest {currencyMinorUnitLabel(entry.currencyCode)})
+                    </Text>
+                    <Text style={styles.line}>
+                      Current cost availability: {isUsableCurrentCost({
+                        coverageStatus: entry.currentCostCoverageStatus,
+                        quantityCostedBaseMicros: entry.currentCostQuantityCostedBaseMicros,
+                        averageUnitCost: entry.currentCostAverageUnitCostNumerator && entry.currentCostAverageUnitCostDenominator
+                          ? {
+                              numerator: entry.currentCostAverageUnitCostNumerator,
+                              denominator: entry.currentCostAverageUnitCostDenominator,
+                            }
+                          : null,
+                      }) ? 'Estimated cost available for current stock' : 'Unavailable for current stock; do not infer profit'}
+                    </Text>
+                    <Text style={styles.line}>Supplier: {entry.supplierNameSnapshot ?? 'Not recorded'}</Text>
+                    <Text style={styles.line}>Observed: {new Date(entry.occurredAt).toLocaleString()} · Contribution: off</Text>
+                  </View>
+                ))
+              )}
+            </View>
+          ) : null}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Product status</Text>
             {detail.product.isTemporary ? (
@@ -612,6 +740,8 @@ const styles = StyleSheet.create({
   sectionTitle: { color: theme.color.textPrimary, fontSize: theme.fontSize.body, fontWeight: '700' },
   line: { color: theme.color.textSecondary, fontSize: theme.fontSize.body, lineHeight: 26 },
   historyRow: { borderTopColor: theme.color.border, borderTopWidth: 1, paddingTop: theme.spacing(2), gap: theme.spacing(1) },
+  priceComparisonDetails: { gap: theme.spacing(1) },
+  changeDirection: { color: theme.color.textPrimary, fontSize: theme.fontSize.body, fontWeight: '700' },
   packageRow: {
     borderColor: theme.color.border,
     borderWidth: 1,

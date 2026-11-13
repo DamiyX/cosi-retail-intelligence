@@ -23,3 +23,4 @@ export type { CalculatedSaleLine, CalculatedSaleTotals, SaleLineCalculationInput
 export { calculateSaleLine, calculateSaleTotals } from './sales';
 export * from './costing';
 export * from './batches';
+export * from './personalPriceChanges';
