@@ -61,6 +61,46 @@ describe('M7 provider-independent sync contracts', () => {
       cursor: null,
       pageSize: 501,
     })).toThrow();
+    expect(parseSyncBootstrapRequest({
+      protocolVersion: 1,
+      payloadVersion: 1,
+      storeId: envelope.storeId,
+      deviceId: envelope.deviceId,
+      cursor: { snapshotRevision: 4, afterRevision: 2, afterChangeIndex: 0 },
+      pageSize: 1,
+    }).cursor).toEqual({ snapshotRevision: 4, afterRevision: 2, afterChangeIndex: 0 });
+    expect(() => parseSyncBootstrapRequest({
+      protocolVersion: 1,
+      payloadVersion: 1,
+      storeId: envelope.storeId,
+      deviceId: envelope.deviceId,
+      cursor: { snapshotRevision: 4, afterEntityType: 'STORE_PRODUCT', afterEntityId: envelope.entityId },
+      pageSize: 1,
+    })).toThrow();
+  });
+
+  it('requires each bootstrap operation occurrence to carry its identity and order', () => {
+    const response = {
+      protocolVersion: 1,
+      payloadVersion: 1,
+      snapshotRevision: 4,
+      entities: [{
+        operationId: envelope.operationId,
+        storeId: envelope.storeId,
+        entityType: envelope.entityType,
+        entityId: envelope.entityId,
+        entityVersion: 1,
+        serverRevision: 2,
+        changeIndex: 0,
+        payloadVersion: 1,
+        payload: envelope,
+      }],
+      nextCursor: null,
+      hasMore: false,
+    };
+    expect(parseSyncBootstrapResponse(response).entities).toHaveLength(1);
+    const { operationId: _omitted, ...withoutId } = response.entities[0];
+    expect(() => parseSyncBootstrapResponse({ ...response, entities: [withoutId] })).toThrow();
   });
 
   it('allows a bootstrap response to close its final page with a null cursor', () => {

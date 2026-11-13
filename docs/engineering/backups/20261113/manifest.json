@@ -1,0 +1,472 @@
+{
+  "label": "m9-integration-audit",
+  "branch": "",
+  "head": "1b2b10041fec8935d61a6c95b1365acfff0083b0",
+  "staged_paths": [
+    "apps/mobile/__tests__/m6Home.test.tsx",
+    "apps/mobile/__tests__/m9PersonalPriceChanges.test.tsx",
+    "apps/mobile/__tests__/m9PersonalPriceClient.test.ts",
+    "apps/mobile/__tests__/m9ProductDetail.test.tsx",
+    "apps/mobile/__tests__/products.test.tsx",
+    "apps/mobile/app/(tabs)/products/[id]/index.tsx",
+    "apps/mobile/app/(tabs)/products/_layout.tsx",
+    "apps/mobile/app/(tabs)/products/price-changes.tsx",
+    "apps/mobile/app/(tabs)/today.tsx",
+    "apps/mobile/src/catalogue/client.ts",
+    "apps/mobile/src/db/repositories/priceObservations.ts",
+    "apps/mobile/src/priceIntelligence/client.ts",
+    "apps/mobile/src/priceIntelligence/index.ts",
+    "apps/mobile/src/priceIntelligence/presentation.ts",
+    "apps/mobile/src/screens/home/HomeScreen.tsx",
+    "apps/mobile/src/screens/products/PersonalPriceChangesScreen.tsx",
+    "apps/mobile/src/screens/products/ProductDetailScreen.tsx",
+    "apps/mobile/src/screens/sales/SellScreen.tsx",
+    "apps/mobile/src/ui/money.ts",
+    "packages/domain/__tests__/personalPriceChanges.test.ts",
+    "packages/domain/src/index.ts",
+    "packages/domain/src/personalPriceChanges.ts"
+  ],
+  "files": [
+    {
+      "path": ".agents/contexts/project-context.md",
+      "status": " M",
+      "bytes": 7227,
+      "sha256": "00aeb94824adcaf803b489534c88dc62ff9999d19c060d2bf546d1381127fa08"
+    },
+    {
+      "path": ".agents/workflows/m7-offline-sync.json",
+      "status": " M",
+      "bytes": 14162,
+      "sha256": "7206090a6bd66ed4aa8d67492d805fb6c011284e4e0d57476a70109d6a43e364"
+    },
+    {
+      "path": "apps/mobile/.env.example",
+      "status": " M",
+      "bytes": 654,
+      "sha256": "72bb4f8db96067087e59dde9cc4511128b014007f0f44e7552c87811d35346ae"
+    },
+    {
+      "path": "apps/mobile/__tests__/m5Reconciliation.test.ts",
+      "status": " M",
+      "bytes": 16486,
+      "sha256": "83ad21a401b9e7e15bbecac5dc91d0af70e95917be345bcf58f291062d3a6e0b"
+    },
+    {
+      "path": "apps/mobile/__tests__/m6Home.test.tsx",
+      "status": "M ",
+      "bytes": 12906,
+      "sha256": "cbfa871c8f3936fe97d2fe8823f7de8800ae5a8ebfbdddab8ec6142144c1f8b1"
+    },
+    {
+      "path": "apps/mobile/__tests__/m7Sync.test.ts",
+      "status": " M",
+      "bytes": 28421,
+      "sha256": "85bf6156a053e4d0c3eb0b48f98a2204243642cda0a503f29020111c9c5014a6"
+    },
+    {
+      "path": "apps/mobile/__tests__/m9PersonalPriceChanges.test.tsx",
+      "status": "A ",
+      "bytes": 10408,
+      "sha256": "04b7686907f61c0bc9cb5a77be8880acf01bdaa20699f04258c801a6ade3eb46"
+    },
+    {
+      "path": "apps/mobile/__tests__/m9PersonalPriceClient.test.ts",
+      "status": "A ",
+      "bytes": 10527,
+      "sha256": "728bc0e0fd93ba0bb624b633bab0fa637a919bb3bcb255097c776b136ec80c13"
+    },
+    {
+      "path": "apps/mobile/__tests__/m9ProductDetail.test.tsx",
+      "status": "A ",
+      "bytes": 11477,
+      "sha256": "c061ddffc8704c66f811866fb879147ad73241d6a612c2f6074cb92472696221"
+    },
+    {
+      "path": "apps/mobile/__tests__/navigation.test.tsx",
+      "status": " M",
+      "bytes": 13926,
+      "sha256": "966c825566726f0011b1eadd068b3db23acc33f04efdb732202309688eda416a"
+    },
+    {
+      "path": "apps/mobile/__tests__/products.test.tsx",
+      "status": "M ",
+      "bytes": 38154,
+      "sha256": "16b26d0affe43cf4a4b8dbadb3b3ee212e6d69b3a97156ea78c09d68362f16a8"
+    },
+    {
+      "path": "apps/mobile/__tests__/sales.test.ts",
+      "status": " M",
+      "bytes": 57951,
+      "sha256": "a41a88f8ae56e44a60487b9d1bd00aec0975e9e614912f78b3515b06681c27a7"
+    },
+    {
+      "path": "apps/mobile/__tests__/shell.test.tsx",
+      "status": " M",
+      "bytes": 7206,
+      "sha256": "e3aa2711b7bca06dd05afc81cd4024e595f7e2539db200c9f792e96bb4f8021c"
+    },
+    {
+      "path": "apps/mobile/app.config.ts",
+      "status": " M",
+      "bytes": 1296,
+      "sha256": "800fd81277ffdcf4dd22f559fac22a5bfc55d5c7232e8b35b470c863f3e3afcf"
+    },
+    {
+      "path": "apps/mobile/app/(tabs)/more.tsx",
+      "status": " M",
+      "bytes": 4978,
+      "sha256": "55b4bf2b8e05ed0eff1912803bdc7965a1b04ffb07b20dd1db3ad86e9d648c22"
+    },
+    {
+      "path": "apps/mobile/app/(tabs)/products/[id]/index.tsx",
+      "status": "M ",
+      "bytes": 2155,
+      "sha256": "2b62e2b00022fa153a5cb8e465a0dfa1fdddc7217c4bf4051888663febf84ba8"
+    },
+    {
+      "path": "apps/mobile/app/(tabs)/products/_layout.tsx",
+      "status": "M ",
+      "bytes": 2936,
+      "sha256": "da29c35b21fbb5dc2d8d4864de53bf805b41ad3c6cef94382ad87adcb660fe23"
+    },
+    {
+      "path": "apps/mobile/app/(tabs)/products/price-changes.tsx",
+      "status": "A ",
+      "bytes": 1686,
+      "sha256": "7cbfc70ff2b14258f1ce43bdc627f3135e5210ac64642440d522ccbd2becd9c8"
+    },
+    {
+      "path": "apps/mobile/app/(tabs)/today.tsx",
+      "status": "M ",
+      "bytes": 2388,
+      "sha256": "8d785cb614b5a6affa91c80e0c4b27c65d16a97ca5651f2edeaee4b41547e7b5"
+    },
+    {
+      "path": "apps/mobile/app/_layout.tsx",
+      "status": " M",
+      "bytes": 2933,
+      "sha256": "b009469ef1d8d8089b924853a181fc8e9b33ec466e116ad0917a812179262df2"
+    },
+    {
+      "path": "apps/mobile/package.json",
+      "status": " M",
+      "bytes": 1590,
+      "sha256": "6563c32136d685c647dec987647a82e97d9899825394971f1fef88a33fd57604"
+    },
+    {
+      "path": "apps/mobile/src/catalogue/client.ts",
+      "status": "M ",
+      "bytes": 9205,
+      "sha256": "589bab67a54b98889b87ec67794939887fa9b58c25f0ef48852d8a98402e69c1"
+    },
+    {
+      "path": "apps/mobile/src/db/migrations.ts",
+      "status": " M",
+      "bytes": 145683,
+      "sha256": "1756032ad30eb4a03b04aa502737f7addb2802a9a6789143f5b58e381294e88a"
+    },
+    {
+      "path": "apps/mobile/src/db/repositories/index.ts",
+      "status": " M",
+      "bytes": 11064,
+      "sha256": "81955afdb573351b3fa8e96aff7f46e7470534b076073d029ae87c9f8353e2f4"
+    },
+    {
+      "path": "apps/mobile/src/db/repositories/outbox.ts",
+      "status": " M",
+      "bytes": 18309,
+      "sha256": "d89a8f7f175e8ee91d8db4cfd0fcaaae53e7742d5399d4b8a79511b1c9da50a3"
+    },
+    {
+      "path": "apps/mobile/src/db/repositories/priceObservations.ts",
+      "status": "M ",
+      "bytes": 12841,
+      "sha256": "81abd0bd35e3996554cd5168d1745de87deadc3feff5001bc3ad5399b7eb85ec"
+    },
+    {
+      "path": "apps/mobile/src/db/repositories/sync.ts",
+      "status": " M",
+      "bytes": 19459,
+      "sha256": "afe4201b7860529fa65e373dec975c27417f682c36d4dfce8ad8bf946836161c"
+    },
+    {
+      "path": "apps/mobile/src/inventory/reconcileInventory.ts",
+      "status": " M",
+      "bytes": 41172,
+      "sha256": "6b9f2fda14d8ea513e087c8132d3dbf606679db3cb95ef36d9852bfcd6d90858"
+    },
+    {
+      "path": "apps/mobile/src/priceIntelligence/client.ts",
+      "status": "A ",
+      "bytes": 8154,
+      "sha256": "4dedd2d844e2eebe92e0c4c81e53167a659058d2193214a6298729fcd8dc2f5a"
+    },
+    {
+      "path": "apps/mobile/src/priceIntelligence/index.ts",
+      "status": "A ",
+      "bytes": 286,
+      "sha256": "01b0acd206499de05eec071ec513d5dd9048bcf6eff9cd661986338ce6f38d9d"
+    },
+    {
+      "path": "apps/mobile/src/priceIntelligence/presentation.ts",
+      "status": "A ",
+      "bytes": 517,
+      "sha256": "65f43a755ee4b2df3dcd804819acc0a6cc49dad4d9c0645e59ad7fd70b885be5"
+    },
+    {
+      "path": "apps/mobile/src/screens/home/HomeScreen.tsx",
+      "status": "M ",
+      "bytes": 14017,
+      "sha256": "495b976fcecd594231f1e5c36b1d241b082283c9afdc0ea0fe767ee9abcaf61c"
+    },
+    {
+      "path": "apps/mobile/src/screens/products/PersonalPriceChangesScreen.tsx",
+      "status": "A ",
+      "bytes": 10080,
+      "sha256": "612c13f1eaa444362a038186e2703ff8f20ec7b10e72e8a325aed97ee113cae3"
+    },
+    {
+      "path": "apps/mobile/src/screens/products/ProductDetailScreen.tsx",
+      "status": "M ",
+      "bytes": 33004,
+      "sha256": "be3f6add07b5157bfe816ef635fced99336ca943c70c1879d6c03894e3fef497"
+    },
+    {
+      "path": "apps/mobile/src/screens/sales/SellScreen.tsx",
+      "status": "M ",
+      "bytes": 51148,
+      "sha256": "a77e06c27810b5f2d0174ef4963f43990b4be26fb4b4dd9b75021ba56fac4296"
+    },
+    {
+      "path": "apps/mobile/src/sync/applier.ts",
+      "status": " M",
+      "bytes": 16050,
+      "sha256": "30ed94c32bb561432cae2e28d331a376723db39da7cc833a85ac99173697e4c0"
+    },
+    {
+      "path": "apps/mobile/src/sync/materialize.ts",
+      "status": " M",
+      "bytes": 13562,
+      "sha256": "83dcd17d7da37d53d95a09f1d5109320f9eeaeffece5e48ea6c417f1dc528ad8"
+    },
+    {
+      "path": "apps/mobile/src/sync/worker.ts",
+      "status": " M",
+      "bytes": 18220,
+      "sha256": "d0979fdd5478e5fc2a4145571a2c38355bdc7d8fb87dad957ad3f8ba771a5fde"
+    },
+    {
+      "path": "apps/mobile/src/ui/money.ts",
+      "status": "M ",
+      "bytes": 4987,
+      "sha256": "e8f25c28ad974772f87d0eed5a71545b42a90b25d9e0e31f47df1d4c4388d7a9"
+    },
+    {
+      "path": "docs/architecture/OFFLINE_SYNC.md",
+      "status": " M",
+      "bytes": 40371,
+      "sha256": "f9d42d4196eabf2200e58e8aabe64cd2fa0cbb862dd35a031b1085cbdd851031"
+    },
+    {
+      "path": "docs/decisions/DECISION_LOG.md",
+      "status": " M",
+      "bytes": 49314,
+      "sha256": "db6195c20e90130e1cb2d4e3e48ac49502beba11f062ff1786ff2eb5cf47504e"
+    },
+    {
+      "path": "docs/engineering/DEVELOPMENT.md",
+      "status": " M",
+      "bytes": 9755,
+      "sha256": "7da7501237a7b4f2a21aa66f409603f24a3600f0aa58f9d3dd533ed915eae3d7"
+    },
+    {
+      "path": "docs/engineering/M7_INDEPENDENT_AUDIT.md",
+      "status": " M",
+      "bytes": 8767,
+      "sha256": "f70edb3c7267bdda2f279f322b18ccc0913a22d370237867f804deedf89be658"
+    },
+    {
+      "path": "docs/engineering/M7_OFFLINE_SYNC_PLAN.md",
+      "status": " M",
+      "bytes": 12434,
+      "sha256": "8482ae1a3b2bed5985cb306b37c819f003b22f97d3cbf557bdf9807755074425"
+    },
+    {
+      "path": "docs/engineering/PROJECT_STATE.md",
+      "status": " M",
+      "bytes": 9987,
+      "sha256": "f7773f470c5393860c6a73b39befb8f9f8946703730dcfd7c599d12db35d1700"
+    },
+    {
+      "path": "package-lock.json",
+      "status": " M",
+      "bytes": 799288,
+      "sha256": "be92be6e59d334995b0e17c61a4cd81db25ee161186c392f066a55feb94f9d65"
+    },
+    {
+      "path": "package.json",
+      "status": " M",
+      "bytes": 1729,
+      "sha256": "f560a8ffed1a175940570568f182326b1b787e631667af7c1678709e7679d04e"
+    },
+    {
+      "path": "packages/contracts/__tests__/sync.test.ts",
+      "status": " M",
+      "bytes": 4424,
+      "sha256": "ef8b7bc314333a232f1bad40b587221639404466d68e2f8e2e40cc427be1a5e8"
+    },
+    {
+      "path": "packages/contracts/src/sync.ts",
+      "status": " M",
+      "bytes": 11040,
+      "sha256": "64a245c22262a4b689833d425c6cc22f2a8af66b2651a26ac8d2b8ba3004e57f"
+    },
+    {
+      "path": "packages/domain/__tests__/personalPriceChanges.test.ts",
+      "status": "A ",
+      "bytes": 7914,
+      "sha256": "74121c6dcd237f125af37f3fed774e7379c5c13659c2d275fc4a2a9faccdbd03"
+    },
+    {
+      "path": "packages/domain/src/index.ts",
+      "status": "M ",
+      "bytes": 777,
+      "sha256": "25e4abcbd1133f92868d145917ef9479282cd55befd69c73fafcf9b90ed613ac"
+    },
+    {
+      "path": "packages/domain/src/personalPriceChanges.ts",
+      "status": "A ",
+      "bytes": 5998,
+      "sha256": "690372841ed75e590c3c29a406928bd11c560ea23247b03ac898967c71032d9b"
+    },
+    {
+      "path": "supabase/functions/_shared/protocol.ts",
+      "status": " M",
+      "bytes": 4114,
+      "sha256": "e4c2e628ce634f972ece6678c88b62e58bb88bb0781789522ef4da58d5ee7abe"
+    },
+    {
+      "path": "supabase/tests/m7_catalogue.sql",
+      "status": " M",
+      "bytes": 948,
+      "sha256": "56a1e295dbf1c8fe8d4391cc81929a700eb44dbb8da354213407c78089bd09fd"
+    },
+    {
+      "path": "supabase/tests/m7_cost_batch.sql",
+      "status": " M",
+      "bytes": 715,
+      "sha256": "857b8bb4e576070bf573a94df12cf60df769d386177c7b6aebdbc433b1103f1f"
+    },
+    {
+      "path": "supabase/tests/m7_device_authorization.sql",
+      "status": " M",
+      "bytes": 8583,
+      "sha256": "900ebe2655f6c18453b52f83a5c624bbbb3096f408a2c381affdcd29858c2b25"
+    },
+    {
+      "path": "supabase/tests/m7_finance.sql",
+      "status": " M",
+      "bytes": 567,
+      "sha256": "9d2d5ad59e6e6a59915015167f4b6faf3008b211568cf54b29a9c48f5a1cbd6f"
+    },
+    {
+      "path": "supabase/tests/m7_m5.sql",
+      "status": " M",
+      "bytes": 674,
+      "sha256": "9e40c66d82f483c028346f2963c494551cc67077c5d3956f72b133d6d5e6f2fe"
+    },
+    {
+      "path": "supabase/tests/m7_sync.sql",
+      "status": " M",
+      "bytes": 1733,
+      "sha256": "01d0610bb970162ed4c052f32faf068475689105f7e99581b6bf94e38e345900"
+    },
+    {
+      "path": "tickets.md",
+      "status": " M",
+      "bytes": 14637,
+      "sha256": "b5c4d14e35906c64cbf3178e81fefc14caa38712c35a829df973f278405faa50"
+    },
+    {
+      "path": "apps/mobile/__tests__/m7Pilot.test.ts",
+      "status": "??",
+      "bytes": 13693,
+      "sha256": "013ee7561f31c0632b04fc84bcc5d5ffd5affb3ef8b6c976e8383b0eff0a8e8b"
+    },
+    {
+      "path": "apps/mobile/__tests__/m9SyncIntegration.test.ts",
+      "status": "??",
+      "bytes": 5120,
+      "sha256": "d5f4447d772e5321477007fbb9ee8bc3bc08bb2fb1e053388155884475ca4725"
+    },
+    {
+      "path": "apps/mobile/app/sync.tsx",
+      "status": "??",
+      "bytes": 11680,
+      "sha256": "ec214403228348833130e977da53cad98c5256dce8aca71a5de37ef68158712b"
+    },
+    {
+      "path": "apps/mobile/src/sync/PilotSyncScheduler.tsx",
+      "status": "??",
+      "bytes": 1154,
+      "sha256": "1f2e50e80384d1fc86a5e4b6de25280fa6157821fdd8e8f4884bb1fb410455b6"
+    },
+    {
+      "path": "apps/mobile/src/sync/auth.ts",
+      "status": "??",
+      "bytes": 1735,
+      "sha256": "f5c674c405f227b547a4de6bb884b2c0b67e5763c8cff3711af863dff7cc236c"
+    },
+    {
+      "path": "apps/mobile/src/sync/pilot.ts",
+      "status": "??",
+      "bytes": 10765,
+      "sha256": "422ddee5af0594e438224b81b847bf1e45f7524c257830b5ed499bdd7147d913"
+    },
+    {
+      "path": "supabase/migrations/20260919223000_m7_bootstrap_operation_history.sql",
+      "status": "??",
+      "bytes": 5375,
+      "sha256": "76568b82354d5012e4f516d9d382ef16966bef6c36b3601ddd0ae04ea3ec0989"
+    },
+    {
+      "path": "supabase/migrations/20260928005512_fix_apply_one_pgcrypto_search_path.sql",
+      "status": "??",
+      "bytes": 307,
+      "sha256": "935bcc74205f176367fbe98b93491b5f2ea5c3186fe879380e715eee1ac5a7dd"
+    },
+    {
+      "path": "supabase/migrations/20260928010143_prevent_revoked_device_reenrollment.sql",
+      "status": "??",
+      "bytes": 644,
+      "sha256": "a049585fe6d89fc8fb35a6a538655c234e95a46b668eb202bbef5950225cd8c8"
+    },
+    {
+      "path": "supabase/migrations/20260928010639_bind_money_out_actor_to_authenticated_owner.sql",
+      "status": "??",
+      "bytes": 2661,
+      "sha256": "2aa224037f9e6600c9c700fe10fd6a030c8b3be69d480cf978c141ede047b048"
+    },
+    {
+      "path": "supabase/migrations/20260928054000_guard_reconciliation_server_baseline.sql",
+      "status": "??",
+      "bytes": 7424,
+      "sha256": "4a2694b05afe34c8be7e7da2b2217a4b610c4767538abd528618718b29ce8e82"
+    },
+    {
+      "path": "supabase/tests/m7_bootstrap_history.sql",
+      "status": "??",
+      "bytes": 5319,
+      "sha256": "f1ce2ce429509c974652285497332e9ab4a22281706d0682c33d9fff1fce57f8"
+    },
+    {
+      "path": "tools/scripts/test-local-sync.mjs",
+      "status": "??",
+      "bytes": 15380,
+      "sha256": "ea78032753b3a0155e823971c0cc960f31ac0d3031c25993559015099b58bfbb"
+    }
+  ],
+  "excluded_changed": [],
+  "raw_zip_sha256": "36b025717b0e2d93fcfb50ee54120488bc436f1a8efd01c77d0f4d4f740fa541",
+  "raw_zip_bytes": 404400
+}

@@ -13,8 +13,10 @@ import {
   getSyncBootstrapState,
   getSyncStoreState,
   listSyncBootstrapEntities,
+  listOpenSyncConflicts,
   listActiveOutboxOperationsForEntity,
   markOutboxEchoApplied,
+  quarantineOutboxConflict,
   saveSyncEntityVersion,
   stageSyncBootstrapEntity,
   updateSyncStoreState,
@@ -47,15 +49,6 @@ function compareCursor(
   return left.revision === right.revision
     ? left.changeIndex - right.changeIndex
     : left.revision - right.revision;
-}
-
-function compareBootstrapIdentity(
-  left: { entityType: string; entityId: string },
-  right: { entityType: string; entityId: string },
-): number {
-  return left.entityType === right.entityType
-    ? left.entityId.localeCompare(right.entityId)
-    : left.entityType.localeCompare(right.entityType);
 }
 
 function assertLocalOperationIdentity(
@@ -158,6 +151,33 @@ function applyOnePullChange(
     entityId: change.entityId,
     excludeOperationId: change.operationId,
   });
+  const openConflict = listOpenSyncConflicts(adapter, change.storeId).find(
+    (item) => item.entityType === change.entityType && item.entityId === change.entityId,
+  );
+  if (openConflict) {
+    createSyncConflict(adapter, {
+      id: openConflict.id,
+      storeId: change.storeId,
+      operationId: openConflict.operationId,
+      entityType: change.entityType,
+      entityId: change.entityId,
+      conflictType: openConflict.conflictType,
+      localPayload: openConflict.localPayload,
+      serverPayload: payloadText(change.payload),
+      serverVersion: change.entityVersion,
+      serverRevision: change.serverRevision,
+      createdAt: options.now,
+    });
+    saveSyncEntityVersion(adapter, {
+      storeId: change.storeId,
+      entityType: change.entityType,
+      entityId: change.entityId,
+      serverVersion: change.entityVersion,
+      serverRevision: change.serverRevision,
+      updatedAt: options.now,
+    });
+    return { applied: 0, echoes: 0, conflicts: 0 };
+  }
   if (activeLocalOperations.length > 0) {
     createSyncConflict(adapter, {
       id: options.conflictIdFactory(),
@@ -169,8 +189,10 @@ function applyOnePullChange(
       localPayload: activeLocalOperations[0].payload,
       serverPayload: payloadText(change.payload),
       serverVersion: change.entityVersion,
+      serverRevision: change.serverRevision,
       createdAt: options.now,
     });
+    quarantineOutboxConflict(adapter, activeLocalOperations[0].operationId);
     saveSyncEntityVersion(adapter, {
       storeId: change.storeId,
       entityType: change.entityType,
@@ -257,9 +279,10 @@ export function applySyncBootstrapPage(
       throw new Error('Bootstrap cursor does not match the snapshot revision.');
     }
 
-    let previous = state.snapshotAfterEntityType !== null && state.snapshotAfterEntityId !== null
-      ? { entityType: state.snapshotAfterEntityType, entityId: state.snapshotAfterEntityId }
-      : null;
+    let previous = {
+      revision: state.snapshotCursorRevision,
+      changeIndex: state.snapshotCursorChangeIndex,
+    };
     for (const entity of response.entities) {
       if (entity.storeId !== input.storeId) {
         throw new Error('Bootstrap response contains an entity from another store.');
@@ -267,43 +290,40 @@ export function applySyncBootstrapPage(
       if (entity.serverRevision > response.snapshotRevision) {
         throw new Error('Bootstrap entity revision exceeds the snapshot revision.');
       }
-      if (previous && compareBootstrapIdentity(entity, previous) <= 0) {
-        throw new Error('Bootstrap entities are not in strict cursor order.');
+      if (compareCursor({ revision: entity.serverRevision, changeIndex: entity.changeIndex }, previous) <= 0) {
+        throw new Error('Bootstrap operations are not in strict cursor order.');
       }
       const envelope = parseSyncOperationEnvelope(entity.payload);
-      if (!matchesSyncEntity(envelope, entity)) {
-        throw new Error('Bootstrap entity envelope does not match its identity.');
+      if (!matchesSyncEntity(envelope, entity) || envelope.operationId !== entity.operationId) {
+        throw new Error('Bootstrap operation envelope does not match its identity.');
       }
       stageSyncBootstrapEntity(adapter, {
         storeId: input.storeId,
         bootstrapId: state.bootstrapId,
         snapshotRevision: response.snapshotRevision,
         serverRevision: entity.serverRevision,
+        changeIndex: entity.changeIndex,
+        operationId: entity.operationId,
         entityType: entity.entityType,
         entityId: entity.entityId,
         entityVersion: entity.entityVersion,
         payload: payloadText(entity.payload),
       });
-      previous = entity;
+      previous = { revision: entity.serverRevision, changeIndex: entity.changeIndex };
     }
 
-    const afterEntityType = response.nextCursor?.afterEntityType ?? null;
-    const afterEntityId = response.nextCursor?.afterEntityId ?? null;
     if (response.nextCursor) {
-      const finalEntity = response.entities.at(-1);
-      if (
-        !finalEntity ||
-        finalEntity.entityType !== afterEntityType ||
-        finalEntity.entityId !== afterEntityId
-      ) {
-        throw new Error('Bootstrap next cursor does not match the final staged entity.');
+      if (response.entities.length === 0 ||
+        compareCursor({ revision: response.nextCursor.afterRevision,
+          changeIndex: response.nextCursor.afterChangeIndex }, previous) !== 0) {
+        throw new Error('Bootstrap next cursor does not match the final staged operation.');
       }
     }
     advanceSyncBootstrap(adapter, {
       storeId: input.storeId,
       snapshotRevision: response.snapshotRevision,
-      afterEntityType,
-      afterEntityId,
+      afterRevision: previous.revision,
+      afterChangeIndex: previous.changeIndex,
       updatedAt: input.options.now,
     });
     return { staged: response.entities.length };
@@ -338,7 +358,8 @@ export function commitSyncBootstrapSnapshot(
       if (
         envelope.storeId !== entity.storeId ||
         envelope.entityType !== entity.entityType ||
-        envelope.entityId !== entity.entityId
+        envelope.entityId !== entity.entityId ||
+        envelope.operationId !== entity.operationId
       ) {
         throw new Error('Staged bootstrap envelope does not match its identity.');
       }
@@ -353,13 +374,30 @@ export function commitSyncBootstrapSnapshot(
         });
         echoes += 1;
       } else {
+        const openConflict = listOpenSyncConflicts(adapter, input.storeId).find(
+          (item) => item.entityType === entity.entityType && item.entityId === entity.entityId,
+        );
         const activeLocalOperations = listActiveOutboxOperationsForEntity(adapter, {
           storeId: input.storeId,
           entityType: entity.entityType as Parameters<typeof listActiveOutboxOperationsForEntity>[1]['entityType'],
           entityId: entity.entityId,
           excludeOperationId: envelope.operationId,
         });
-        if (activeLocalOperations.length > 0) {
+        if (openConflict) {
+          createSyncConflict(adapter, {
+            id: openConflict.id,
+            storeId: input.storeId,
+            operationId: openConflict.operationId,
+            entityType: entity.entityType,
+            entityId: entity.entityId,
+            conflictType: openConflict.conflictType,
+            localPayload: openConflict.localPayload,
+            serverPayload: entity.payload,
+            serverVersion: entity.entityVersion,
+            serverRevision: entity.serverRevision,
+            createdAt: input.options.now,
+          });
+        } else if (activeLocalOperations.length > 0) {
           createSyncConflict(adapter, {
             id: input.options.conflictIdFactory(),
             storeId: input.storeId,
@@ -370,8 +408,10 @@ export function commitSyncBootstrapSnapshot(
             localPayload: activeLocalOperations[0].payload,
             serverPayload: entity.payload,
             serverVersion: entity.entityVersion,
+            serverRevision: entity.serverRevision,
             createdAt: input.options.now,
           });
+          quarantineOutboxConflict(adapter, activeLocalOperations[0].operationId);
           conflicts += 1;
         } else {
           materializeSyncOperation(adapter, envelope);

@@ -68,6 +68,11 @@ describe('M5 blind reconciliation checks', () => {
       expect(graph.reconciliation.status).toBe('COMPLETED');
       expect(countRows(fixture.adapter, 'inventory_events')).toBe(beforeEvents);
       expect(countRows(fixture.adapter, 'outbox_operations')).toBe(beforeOutbox + 1);
+      expect(JSON.parse(graph.outbox.payload).entities.syncBaseline).toEqual({
+        serverRevision: 0,
+        predecessorOperationIds: [testId(6020)],
+        incomplete: false,
+      });
       const replay = client.finalizeReconciliation({
         reconciliationId: draft.reconciliationId,
         operationId: testId(6040),

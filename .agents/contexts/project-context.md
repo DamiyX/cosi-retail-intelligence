@@ -3,7 +3,7 @@
 **Status:** Active  
 **Scope:** Whole project  
 **Project ID:** COSI  
-**Updated:** 2026-09-19  
+**Updated:** 2026-09-28  
 **Confidence:** High for approved product and architecture; explicit unknowns
 remain below.
 
@@ -24,9 +24,11 @@ M0–M6 source/automated scope is independently accepted. M5 added minimal
 batch-aware expiry, assumed FEFO, blind reconciliation, guided owner checks and
 attention. M6 added owner-only expenses/withdrawals and truthful Home/Today.
 Physical/release gates remain carried and native/release readiness is not yet
-approved. M7 planning is active on `feat/m7-offline-sync`; no M7 runtime code is
-claimed. Coordinator task `01a098ef-d830-7531-bca7-2d66b0a5b587` owns tickets
-and independent acceptance.
+approved. M7 runtime code is present on `feat/m7-offline-sync`; local PostgreSQL,
+endpoint and D-044 stale-count checks pass, while the rebuilt-APK Galaxy gate
+remains open. M9 source work exists separately on `plan/m9-price-intelligence`
+and awaits integration with accepted M7. The coordinator owns tickets and
+independent acceptance; M8 remains deferred.
 
 ## Product Snapshot
 

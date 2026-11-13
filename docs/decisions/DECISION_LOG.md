@@ -111,6 +111,9 @@ When a major decision changes, update the affected source-of-truth document too.
 | D-038 | M4 exact cost basis, provisional COGS rounding and conservative coverage | ACTIVE |
 | D-039 | Pilot batch awareness, automatic assumed FEFO and first-class unknown stock | ACTIVE |
 | D-040 | Blind owner checks, sourced adjustment costing and durable attention | ACTIVE |
+| D-041 | M6 money-out and truthful daily summary | ACTIVE |
+| D-042 | M7 authenticated sync and PostgreSQL application boundary | ACTIVE |
+| D-044 | Reject cross-device stale physical reconciliations | ACTIVE |
 
 ---
 
@@ -1398,6 +1401,45 @@ without rewriting actor history or prematurely deciding final onboarding UX.
 Revisit D-011 and evaluate a managed sync engine if the M7 sale spike cannot
 demonstrate safe idempotent retry, per-store ordering, RLS isolation and
 recoverable pull without disproportionate complexity.
+
+---
+
+## D-044 — Reject Cross-Device Stale Physical Reconciliations
+
+**Status:** ACTIVE  
+**Date:** 2026-09-28  
+**Approval:** The founder authorized completion of the M7 correction and phone
+verification before M9 integration after the independent audit explained the
+missing cross-device guard.
+
+### Decision
+
+Retain local blind-count and same-device inventory/batch watermark checks.
+Each new finalized reconciliation also carries the last server revision fully
+materialized on that device and a bounded set of the device's local inventory/
+batch operation IDs already reflected in the counted projection. The server
+checks that baseline under the store revision lock. It accepts later product
+movements only when they are verified predecessors from the same device;
+another device's later movement or batch change yields a durable `CONFLICT`.
+Counts queued before this baseline existed fail closed for manual review.
+The authenticated caller must retain an active OWNER membership to submit a
+physical reconciliation; a payload role claim cannot grant this authority.
+No conflict silently mutates the server inventory ledger. Genuine concurrent
+sales remain append-only under D-013.
+
+### Rationale
+
+SQLite row IDs and local batch application order cannot compare state across
+devices. A stale adjustment could otherwise overwrite the meaning of a real
+sale. The server revision and operation IDs already exist in M7, so the guard
+extends the canonical reconciliation envelope without a new queue or stock
+system. A conflict keeps local evidence visible for review/recount.
+
+### Revisit if
+
+The pilot needs automatic cross-device count resolution, stronger device
+cloning defenses, or counts with more than 5,000 unsynchronized product
+predecessors. Those require separate UX and protocol evidence.
 
 ---
 

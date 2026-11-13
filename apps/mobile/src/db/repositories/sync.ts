@@ -59,6 +59,8 @@ export interface SyncBootstrapEntityRow {
   bootstrapId: string;
   snapshotRevision: number;
   serverRevision: number;
+  changeIndex: number;
+  operationId: string;
   entityType: string;
   entityId: string;
   entityVersion: number;
@@ -75,6 +77,7 @@ export interface SyncConflictRow {
   localPayload: string;
   serverPayload: string | null;
   serverVersion: number | null;
+  serverRevision: number | null;
   status: SyncConflictStatus;
   resolution: string | null;
   createdAt: string;
@@ -134,6 +137,8 @@ function mapBootstrapEntity(row: Row): SyncBootstrapEntityRow {
     bootstrapId: row.bootstrap_id as string,
     snapshotRevision: row.snapshot_revision as number,
     serverRevision: row.server_revision as number,
+    changeIndex: row.change_index as number,
+    operationId: row.operation_id as string,
     entityType: row.entity_type as string,
     entityId: row.entity_id as string,
     entityVersion: row.entity_version as number,
@@ -152,6 +157,7 @@ function mapConflict(row: Row): SyncConflictRow {
     localPayload: row.local_payload as string,
     serverPayload: (row.server_payload as string | null) ?? null,
     serverVersion: (row.server_version as number | null) ?? null,
+    serverRevision: (row.server_revision as number | null) ?? null,
     status: row.status as SyncConflictStatus,
     resolution: (row.resolution as string | null) ?? null,
     createdAt: row.created_at as string,
@@ -275,6 +281,7 @@ export function beginSyncBootstrap(
   const startedAt = input.startedAt ?? nowIso();
   adapter.transaction(() => {
     adapter.run('DELETE FROM sync_bootstrap_entities WHERE store_id = ?;', [requireId(input.storeId)]);
+    adapter.run('DELETE FROM sync_bootstrap_operations WHERE store_id = ?;', [requireId(input.storeId)]);
     adapter.run(
       `INSERT INTO sync_bootstrap_state
         (store_id, device_id, bootstrap_id, status, started_at, updated_at)
@@ -312,12 +319,15 @@ export function stageSyncBootstrapEntity(
   input: SyncBootstrapEntityRow,
 ): void {
   adapter.run(
-    `INSERT INTO sync_bootstrap_entities
-      (store_id, bootstrap_id, snapshot_revision, server_revision, entity_type, entity_id, entity_version, payload)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(store_id, bootstrap_id, entity_type, entity_id) DO UPDATE SET
+    `INSERT INTO sync_bootstrap_operations
+      (store_id, bootstrap_id, snapshot_revision, server_revision, change_index,
+       operation_id, entity_type, entity_id, entity_version, payload)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(store_id, bootstrap_id, server_revision, change_index) DO UPDATE SET
        snapshot_revision = excluded.snapshot_revision,
-       server_revision = excluded.server_revision,
+       operation_id = excluded.operation_id,
+       entity_type = excluded.entity_type,
+       entity_id = excluded.entity_id,
        entity_version = excluded.entity_version,
        payload = excluded.payload;`,
     [
@@ -325,6 +335,8 @@ export function stageSyncBootstrapEntity(
       requireId(input.bootstrapId),
       input.snapshotRevision,
       input.serverRevision,
+      input.changeIndex,
+      requireId(input.operationId),
       input.entityType,
       requireId(input.entityId),
       input.entityVersion,
@@ -338,11 +350,11 @@ export function listSyncBootstrapEntities(
   input: { storeId: string; bootstrapId: string },
 ): SyncBootstrapEntityRow[] {
   return adapter.getAllRows<Row>(
-    `SELECT store_id, bootstrap_id, snapshot_revision, server_revision, entity_type, entity_id,
-            entity_version, payload
-     FROM sync_bootstrap_entities
+    `SELECT store_id, bootstrap_id, snapshot_revision, server_revision, change_index,
+            operation_id, entity_type, entity_id, entity_version, payload
+     FROM sync_bootstrap_operations
      WHERE store_id = ? AND bootstrap_id = ?
-     ORDER BY server_revision ASC, entity_type ASC, entity_id ASC;`,
+     ORDER BY server_revision ASC, change_index ASC;`,
     [requireId(input.storeId), requireId(input.bootstrapId)],
   ).map(mapBootstrapEntity);
 }
@@ -352,7 +364,7 @@ export function clearSyncBootstrapEntities(
   input: { storeId: string; bootstrapId: string },
 ): void {
   adapter.run(
-    'DELETE FROM sync_bootstrap_entities WHERE store_id = ? AND bootstrap_id = ?;',
+    'DELETE FROM sync_bootstrap_operations WHERE store_id = ? AND bootstrap_id = ?;',
     [requireId(input.storeId), requireId(input.bootstrapId)],
   );
 }
@@ -401,8 +413,8 @@ export function advanceSyncBootstrap(
   input: {
     storeId: string;
     snapshotRevision: number;
-    afterEntityType: string | null;
-    afterEntityId: string | null;
+    afterRevision: number;
+    afterChangeIndex: number;
     updatedAt?: string;
   },
 ): void {
@@ -410,15 +422,13 @@ export function advanceSyncBootstrap(
   adapter.run(
     `UPDATE sync_bootstrap_state
      SET snapshot_revision = ?, snapshot_cursor_revision = ?,
-         snapshot_cursor_change_index = ?, snapshot_after_entity_type = ?,
-         snapshot_after_entity_id = ?, updated_at = ?
+         snapshot_cursor_change_index = ?, snapshot_after_entity_type = NULL,
+         snapshot_after_entity_id = NULL, updated_at = ?
      WHERE store_id = ? AND status = 'IN_PROGRESS';`,
     [
       input.snapshotRevision,
-      input.snapshotRevision,
-      input.afterEntityType === null || input.afterEntityId === null ? 0 : 1,
-      input.afterEntityType,
-      input.afterEntityId,
+      input.afterRevision,
+      input.afterChangeIndex,
       updatedAt,
       requireId(input.storeId),
     ],
@@ -503,7 +513,7 @@ export function saveSyncEntityVersion(
 
 const CONFLICT_COLUMNS =
   'id, store_id, operation_id, entity_type, entity_id, conflict_type, local_payload, ' +
-  'server_payload, server_version, status, resolution, created_at, resolved_at';
+  'server_payload, server_version, server_revision, status, resolution, created_at, resolved_at';
 
 export interface CreateSyncConflictInput {
   id: string;
@@ -515,6 +525,7 @@ export interface CreateSyncConflictInput {
   localPayload: string;
   serverPayload?: string | null;
   serverVersion?: number | null;
+  serverRevision?: number | null;
   createdAt?: string;
 }
 
@@ -524,10 +535,19 @@ export function createSyncConflict(
 ): SyncConflictRow {
   const createdAt = input.createdAt ?? nowIso();
   adapter.run(
+    `UPDATE sync_conflicts SET server_payload = COALESCE(?, server_payload),
+       server_version = COALESCE(?, server_version),
+       server_revision = COALESCE(?, server_revision)
+     WHERE operation_id = ? AND status = 'OPEN'
+       AND (server_revision IS NULL OR server_revision <= ?);`,
+    [input.serverPayload ?? null, input.serverVersion ?? null, input.serverRevision ?? null,
+      requireId(input.operationId), input.serverRevision ?? -1],
+  );
+  adapter.run(
     `INSERT OR IGNORE INTO sync_conflicts
       (id, store_id, operation_id, entity_type, entity_id, conflict_type,
-       local_payload, server_payload, server_version, status, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN', ?);`,
+       local_payload, server_payload, server_version, server_revision, status, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN', ?);`,
     [
       requireId(input.id),
       requireId(input.storeId),
@@ -538,6 +558,7 @@ export function createSyncConflict(
       input.localPayload,
       input.serverPayload ?? null,
       input.serverVersion ?? null,
+      input.serverRevision ?? null,
       createdAt,
     ],
   );

@@ -4,13 +4,14 @@
   "workflow_id": "build-feature",
   "mode": "implement",
   "status": "in_progress",
-  "current_state": "m7-independent-audit-source-blockers-open",
+  "current_state": "m7-local-integration-passed-native-gate-open",
   "completed_states": [
     "m6-independent-source-accepted",
     "m7-roadmap-and-envelope-impact-reviewed",
     "m7-plan-tickets-reviewed",
     "m7-01-through-m7-07-implemented",
-    "m7-08-source-hardening-complete"
+    "m7-08-source-hardening-complete",
+    "m7-independent-source-corrections-validated"
   ],
   "owner": {
     "agent": "coordinating-planner-independent-auditor",
@@ -59,6 +60,24 @@
       "claim": "Current official Supabase guidance confirms explicit Data API grants, RLS plus negative policy tests, authenticated Edge Function JWT handling and pgTAP database testing. The M7 plan requires these rather than relying on platform defaults.",
       "source": "https://supabase.com/docs/guides/database/postgres/row-level-security; https://supabase.com/docs/guides/functions/auth; https://supabase.com/docs/guides/local-development/testing/overview; https://supabase.com/changelog/45329-breaking-change-tables-not-exposed-to-data-and-graphql-api-automatically",
       "observed_at": "2026-09-19T02:59:49.0107167Z"
+    },
+    {
+      "kind": "verification",
+      "claim": "Audit source corrections: ordered operation-history bootstrap, owner-facing pilot sync, durable auth and conflict states. Final npm run validate passed 503 tests across 52 suites, strict typecheck, zero-warning lint and environment check; focused pilot suite passed 9/9. Expo Doctor 21/21, dependency check and Android export passed. PostgreSQL and device integration remain unrun.",
+      "source": "npm run validate; npm test --workspace @retail/mobile -- --runInBand m7Pilot.test.ts; npm run mobile:doctor; npm exec --workspace @retail/mobile -- expo install --check; npm run mobile:export; docs/engineering/M7_INDEPENDENT_AUDIT.md",
+      "observed_at": "2026-09-27T15:36:01Z"
+    },
+    {
+      "kind": "verification",
+      "claim": "Disposable local Supabase reset, 81 pgTAP assertions, scoped lint, security advisors, and live Auth/Edge Function/PostgreSQL sync integration pass. Cross-device stale stock reconciliation and native-device sync remain open; M7 is not accepted.",
+      "source": "docs/engineering/M7_INDEPENDENT_AUDIT.md; npm exec -- supabase test db --local; npm run test:sync:local",
+      "observed_at": "2026-09-28T05:25:13Z"
+    },
+    {
+      "kind": "verification",
+      "claim": "The expanded live integration test reproduced stale-count APPLIED before the additive D-044 guard; after reset it passes valid same-device predecessor, cross-device conflict, forged predecessor, legacy-baseline conflict and idempotent replay. Focused mobile reconciliation tests pass 6/6; 81 pgTAP assertions, scoped lint and security advisors pass.",
+      "source": "docs/engineering/M7_INDEPENDENT_AUDIT.md; npm run test:sync:local; npm run test --workspace @retail/mobile -- --runInBand m5Reconciliation.test.ts; npm exec -- supabase test db --local",
+      "observed_at": "2026-09-28T06:05:04Z"
     }
   ],
   "acceptance_gates": [
@@ -119,7 +138,7 @@
       "claim": "M7 has a non-production PostgreSQL/Supabase environment for migration, RLS and endpoint integration tests.",
       "owner": "founder-and-environment-setup-task",
       "required": true,
-      "status": "blocked",
+      "status": "met",
       "depends_on": [],
       "verification": {
         "kind": "test",
@@ -136,12 +155,17 @@
           "result": "supabase test db --local supabase/tests/m7_sync.sql attempted and failed with the same local Postgres connection refusal.",
           "source": "npm exec -- supabase test db --local supabase/tests/m7_sync.sql",
           "observed_at": "2026-09-19T21:52:32.7837525Z"
+        },
+        {
+          "result": "Docker-backed local reset applied every migration; pgTAP passed 81 assertions in 9 files, scoped lint and security advisors passed, and disposable Auth/Edge Function/PostgreSQL integration passed. Hosted services were untouched.",
+          "source": "npm exec -- supabase db reset --local --no-seed --yes; npm exec -- supabase test db --local; npm exec -- supabase db lint --local --schema public,sync_private --fail-on error; npm exec -- supabase db advisors --local --type security --level warn --fail-on error; npm run test:sync:local",
+          "observed_at": "2026-09-28T05:25:13Z"
         }
       ],
       "limitations": [
-        "No hosted project is linked or authorized; no migration, RLS or endpoint acceptance claim is made."
+        "Only disposable local Supabase was tested; no hosted project was linked or modified."
       ],
-      "blocker": "Docker Desktop fails during startup with stale Unix socket rename errors; the founder deferred further setup troubleshooting on 2026-09-27.",
+      "blocker": null,
       "waiver": null
     },
     {
@@ -188,13 +212,18 @@
       },
       "evidence": [
         {
-          "result": "Independent source review found that latest-document bootstrap omits earlier creation facts after mutable edits; the mobile app has no integrated sync/enrolment/retry/conflict path. Focused local M7 tests passed 14/14 after audit corrections; database evidence has not run.",
+          "result": "Independent review found and locally corrected latest-document bootstrap loss and missing app sync integration. Final validation passed 503 tests across 52 suites and focused pilot regressions 9/9. Database and native-device evidence has not run.",
           "source": "docs/engineering/M7_INDEPENDENT_AUDIT.md; npm run test --workspace @retail/mobile -- --runInBand m7Sync.test.ts",
-          "observed_at": "2026-09-27T14:39:00Z"
+          "observed_at": "2026-09-27T15:36:01Z"
+        },
+        {
+          "result": "Local PostgreSQL, pgTAP and endpoint checks now pass; audit identified the missing cross-device stale-reconciliation guard. Native-device sync remains open.",
+          "source": "docs/engineering/M7_INDEPENDENT_AUDIT.md; npm exec -- supabase test db --local; npm run test:sync:local",
+          "observed_at": "2026-09-28T05:25:13Z"
         }
       ],
-      "limitations": ["PostgreSQL migration, pgTAP and Edge Function integration remain untested."],
-      "blocker": "Bootstrap reconstruction and app integration must be corrected before source acceptance.",
+      "limitations": ["Local PostgreSQL and stale-count endpoint checks pass; rebuilt-APK native-device sync remains unverified."],
+      "blocker": "Local PostgreSQL, endpoint and D-044 stale-reconciliation checks pass; rebuilt-APK Galaxy sync/offline evidence remains open. See docs/engineering/M7_INDEPENDENT_AUDIT.md.",
       "waiver": null
     }
   ],
@@ -229,12 +258,11 @@
     }
   ],
   "blockers": [
-    "Fresh-device bootstrap loses original creation facts after mutable edits; the app does not invoke sync.",
-    "A disposable PostgreSQL/Supabase integration environment is required before M7 can be accepted; Docker troubleshooting is deferred by the founder."
+    "A rebuilt Android client and Galaxy offline/sign-in/sync verification remain open."
   ],
-  "next_action": "Correct M7 source blockers, then run PostgreSQL integration when the environment gate resumes. Finalize M9 planning separately and ask the founder before starting an M9 implementation task. Do not start M8.",
+  "next_action": "Complete rebuilt-APK Galaxy offline/sign-in/sync checks in the separate phone-verification chat, then integrate the isolated M9 worktree and verify M9-04. Do not start M8.",
   "created_at": "2026-09-19T02:59:49.0107167Z",
-  "updated_at": "2026-09-27T14:39:00Z",
+  "updated_at": "2026-09-28T06:05:04Z",
   "archived": false
 }
 

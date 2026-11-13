@@ -525,3 +525,14 @@ export function markOutboxConflict(
     [update.errorCode, requireId(update.operationId), ...lease.params],
   );
 }
+
+/** A pulled remote edit can conflict before the pending local operation is leased. */
+export function quarantineOutboxConflict(adapter: DatabaseAdapter, operationId: string): void {
+  adapter.run(
+    `UPDATE outbox_operations
+     SET status = 'CONFLICT', lease_id = NULL, lease_expires_at = NULL,
+         next_attempt_at = NULL, last_error_code = 'CONFLICT'
+     WHERE operation_id = ? AND status IN ('PENDING', 'ERROR_RETRYABLE');`,
+    [requireId(operationId)],
+  );
+}

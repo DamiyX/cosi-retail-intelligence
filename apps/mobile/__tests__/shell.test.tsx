@@ -24,6 +24,7 @@ import ExpenseHistoryRoute from '../app/expenses';
 import OwnerWithdrawalEntryRoute from '../app/withdrawal';
 import OwnerWithdrawalHistoryRoute from '../app/withdrawals';
 import BusinessSummaryRoute from '../app/summary';
+import CloudSyncRoute from '../app/sync';
 import type { IsolatedDatabase } from '../src/db/testing';
 import { openIsolatedDatabase } from '../src/db/testing';
 import { CURRENT_SCHEMA_VERSION, MIGRATIONS } from '../src/db';
@@ -67,6 +68,7 @@ const ROUTES = {
   withdrawal: OwnerWithdrawalEntryRoute,
   withdrawals: OwnerWithdrawalHistoryRoute,
   summary: BusinessSummaryRoute,
+  sync: CloudSyncRoute,
 } as never;
 
 function openStoreDatabase(): IsolatedDatabase {

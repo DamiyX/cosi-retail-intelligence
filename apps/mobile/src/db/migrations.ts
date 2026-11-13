@@ -2566,6 +2566,41 @@ export const MIGRATIONS: Migration[] = [
         ON sync_bootstrap_entities(store_id, bootstrap_id, server_revision, entity_type, entity_id);`,
     ],
   },
+  {
+    version: 20,
+    name: 'offline_sync_bootstrap_operation_history',
+    statements: [
+      `CREATE TABLE sync_bootstrap_operations (
+        store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+        bootstrap_id TEXT NOT NULL,
+        snapshot_revision INTEGER NOT NULL CHECK (snapshot_revision >= 0),
+        server_revision INTEGER NOT NULL CHECK (server_revision > 0),
+        change_index INTEGER NOT NULL CHECK (change_index >= 0),
+        operation_id TEXT NOT NULL,
+        entity_type TEXT NOT NULL,
+        entity_id TEXT NOT NULL,
+        entity_version INTEGER NOT NULL CHECK (entity_version >= 0),
+        payload TEXT NOT NULL,
+        PRIMARY KEY (store_id, bootstrap_id, server_revision, change_index),
+        UNIQUE (store_id, bootstrap_id, operation_id),
+        FOREIGN KEY (store_id) REFERENCES sync_bootstrap_state(store_id) ON DELETE CASCADE
+      );`,
+      `UPDATE sync_bootstrap_state SET status = 'FAILED',
+        last_error_code = 'BOOTSTRAP_PROTOCOL_UPGRADED'
+        WHERE status = 'IN_PROGRESS';`,
+      `UPDATE sync_store_state SET status = 'ERROR_RETRYABLE',
+        last_error_code = 'BOOTSTRAP_PROTOCOL_UPGRADED'
+        WHERE status = 'BOOTSTRAPPING';`,
+    ],
+  },
+  {
+    version: 21,
+    name: 'offline_sync_conflict_server_revision',
+    statements: [
+      `ALTER TABLE sync_conflicts ADD COLUMN server_revision INTEGER NULL
+        CHECK (server_revision IS NULL OR server_revision >= 0);`,
+    ],
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = MIGRATIONS.length;

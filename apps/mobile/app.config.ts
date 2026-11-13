@@ -27,7 +27,7 @@ const config: ExpoConfig = {
     package: 'com.damiyx.retailintelligence' + variant.suffix,
     versionCode: 1,
   },
-  plugins: ['expo-router', 'expo-dev-client'],
+  plugins: ['expo-router', 'expo-dev-client', 'expo-secure-store'],
   extra: {
     appEnvironment: environment,
     ...(projectId ? { eas: { projectId } } : {}),
