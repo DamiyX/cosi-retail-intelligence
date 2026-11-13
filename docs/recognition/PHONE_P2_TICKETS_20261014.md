@@ -1,5 +1,15 @@
 # P2 rolling tickets — generated session preparation
 
+2 November2026 current: **P2-03 scoped experimental camera proof accepted**.
+Standalone/early integration, eight A/B numerical geometry positions and limited
+IC01 recreated-screen recovery accepted, with documented scene/timing and
+generated-versus-physical limitations. See
+apps/recognition-lab/runs/phone-experiment/p203-final-disposition-20261102-a1/COORDINATOR_ACCEPTANCE.md
+and PROJECT_STATE. P2-04's camera-proof prerequisite is cleared in this scope;
+its older implementation plan still needs current-native baseline reconciliation
+before source dispatch. No new phone, code, Git or CI action inferred. Older dated
+dispatch/status statements below remain historical evidence.
+
 October16 latest: original G3 stopped NO APK/publication-closure blocker;
 active correction is reports/PHONE_P2_03_G3_C1_DISPATCH_20261016.md.
 No Kotlin/R8/phone acceptance. Older dated dispatch status below is historical.

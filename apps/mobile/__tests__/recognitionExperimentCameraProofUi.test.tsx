@@ -2,7 +2,8 @@ import { act, fireEvent, render } from '@testing-library/react-native';
 import { AppState, View, type AppStateStatus } from 'react-native';
 import CameraProofPanel from '../src/recognitionExperiment/CameraProofPanel';
 import ExperimentRoot from '../src/recognitionExperiment/ExperimentRoot';
-import { cameraProofNative } from '../src/recognitionExperiment/nativeAdapter';
+import { cameraProofNative, exportSavedCameraEvidence, cancelSavedCameraEvidenceExport, inspectStationaryChart, exportStationaryChart } from '../src/recognitionExperiment/nativeAdapter';
+import { STATIONARY_JOB, STATIONARY_TARGET, STATIONARY_TARGET_SHA } from '../src/recognitionExperiment/cameraStationary';
 const mockPermission = { granted: true }, mockRequest = jest.fn(), mockTake = jest.fn(), mockSizes = jest.fn(), mockCheckPermission = jest.fn();
 jest.mock('../src/recognitionExperiment/cameraRuntime', () => {
   const React = jest.requireActual('react'), { View } = jest.requireActual('react-native');
@@ -10,7 +11,7 @@ jest.mock('../src/recognitionExperiment/cameraRuntime', () => {
     React.useImperativeHandle(ref, () => ({ getAvailablePictureSizesAsync: mockSizes, takePictureAsync: mockTake }), []); return React.createElement(View, { ...props, testID: 'camera-proof-view' });
   }) };
 });
-jest.mock('../src/recognitionExperiment/nativeAdapter', () => ({ cameraProofNative: { beginCameraProof: jest.fn(), cancelCameraProof: jest.fn(), failCameraProofCapture: jest.fn(), processCameraProof: jest.fn(), cameraProofStatus: jest.fn(), recoverCameraProof: jest.fn(), recordCameraProofRefusal: jest.fn() }, recoverGeneratedImageEvidence: jest.fn(() => { throw Error('legacy recovery mounted'); }) }));
+jest.mock('../src/recognitionExperiment/nativeAdapter', () => ({ inspectStationaryChart: jest.fn(), exportStationaryChart: jest.fn(), cancelStationaryChartExport: jest.fn(() => Promise.resolve(true)), exportSavedCameraEvidence: jest.fn(), cancelSavedCameraEvidenceExport: jest.fn(() => Promise.resolve(true)), cameraProofNative: { beginCameraProof: jest.fn(), cancelCameraProof: jest.fn(), failCameraProofCapture: jest.fn(), processCameraProof: jest.fn(), cameraProofStatus: jest.fn(), recoverCameraProof: jest.fn(), recordCameraProofRefusal: jest.fn() }, recoverGeneratedImageEvidence: jest.fn(() => { throw Error('legacy recovery mounted'); }) }));
 const native = jest.mocked(cameraProofNative);
 let change: (state: AppStateStatus) => void;
 beforeEach(() => {
@@ -21,6 +22,23 @@ beforeEach(() => {
   native.beginCameraProof.mockResolvedValue({ jobId: '12345678-1234-1234-1234-123456789abc', sourceSha256: 'a'.repeat(64) });
 });
 afterEach(() => { jest.restoreAllMocks(); delete process.env.EXPO_PUBLIC_RECOGNITION_CAMERA_PROOF; });
+test.each(['status', 'recovery'] as const)('explicit %s failure exposes only a bounded native code without capture', async operation => {
+  const failure = Object.assign(Error('private /data/user/0/test/file and bytes must stay hidden'), { code: 'CAMERA_IO_LINK_EPERM' });
+  if (operation === 'status') native.cameraProofStatus.mockRejectedValueOnce(failure);
+  else native.recoverCameraProof.mockRejectedValueOnce(failure);
+  const screen = render(<CameraProofPanel />);
+  await act(async () => { fireEvent.press(screen.getByLabelText(operation === 'status' ? 'Inspect saved camera status' : 'Classify interrupted camera storage')); });
+  expect(screen.getByText(/CAMERA_IO_LINK_EPERM/)).toBeTruthy();
+  expect(screen.queryByText(/private \/data/)).toBeNull();
+  expect(native.beginCameraProof).not.toHaveBeenCalled(); expect(mockTake).not.toHaveBeenCalled();
+});
+test('malformed native diagnostics fall back without exposing exception content', async () => {
+  native.recoverCameraProof.mockRejectedValueOnce(Object.assign(Error('private path /data/secret'), { code: 'CAMERA_IO_LINK_/data/secret' }));
+  const screen = render(<CameraProofPanel />);
+  await act(async () => { fireEvent.press(screen.getByLabelText('Classify interrupted camera storage')); });
+  expect(screen.getByText(/CAMERA_OPERATION_FAILED/)).toBeTruthy();
+  expect(screen.queryByText(/secret/)).toBeNull(); expect(mockTake).not.toHaveBeenCalled();
+});
 async function ready(screen: ReturnType<typeof render>) {
   // Report actual preview layout; changing reported size remounts and requires a new ready event.
   const available = screen.UNSAFE_getAllByType(View).filter(v => v.props.onLayout);
@@ -31,6 +49,14 @@ async function ready(screen: ReturnType<typeof render>) {
   expect(screen.getByLabelText('Capture one target').props.accessibilityState.disabled).toBe(true);
   await act(async () => { fireEvent(screen.getByTestId('camera-proof-view'), 'cameraReady'); });
 }
+
+test('native admission errno is visible without starting SDK work or exposing bridge paths', async () => {
+  native.beginCameraProof.mockRejectedValueOnce(Object.assign(Error('/data/user/0/private/reservation.new'), { code: 'CAMERA_IO_RENAME_EACCES' }));
+  const screen = render(<CameraProofPanel />); await ready(screen);
+  await act(async () => { fireEvent.press(screen.getByLabelText('Capture one target')); });
+  expect(screen.getByText('CAMERA_IO_RENAME_EACCES')).toBeTruthy(); expect(screen.queryByText(/data\/user/)).toBeNull();
+  expect(mockTake).not.toHaveBeenCalled(); expect(native.processCameraProof).not.toHaveBeenCalled(); expect(native.failCameraProofCapture).not.toHaveBeenCalled();
+});
 test('opted-in root does not mount legacy recovery or automatically capture/recover', async () => {
   process.env.EXPO_PUBLIC_RECOGNITION_CAMERA_PROOF = '1'; const screen = render(<ExperimentRoot />);
   await act(async () => {});
@@ -105,4 +131,44 @@ test('C1 counterexample: pressing the selected layout preserves usable readiness
   expect(screen.getByLabelText('Capture one target').props.accessibilityState.disabled).toBe(false);
   act(() => { fireEvent.press(screen.getByLabelText('Layout A')); });
   expect(screen.getByLabelText('Capture one target').props.accessibilityState.disabled).toBe(false);
+});
+
+test('saved export uses no capture/model call; cancellation and unmount request native drain', async () => {
+  let resolve!: (value: Record<string, unknown>) => void;
+  jest.mocked(exportSavedCameraEvidence).mockReturnValueOnce(new Promise(r => { resolve = r; }));
+  const screen = render(<CameraProofPanel />); await ready(screen);
+  await act(async () => { fireEvent.press(screen.getByLabelText('Export this saved test evidence')); });
+  expect(exportSavedCameraEvidence).toHaveBeenCalledTimes(1);
+  await act(async () => { fireEvent.press(screen.getByLabelText('Capture one target')); fireEvent.press(screen.getByLabelText('Cancel saved evidence export')); });
+  expect(mockTake).not.toHaveBeenCalled(); expect(native.beginCameraProof).not.toHaveBeenCalled(); expect(native.processCameraProof).not.toHaveBeenCalled();
+  expect(cancelSavedCameraEvidenceExport).toHaveBeenCalledTimes(1);
+  screen.unmount(); expect(cancelSavedCameraEvidenceExport).toHaveBeenCalledTimes(2);
+  await act(async () => { resolve({ status: 'READBACK_VERIFIED' }); });
+});
+
+test('stationary slot needs explicit status and acknowledgement; consumed reopen never rearms', async () => {
+  jest.mocked(inspectStationaryChart).mockResolvedValueOnce({ kind: 'STATIONARY_SLOT_STATUS', jobId: STATIONARY_JOB, targetId: STATIONARY_TARGET, targetSha256: STATIONARY_TARGET_SHA, state: 'CAPTURE_CONSUMED', captureAvailable: false, exportEligible: false, geometryStatus: 'INCONCLUSIVE' });
+  const screen = render(<CameraProofPanel />); await ready(screen);
+  expect(inspectStationaryChart).not.toHaveBeenCalled(); expect(exportStationaryChart).not.toHaveBeenCalled();
+  expect(screen.getByLabelText('Capture stationary chart once').props.accessibilityState.disabled).toBe(true);
+  await act(async () => { fireEvent.press(screen.getByLabelText('Inspect stationary chart slot')); });
+  expect(screen.getByLabelText('Acknowledge supported phone and fixed chart').props.accessibilityState.disabled).toBe(true);
+  expect(screen.getByLabelText('Capture stationary chart once').props.accessibilityState.disabled).toBe(true);
+  expect(screen.getByLabelText('Export stationary chart evidence').props.accessibilityState.disabled).toBe(true);
+  expect(mockTake).not.toHaveBeenCalled(); expect(native.beginCameraProof).not.toHaveBeenCalled();
+});
+
+test('stationary acknowledgement permits only one explicit admission even after a failed preflight', async () => {
+  const begin = jest.fn<Promise<unknown>, [string, string]>(async () => ({ jobId: STATIONARY_JOB, sourceSha256: 'a'.repeat(64) }));
+  cameraProofNative.beginStationaryChartProof = begin;
+  jest.mocked(inspectStationaryChart).mockResolvedValueOnce({ kind: 'STATIONARY_SLOT_STATUS', jobId: STATIONARY_JOB, targetId: STATIONARY_TARGET, targetSha256: STATIONARY_TARGET_SHA, state: 'AVAILABLE', captureAvailable: true, exportEligible: false, geometryStatus: 'INCONCLUSIVE' });
+  const screen = render(<CameraProofPanel />); await ready(screen);
+  await act(async () => { fireEvent.press(screen.getByLabelText('Inspect stationary chart slot')); });
+  expect(begin).not.toHaveBeenCalled();
+  act(() => fireEvent.press(screen.getByLabelText('Acknowledge supported phone and fixed chart')));
+  mockCheckPermission.mockResolvedValueOnce({ granted: false });
+  await act(async () => { fireEvent.press(screen.getByLabelText('Capture stationary chart once')); });
+  expect(begin).toHaveBeenCalledTimes(1); expect(native.failCameraProofCapture).toHaveBeenCalledWith(STATIONARY_JOB, 'CAMERA_CAPTURE_NOT_STARTED');
+  expect(mockTake).not.toHaveBeenCalled();
+  expect(screen.getByLabelText('Capture stationary chart once').props.accessibilityState.disabled).toBe(true);
 });

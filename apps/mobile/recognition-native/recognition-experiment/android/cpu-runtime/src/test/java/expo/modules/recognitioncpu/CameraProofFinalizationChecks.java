@@ -52,6 +52,18 @@ public final class CameraProofFinalizationChecks {
   }
   private static CameraProofFinalizer.Run<String> run(Fixture f,CameraProofFinalizer.Work<String> work,Sink sink){return CameraProofFinalizer.dispatch(Runnable::run,work,f.completion(),sink);}
   public static void main(String[] args)throws Exception{
+    IOException diagnosticCause=new IOException("sensitive /data/user/0/private/path");
+    for(CameraProofFinalizer.IoStage stage:CameraProofFinalizer.IoStage.values()){
+      IOException diagnostic=CameraProofFinalizer.ioFailure(stage,1,"EPERM",diagnosticCause);
+      ok(diagnostic.getCause()==diagnosticCause,"diagnostic retains original error");
+      ok(CameraProofFinalizer.code(diagnostic).equals("CAMERA_IO_"+stage.name()+"_EPERM"),"stable safe stage/errno reaches bridge");
+      ok(!diagnostic.getMessage().contains("sensitive")&&!diagnostic.getMessage().contains("/"),"private OS message not exposed");
+    }
+    for(String name:Arrays.asList(null,"EPERM /data/private","CAMERA_SECRET","E","E".repeat(50))){
+      IOException diagnostic=CameraProofFinalizer.ioFailure(CameraProofFinalizer.IoStage.LINK,Integer.MIN_VALUE,name,diagnosticCause);
+      ok(diagnostic.getMessage().equals("CAMERA_IO_LINK_ERRNO_2147483648"),"malformed/unknown errno bounded and safe");
+    }
+    ok(CameraProofFinalizer.code(diagnosticCause).equals("CAMERA_OPERATION_FAILED"),"unknown error classification unchanged");
     File parent=new File(args[0]);if(!parent.mkdir())throw new IOException("exclusive generated destination");
     Fixture orphan=new Fixture(parent,"candidate-before-cancel");orphan.candidate();
     refuses(()->orphan.store.readNumerical(orphan.ticket.id));ok(orphan.gate.cancel(orphan.ticket.id,"USER"),"accepted cancellation before publication claim");

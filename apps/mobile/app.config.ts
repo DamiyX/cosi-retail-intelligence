@@ -26,6 +26,8 @@ if (cameraProofValue !== undefined && cameraProofValue !== '0' && cameraProofVal
   throw new Error('Invalid recognition camera opt-in.');
 }
 const cameraProof = cameraProofValue === '1';
+const cameraComponentIntegration = process.env.EXPO_PUBLIC_RECOGNITION_CAMERA_COMPONENT_INTEGRATION === '1';
+if (cameraComponentIntegration && (!recognitionExperiment || !cameraProof || process.env.COSI_RECOGNITION_CAMERA_COMPONENT_INTEGRATION !== '1')) throw new Error('Component integration requires matching isolated flags.');
 if (cameraProof && !recognitionExperiment) throw new Error('Camera proof requires both isolated recognition flags.');
 const projectId = process.env.EAS_PROJECT_ID ?? '737ed99c-2c20-4612-ac80-a8a868b827cb';
 const owner = process.env.EAS_OWNER ?? 'damiyxs-team';
@@ -53,7 +55,7 @@ const config: ExpoConfig = {
 };
 
 if (recognitionExperiment) {
-  config.plugins = cameraProof ? ['./plugins/withRecognitionExperiment', ['expo-camera', { recordAudioAndroid: false, microphonePermission: false, barcodeScannerEnabled: false }]] : ['./plugins/withRecognitionExperiment'];
+  config.plugins = cameraProof && !cameraComponentIntegration ? ['./plugins/withRecognitionExperiment', ['expo-camera', { recordAudioAndroid: false, microphonePermission: false, barcodeScannerEnabled: false }]] : ['./plugins/withRecognitionExperiment'];
   config.android = {
     ...config.android,
     permissions: cameraProof ? ['android.permission.CAMERA'] : [],

@@ -1,0 +1,21 @@
+# P2-04 export review and implementation brief
+
+9 November. The founder requested Astra's investigation and implementation by the existing mini-app agent. This brief releases local source work and self-checks at Sol 6.1 High.
+
+## Findings
+
+In EnrollmentReportTransfer.write, a fresh read descriptor passes the size and identity checks at reopen. The stream then compares total bytes, SHA-256 and final descriptor identity using one short-circuit assertion. The R04 terminal contains the expected length and digest and the two start identities. Seven combinations of failed comparisons collapse to the same stored result in the D082 fixture. An exact historical cause cannot be recovered. R02 and R03 carry still less failure detail. Counting those three uncertain confirmations as three identical code failures would overstate the evidence.
+
+The later diagnostic opens a different file-selection session. D085 ended on Back with zero reads, after the operator applied the 30-second post-callback deadline to the picker. D086 establishes the file existed at the later metadata check. The shell's device-number difference and denied provider query cannot identify the failing comparison during the original export. Reopening an old file adds no observation of that original operation.
+
+## Source correction
+
+Work in the original export verifier at the point the app still owns the reopened descriptor. Preserve and test the established byte-count, digest, EOF, full same-operation file-identity, size limit, owner, timing, close and grant-release conditions. Replace the lossy combined error with individually identifiable outcomes for a short read, wrong digest and changed final identity. Preserve existing overlength, I/O, cleanup and publication outcomes. Capture final metadata while the descriptor is valid whenever possible. If multiple checks fail, define precedence or retain bounded independent outcome flags so later analysis can see what was actually measured. Represent unavailable observations explicitly. Prefer the smallest compatible terminal change using existing storage and status UI. Old terminal bytes, readers, references, accounting, caps and reserved slots must still work. Do not add a second picker, diagnostic slot, speculative seek, automatic retry, permission or weaker success rule.
+
+Exercise the actual production verifier through a narrow injected stream/stat boundary. Demonstrate the old ambiguous failure, valid multi-buffer and short-positive-chunk reads through EOF, short/overlong data, equal-length wrong bytes, changed final identity, combined failures and final-stat/cleanup errors. Check actual Java/host/UI parsing wherever changed, including historical receipts and the existing success path. Use synthetic inputs for failure cases. Classify local verification separately from device acceptance. If a specific transport defect is independently reproduced in production logic, repair it within these guards and preserve the failing reproduction. An injected mismatch alone demonstrates reporting behavior.
+
+## Route to product two
+
+Use the existing R03 laptop copy and existing strict parser/receipts for a proposed Fanta enrollment checkpoint. Prepared and transferred SHA-256 agree for 147795 bytes. Session, roster, sequence 24, seven retained references and four active jobs 8/5/6/7 bind the result. Report the limits on physical image validation and historical journal replay. Return a concise checkpoint disposition, reusing the existing parser. The R02 exception was specific to R02. Adopting R03 numerical evidence for continued enrollment requires an explicit change to the native-confirmation gate. Preserve R03/R04 uncertainty and all charges. State a concrete final-evidence amendment for the displaced pre-restart R04 slot and reserved R05, including how full pre/post gallery continuity can be tested and what needs approval before collecting the remaining products. Do not count a Fanta-only report as final-gallery evidence.
+
+The implementer owns ordinary scoped corrections, local checks and one stopped handoff. Build, installation, new report/export, new permissions and product photography are separate device decisions. Keep prior device evidence intact.

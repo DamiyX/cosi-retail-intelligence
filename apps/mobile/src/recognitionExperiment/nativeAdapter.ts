@@ -1,11 +1,24 @@
+import type { CameraRecoveryNative } from './cameraMatrixRecovery';
+import type { OrientationNative } from './cameraOrientationProof';
+import type { MatrixNative } from './cameraMatrixProof';
 import { requireNativeModule } from 'expo-modules-core';
 import { fixtureIds, validateProbe, type FixtureId, type ProbeResult } from './generatedProbe';
 import { validateImageProbe, validateImageExport, validateImageRecovery, type ImageProbeResult, type ImageRecovery } from './imageProbes';
 import { validatePrivateResult, validatePrivateState, validatePrivateImport, validatePrivateExport, validatePrivateOfflineGate, type PrivateResult } from './phonePortability';
 import type { CameraProofNative } from './cameraProof';
+import { validateSavedCameraEvidenceExport, type SavedCameraEvidenceExportNative } from './cameraEvidenceExport';
+import { stationaryStatus, stationaryExport, type StationaryNative } from './cameraStationary';
+
+export const inspectStationaryChart = async () => stationaryStatus(await requireNativeModule<StationaryNative>('RecognitionExperiment').stationaryChartStatus());
+export const exportStationaryChart = async () => stationaryExport(await requireNativeModule<StationaryNative>('RecognitionExperiment').exportStationaryChartEvidence());
+export const cancelStationaryChartExport = () => requireNativeModule<StationaryNative>('RecognitionExperiment').cancelStationaryChartEvidenceExport();
+
+export const exportSavedCameraEvidence = async () => validateSavedCameraEvidenceExport(await requireNativeModule<SavedCameraEvidenceExportNative>('RecognitionExperiment').exportSavedCameraEvidence());
+export const cancelSavedCameraEvidenceExport = () => requireNativeModule<SavedCameraEvidenceExportNative>('RecognitionExperiment').cancelSavedCameraEvidenceExport();
 
 // No camera library is imported/evaluated here. Native gates the camera-only variant.
 export const cameraProofNative: CameraProofNative = {
+  beginStationaryChartProof: (request, acknowledgement) => requireNativeModule<StationaryNative>('RecognitionExperiment').beginStationaryChartProof(request, acknowledgement),
   beginCameraProof: request => requireNativeModule<CameraProofNative>('RecognitionExperiment').beginCameraProof(request),
   cancelCameraProof: (id, reason) => requireNativeModule<CameraProofNative>('RecognitionExperiment').cancelCameraProof(id, reason),
   failCameraProofCapture: (id, code) => requireNativeModule<CameraProofNative>('RecognitionExperiment').failCameraProofCapture(id, code),
@@ -93,3 +106,45 @@ export async function exportGeneratedImageEvidence(expected: ImageProbeResult) {
     return validateImageExport(await native.exportGeneratedImageEvidence(), expected);
   } finally { busy = false; }
 }
+
+// Finite matrix adapter: no native effect occurs at import.
+export const cameraMatrixNative: MatrixNative = {
+  inspectMatrixProof: () => requireNativeModule<MatrixNative>('RecognitionExperiment').inspectMatrixProof(),
+  observeMatrixPermission: (id, previewReady) => requireNativeModule<MatrixNative>('RecognitionExperiment').observeMatrixPermission(id, previewReady),
+  beginMatrixCase: (id, request, nonce) => requireNativeModule<MatrixNative>('RecognitionExperiment').beginMatrixCase(id, request, nonce),
+  matrixCaptureInvoked: (job, at) => requireNativeModule<MatrixNative>('RecognitionExperiment').matrixCaptureInvoked(job, at),
+  matrixCapturePhase: (job, phase) => requireNativeModule<MatrixNative>('RecognitionExperiment').matrixCapturePhase(job, phase),
+  recoverMatrixProof: () => requireNativeModule<MatrixNative>('RecognitionExperiment').recoverMatrixProof(),
+  sealMatrixRun: () => requireNativeModule<MatrixNative>('RecognitionExperiment').sealMatrixRun(),
+  exportMatrixEvidence: () => requireNativeModule<MatrixNative>('RecognitionExperiment').exportMatrixEvidence(),
+  cancelMatrixEvidenceExport: () => requireNativeModule<MatrixNative>('RecognitionExperiment').cancelMatrixEvidenceExport(),
+};
+
+// Native Activity handles result delivery and durable ownership independently of this module.
+export const cameraRecoveryNative: CameraRecoveryNative = {
+  openP203Recovery: fixture => requireNativeModule<CameraRecoveryNative>('RecognitionExperiment').openP203Recovery(fixture),
+  p203RecoveryStatus: fixture => requireNativeModule<CameraRecoveryNative>('RecognitionExperiment').p203RecoveryStatus(fixture),
+};
+
+// Separate fixed namespace; default camera/recovery routes are unaffected until explicit V2 opt-in.
+export const cameraOrientationNative: OrientationNative = {
+  inspectOrientationProof: () => requireNativeModule<OrientationNative>('RecognitionExperiment').inspectOrientationProof(),
+  beginOrientationCase: (id, request, nonce) => requireNativeModule<OrientationNative>('RecognitionExperiment').beginOrientationCase(id, request, nonce),
+  cancelOrientationProof: (id, reason) => requireNativeModule<OrientationNative>('RecognitionExperiment').cancelOrientationProof(id, reason),
+  failOrientationCapture: (id, code) => requireNativeModule<OrientationNative>('RecognitionExperiment').failOrientationCapture(id, code),
+  processOrientationProof: (id, metadata) => requireNativeModule<OrientationNative>('RecognitionExperiment').processOrientationProof(id, metadata),
+  sealOrientationRun: () => requireNativeModule<OrientationNative>('RecognitionExperiment').sealOrientationRun(),
+  openOrientationExport: prefix => requireNativeModule<OrientationNative>('RecognitionExperiment').openOrientationExport(prefix),
+  orientationExportStatus: prefix => requireNativeModule<OrientationNative>('RecognitionExperiment').orientationExportStatus(prefix),
+};
+
+/** Source-only native seam refuses until exact retention/owner-release binding exists. */
+export const openCaptureDiagnostic = () => requireNativeModule<{ openCaptureDiagnostic(): Promise<unknown> }>('RecognitionExperiment').openCaptureDiagnostic();
+
+export const captureDiagnosticSnapshot = () => requireNativeModule<{ captureDiagnosticSnapshot(): Promise<unknown> }>('RecognitionExperiment').captureDiagnosticSnapshot();
+
+/** Metadata-only build. Returns no private bytes or capture/recovery authority. */
+export const captureDiagnosticSetupSnapshot = () => requireNativeModule<{ captureDiagnosticSetupSnapshot(): Promise<unknown> }>('RecognitionExperiment').captureDiagnosticSetupSnapshot();
+
+export const openGraphicsEntryProbe = () => requireNativeModule<{ openGraphicsEntryProbe(): Promise<unknown> }>('RecognitionExperiment').openGraphicsEntryProbe();
+export const graphicsEntryMetadata = () => requireNativeModule<{ graphicsEntryMetadata(): Promise<string> }>('RecognitionExperiment').graphicsEntryMetadata();

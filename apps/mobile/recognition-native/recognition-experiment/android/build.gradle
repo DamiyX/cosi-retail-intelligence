@@ -5,16 +5,52 @@ plugins {
 group = 'local.recognitionexperiment'
 version = '0.0.1'
 expoModule { canBePublished false }
+def componentIntegration = System.getenv('COSI_RECOGNITION_EXPERIMENT') == '1' && System.getenv('EXPO_PUBLIC_APP_ENV') == 'recognition-verification' && System.getenv('EXPO_PUBLIC_RECOGNITION_CAMERA_PROOF') == '1' && System.getenv('COSI_RECOGNITION_CAMERA_COMPONENT_INTEGRATION') == '1' && System.getenv('EXPO_PUBLIC_RECOGNITION_CAMERA_COMPONENT_INTEGRATION') == '1'
+def enrollment = System.getenv('COSI_RECOGNITION_ENROLLMENT') == '1'
+if (enrollment != (System.getenv('EXPO_PUBLIC_RECOGNITION_ENROLLMENT') == '1') || (enrollment && !componentIntegration)) throw new GradleException('Enrollment requires matching isolated component flags')
 android {
+  if (componentIntegration) { sourceSets.main.java.srcDir('src/integration/java'); sourceSets.main.manifest.srcFile('src/integration/AndroidManifest.xml') }
+  if (enrollment) { sourceSets.main.java.srcDir('src/enrollment/java'); sourceSets.main.assets.srcDir('src/enrollment/assets') }
   namespace 'expo.modules.recognitionexperiment'
+  buildFeatures { buildConfig true }
   defaultConfig {
-    minSdk 24
+    manifestPlaceholders.p203IntegrationEnabled = (componentIntegration && !enrollment).toString()
+    manifestPlaceholders.p204EnrollmentEnabled = enrollment.toString()
+    buildConfigField 'String', 'INTEGRATION_SOURCE_SHA', '"' + (project.findProperty('integrationSourceSha') ?: '') + '"'
+    buildConfigField 'String', 'INTEGRATION_SIGNER_SHA', '"' + (project.findProperty('integrationSignerSha') ?: '') + '"'
+    minSdk (componentIntegration ? 30 : 24)
     versionCode 1
     versionName '0.0.1'
+    manifestPlaceholders.p203RecoveryEnabled = (System.getenv('COSI_RECOGNITION_EXPERIMENT') == '1' && System.getenv('EXPO_PUBLIC_APP_ENV') == 'recognition-verification' && System.getenv('EXPO_PUBLIC_RECOGNITION_CAMERA_PROOF') == '1').toString()
+    def diagnostic = System.getenv('COSI_RECOGNITION_CAPTURE_DIAGNOSTIC') == '1' && System.getenv('EXPO_PUBLIC_RECOGNITION_CAPTURE_DIAGNOSTIC') == '1' && System.getenv('COSI_RECOGNITION_EXPERIMENT') == '1' && System.getenv('EXPO_PUBLIC_APP_ENV') == 'recognition-verification' && System.getenv('EXPO_PUBLIC_RECOGNITION_CAMERA_PROOF') == '1'
+    manifestPlaceholders.p203DiagnosticEnabled = diagnostic.toString()
+    def setupMetadataOnly = System.getenv('COSI_RECOGNITION_SETUP_METADATA_ONLY') == '1' && System.getenv('EXPO_PUBLIC_RECOGNITION_SETUP_METADATA_ONLY') == '1' && System.getenv('COSI_RECOGNITION_EXPERIMENT') == '1' && System.getenv('EXPO_PUBLIC_APP_ENV') == 'recognition-verification'
+    if (componentIntegration || diagnostic || setupMetadataOnly) manifestPlaceholders.p203RecoveryEnabled = 'false'
+    if (componentIntegration || setupMetadataOnly) manifestPlaceholders.p203DiagnosticEnabled = 'false'
   }
   androidResources { noCompress += ['tflite', 'f32le'] }
 }
 dependencies {
+  if (componentIntegration) implementation project(':camera-component')
+  if (enrollment) implementation 'com.google.zxing:core:3.5.4' // D-062: exact inspected synchronous Java decoder; offline repo supplied by reviewed build packet
   implementation project(':recognition-cpu-runtime')
+  // Public CameraX Future API: same bytes already selected at app runtime.
+  compileOnly 'com.google.guava:guava:33.5.0-android'
+  // Existing reviewed CameraX artifacts; no version change or network resolution.
+  implementation 'androidx.camera:camera-core:1.6.0'
+  implementation 'androidx.camera:camera-camera2:1.6.0'
+  implementation 'androidx.camera:camera-lifecycle:1.6.0'
+  implementation 'androidx.camera:camera-view:1.6.0'
+  constraints {
+    // CameraView's old minimums are absent offline; use the accepted app artifacts.
+    implementation('androidx.appcompat:appcompat:1.7.1')
+    implementation('androidx.fragment:fragment:1.5.4')
+  }
+  // Already resolved in the reviewed offline graph; no new version or download.
+  implementation 'androidx.activity:activity:1.8.0'
+  // Align this module's runtime graph with its reviewed offline baseline.
+  // Higher app/camera versions remain selected through normal conflict resolution.
+  implementation 'androidx.core:core:1.17.0'
+  implementation 'androidx.core:core-ktx:1.17.0'
 }
 dependencyLocking { lockAllConfigurations() }

@@ -8,11 +8,14 @@ import java.util.*;
 /** Append-only owned evidence. IO enforces real regular files and exclusive publication. */
 public final class CameraProofStore {
   public static final long CAP=256L*1024*1024;
+  public static final int EXPORT_OUTPUT=16*1024*1024, EXPORT_BOOKKEEPING=128*1024;
+  public static final long CAMERA_CAP=CAP-2L*(EXPORT_OUTPUT+EXPORT_BOOKKEEPING);
   public static final int RECEIPT=65536, PREVIEW=262144, FAILURE=4096, MARKER=4096, REFUSALS=65536;
   // Both final and .new/.bak residue are charged. No draft 19/20-file assumption.
   public static final long RESERVATION=2L*(CameraProofFrame.JPEG_LIMIT+PREVIEW+2*RECEIPT+2*FAILURE+5*MARKER);
   public interface IO {
     void root(File root,boolean create)throws IOException;
+    void syncDirectory(File root)throws IOException; // verified namespace durability, never a visibility-only check
     List<String> list(File root)throws IOException;
     long size(File file)throws IOException; // -1 absent; otherwise regular, single-link, canonical only
     byte[] read(File file,int cap)throws IOException;
@@ -20,20 +23,33 @@ public final class CameraProofStore {
     void publish(File staged,File destination)throws IOException; // exclusive destination; retain failures
     void writeAt(File file,int offset,byte[] bytes)throws IOException; // must not grow a preallocated file
     long available(File root)throws IOException;
+    /** Frozen legacy stores reserve zero here; the matrix artifact reserves its new allowance permanently. */
+    default long matrixAllowance(){return 0;}
+    /** V2 only: old owned camera bytes remain charged; never counted as free new capacity. */
+    default long retainedCameraClaimBytes(){return 0;}
   }
-  private final File root;private final IO io;private final String source,process;
+  private final File root;private final IO io;private final String source,process;private final boolean orientationV2;
   private final byte[] owner;
-  public CameraProofStore(File root,IO io,String source,String process)throws IOException{
-    CameraProofFrame.require(source.matches("[a-f0-9]{64}")&&process.matches("[a-f0-9-]{36}"),"CAMERA_STORE_BINDING");
-    this.root=root;this.io=io;this.source=source;this.process=process;
-    owner=bytes("CAMERA_PROOF_OWNED_V1\n"+source+"\n"+CameraProofFrame.MODEL+"\n"+CameraProofFrame.RECIPE+"\n");
-    io.root(root,true);List<String> names=io.list(root);
+  public CameraProofStore(File root,IO io,String source,String process)throws IOException{this(root,io,source,process,false);}
+  public static CameraProofStore orientation(File root,IO io,String source,String process)throws IOException{return new CameraProofStore(root,io,source,process,false,true);}
+  public static CameraProofStore readOrientation(File root,IO io,String source,String process)throws IOException{return new CameraProofStore(root,io,source,process,true,true);}
+  /** Read-only opening never traverses the create/initialize branch. */
+  public static CameraProofStore readOnly(File root,IO io,String source,String process)throws IOException{return new CameraProofStore(root,io,source,process,true);}
+  private CameraProofStore(File root,IO io,String source,String process,boolean readOnly)throws IOException{this(root,io,source,process,readOnly,false);}
+  private CameraProofStore(File root,IO io,String source,String process,boolean readOnly,boolean orientationV2)throws IOException{
+    CameraProofFrame.require(source.matches("[a-f0-9]{64}")&&id(process),"CAMERA_STORE_BINDING");
+    this.root=root;this.io=io;this.source=source;this.process=process;this.orientationV2=orientationV2;
+    owner=bytes((orientationV2?"CAMERA_PROOF_OWNED_V2\n":"CAMERA_PROOF_OWNED_V1\n")+source+"\n"+CameraProofFrame.MODEL+"\n"+(orientationV2?CameraOrientationGeometry.RECIPE:CameraProofFrame.RECIPE)+"\n");
+    io.root(root,!readOnly);List<String> names=io.list(root);
     if(names.isEmpty()){
+      CameraProofFrame.require(!readOnly,"CAMERA_READ_ONLY_EMPTY");
       CameraProofFrame.require(io.available(root)>=REFUSALS+owner.length,"CAMERA_LOW_DISK");
       io.writeNew(file("owner"),owner);io.writeNew(file("refusals"),new byte[REFUSALS]);
     }
     scan();
   }
+  private long matrixAllowance(){long n=io.matrixAllowance();CameraProofFrame.require(n==0||n==CameraMatrixPlan.OUTPUT+(long)CameraMatrixPlan.BOOK||n==CameraMatrixPlan.OUTPUT+(long)CameraMatrixPlan.BOOK+CameraMatrixRecoveryPlan.FIXTURE_ALLOWANCE,"CAMERA_MATRIX_ALLOWANCE");return n;}
+  private long effectiveCap(){long retained=orientationV2?io.retainedCameraClaimBytes():0;CameraProofFrame.require(retained>=0&&retained<=CAP,"CAMERA_RETAINED_CLAIM");return orientationV2?CameraOrientationPlan.cameraCap(matrixAllowance(),retained):CAMERA_CAP-matrixAllowance();}
   private File file(String n){return new File(root,n);}
   private static byte[] bytes(String s){return s.getBytes(StandardCharsets.UTF_8);}
   private static String text(byte[] b){return new String(b,StandardCharsets.UTF_8);}
@@ -45,7 +61,12 @@ public final class CameraProofStore {
   private static final class Group {final List<String> names=new ArrayList<>();long actual;boolean done;String resolution;}
   private static final class Usage {long actual,claimed;final Map<String,Group> groups=new TreeMap<>();}
   private Usage scan()throws IOException{
-    io.root(root,false);CameraProofFrame.require(Arrays.equals(io.read(file("owner"),1024),owner)&&io.size(file("refusals"))==REFUSALS,"CAMERA_STORE_OWNER");
+    io.root(root,false);
+    // Visibility is not acknowledgment after rename + failed fsync, including on
+    // reopen. Every evidence/capacity consumer crosses this same verified barrier.
+    // Fail closed before trusting done/resolution/invalidation or releasing a claim.
+    io.syncDirectory(root);
+    CameraProofFrame.require(Arrays.equals(io.read(file("owner"),1024),owner)&&io.size(file("refusals"))==REFUSALS,"CAMERA_STORE_OWNER");
     validateRefusals(io.read(file("refusals"),REFUSALS));
     List<String> names=io.list(root);CameraProofFrame.require(names.size()<=2000,"CAMERA_STORE_FILE_COUNT");Usage u=new Usage();
     for(String n:names){
@@ -62,7 +83,7 @@ public final class CameraProofStore {
       if(g.names.contains(e.getKey()+".resolution"))g.resolution=verifyResolution(e.getKey(),g);
       u.claimed=Math.addExact(u.claimed,g.resolution!=null?g.actual:Math.max(RESERVATION,g.actual));
     }
-    CameraProofFrame.require(u.actual<=CAP&&u.claimed<=CAP,"CAMERA_OWNED_CAP");return u;
+    CameraProofFrame.require(u.actual<=effectiveCap()&&u.claimed<=effectiveCap(),"CAMERA_OWNED_CAP");return u;
   }
   private void verifyDone(String ticket,Group g)throws IOException{
     String marker=text(io.read(file(ticket+".done"),MARKER));String[] lines=marker.split("\n");
@@ -86,8 +107,11 @@ public final class CameraProofStore {
     return bytes(body+CameraProofFrame.hash(bytes(body))+"\n");
   }
   private String verifyResolution(String ticket,Group g)throws IOException{
-    CameraProofFrame.require(g.done,"CAMERA_RESOLUTION_WITHOUT_CANDIDATE");String[] r=text(io.read(file(ticket+".resolution"),MARKER)).split("\n");
-    CameraProofFrame.require(r.length==8&&r[0].equals(source)&&r[1].equals("CAMERA_RESOLUTION_V1")&&r[2].equals(ticket)&&r[3].matches("[a-f0-9-]{36}")&&r[4].equals(CameraProofFrame.hash(io.read(file(ticket+".done"),MARKER)))&&Arrays.asList("PUBLISHED","FAILED","CANCELLED","INTERRUPTED").contains(r[5])&&r[6].matches("[A-Z0-9_]{1,100}"),"CAMERA_RESOLUTION_BINDING");
+    return verifyResolutionRecord(ticket,g,io.read(file(ticket+".resolution"),MARKER));
+  }
+  private String verifyResolutionRecord(String ticket,Group g,byte[] record)throws IOException{
+    CameraProofFrame.require(g.done,"CAMERA_RESOLUTION_WITHOUT_CANDIDATE");String[] r=text(record).split("\n");
+    CameraProofFrame.require(r.length==8&&r[0].equals(source)&&r[1].equals("CAMERA_RESOLUTION_V1")&&r[2].equals(ticket)&&id(r[3])&&r[4].equals(CameraProofFrame.hash(io.read(file(ticket+".done"),MARKER)))&&Arrays.asList("PUBLISHED","FAILED","CANCELLED","INTERRUPTED").contains(r[5])&&r[6].matches("[A-Z0-9_]{1,100}")&&Arrays.equals(record,bytes(String.join("\n",r)+"\n")),"CAMERA_RESOLUTION_BINDING");
     String body=String.join("\n",Arrays.copyOf(r,7))+"\n";CameraProofFrame.require(r[7].equals(CameraProofFrame.hash(bytes(body))),"CAMERA_RESOLUTION_HASH");
     if(r[5].equals("PUBLISHED"))CameraProofFrame.require(!g.names.contains(ticket+".failure.json")&&!g.names.contains(ticket+".interruption.json")&&g.names.contains(ticket+".receipt.json"),"CAMERA_PUBLISHED_FAILURE");
     return r[5];
@@ -99,27 +123,60 @@ public final class CameraProofStore {
     CameraProofFrame.require(!recovery||outcome.equals("INTERRUPTED"),"CAMERA_RECOVERY_PUBLISH");
     reservation(ticket,!recovery);Usage u=scan();Group g=u.groups.get(ticket);CameraProofFrame.require(g!=null&&g.done&&g.resolution==null,"CAMERA_RESOLUTION_DUPLICATE");
     if(outcome.equals("PUBLISHED"))CameraProofFrame.require(!invalidated(ticket,g)&&!g.names.contains(ticket+".failure.json")&&!g.names.contains(ticket+".interruption.json")&&g.names.contains(ticket+".receipt.json"),"CAMERA_PUBLISHED_FAILURE");
-    write(ticket,"resolution",resolution(ticket,outcome,code),recovery);scan();
+    byte[] record=resolution(ticket,outcome,code);
+    if(recovery&&io.size(file(ticket+".resolution.new"))>=0){
+      // A previous process may have synced the exact interrupted resolution before
+      // crashing in publication. Validate its binding/hash, never rewrite its bytes.
+      record=io.read(file(ticket+".resolution.new"),MARKER);String[] prior=text(record).split("\n");
+      CameraProofFrame.require(verifyResolutionRecord(ticket,g,record).equals("INTERRUPTED")&&prior[6].equals(code),"CAMERA_RECOVERY_RESOLUTION");
+    }
+    write(ticket,"resolution",record,recovery);scan();
   }
   private static void completeProfile(Set<String> roles){
     if(roles.contains("receipt.json")&&!roles.contains("failure.json")&&!roles.contains("interruption.json"))CameraProofFrame.require(roles.containsAll(Arrays.asList("raw.jpg","preview.png","numerical.json","reservation","request.json")),"CAMERA_COMMIT_PROFILE");
   }
   private void reservation(String ticket,boolean current)throws IOException{
-    CameraProofFrame.require(id(ticket),"CAMERA_TICKET");String[] r=text(io.read(file(ticket+".reservation"),MARKER)).split("\n");
-    CameraProofFrame.require(r.length==4&&r[0].equals(source)&&r[1].equals(ticket)&&r[3].equals(Long.toString(RESERVATION))&&(!current||r[2].equals(process)),"CAMERA_RESERVATION_BINDING");
+    reservationRecord(ticket,io.read(file(ticket+".reservation"),MARKER),current);
+  }
+  private String reservationRecord(String ticket,byte[] record,boolean current){
+    CameraProofFrame.require(id(ticket),"CAMERA_TICKET");String[] r=text(record).split("\n");
+    CameraProofFrame.require(r.length==4&&r[0].equals(source)&&r[1].equals(ticket)&&id(r[2])&&r[3].equals(Long.toString(RESERVATION))&&(!current||r[2].equals(process))&&Arrays.equals(record,bytes(String.join("\n",r)+"\n")),"CAMERA_RESERVATION_BINDING");return r[2];
+  }
+  /** Bounded, read-only facts inside the owner app. No paths or file contents escape. */
+  public synchronized List<Map<String,Object>> inspectInterrupted()throws IOException{
+    Usage u=scan();List<Map<String,Object>> result=new ArrayList<>();
+    for(Map.Entry<String,Group> e:u.groups.entrySet())if(e.getValue().resolution==null){
+      String ticket=e.getKey();Group g=e.getValue();String committed=ticket+".reservation",staged=committed+".new";
+      boolean hasFinal=g.names.contains(committed),valid=false,current=false;
+      String candidate=hasFinal?committed:staged;
+      if(g.names.contains(candidate))try{current=reservationRecord(ticket,io.read(file(candidate),MARKER),false).equals(process);valid=true;}
+      catch(IllegalArgumentException|IllegalStateException invalid){/* Report invalid binding, preserving every byte. IO failures still refuse inspection. */}
+      List<Map<String,Object>> files=new ArrayList<>();List<String> ordered=new ArrayList<>(g.names);Collections.sort(ordered);
+      for(String n:ordered){Map<String,Object> f=new LinkedHashMap<>();String role=role(n);f.put("role",role);f.put("stage",n.endsWith(".new")?"NEW":n.endsWith(".bak")?"BACKUP":"FINAL");f.put("bytes",io.size(file(n)));f.put("sha256",CameraProofFrame.hash(io.read(file(n),maximum(role))));files.add(f);}
+      Map<String,Object> facts=new LinkedHashMap<>();facts.put("ticket",ticket);facts.put("files",files);facts.put("reservationValid",valid);facts.put("ownerIsCurrentProcess",current);
+      facts.put("classification",hasFinal?(valid?"FINAL_RESERVATION":"INVALID_FINAL_RESERVATION"):g.names.size()==1&&g.names.contains(staged)&&valid?"COMPLETE_STAGED_RESERVATION":"UNCLASSIFIED_RESIDUE");
+      facts.put("drainProofRequired",true);result.add(facts);
+    }return result;
   }
   public synchronized Map<String,Object> status()throws IOException{
     Usage u=scan();List<String> interrupted=new ArrayList<>();for(Map.Entry<String,Group> e:u.groups.entrySet())if(e.getValue().resolution==null||e.getValue().resolution.equals("INTERRUPTED")||e.getValue().resolution.equals("CANCELLED")||invalidated(e.getKey(),e.getValue()))interrupted.add(e.getKey());
-    Map<String,Object> m=new LinkedHashMap<>();m.put("ownedBytes",u.actual);m.put("claimedBytes",u.claimed);m.put("ownedCapBytes",CAP);m.put("interrupted",interrupted);m.put("captureCount",u.groups.size());m.put("sdkHardCap",false);return m;
+    Map<String,Object> m=new LinkedHashMap<>();m.put("ownedBytes",u.actual);m.put("claimedBytes",u.claimed);m.put("ownedCapBytes",CAP);m.put("cameraCapBytes",effectiveCap());m.put("exportOutputAllowanceBytes",EXPORT_OUTPUT);m.put("exportBookkeepingAllowanceBytes",EXPORT_BOOKKEEPING);m.put("stationaryOutputAllowanceBytes",EXPORT_OUTPUT);m.put("stationaryBookkeepingAllowanceBytes",EXPORT_BOOKKEEPING);m.put("aggregateExportAllowanceBytes",2L*(EXPORT_OUTPUT+EXPORT_BOOKKEEPING));m.put("matrixAllowanceBytes",matrixAllowance());m.put("aggregateClaimedBytes",u.claimed+2L*(EXPORT_OUTPUT+EXPORT_BOOKKEEPING)+matrixAllowance()+(orientationV2?io.retainedCameraClaimBytes()+CameraOrientationPlan.ACTIVE_OUTPUT+(long)CameraOrientationPlan.BOOK:0));if(orientationV2){m.put("orientationOutputAllowanceBytes",CameraOrientationPlan.ACTIVE_OUTPUT);m.put("orientationBookkeepingAllowanceBytes",CameraOrientationPlan.BOOK);m.put("retainedLegacyCameraClaimBytes",io.retainedCameraClaimBytes());}m.put("interrupted",interrupted);m.put("captureCount",u.groups.size());m.put("sdkHardCap",false);return m;
   }
   public synchronized String reserve()throws IOException{
+    return reserveId(UUID.randomUUID().toString());
+  }
+  /** Internal fixed C8 capability; never accepts a caller-selected UUID. */
+  synchronized String reserveMatrix(CameraMatrixPlan.Case c)throws IOException{return reserveId(CameraMatrixPlan.get(c.id).job);}
+  synchronized String reserveStationary()throws IOException{return reserveId(CameraStationarySlot.JOB);}
+  synchronized String reserveOrientation(CameraOrientationPlan.Case c)throws IOException{CameraProofFrame.require(orientationV2&&CameraOrientationPlan.get(c.id)==c,"CAMERA_ORIENTATION_FIXED_JOB");return reserveId(c.job);}
+  private String reserveId(String ticket)throws IOException{
     Usage u=scan();for(Map.Entry<String,Group> e:u.groups.entrySet())CameraProofFrame.require(e.getValue().resolution!=null&&(!invalidated(e.getKey(),e.getValue())||e.getValue().names.contains(e.getKey()+".invalidated")),"CAMERA_RECOVERY_REQUIRED");
-    if(u.groups.size()>=115||u.claimed+RESERVATION>CAP||io.available(root)<RESERVATION+24L*1024*1024){
+    if(u.groups.size()>=115||u.claimed+RESERVATION>effectiveCap()||io.available(root)<RESERVATION+24L*1024*1024){
       refusal("CAPACITY_OR_COUNT_OR_FREE_SPACE");throw new IllegalStateException("CAMERA_CAPACITY_REFUSED");
     }
-    String ticket=UUID.randomUUID().toString();byte[] b=bytes(source+"\n"+ticket+"\n"+process+"\n"+RESERVATION+"\n");
+    CameraProofFrame.require(!u.groups.containsKey(ticket),"CAMERA_TICKET_EXISTS");byte[] b=bytes(source+"\n"+ticket+"\n"+process+"\n"+RESERVATION+"\n");
     // Reserve the full profile before the first owned job write.
-    CameraProofFrame.require(u.claimed+RESERVATION<=CAP,"CAMERA_OWNED_CAP");
+    CameraProofFrame.require(u.claimed+RESERVATION<=effectiveCap(),"CAMERA_OWNED_CAP");
     io.writeNew(file(ticket+".reservation.new"),b);io.publish(file(ticket+".reservation.new"),file(ticket+".reservation"));scan();return ticket;
   }
   public synchronized void refusal(String code)throws IOException{
@@ -136,7 +193,7 @@ public final class CameraProofStore {
       byte[] body=Arrays.copyOfRange(log,at+3,at+3+n);CameraProofFrame.require(text(Arrays.copyOfRange(log,at+3+n,at+3+n+64)).equals(CameraProofFrame.hash(body)),"CAMERA_REFUSAL_CORRUPT");
     }throw new IllegalStateException("CAMERA_REFUSAL_LOG_FULL");
   }
-  private static void validateRefusals(byte[] log){
+  static void validateRefusals(byte[] log){
     boolean emptySeen=false;
     for(int at=0;at<log.length;at+=512){
       if(log[at]==0){emptySeen=true;for(int j=at;j<at+512;j++)CameraProofFrame.require(log[j]==0,"CAMERA_REFUSAL_TORN");continue;}
@@ -158,12 +215,17 @@ public final class CameraProofStore {
     reservation(ticket,!recovery);Usage u=scan();Group g=u.groups.get(ticket);CameraProofFrame.require(g!=null&&(!g.done||role.equals("invalidated")||role.equals("resolution")),"CAMERA_JOB_ALREADY_COMMITTED");
     CameraProofFrame.require(!recovery||role.equals("interruption.json")||role.equals("done")||role.equals("resolution"),"CAMERA_RECOVERY_WRITE");
     int cap=maximum(role);CameraProofFrame.require(body.length<=cap&&body.length>0,"CAMERA_OUTPUT_CAP");
-    CameraProofFrame.require(io.size(file(ticket+"."+role))<0&&io.size(file(ticket+"."+role+".new"))<0,"CAMERA_OUTPUT_EXISTS");
-    // Exclusive link publication briefly names both stage and destination; reserve
-    // both lengths even for a group whose retained residue already exceeds B.
+    File destination=file(ticket+"."+role),staged=file(ticket+"."+role+".new");
+    CameraProofFrame.require(io.size(destination)<0,"CAMERA_OUTPUT_EXISTS");
+    if(recovery&&io.size(staged)>=0){
+      CameraProofFrame.require(Arrays.equals(io.read(staged,cap),body),"CAMERA_RECOVERY_STAGED_MISMATCH");
+      io.publish(staged,destination);scan();return;
+    }
+    CameraProofFrame.require(io.size(staged)<0,"CAMERA_OUTPUT_EXISTS");
+    // Retain the historical conservative two-length reservation; no capacity expansion.
     long peak=g.actual+2L*body.length;
     long next=u.claimed-(g.resolution!=null?g.actual:Math.max(RESERVATION,g.actual))+(g.resolution!=null?peak:Math.max(RESERVATION,peak));
-    CameraProofFrame.require(next<=CAP&&io.available(root)>=body.length,"CAMERA_OWNED_CAP");
+    CameraProofFrame.require(next<=effectiveCap()&&io.available(root)>=body.length,"CAMERA_OWNED_CAP");
     io.writeNew(file(ticket+"."+role+".new"),body);io.publish(file(ticket+"."+role+".new"),file(ticket+"."+role));scan();
   }
   public synchronized void finish(String ticket)throws IOException{
@@ -179,14 +241,33 @@ public final class CameraProofStore {
   private void finish(String ticket,boolean recovery)throws IOException{
     reservation(ticket,!recovery);Usage u=scan();Group g=u.groups.get(ticket);CameraProofFrame.require(g!=null&&!g.done,"CAMERA_COMMIT_DUPLICATE");
     StringBuilder b=new StringBuilder(source+"\nCAMERA_DONE_V1\n");boolean terminal=false;Set<String> roles=new HashSet<>();
-    for(String n:g.names){if(n.endsWith(".new")||n.endsWith(".bak"))continue;String r=role(n);if(r.equals("receipt.json")||r.equals("failure.json")||r.equals("interruption.json"))terminal=true;
+    List<String> ordered=new ArrayList<>(g.names);if(recovery)Collections.sort(ordered);
+    for(String n:ordered){if(n.endsWith(".new")||n.endsWith(".bak"))continue;String r=role(n);if(r.equals("receipt.json")||r.equals("failure.json")||r.equals("interruption.json"))terminal=true;
       roles.add(r);b.append(r).append('=').append(CameraProofFrame.hash(io.read(file(n),maximum(r)))).append('\n');}
     CameraProofFrame.require(terminal,"CAMERA_COMMIT_INCOMPLETE");completeProfile(roles);write(ticket,"done",bytes(b.toString()),recovery);scan();
   }
   /** Read-only status never resumes. Explicit recovery only closes a different process's orphan. */
   public synchronized void recover(boolean processDrained)throws IOException{
     Usage u=scan();for(Map.Entry<String,Group> e:u.groups.entrySet())if(e.getValue().resolution==null){
-      String ticket=e.getKey();reservation(ticket,false);String[] r=text(io.read(file(ticket+".reservation"),MARKER)).split("\n");
+      String ticket=e.getKey();Group group=e.getValue();String finalName=ticket+".reservation",stagedName=finalName+".new";
+      // Resume only ordered interrupted metadata, not arbitrary mixed publication drafts.
+      CameraProofFrame.require(!group.names.contains(finalName)||!group.names.contains(stagedName),"CAMERA_RECOVERY_RESERVATION_AMBIGUOUS");
+      for(String role:Arrays.asList("interruption.json","done","resolution")){
+        CameraProofFrame.require(!group.names.contains(ticket+"."+role+".bak"),"CAMERA_RECOVERY_BACKUP_AMBIGUOUS");
+        CameraProofFrame.require(!group.names.contains(ticket+"."+role)||!group.names.contains(ticket+"."+role+".new"),"CAMERA_RECOVERY_STAGE_AMBIGUOUS");
+      }
+      CameraProofFrame.require(!group.names.contains(ticket+".done.new")||group.names.contains(ticket+".interruption.json"),"CAMERA_RECOVERY_STAGE_ORDER");
+      CameraProofFrame.require(!group.names.contains(ticket+".resolution.new")||group.done,"CAMERA_RECOVERY_STAGE_ORDER");
+      if(!group.names.contains(finalName)){
+        // Only a complete pre-admission reservation with no job outputs is eligible.
+        // Explicit drain proof is mandatory even for a different process UUID.
+        CameraProofFrame.require(processDrained,"CAMERA_DRAIN_UNKNOWN");
+        CameraProofFrame.require(group.names.size()==1&&group.names.contains(stagedName),"CAMERA_STAGED_RESERVATION_PROFILE");
+        byte[] original=io.read(file(stagedName),MARKER);reservationRecord(ticket,original,false);
+        io.publish(file(stagedName),file(finalName));
+        CameraProofFrame.require(Arrays.equals(io.read(file(finalName),MARKER),original),"CAMERA_RESERVATION_PUBLICATION_CHANGED");
+      }
+      reservation(ticket,false);String[] r=text(io.read(file(finalName),MARKER)).split("\n");
       CameraProofFrame.require(!r[2].equals(process)||processDrained,"CAMERA_DRAIN_UNKNOWN");
       // Only classification is appended; prior partial/vector facts and residue remain.
       if(!e.getValue().done){if(!e.getValue().names.contains(ticket+".interruption.json"))write(ticket,"interruption.json",bytes("{\"status\":\"INTERRUPTED\",\"observationsRetained\":true,\"physicalDrainProven\":false}"),true);finish(ticket,true);}
@@ -197,4 +278,29 @@ public final class CameraProofStore {
     Usage u=scan();Group g=u.groups.get(ticket);CameraProofFrame.require(g!=null&&"PUBLISHED".equals(g.resolution)&&!g.names.contains(ticket+".interruption.json")&&!g.names.contains(ticket+".failure.json")&&!invalidated(ticket,g),"CAMERA_RECEIPT_NOT_COMMITTED");return io.read(file(ticket+".numerical.json"),RECEIPT);
   }
   public File preview(String ticket){CameraProofFrame.require(id(ticket),"CAMERA_TICKET");return file(ticket+".preview.png");}
+  /** Complete immutable profile only; no arbitrary role/path or unresolved bytes. */
+  public synchronized Map<String,byte[]> savedEvidence(String ticket)throws IOException{
+    CameraProofFrame.require(CameraEvidenceExport.JOB.equals(ticket),"CAMERA_EXPORT_JOB");
+    return savedProfile(ticket);
+  }
+  synchronized Map<String,byte[]> stationaryEvidence()throws IOException{return savedProfile(CameraStationarySlot.JOB);}
+  synchronized boolean stationarySlotExists()throws IOException{return scan().groups.containsKey(CameraStationarySlot.JOB);}
+  synchronized Map<String,byte[]> matrixEvidence(CameraMatrixPlan.Case c)throws IOException{
+    CameraProofFrame.require(CameraMatrixPlan.get(c.id)==c,"CAMERA_MATRIX_CASE");Usage u=scan();for(Group g:u.groups.values())CameraProofFrame.require(g.resolution!=null,"CAMERA_MATRIX_UNRESOLVED");Group g=u.groups.get(c.job);if(g==null)return Collections.emptyMap();
+    Map<String,byte[]> result=new TreeMap<>();for(String n:g.names){CameraProofFrame.require(!n.endsWith(".new")&&!n.endsWith(".bak"),"CAMERA_MATRIX_RESIDUE");String r=role(n);byte[] b=io.read(file(n),r.equals("raw.jpg")?CameraMatrixPlan.JPEG:maximum(r));result.put(r,b);}return result;
+  }
+  synchronized boolean matrixRecoverableOnly(CameraMatrixPlan.Case c)throws IOException{Usage u=scan();for(Map.Entry<String,Group> e:u.groups.entrySet())if(e.getValue().resolution==null&&!e.getKey().equals(c.job))return false;return true;}
+  synchronized Map<String,byte[]> orientationEvidence(CameraOrientationPlan.Case c)throws IOException{
+    CameraProofFrame.require(orientationV2&&CameraOrientationPlan.get(c.id)==c,"CAMERA_ORIENTATION_CASE");Usage u=scan();for(Group g:u.groups.values())CameraProofFrame.require(g.resolution!=null,"CAMERA_ORIENTATION_UNRESOLVED");Group g=u.groups.get(c.job);if(g==null)return Collections.emptyMap();
+    Map<String,byte[]> result=new TreeMap<>();for(String n:g.names){CameraProofFrame.require(!n.endsWith(".new")&&!n.endsWith(".bak"),"CAMERA_ORIENTATION_RESIDUE");String role=role(n);result.put(role,io.read(file(n),role.equals("raw.jpg")?CameraMatrixPlan.JPEG:maximum(role)));}return result;
+  }
+  private Map<String,byte[]> savedProfile(String ticket)throws IOException{
+    Usage u=scan();for(Group pending:u.groups.values())CameraProofFrame.require(pending.resolution!=null,"CAMERA_EXPORT_UNRESOLVED");
+    Group g=u.groups.get(ticket);CameraProofFrame.require(g!=null&&"PUBLISHED".equals(g.resolution)&&!invalidated(ticket,g),"CAMERA_EXPORT_PROFILE");
+    List<String> roles=Arrays.asList("raw.jpg","preview.png","numerical.json","receipt.json","request.json","reservation","done","resolution");
+    Set<String> expected=new HashSet<>();for(String r:roles)expected.add(ticket+"."+r);
+    CameraProofFrame.require(new HashSet<>(g.names).equals(expected),"CAMERA_EXPORT_PROFILE");
+    Map<String,byte[]> result=new LinkedHashMap<>();for(String r:roles)result.put(r,io.read(file(ticket+"."+r),maximum(r)));
+    scan();return result;
+  }
 }

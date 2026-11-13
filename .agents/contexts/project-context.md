@@ -1,6 +1,16 @@
 <!-- October3 current routing: founder authorized M11 continuation. Read PROJECT_STATE, M11_STAFF_PLAN/TICKETS and m11-staff-accountability.json. M9/M10 software source accepted; live gates pending. M11 implementation sequential, coordinator audits stopped returns. No real staff activation/assignee scope or M12 is claimed. -->
 # COSI Project Context and Decision Packet
 
+**Operating-policy update, October25:** all current/new/resumed agents follow
+`docs/engineering/MULTI_AGENT_WORKFLOW.md` section1.1 October25 amendment. The agent
+owns ordinary scoped diagnosis and one bounded repair; approved Low/Medium-to-High
+setting escalation leaves repair ownership with it. October26: ask the founder
+directly first; only after60 seconds without a response, or explicit unavailability,
+request the coordinator's preauthorized setting-only fallback. If the founder
+responds, wait for their switch; avoid duplicate setting changes. Failed repair escalates to the
+coordinator; unresolved coordinator recovery/larger planning goes to founder-selected
+Astra. Final stopped handoff and independent review remain. Product scope unchanged.
+
 **October2 routing supersedes earlier current-priority prose:** source/phone agents
 are stopped. Track B corrected R0 source/tooling is independently accepted;
 R0-A2-01/02 resolved. See docs/recognition/reports/R0_A2_INDEPENDENT_REVIEW.md.

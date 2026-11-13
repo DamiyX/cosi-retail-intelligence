@@ -9,6 +9,15 @@ coverage/
 .env.*
 !.env.example
 **/android/
+!apps/recognition-lab/camera-mini/android/
+apps/recognition-lab/camera-mini/android/.gradle/
+apps/recognition-lab/camera-mini/android/.cxx/
+apps/recognition-lab/camera-mini/android/build/
+apps/recognition-lab/camera-mini/android/app/build/
+apps/recognition-lab/camera-mini/android/app/.cxx/
+apps/recognition-lab/camera-mini/android/camera-component/build/
+apps/recognition-lab/camera-mini/android/camera-component/.cxx/
+apps/recognition-lab/camera-mini/android/local.properties
 !apps/mobile/recognition-native/recognition-experiment/android/
 apps/mobile/recognition-native/recognition-experiment/android/build/
 apps/mobile/recognition-native/recognition-experiment/android/.gradle/

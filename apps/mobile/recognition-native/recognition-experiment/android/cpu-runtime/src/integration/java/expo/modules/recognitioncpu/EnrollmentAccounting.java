@@ -1,0 +1,38 @@
+package expo.modules.recognitioncpu;
+import android.system.*;
+import java.io.*;
+import java.nio.file.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+/** Bounded metadata enumeration only. Unknown roots are never traversed. No historical content reads. */
+public final class EnrollmentAccounting {
+ public static final int TOP=512,ROWS=8192;
+ public static final class Row {public final int root,kind;public final String leaf,identity;public final long bytes;int status,disposition;Row(int root,int kind,String leaf,String identity,long bytes){this.root=root;this.kind=kind;this.leaf=leaf;this.identity=identity;this.bytes=bytes;status=leaf.isEmpty()?0:kind==2?2:1;}}
+ public static final class Cut {public final List<Row> rows;public final long historical,integrated,retainedMeasured,retainedUnmaterialized,free,reserved,external,total;Cut(List<Row> rows,long old,long used,long free,long reserved,long external){ObservedEnrollment.require(reserved>=0&&external>=0,"ACCOUNTING_RESERVATION");this.rows=Collections.unmodifiableList(rows);historical=old;integrated=used;this.free=free;retainedMeasured=rows.stream().filter(row->row.kind==2).mapToLong(row->row.bytes).sum();ObservedEnrollment.require(retainedMeasured<=ObservedEnrollment.RETAINED_PROOFS,"RETAINED_CLAIM_EXCEEDED");retainedUnmaterialized=ObservedEnrollment.RETAINED_PROOFS-retainedMeasured;this.reserved=Math.addExact(reserved,retainedUnmaterialized);this.external=external;total=Math.addExact(Math.addExact(used,this.reserved),external);ObservedEnrollment.require(total<=ObservedEnrollment.CAP,"QUOTA");}
+  public Map<String,Object> summary(){Map<String,Object> m=new LinkedHashMap<>();m.put("registryHash",EnrollmentRootRegistry.hash());m.put("measuredHistoricalBytes",historical);m.put("historicalLogicalClaim",EnrollmentRootRegistry.HISTORICAL_CLAIM);m.put("standaloneRetainedClaim",EnrollmentRootRegistry.STANDALONE_CLAIM);m.put("standaloneInspected",false);m.put("measuredIntegratedBytes",integrated);m.put("reservedUnmaterializedBytes",reserved);m.put("externalCopyCharges",external);m.put("integratedAdmissionTotal",total);m.put("freeBytes",free);m.put("inventoryRows",rows.size());m.put("rootCount",rows.stream().filter(r->r.leaf.isEmpty()).count());m.put("leafCount",rows.stream().filter(r->!r.leaf.isEmpty()).count());m.put("retainedIntegrationLogicalClaim",ObservedEnrollment.RETAINED_PROOFS);m.put("measuredRetainedProofBytes",retainedMeasured);m.put("retainedUnmaterializedCharge",retainedUnmaterialized);m.put("measuredEnrollmentAndControlBytes",integrated-retainedMeasured);m.put("integrity","METADATA_AND_RETAINED_SHAPE_NO_HISTORICAL_CONTENT_CHECK");m.put("excludedPlatformRoots",rows.stream().filter(r->r.kind==0).map(r->EnrollmentRootRegistry.rootById(r.root).name).toArray(String[]::new));m.put("classification","CLASSIFIED_METADATA_ONLY");return m;}
+  public byte[] bytes()throws IOException{ByteArrayOutputStream b=new ByteArrayOutputStream();DataOutputStream d=new DataOutputStream(b);for(Row r:rows){d.writeInt(r.root);d.writeInt(r.kind);d.writeLong(r.bytes);d.write(EnrollmentEvidence.digest(r.leaf.getBytes(StandardCharsets.UTF_8)));d.write(EnrollmentEvidence.digest(r.identity.getBytes(StandardCharsets.UTF_8)));d.writeInt(r.leaf.isEmpty()?0:EnrollmentRootRegistry.leafId(EnrollmentRootRegistry.rootById(r.root),r.leaf));d.writeInt(r.status);d.writeInt(r.root>100&&r.root<=164?r.root-100:0);d.writeInt(r.disposition);d.write(new byte[32]);}ObservedEnrollment.require(b.size()<=EnrollmentEvidence.INVENTORY,"REPORT_INVENTORY_BOUND");return b.toByteArray();}
+ }
+ private static String key(StructStat s){return EnrollmentDisk.identity(s);}
+ private static void directory(File f,StructStat s)throws Exception{ObservedEnrollment.require(f.equals(f.getCanonicalFile())&&OsConstants.S_ISDIR(s.st_mode)&&s.st_uid==android.os.Process.myUid(),"ACCOUNTING_DIRECTORY");}
+ public static final class Refusal extends IllegalStateException {final String name,identity;Refusal(String code,String name,String identity){super(code);this.name=name.replaceAll("[\\p{Cntrl}]","?").substring(0,Math.min(96,name.length()));this.identity=identity;}public Map<String,Object> summary(){Map<String,Object> m=new LinkedHashMap<>();m.put("classification","ACCOUNTING_UNCLASSIFIED");m.put("reason",getMessage());m.put("name",name);m.put("identity",identity);m.put("contentsRead",false);return m;}}
+ public static Cut scan(File parent,long reserved,long external)throws Exception{
+  StructStat parentBefore=Os.lstat(parent.getPath());directory(parent,parentBefore);List<File> children=new ArrayList<>();
+  try(DirectoryStream<Path> stream=Files.newDirectoryStream(parent.toPath())){for(Path p:stream){ObservedEnrollment.require(children.size()<TOP,"ACCOUNTING_TOP_COUNT");children.add(p.toFile());}}
+  children.sort(Comparator.comparing(File::getName));
+  List<Row> rows=new ArrayList<>();Set<String> found=new HashSet<>();long historical=0,integrated=0;
+  for(File root:children){StructStat a=Os.lstat(root.getPath());EnrollmentRootRegistry.Root definition;try{definition=EnrollmentRootRegistry.root(root.getName());}catch(IllegalStateException e){throw new Refusal("UNKNOWN_ROOT",root.getName(),key(a));}found.add(root.getName());directory(root,a);ObservedEnrollment.require(rows.size()<ROWS,"ACCOUNTING_ROWS");rows.add(new Row(definition.id,definition.category,"",key(a),0));if(definition.category==0)continue;
+   java.io.FileDescriptor fd=Os.open(root.getPath(),OsConstants.O_RDONLY|OsConstants.O_NOFOLLOW|OsConstants.O_NONBLOCK,0);
+   try{ObservedEnrollment.require(key(a).equals(key(Os.fstat(fd))),"ACCOUNTING_ROOT_CHANGED");int count=0;Set<String> names=new TreeSet<>();
+    try(DirectoryStream<Path> stream=Files.newDirectoryStream(root.toPath())){for(Path path:stream){ObservedEnrollment.require(rows.size()<ROWS&&count++<4097,"ACCOUNTING_ROWS");File f=path.toFile();names.add(f.getName());long cap;try{cap=EnrollmentRootRegistry.limit(definition,f.getName());}catch(IllegalStateException e){throw new Refusal("UNKNOWN_LEAF",root.getName()+"/"+f.getName(),key(Os.lstat(f.getPath())));}StructStat before=Os.lstat(f.getPath());java.io.FileDescriptor leaf=Os.open(f.getPath(),OsConstants.O_RDONLY|OsConstants.O_NOFOLLOW|OsConstants.O_NONBLOCK,0);
+     try{StructStat actual=Os.fstat(leaf);EnrollmentDisk.regular(actual,cap);ObservedEnrollment.require(key(before).equals(key(actual))&&key(actual).equals(key(Os.lstat(f.getPath()))),"ACCOUNTING_LEAF_CHANGED");rows.add(new Row(definition.id,definition.category,f.getName(),key(actual),actual.st_size));if(definition.category==1)historical=Math.addExact(historical,actual.st_size);else integrated=Math.addExact(integrated,actual.st_size);}finally{Os.close(leaf);}
+    }}
+    Set<String> after=new TreeSet<>();try(DirectoryStream<Path> stream=Files.newDirectoryStream(root.toPath())){for(Path path:stream){ObservedEnrollment.require(after.size()<4097,"ACCOUNTING_ROWS");after.add(path.getFileName().toString());}}
+    ObservedEnrollment.require(names.equals(after)&&key(a).equals(key(Os.fstat(fd)))&&key(a).equals(key(Os.lstat(root.getPath()))),"ACCOUNTING_INVENTORY_CHANGED");
+   }finally{Os.close(fd);}
+  }
+  for(EnrollmentRootRegistry.Root root:EnrollmentRootRegistry.roots())if(root.required&&!found.contains(root.name))throw new Refusal("REQUIRED_ROOT_MISSING",root.name,"");
+  rows.sort(Comparator.comparingInt((Row row)->row.root).thenComparing(row->row.leaf));
+  ObservedEnrollment.require(key(parentBefore).equals(key(Os.lstat(parent.getPath()))),"ACCOUNTING_PARENT_CHANGED");return new Cut(rows,historical,integrated,parent.getUsableSpace(),reserved,external);
+ }
+}

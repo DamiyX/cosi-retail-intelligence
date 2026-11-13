@@ -1,0 +1,25 @@
+# D-077 — Existing R04 observation and completion visibility
+
+Coordinator decision8November2026 under founder's explicit investigation/correction and absent-founder recommended-decision/routine-phone authority verified same chat user turn01a1b4a8-7cd4-7860-8949-b6ff9ef8882e. SAME dedicated chat01a18b1c-dddc-76f3-b147-610604e47e08 at Sol6.1 High owns this bounded diagnosis/source correction. Preserve branch/dirty work, immutable original records and others' changes; prospective scoped lease. No new agent.
+
+## Facts and competing explanations
+
+D-076 R04 PREPARED148563B SHA a53780c857bbe1a6d020b715a1e43e7ec798dcb5ffe397baac251606274bedcb, ONE local export/Save, UI terminal READBACK/uncertain. Exact error code/secondary failures/native terminal bytes are NOT observed. READBACK can include stream/message-digest/read errors, focus/deadline failures, length/hash or final full-stat identity mismatch. Do not assert a specific provider/metadata/hardware cause. Original R02/R03 discarded details cannot be reconstructed.
+
+Source diagnosis is confirmed: EnrollmentReportTransfer.status supplies a bounded canonical terminal, reportCompletion retains it, but EnrollmentEntry only displays completion.phase then stops polling; there is no read-only UI action to retrieve completed status later. This hides the already recorded detail from the actual operator. Fixing that observability gap does not fix or waive the underlying transport failure.
+
+## A — ONE existing-file read-only diagnostic observation
+
+If the existing known Galaxy connection/unlocked device is available, confirm serial/installed f207 APK/UID and task/session scope. Observe ONLY /sdcard/Download/p204-evidence-enrollment-mw4zmxro-R04.bin using the established bounded exact-file metadata/hash procedure: before stat (regular/single-link/size <=4MiB), bounded exact148563-byte SHA256 read, after full available identity/stat. Reject aliases/type/size/identity drift. No recursive directory scan, shell-readable private storage, logs/images/vectors dump, host file copy or parser is granted. Retain a metadata/hash receipt. No reread loop/retry after uncertain observation; if inaccessible, record and continue safe source work without changing phone settings/network.
+
+This is a separately authorized diagnostic read of the already exported numerical file, not D-076's VERIFIED host-transfer path or a native confirmation waiver. A matching file cannot make native R04 VERIFIED or prove historical identities. No new file/Save/export/report preparation/slot/image/model operation. Do not consume R05. No app launch/restart/install is needed or granted for this observation.
+
+## B — Small source-only visibility correction and checks
+
+Add the smallest user-visible completion detail and read-only reinspection action using ONLY the existing strict reportStatus request and canonical P204T1/old terminal decoder. It must let the operator read the original R04 result after process/update loss if a durable terminal exists; missing/staged/failed terminal remains explicit uncertainty, never fabricated. Exact report/session/current truthful source, allowed enum/code/kind/errno, primary/close/revoke/terminal failures and bounded elapsed/size/stat facts only, within existing4096 ASCII terminal. No arbitrary exception messages/path/URI/labels/image/vector reader, logs or data export. Do not loosen decoder or any transfer/owner/deadline/accounting check.
+
+Keep observations independent from export: new action must never call exportReport/prepareReport/accounting.begin or reset deadline/cancel/generation, acquire second mutation ownership, auto-retry/resume/return to picker, change status/charges or declare a phase alone a successful save. Use existing early reportStatus bridge; no new native/private-data API, registry leaf, dependency/permission/camera/model change. Existing saved references/descriptor/source compatibility remains exact and truthful on source rollover. Do not change native transport behavior based on hypotheses.
+
+Self-review and focused checks for actual pending/verified/uncertain primary+secondary diagnostic display; cold exact R04 reinspection; missing/torn/old terminal; wrong session/report/extra fields/private-string refusal; unmount/stale result; one requested status action/no export/preparation/accounting effect/no deadline rearm. Preserve all passed predecessor evidence; regression should demonstrate previous phase-only loss and new operator-visible code. Tests are host/source checks, not physical cause proof.
+
+Return ONE stopped handoff, frozen source/index/archive/delta, exact existing-file observation or access limitation, diagnosis with remaining alternatives, checks/receipts and minimal later build/update/read-status proposal. Release own lease. No build/install/launch/new report/Save/hostcopy/native transport repair, no metadata-identity weakening, no R05, photos/screenshots/inference/barcode/settings/network/Git/CI/P2-05/PC-21/new agent. R04 remains consumed/uncertain; R01-R03 and all charges/caps preserved. Later artifact/device effects require coordinator dispatch under applicable delegation.

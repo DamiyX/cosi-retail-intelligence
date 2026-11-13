@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.22.1)
+project(camera_proof_publish LANGUAGES C)
+add_library(camera_proof_publish SHARED camera_proof_publish.c)
+target_compile_features(camera_proof_publish PRIVATE c_std_11)
+target_compile_options(camera_proof_publish PRIVATE -Wall -Wextra -Werror)
+target_link_options(camera_proof_publish PRIVATE -Wl,-z,max-page-size=16384)
+target_link_libraries(camera_proof_publish PRIVATE dl)

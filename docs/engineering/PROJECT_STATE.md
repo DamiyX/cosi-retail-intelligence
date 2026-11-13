@@ -1,11 +1,80 @@
-# PROJECT_STATE — COSI
+# PROJECT_STATE â€” COSI
 
-Last updated: 2026-10-18
-Current work: P2-03 C4 import repair independently ACCEPTED FOR SOURCE/STATIC SCOPE WITH RESIDUAL HOST TIMING RISK. APK086ee746...47699c avoids Expo/Asset bootstrap without new native modules/permissions. Fresh targeted actual-import/core-hook2pass; writer startup6pass/1cold-render5000ms timeout remains unresolved. C4 physical startup/geometry unverified; writer stopped/no lease. Founder-authorized GitHub source checkpoint f76f0df (714 files) PUSHED and14 branch tips remotely verified, including3 older-worktree snapshots without changing their files/index/HEAD. No merge/force/release. Private photos/PDF/runs/APKs/caches remain local, not backed up by GitHub. Await founder USB/unlock and aiming/movement for G4; no overnight phone action. P2-04/05/06 held. See GITHUB_BACKUP_RESULT_20261018.md and PHONE_P2_03_G4_C4_RESUME_20261018.md.
+Last updated: 2026-11-12
+CURRENT job42 reconciliation branchB: one Back/one saved-progress read showed no review controls/candidate, roll-on front Saved/rear Missing. CPU admission and pending identity remain unproven; raw photo/dispatch/charge preserved. SAME Terra6.1 Medium authorized one existing guarded interruption classification and fresh accounting, then direct founder coordination for covered remaining views or exact replacement shortfall, fresh READY mandatory. No reprocess42/refund/source change or automatic retake. Routine successful recovery does not require another coordinator round trip. See job42-reconciliation.json and actual hierarchy receipts under p204-job39-diagnosis-20261112-a1.
+CURRENT job42 processing uncertain: capture SAVED original/crop, one Process dispatch recorded, later CLOSED persists. Focused OS/CPU observations do not establish worker admission/completion. Astra timeline finds SAVED after dispatch and first CLOSED consistent with finish watchdog; early/missed action possible, unproven. SAME Terra6.1 Medium authorized ONE ordinary Back (may cancel unfinished processing), then read-only saved-progress reconciliation after drain. Candidate42 permits existing founder review; no candidate/busy/ambiguous stops with42 and dispatch spent, no reprocess/classification/retake. No new APK/source change justified. See final accounting-review addendum and job42 receipts. Job39 focus recovery remains valid, prior photos retained.
+CURRENT job39 recovery complete: Android focus events show NotificationShade interruption during preview; source cancellation latch explains subsequent OWNER_NOT_LIVE, initiator unknown. No photo39 or source defect established. One existing recovery and fresh classified accounting207090331B/free2095472640B passed, Freshglow four Saved slots retained;39 remains spent. SAME Terra6.1 Medium owns remaining-photo authorization reconciliation/direct founder question if needed, then products8–10 twelve intended views under fresh READY/unchanged caps. Jobs9–39 consumed31 admissions; global64 is not authorization. See p204-job39-diagnosis-20261112-a1/DIAGNOSIS.md. No new APK needed; R07/R08 remain reserved.
+CURRENT job37 resolved by one read-only observation: terminal says Photo and feature saved for review, Product7/complementary2. Earlier CLOSED sample was intermediate, not failure; no retake, Process repeat, source fix or APK needed. SAME Terra6.1 Medium resumes normal close/saved-progress/candidate37 check and actual founder review/Keep-or-Decline, then existing product session within unchanged budgets/fresh READY. Fourth Freshglow view not accepted until review/Keep confirmed. Receipt p204-job37-diagnosis-20261112-a1/job37-observation-once.raw and result.json; job36 remains spent, older uncertainties retained.
+CURRENT job37 observation correction: High source/evidence diagnosis confirms CLOSED hardware drain not attested is an unconditional non-busy stop status that can occur normally before queued processing completes, not an attestation-failure verdict. Earlier coordinator failure interpretation was premature. Six relevant files match source688; no justified source edit/build. Capture SAVED original/crop; CPU admission/completion still unknown from old UI sample. SAME Terra6.1 Medium dispatched ONE fresh read-only current Activity hierarchy, no button/navigation/replay/Keep/recovery/new admission/private-image read. Preserve spent37 and previous photos. See p204-job37-diagnosis-20261112-a1/DIAGNOSIS.md. Prior job36 recovery/account30 success remains valid in its scope.
+CURRENT job36 recovery verified: one existing explicit interruption recovery completed; saved Freshglow front/rear/complementary1 remain, complementary2 missing. Fresh account30 successful CLASSIFIED_METADATA_ONLY/a354 total107074405+31159917+63064915=201299237B/free2100776960B, capture thresholds pass. Coordinator parsed actual saved receipts; this recovery gate cleared, exact account29 exception/pending identity unproven. SAME Terra6.1 Medium resumes existing remaining-product workflow with founder/fresh READY within unchanged exact allowances; job36 stays spent, no new allowance/refund implied. No new APK or image in recovery. See recovery36/account30 receipts in p204-remaining-products-20261112-a1.
+CURRENT later November12 interruption: job35 kept; job36 Activity recreated before a photo, account29 correctly targeted but returned generic failure. Astra addendum identifies a likely unclassified pending36; exact exception remains hidden/unconfirmed. SAME Terra6.1 Medium dispatched ONE existing explicit interruption recovery after same-session/drain checks, read-only progress reconciliation and one fresh accounting if recovery confirmed. Keep job36 spent/all saved references unchanged; no new admission/READY/photo in this recovery packet. Failure/uncertainty stops without repeat or rebuild. See accounting-review addendum and account29/job36 receipts.
+CURRENT accounting follow-up November12: founder-requested independent Astra review recommends retaining qualified688/a88 and correcting the observation procedure, with no new APK. Saved account25 chronology supports a completed read; historical account22–24 individual completions remain unverified. Final saved total193473390B/free2039099392B is historical, not a fresh admission check. SAME Terra6.1 Medium agent dispatched to obtain one attributable current idle-session accounting result, then continue remaining-product work directly with founder under existing scope and fresh READY. Preserve all photos/charges and R07/R08 reservations; ambiguous/refused current check stops before camera. See PHONE_P2_04_ASTRA_ACCOUNTING_REVIEW_20261112.md. No new phone acceptance or source correction claimed here.
+CURRENT — D092 R06 independently ACCEPTED November12. Actual LIVE VERIFIED COMPLETE ACKNOWLEDGED, count/SHA/EOF pass; actual final ctime-only advance52ms recorded, all other compared fields stable and cleanup/publication errors NONE. Existing150355B report/hash202d6f7b... matched;31 device/host receipts plus fresh strict truthful688/a88/a354 parser and exact pinned R03 Fanta state/reference comparison pass. One prepared report preserved through interruption; no reprepare/retry/new photo. Source/app688/a88 now qualified for this numerical continuation gate. Old R01-R05 uncertainty retained. Next SAME Terra6.1 Medium agent arranges remaining-nine physical session directly with founder under existing plan/caps and fresh READY; R07/R08 reserved for final full-gallery pre/post-restart. P2-04 still OPEN. See p204-r06-qualification-review-20261112-a1/REVIEW.md.
+November12 D092 ordering correction: R06 preparation reconciled PREPARED150355B/hash202d6f7b..., export/Save/copy dispatches0. Current source cold decision requires six completed roles, so prepared-only UNKNOWN is expected and cannot show a prior export. Coordinator corrected blanket pre-export stop rule in device packet and re-dispatched SAME Terra6.1 Medium for FIRST export of existing R06, exclusive export-intent guard retained, no reprepare/reinstall. After export, LIVE ACKNOWLEDGED + strict host gate still mandatory. R07/R08 reserved; uncertain app transition and old window.xml side effect retained. No new export result claimed.
+D092 current work: D091 signed a88c6596 APK independently accepted (194 evidence/688source/525Metro, built probe16/current v3 policy/native closure). SAME Terra6.1 Medium dispatched bounded phone identity/capacity/update/ONE R06 export and only LIVE ACKNOWLEDGED + strict host qualification. No current device result yet. R07/R08 reserved, all old outcomes/charges retained, no photos. See PHONE_P2_04_R06_QUALIFICATION_DEVICE_20261109.md and p204-t3-reconciliation-apk-review-20261109-a1/REVIEW.md.
+D091 current work: source688/e49b1b2a independently accepted after1581 evidence hashes/688 source archive and fresh decision54/T3 213/consumer10/fresh-JVM14/mobile76 checks plus AndroidAPI compile. Reviewer harness setup failures corrected/retained, no production finding. SAME Sol6.1 High dispatched ONE offline build under PHONE_P2_04_T3_RECONCILIATION_BUILD_20261109.md. Policybaa68733/registrya354cedb, T3/R06-R08 and live/cold provenance must be in actual artifact. No new device/qualification result; next stopped artifact review then fresh phone/capacity/R06 LIVE+host gate.
+D090 current work: same Astra reviewer completed publication addendum, coordinator adopted prospective live-acknowledgment versus cold-reconciliation criterion, SAME Sol6.1 High implementer dispatched to correct F1 and return one complete source handoff. Frozen686 remains blocked. Physical qualification requires witnessed live success plus strict host proof despite any later private reconciliation. No APK/phone/report effect. See PHONE_P2_04_ASTRA_PUBLICATION_REVIEW_20261109.md and D090.
+D089 source686 candidate stopped with BLOCKING F1, build withheld. Publication may leave readable VERIFIED terminal then throw, giving live UNCERTAIN but cold eligibility. Coordinator verified1731 evidence hashes/686 archive-current matches and reran baseline/current counterexamples. Same Astra reviewer resumed for precise commit/recovery criterion, then same implementerHigh correction. No APK/phone/report effect. See p204-t3-f1-coordinator-review-20261109-a1/results.json and source SELF_REVIEW.md.
+D089 current source work: independent Astra review complete and founder-directed final recommendation adopted. SAME mini-app chat dispatched at Sol6.1 High for ONE complete T3 content criterion + actual metadata/deltas + exactly R06 qualification/R07PRE/R08POST source-policy change and full self-checks/stopped review. See PHONE_P2_04_ASTRA_CTIME_REVIEW_20261109.md and D089. Current baseline681/installed3329a2b2; new implementation not yet complete. Old R01-R05 outcomes/charges retained, no current phone/build/report effect.
+Independent Astra reviewer completed the one review-document assignment at gpt-6-astra High. Its stopped plan is adopted under D089, implementation now belongs to the same mini-app chat.
+Latest stopped diagnosis:23 analysis receipt hashes verified. Later R05 metadata matches read-start fields except ctime+56ms; exact original-final field set remains unknown. No production source change. Concrete PHONE_P2_04_CTIME_CHECKPOINT_PROPOSAL_20261109.md recommends a distinct content-verified/ctime-changed outcome with stable object/mtime/full content and all other guards, retaining strict VERIFIED and exact T3 metadata. Evidence-rule decision required before implementation. Five report slots spent; future test/final-report allocations still need explicit amendment. No further device effect.
+Latest D088 R05 actual original-export result UNCERTAIN/READ_CHANGED: byte count MATCH, checksum MATCH, final full identity CHANGED; no final-stat/close/revoke/publication error recorded, elapsed43945ms. One prepare/export/Save consumed149587B/hash606c2aad...,14 receipt hashes independently matched. Zero host copy/parser because native verification failed. No raw final identity fields persisted, so changed field/provider cause unknown. SAME Sol6.1 High assigned bounded investigation/ONE later exact metadata-only stat and smallest correction proposal, no guard weakening/build/re-export/new report. R05 now spent, final-report allowance needs later amendment. Old R03/R04 causes remain unproven.
+Latest D088: reviewed3329a2b2 installed once over4ab23d93 via USB, one normal launch/same UID-dataDir-firstInstall and four Fanta saved-view labels;10 receipt hashes verified. Founder explicitly requests original-export test. Coordinator disclosed and adopted unspent R05 as ONE current-Fanta original-export test under PHONE_P2_04_R05_ORIGINAL_EXPORT_TEST_20261109.md; SAME Terra6.1 Medium dispatched. Earlier unapproved R05PRE/R06POST proposal superseded, any two final reports need later separate approval. No current test result claimed. Native success plus strict host validation could establish current checkpoint without R03 waiver. No new photo or additional slot authorized.
+Latest D087 APK3329a2b2/44600255B independently accepted from source681 after190 receipt hashes/681 archive-current-stage/524 Metro bindings, actual signer/manifest/ELF/R8/new helper and built-codec host probe. Own review's final receipt filename mismatch corrected through saved-result reconciliation, no repeated build/test. See p204-export-verifier-apk-review-20261109-a1/REVIEW.md. All writers stopped. Founder decision requested for exact R03 numerical continuation and one extra final R06 report; unanswered. No installation or new device effect released here. Installed4ab23d93 last known, original export cause/physical acceptance unresolved. Next approved slot/source/device packet before remaining-product collection.
+Latest source681/848ddbfe original-export correction accepted independently:538 receipt hashes/681 source archive matches, fresh33 adapter/61 helper-codec/52 mobile cases and Android Java compile. D087 SAME Sol6.1 High authorized ONE new offline APK under PHONE_P2_04_EXPORT_VERIFIER_BUILD_20261109.md, stopped artifact review next. New T2 reports distinguish count/hash/final-identity outcomes, old terminal compatibility retained. Original export cause/device acceptance unresolved. Exact R03 numerical continuation exception and one additional final R06 report remain proposals, no waiver/slot amendment or remaining-product capture approved here.
+Current assignment following founder-selected Astra review: SAME mini-app agent active at Sol 6.1 High on the original exporter readback correction, scoped local checks and an R03 enrollment-checkpoint and final-gallery evidence proposal. See docs/recognition/PHONE_P2_04_ASTRA_EXPORT_REVIEW_20261109.md. Coordinator freshly matched the retained 147795-byte R03 laptop artifact to its prepared digest. Await the stopped source handoff. Resuming nine-product collection depends on an explicit evidence disposition and a physical packet.
+November9 04:46 Lagos one-time continuation handled: current state/handoff and ONE compact same-chat snapshot confirm completed/idle, no interrupted authorized work. No repeat device/build/diagnostic or completed PC21 planning. Stale workflow next_action reconciled without lease/other changes. Timer resume-cosi-after-usage-reset-november-9 deleted after handling. Existing R04 uncertainty and next scope decision unchanged.
+Current work: D084 source679/047aa4c0 signed APK4ab23d93 independently accepted and installed once under D085; one normal launch, same UID/dataDir/firstInstall. Fixed read diagnostic consumed/CANCELLED after operator timing error (120s total/30s post-callback, not30s picker); zero reads, no new read failure proved. D086 exact file metadata confirms148563B path present; provider query denied/MIME unknown; shell device78 differs from historic163, not provider-FD proof. Host receipt helper repaired/tested; first stat output UNKNOWN, new bounded stat recorded (cumulative2). No supported source repair or consumed-attempt reset. All evidence verified/stopped; next requires a distinct bounded capability/diagnostic disposition, no automatic device effects. Original R04 uncertain/R05 reserved/final-evidence gap retained; PC21 planning complete/reviewed, no implementation. See p204-fixed-read-apk-coordinator-review-20261109-a1/RETURN_BRIEF.md.
+
+Overnight fallback completed9November: no founder reply for five minutes after23:52:29UTC8November and primary blocked on locked phone. SAME /root/offline_product_prefill_plan resumed and returned its already-complete retained draft/stopped handoff with no edits or new research. Coordinator accepted the conditional proposal after read-only core-field/photo/guard/roadmap checks; see OFFLINE_PRODUCT_DETAILS_PLAN_REVIEW_20261109.md. PC21 planning now COMPLETE/REVIEWED, implementation/engine/roadmap/data gates still pending; original pause header is historical. No new planner/source/dependency/device effect. Later D085 phone execution is recorded above; timer subsequently handled/deleted as recorded above; no completed/consumed action replay.
+
+Latest founder overnight steering8November: continue authorized primary nonphysical work/installations/recommended decisions autonomously; no unattended physical scan/photo. Known Galaxy wireless transport99 returned RZCX22H432K at scheduling (not package/unlock proof). ONE coordinator continuation scheduled9November04:46:34 Lagos, id resume-cosi-after-usage-reset-november-9, subsequently handled/deleted as above. If primary genuinely blocked needing founder/phone, ask once and wait5minutes; only if unanswered/no independent primary work remains may SAME paused Astra PC21 planner resume its existing draft. Do not resume while useful primary work remains. See PHONE_P2_04_OVERNIGHT_CONTINUATION_20261108.md. Existing primary build/model/budgets unchanged; no release-scope change.
+Scheduled continuation November6 18:17 Lagos: both D-067 implementation and PC-21 Astra planning were interrupted. SAME implementer resumed from UI checks toward Java/TypeScript contract verification/final self-review; SAME Astra planner resumed its detailed plan. No completed handoff or device action claimed. One-time timer handled; no recurring polling.
+
+November7 11:03 Lagos one-time continuation: compact snapshot confirmed D-074 agent stopped on usage limit during final targeted checks/source freeze. SAME Sol6.1 High chat prompted to reconcile outputs and resume without restarting; expired lease must be renewed prospectively before writes. No completed handoff yet and no device effect. One-time continuation handled/deleted. Paused PC-21 Astra reminder delivered with this return update; task remains paused and its one-time reminder deleted.
+
+## Founder product follow-up — November6
+
+PRODUCT_CHANGE_BACKLOG PC-20 records added handwriting/shipping-label robustness,
+explicitly deferred after v1. PC-21 records offline editable photo-to-product
+details as founder-requested MVP priority, extending existing OCR clues/reranking.
+Founder PAUSED PC-21 Astra planning November6 to prioritize P2-04. Under the later overnight conditional authorization, SAME agent returned the completed draft on November9; coordinator review is now recorded in OFFLINE_PRODUCT_DETAILS_PLAN_REVIEW_20261109.md. Planning complete; implementation and sequencing remain unapproved. It is separate from active P2-04 source recovery;
+no dependency/code/device integration or milestone reorder has been executed.
+Reconcile existing Track B R6/M12 timing before adopting an implementation packet.
+
+## Agent recovery policy
+
+Founder approved October25: current/new/resumed agents own ordinary scoped
+diagnosis and one bounded repair. October26 correction: a Low/Medium agent asks
+the founder directly to switch the same chat to High, waits at least60 seconds
+for a response, and contacts the coordinator for the preauthorized setting-only
+fallback only if unanswered or the founder is explicitly unavailable. A founder
+response suspends fallback while they change it. Repair stays with the agent;
+already-High work continues without another request. Failed repair escalates with evidence; unresolved
+coordinator recovery/larger planning goes to founder-selected Astra. Independent
+stopped final audit and action/scope limits remain. See MULTI_AGENT_WORKFLOW.md1.1.
+
+## Deferred GitHub validation repair
+
+Founder instruction2026-10-18: leave CI/dependency correction pending until the
+camera test is complete and satisfactory, then address it before the next GitHub
+update. Existing source checkpoint374286d remains remotely verified; later local
+camera result/proposal/state changes have not yet been pushed.
+
+Seven newly pushed historical M1â€“M7 branches failed Expo dependency compatibility
+on both Windows and Ubuntu. The inspected M3 run passed types/lint/tests first;
+the current checkout also fails the compatibility check for seven packages.
+Current workflow excludes plan/** push branches; checkpoint374286d has zero CI
+checks, not a CI pass. Diagnosis complete, repair NOT implemented or waived.
+After the camera gate: review the current branch's dependency alignment while
+preserving frozen camera artifacts/pins, correct active-branch CI coverage, run
+the applicable checks on Windows/Ubuntu, and verify actual successful CI results.
+Do not rewrite historical backup branches or silence checks to make them green.
+No dependency/workflow change, CI rerun, commit or push is authorized for now.
 
 ## Active source and ownership
 
-### M9 integration — October3
+### M9 integration â€” October3
 
 M9 software integration accepted by main coordinator after C1 account-status
 repair. Central guard requires present ACTIVE user plus ACTIVE store/OWNER
@@ -19,7 +88,7 @@ Sibling finance/purchase/inventory account guards remain source observations for
 M11 actor/permission review, not runtime-validated or repaired here. Entire-app
 security/physical/native/live/accessibility/second-laptop/release gates pending.
 
-### M10 source acceptance — October3
+### M10 source acceptance â€” October3
 
 M10 software source accepted by main coordinator after stopped C1/C2 repairs.
 Same-revision new/expanded requested keys work; omitted sparse/observed-expired
@@ -39,26 +108,26 @@ activation/native/physical/accessibility/second-laptop/market-quality/release
 gates remain pending. All writers stopped; unattended automation to pause.
 Founder has now authorized M11 continuation; see current M11 section below.
 
-### M11 source foundation — October3
+### M11 source foundation â€” October3
 
-Sole writer01a100e8-66eb-77f2-a3bd-26100a36f8de STOPPED after MAX F1–F4 scoped
+Sole writer01a100e8-66eb-77f2-a3bd-26100a36f8de STOPPED after MAX F1â€“F4 scoped
 repairs; main coordinator verified returned611 paths and49 fresh executions/seven suites.
 Lease null; corrections verified, with unexplained M9 timing retained as an open risk.
-Prior C1–C5 verification remains historical/valid within its scope. Both full
+Prior C1â€“C5 verification remains historical/valid within its scope. Both full
 purchase-history paths now use exact occurred/purchase-created/ID ordering;
 catalogue/sales photo mutations retain captured actor/member/enrollment, while
 low-level utility/history behavior and existing member roles remain. Market
 cache/control/expiry mutations recheck authority; staff panel uses bounded
 member/pending pages with reachable original-ID retry. Seven allowed runtime
 paths only,34 new regression cases. Affected168/16 and final photo30/2 pass;
-unchanged originalF1–F3 plus canonical positive4/2 pass, four filtered not evidence.
+unchanged originalF1â€“F3 plus canonical positive4/2 pass, four filtered not evidence.
 ONE final npm run validate passed: source-only environment, four-workspace types/zero-warning lint and all workspace tests.
 One bounded diagnostic:INACTIVE15626ms>original15000ms FAIL; rational1635ms PASS.
 Most first-case delay is outside measured SQL calls; cause unresolved. Original
 MAX25182ms/5888ms and earlier timing failures remain evidence even after later
 passes. No timeout/config/assertion/protected-test relaxation or full-run retry.
 All130 pre-existing test/helper hashes and194 prior evidence artifacts preserved;
-migrations1–28/domain/contracts/server/dependencies/other shared work unchanged.
+migrations1â€“28/domain/contracts/server/dependencies/other shared work unchanged.
 Original audits/handoffs and different605/604/598 freezes remain distinct.
 Final source acceptance withheld pending timing-risk resolution/disposition;
 all confirmed source repairs verified. See M9_M11_MAX_CORRECTION_VERIFICATION.md.
@@ -70,12 +139,12 @@ build/spending effects. No fresh Doctor/dependency/export. See current correctio
 ledger, M11 tickets and M9_M11_MAX_CORRECTION_HANDOFF.md for exact return evidence.
 
 - Checkout: `C:\Users\doyew\Documents\DEV 2\COSI-m8-planning`; branch `plan/m8-unified-scanner`. Continue this task branch across model changes.
-- M0–M7 local source accepted at M7 basec817edb. Original M8 plan4105618, earlier returned source correctionsadc8b8f and SDK57 alignment824b2af are preserved.
+- M0â€“M7 local source accepted at M7 basec817edb. Original M8 plan4105618, earlier returned source correctionsadc8b8f and SDK57 alignment824b2af are preserved.
 - Coordinator planning/native packet preserved exactly in4e1b4ba; founder model/handoff policy packet separately preserved inf9f78bf. Default implementation policy is GPT-6.1 Sol HIGH; coordinator relayed founder-approved bounded XHIGH for M8-17/18. UI effort selection is not verified by source tooling.
 - M8-10 bc8ba86: deliberate same-code re-arm, Single cancellation back to scanner, bounded optional match/neutral-code feedback and no later form-add beep.
 - M8-11 a5646c9: centralized compatible draft accumulation, exact totals and incremental Undo; edits replace and invalidate old Undo. Completed-sale/inventory/outbox/replay facts retained.
 - M8-12 8e6602c: private photo/name presentation for all products in catalogue/search/cart/detail, enlargement/Close/back and bounded mounted-item verification. Generated cart labels compact; saved receipt labels unchanged.
-- M8-13 4aad10a: optional named Add photo/preview/retake and existing-product Add/Change through client.photos. New JPEG long edge<=1024/bytes<=307200 at staging and attachment; legacy8MiB-valid photos still read/replay. Tracked capture-cache cleanup, old-photo rollback/cancel and committed replay retained.50–150KiB remains a tuning target; unsupported/oversized captures expose honest no-photo fallback, not a large-original fallback.
+- M8-13 4aad10a: optional named Add photo/preview/retake and existing-product Add/Change through client.photos. New JPEG long edge<=1024/bytes<=307200 at staging and attachment; legacy8MiB-valid photos still read/replay. Tracked capture-cache cleanup, old-photo rollback/cancel and committed replay retained.50â€“150KiB remains a tuning target; unsupported/oversized captures expose honest no-photo fallback, not a large-original fallback.
 - M8-14 8efb1e0: compact Discounts given from existing completed-sale totals; Sales value is labeled after discounts and never reduced twice. Existing cost/margin/expenses/withdrawals unchanged.
 - Temporary diagnostic caa7003 is retired by41463fb/e1acccc. Helper/test/flag consumption/caller metadata removed; ordinary feedback hook, Sell source and sale tests restored to8efb1e0, with permanent freshness-count regression retained. Native trace history preserved; no sound/gain/asset/deadline/native-policy change or causal fix.
 - M8-16 4e5863f source independently reviewed19 tests/four suites, not native acceptance; pinch preference now superseded by M8-17.
@@ -112,7 +181,7 @@ failure/pair/tail counts verified. Junction escapes rejected; true file-symlink
 creation denied EPERM (executable case unverified).477 protected baseline hashes
 unchanged; only assigned ledger/workflow/state updated. No native runner, encoder,
 Android latency measurement, automatic native pass, model choice or production/
-schema/dependency/R0–R2/threshold change. Supplied observations remain unverified;
+schema/dependency/R0â€“R2/threshold change. Supplied observations remain unverified;
 all real/device/rights/quality gates pending. Independent R3 preparation source accepted in reports/R3_INDEPENDENT_REVIEW.md: fresh226 tests/14 suites113.765s, types/lint0,7 coordinator CLI cases and477 protected hashes.
 Report:docs/recognition/reports/R3_PREPARATION.md.
 
@@ -178,7 +247,7 @@ October1 default/cached connection failed NativeDatabase.prepareSync with NullPo
 
 Existing isolated APK105bb294-dce0-487c-ba87-d1620a40cd82 came from4d6521e on SM-A156E Android16. It contains older native patches; source exports are not rebuilt APK evidence. Prior Fanta/AirPro additions, unknown cancel, torch and one beep were observed; three unexpected codes and silent first addition leave decoder/beep stability unresolved. Large-text/TalkBack and standalone first-use offline detector gates remain unverified. Font recreation loses the memory-only unfinished draft under D-037.
 
-A separately reconstructed offline NGN4,000 completed sale survived restart with receipt/snapshots/inventory/outbox, with USB Metro available. This does not pass the original scanned-basket or standalone gate. Photo capture/normal onboarding/replacement/retention/clarity, current audio and 200% text/TalkBack require the later coordinator-owned phone procedure. M3–M7 broader physical checks, two phones, remote CI and second laptop remain release gates.
+A separately reconstructed offline NGN4,000 completed sale survived restart with receipt/snapshots/inventory/outbox, with USB Metro available. This does not pass the original scanned-basket or standalone gate. Photo capture/normal onboarding/replacement/retention/clarity, current audio and 200% text/TalkBack require the later coordinator-owned phone procedure. M3â€“M7 broader physical checks, two phones, remote CI and second laptop remain release gates.
 
 Historical first R0 audit (superseded by reports/R0_REAUDIT.md) accepted source/tooling: fresh51 tests/5 suites20.192s, lab typecheck/zero-warning lint and separate fixture/hash/failure/metric/frozen-config assertions pass. Builder full692-test log was inspected, not independently rerun. No blocking finding or source fix. See docs/recognition/reports/R0_INDEPENDENT_AUDIT.md.
 
@@ -196,7 +265,7 @@ upload, camera action, gallery sweep or model execution by the coordinator.
 Normal shop backgrounds and hand-held products remain required evaluation
 conditions; optional background removal is PC-19, not an implemented feature.
 
-Source correction cycle is complete and all implementers are stopped. Founder stopped further beep checks. Exact selected-photo inventory, actual labels and observations are in apps/recognition-lab/DATASET_CAPTURE.md. All twenty private copies have founder approval, matching original/copy SHA256 and existing Git exclusions; originals stay in Downloads and extra Fanta022727.jpg stays unviewed/uncopied. Existing-schema reference-only manifest, pending curation and template-header worksheets are now organized in private-data/r1-pilot. Native readiness exit2 records VALID integrity/INCOMPLETE; first PowerShell wrapper reported1 for nonzero native exit and is not an invalid-data result. Reports/log remain in ignored runs/r1-pilot-20261004-intake. No holdout seal, benchmark admission, independent-query or accuracy acceptance. Next is one-product fresh-query guidance via the existing phone utility, recording whether a separate physical sample is available. Same-item fresh photos are exploratory, not independent benchmark evidence. Full30–50-product coverage, formal curation and exact model/native evaluation remain open; no R5/M12/model/runtime adoption.
+Source correction cycle is complete and all implementers are stopped. Founder stopped further beep checks. Exact selected-photo inventory, actual labels and observations are in apps/recognition-lab/DATASET_CAPTURE.md. All twenty private copies have founder approval, matching original/copy SHA256 and existing Git exclusions; originals stay in Downloads and extra Fanta022727.jpg stays unviewed/uncopied. Existing-schema reference-only manifest, pending curation and template-header worksheets are now organized in private-data/r1-pilot. Native readiness exit2 records VALID integrity/INCOMPLETE; first PowerShell wrapper reported1 for nonzero native exit and is not an invalid-data result. Reports/log remain in ignored runs/r1-pilot-20261004-intake. No holdout seal, benchmark admission, independent-query or accuracy acceptance. Next is one-product fresh-query guidance via the existing phone utility, recording whether a separate physical sample is available. Same-item fresh photos are exploratory, not independent benchmark evidence. Full30â€“50-product coverage, formal curation and exact model/native evaluation remain open; no R5/M12/model/runtime adoption.
 
 Both source implementer and phone utility have stopped. October2 utility verified candidate asset provenance and freshly loaded slider; founder reports beep working in his current session. This is provisional human device/session evidence, not five controlled sound-path passes or a causal fix. Focus-at-tap is not implemented; actual focus/indicator and thinner slider below brackets with sufficient space are deferred to a later approved build/daytime. Preserve accessible touch targets. Native evidence is in M8_ANDROID_VERIFICATION.md.
 

@@ -2,17 +2,26 @@ plugins { id 'com.android.library' }
 
 group = 'local.recognitionexperiment'
 version = '0.0.1'
+def componentIntegration = System.getenv('COSI_RECOGNITION_EXPERIMENT') == '1' && System.getenv('EXPO_PUBLIC_APP_ENV') == 'recognition-verification' && System.getenv('EXPO_PUBLIC_RECOGNITION_CAMERA_PROOF') == '1' && System.getenv('COSI_RECOGNITION_CAMERA_COMPONENT_INTEGRATION') == '1' && System.getenv('EXPO_PUBLIC_RECOGNITION_CAMERA_COMPONENT_INTEGRATION') == '1'
 android {
+  if (componentIntegration) sourceSets.main.java.srcDir('src/integration/java')
   namespace 'expo.modules.recognitioncpu'
   compileSdk 36
   buildToolsVersion '36.0.0'
-  defaultConfig { minSdk 24 }
+  ndkVersion '27.1.12297006'
+  defaultConfig {
+    minSdk (componentIntegration ? 30 : 24)
+    consumerProguardFiles 'consumer-rules.pro'
+    externalNativeBuild { cmake { arguments '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON' } }
+  }
+  externalNativeBuild { cmake { path file('src/main/cpp/CMakeLists.txt'); version '3.22.1' } }
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_17
     targetCompatibility JavaVersion.VERSION_17
   }
 }
 dependencies {
+  if (componentIntegration) implementation project(':camera-component')
   implementation('com.google.ai.edge.litert:litert:2.2.0') {
     exclude group: 'com.google.android.play', module: 'ai-delivery'
   }

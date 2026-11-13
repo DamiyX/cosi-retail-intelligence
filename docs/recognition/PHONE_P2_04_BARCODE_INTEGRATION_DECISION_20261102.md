@@ -1,0 +1,21 @@
+# P2-04 barcode integration: source-only decision
+
+**Status: APPROVED, 2 November 2026.** Founder selected “Approve source-only barcode integration (Recommended)” in the explicit coordinator approval card describing the exact17-artifact library addition, initialization/background components, unchanged no-Internet permissions and source-only boundary. This authorizes the implementation/self-check scope below, not APK build/installation/phone tests. SAME dedicated chat uses Sol6.1 High and returns one stopped coherent handoff. See DECISION_LOG.md D-061.
+
+The combined visual-and-barcode goal is unchanged. This decision concerns adding a specific native dependency to the isolated experiment, not choosing the combined goal again.
+
+A4 exact-context cached offline build passed detector API compilation, manifest/R8/resources/native packaging/signing. Research APK SHA24e105d237abc8de1f3d351eca7b0f8794aa4e88d0214d4b0ae65fa16a3110f3,51,067,404 bytes,6,850,834 bytes above installed visual A2. Coordinator independently checked exact report/APK hashes/size, ZIP CRC and20 arm64 libraries; builder's actual commands/static results are in p204-barcode-compatibility-20261102-a4/STOPPED_REPORT.md. No detector ran on the phone. Original failures remain evidence, not erased by this pass.
+
+## Recommended authorization
+
+Authorize SAME agent at Sol6.1 High to implement and self-check an isolated source-only barcode integration using the exact cached bundled MLKit17.3.0 closure:129 baseline artifact identities unchanged,17 recorded additions. Allowed surface is optional experiment Gradle wiring, focused enrollment native analyzer/ownership/bridge/UI/state and relevant tests. Record exact paths before mutation, preserve frozen A2 source/APK/data and A3/A4 evidence, and acquire own scoped lease. No core retail scanner/business DB/schema/provider/ML model/framework change.
+
+Keep code behind experimental build/entry gates. One in-flight image, fixed product/view/generation identity, supported GTIN validation, stable candidate then explicit confirmation, visible Barcode acquired, dedup and conflict/no-code states; do not bind a stale callback to a new product. Preserve existing storage ceiling/history and no automatic capture/retake. Disable optional autozoom.
+
+Before enabling detector/camera handover, establish a credible public-API ownership/drain mechanism from actual cached code. A Task terminal, pending count, timeout, posted fence or public void close return is insufficient. Use controllable delayed/error/cancel/late-submit/image-close tests. If counted-executor ownership cannot cover actual native/release work, keep barcode disabled and return a concrete unresolved design decision instead of casting to internal APIs or weakening the guard. Image lifetime and actual capture/CPU exclusion must remain explicit.
+
+Candidate adds MLKit initialization/registrars, GoogleApiActivity and nonexported transport discovery/job/receiver components. Final A4 APK has the same CAMERA/internal-signature permissions and no Internet/network-state permissions under inherited manifest removals. This does not prove absence of telemetry attempts, IPC or offline initialization failures. Preserve and review actual merged consequences; do not silently strip more components or grant permissions. POMs identify MLKit Terms of Service, Android SDK and Apache2.0 license families; no blanket permissive-license assertion.
+
+Source-only approval covers implementation and focused local/self-check evidence only. A further APK build/installation/phone detector run, radio changes, photos/screenshots/processing/export/private readback need their concrete later packet. No installed-app change, network downloads, generic reader, old-exporter reuse, Git/CI or P2-05. Complete one coherent deliverable with self-corrections, then one stopped report. Coordinator reviews the material handoff, not each coding slice. Full combined P2-04 acceptance remains open until actual offline barcode and physical enrollment evidence supports it.
+
+Alternative: retain the installed visual-only build and defer barcode integration explicitly. That would leave the combined P2-04 outcome incomplete; it is not the recommended default given the founder's combined-flow choice.

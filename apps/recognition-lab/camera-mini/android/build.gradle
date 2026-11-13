@@ -1,0 +1,24 @@
+// Reuse the already cached javapoet version selected by the reviewed toolchain graph.
+buildscript { repositories { google(); mavenCentral() }; dependencies { classpath 'com.squareup:javapoet:1.13.0' } }
+plugins {
+ id 'com.android.application' version '8.12.0' apply false
+ id 'com.android.library' version '8.12.0' apply false
+}
+
+// Actual resolved artifact bytes/edges for final independent review; no network.
+tasks.register('reviewClosure') {
+ doLast {
+  def scopes=[:]
+  allprojects.each { p ->
+   def configs=p.configurations.findAll { it.name in ['releaseCompileClasspath','releaseRuntimeClasspath'] }
+   configs.each { c ->
+    scopes[p.path+':'+c.name]=[edges:c.incoming.resolutionResult.allDependencies.collect{it.toString()}.sort(), artifacts:c.incoming.artifactView { componentFilter { it instanceof org.gradle.api.artifacts.component.ModuleComponentIdentifier } }.artifacts.artifacts.collect { a ->
+     def digest=java.security.MessageDigest.getInstance('SHA-256');a.file.withInputStream { stream ->byte[] b=new byte[65536];int n;while((n=stream.read(b))!=-1)digest.update(b,0,n)}
+     [coordinate:a.id.componentIdentifier.displayName,path:a.file.absolutePath,bytes:a.file.length(),sha256:digest.digest().encodeHex().toString()]
+    }.sort{it.coordinate}]
+   }
+  }
+  def output=System.getenv('MINI_REVIEW_OUTPUT');if(!output)throw new GradleException('Review output required')
+  new File(output,'resolved-closure.json').text=groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(scopes))+'\n'
+ }
+}

@@ -12,6 +12,18 @@ function native(): jest.Mocked<CameraProofNative> {
 }
 function deferred<T>() { let resolve!: (value: T) => void, reject!: (error: Error) => void; const promise = new Promise<T>((a, b) => { resolve = a; reject = b; }); return { promise, resolve, reject }; }
 const prepared = (capture: () => Promise<unknown>) => async () => capture;
+
+test('failed native admission retains primary safe errno and never invokes camera or model', async () => {
+  const n = native(), run = new CameraProofRun(n), capture = jest.fn();
+  const primary = Object.assign(Error('private /data/user/0/app/reservation.new'), { code: 'CAMERA_IO_RENAME_EACCES' });
+  n.beginCameraProof.mockRejectedValueOnce(primary);
+  await expect(run.start(request, capture)).rejects.toMatchObject({ message: 'CAMERA_IO_RENAME_EACCES', cause: primary });
+  expect(capture).not.toHaveBeenCalled(); expect(n.processCameraProof).not.toHaveBeenCalled();
+  expect(n.failCameraProofCapture).not.toHaveBeenCalled(); expect(n.cancelCameraProof).not.toHaveBeenCalled(); expect(run.running).toBe(false);
+  n.beginCameraProof.mockRejectedValueOnce(Object.assign(Error('private path'), { code: 'CAMERA_bad/path' }));
+  await expect(run.start(request, capture)).rejects.toThrow('CAMERA_OPERATION_FAILED');
+  expect(capture).not.toHaveBeenCalled();
+});
 test('selects a deterministic reported size within 4MP, refuses unbounded/unknown lists', () => {
   expect(choosePictureSize(['4000x3000', '2000x2000', '1920x1080', 'bad'])).toEqual({ size: '2000x2000', width: 2000, height: 2000 });
   expect(choosePictureSize(['2001x2000', '2000x2000']).size).toBe('2000x2000');

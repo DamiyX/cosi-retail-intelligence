@@ -19,6 +19,9 @@ public final class CameraProofChecks {
     String fault="";long available=Long.MAX_VALUE;
     private void regular(File f)throws IOException{if(!f.getCanonicalFile().equals(f.getAbsoluteFile())||Files.isSymbolicLink(f.toPath())||(f.exists()&&!f.isFile()))throw new IOException("host alias/type");}
     public void root(File f,boolean create)throws IOException{if(!f.getCanonicalFile().equals(f.getAbsoluteFile())||Files.isSymbolicLink(f.toPath()))throw new IOException("host root alias");if(!f.exists()&&create&&!f.mkdir())throw new IOException("mkdir");if(!f.isDirectory())throw new IOException("root");}
+    // Logic-only host seam. DurableIO separately models visible versus acknowledged names.
+    // This method is NOT evidence of a host or Android filesystem fsync.
+    public void syncDirectory(File f)throws IOException{root(f,false);}
     public List<String> list(File f){return Arrays.asList(Objects.requireNonNull(f.list()));}
     public long size(File f)throws IOException{regular(f);return f.exists()?f.length():-1;}
     public byte[] read(File f,int cap)throws IOException{regular(f);if(!f.exists()||f.length()>cap)throw new IOException("read bound");return Files.readAllBytes(f.toPath());}

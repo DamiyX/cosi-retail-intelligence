@@ -1,0 +1,10 @@
+pluginManagement {
+ repositories { google(); mavenCentral(); gradlePluginPortal() }
+ resolutionStrategy { eachPlugin { if(requested.id.id.startsWith('com.android.')) useModule('com.android.tools.build:gradle:8.12.0') } }
+}
+dependencyResolutionManagement {
+ repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+ repositories { maven { url uri('C:/Users/doyew/.cache/cosi-p2-camera-g3-c1-20261016-a1/maven') }; google(); mavenCentral() }
+}
+rootProject.name = 'CameraComponentProbe'
+include ':app', ':camera-component'

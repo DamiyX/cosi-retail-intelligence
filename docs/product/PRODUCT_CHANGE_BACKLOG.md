@@ -46,6 +46,8 @@ catalogue/inventory enrichment must preserve immediate sell-first value.
 | PC-17 | Compact checkout, product language, scoped edit cancellation and inline quantity controls | Founder explicitly deferred October1 until scanning is finished; preserve as later sales/checkout work, outside current M8 corrections |
 | PC-18 | Bargained reductions shown as discounts, higher prices allowed and below-cost protection | Founder explicitly deferred October1 until scanning is finished; future pricing/cost-reference review required, outside current M8 corrections |
 | PC-19 | Recognize products held in a hand or against ordinary shop backgrounds; assess optional offline cutouts | October3 input; existing recognition evaluation conditions reinforced. Preprocessing feasibility only; higher-model planning awaits founder selection, no model/native dependency or feature adopted |
+| PC-20 | Same product remains recognizable despite handwritten delivery notes, marker prices and added shipping labels | Founder November6; advanced robustness deferred until after v1. Record evaluation concern now; no new masking/model/identity behavior implemented |
+| PC-21 | Suggest editable product name, size/variant and category from the existing onboarding/temporary-product photo, entirely offline | Founder November6 prioritizes MVP; Astra planning requested. Existing OCR clues/reranking does not specify this complete flow. Planning only; reconcile Track B/M12 timing before source integration |
 
 ## PC-17 — Keep checkout compact and product edits local
 
@@ -505,3 +507,45 @@ separation is not guaranteed. Its
 uses a downloaded model and is beta; on-device does not establish fresh-install
 offline readiness. Neither library is selected or added to COSI. No dataset/model/
 device evidence establishes whether masks improve this project's recognition.
+
+## PC-20 — Added writing and labels on real packaging
+
+Founder input 6 November2026: the same carton or product may carry handwritten delivery destinations, marker numbers/prices or added labels in one shop but not another. Those additions must not automatically establish a different product identity. Advanced handling is explicitly deferred until after v1; no implementation or detailed recovery-model plan requested now.
+
+Record this as an evaluation concern for visual matching and OCR: compare the same SKU/package with and without additions, and distinguish genuinely different printed size/variant labels. Suppressing handwriting alone is insufficient: shipping labels can be printed, and marker strokes can hide genuine manufacturer text. Do not reconstruct hidden information or declare packaging variants identical without evidence. Preserve UNKNOWN/manual correction. No current robustness claim is established by the existing lab tests.
+
+## PC-21 — Offline photo-assisted product details (MVP priority)
+
+Founder input 6 November2026: typing ten names/specifications was tedious; doing this for hundreds while trading risks abandonment. Use the already captured front/label photo to suggest name/brand, visible size, variant and package form; suggest a category when evidence permits. Support an unknown/temporary product during selling as well as fuller later guided enrollment. Prompt for a front view showing the name, without requiring complete enrollment to finish a sale. The user reviews/corrects a short draft; uncertain fields stay empty. This is factual field extraction, not marketing prose generation.
+
+Observed roadmap coverage: SCANNING_ARCHITECTURE sections31–33 already provide OCR clues and locally guaranteed assets. BUILD_PLAN R6 tests OCR reranking after baseline retrieval; M8/PC-08 currently routes OCR/guided visual enrollment to Track B/M12. These statements do not constitute a delivered photo-prefill flow. Founder now requests this flow in the MVP and Astra-led planning. This records that priority; implementation scheduling and integration require explicit reconciliation with those existing boundaries. It does not silently move OCR into the active P2-04 recovery task or reopen passed P2-03.
+
+Planning boundaries: manual/barcode/local-known-product paths remain usable. A category suggestion is distinct from recognizing an exact SKU. Read printed net contents separately from actual stock, price/cost or package conversion; never infer those from a photo. Unmarked cartons/unbranded goods may need a retailer label; unseen contents cannot be reliably extracted. A carton count visible on the pack is a suggestion requiring confirmation, not an authoritative inventory conversion. Corrections may improve that store's future suggestions under a defined local policy; they are not automatic shared truth or on-device model retraining. Incidental delivery-address text must not become product metadata or shared training data.
+
+Research quick scan, 6 November2026 (primary-source claims, not COSI measurements):
+
+- Google ML Kit text recognition offers a model bundled with the app and an alternative dynamically downloaded model. Bundled availability fits first-use offline evaluation; its documentation also warns that resolution/focus affect extraction. Candidate only: earlier barcode lifecycle/dependency findings require fresh OCR-specific review, not automatic adoption. https://developers.google.com/ml-kit/vision/text-recognition/v2/android
+- PaddleOCR provides mobile OCR deployment examples that can be studied/reused rather than building an OCR engine from scratch. Native integration, exact release/model/license, compatibility, resource cost and ownership/drain still need review. https://github.com/PaddlePaddle/PaddleOCR/blob/main/deploy/lite/readme.md
+- Tesseract is a printed-text baseline candidate; its FAQ says handwriting recognition performs poorly. Poor handwriting recognition does not prove handwriting is safely ignored or cannot distort matching. https://tesseract-ocr.github.io/tessdoc/FAQ
+
+Recommendation: benchmark a small reusable offline OCR engine plus simple field parsing/local category mapping against current manual entry before adopting heavier on-device language/vision generation. Measure field correctness and retailer correction/time saved, unsupported guesses, first-use airplane-mode behavior, latency/memory/storage on target Android phones, and sale continuity. Include small curved/glossy labels, multiple languages/scripts as relevant, similar sizes, genuine variants and added shipping/marker text. No engine, model, dependency, benchmark threshold or accuracy guarantee selected by this scan.
+
+Astra planning delegated as a separate read-only bounded task; existing same-agent P2-04 source repair continues untouched. No new phone test, dependency retrieval, source implementation, integration or private-photo use authorized by this backlog record.
+
+### Astra planning return — 6 November2026
+
+Astra planning agent /root/offline_product_prefill_plan completed a read-only review; no files, source, dependency or phone effects. Proposed minimum slice: optional “Suggest details from photo” in Add product, unknown checkout item and Temporary-product completion. Reuse the available front photo; suggest only evidence-supported name/brand/size/variant/category/package form. Accept/edit/dismiss/continue immediately. Preserve current checkout requirements and the same product ID; never overwrite retailer edits with late results or rewrite completed-sale snapshots. Current product-detail edit surfaces do not by themselves deliver all these structured fields; approved durable homes and permissions must be resolved before implementation.
+
+Proposed sequencing amendment, not silently enacted: permit standalone photo-to-details evaluation and potential MVP integration earlier than R6's recognition-reranking experiment. Keep full guided enrollment/recognition gates and M12 claims separate. This requires a bounded coordinator/founder scope-and-sequencing decision, then Astra's implementation-ready experiment packet; the candidate scan above is not that complete technical packet.
+
+Experiment packet must resolve (1) supported fields and persistent ownership, (2) whether existing compressed photos retain readable text and optional fallback if not, (3) exact reusable offline engine/native lifecycle and resource/license implications, and (4) representative expected answers, manual-entry baseline and agreed go/no-go criteria. Use existing licensed/authorized photos only within their permission; new collection/phone work requires its applicable scope. No automatic larger-original retention or hidden remote processing.
+
+Judge accepted useful fields, wrong suggestions, omissions, total correction/completion time, offline first use and target-device resource cost. Verify cancellation/restart/photo replacement/store-product switching and late-result handling. Narrow the slice if correcting suggestions takes more effort than typing. Corrections save local product knowledge under defined rules; they do not automatically retrain a model or establish shared truth. Advanced handwriting separation stays deferred, with conservative omission/manual correction available in v1.
+
+Recommended next action: finish current P2-04 recovery independently; agree the earlier MVP photo-details experiment scope, then use Astra for its integration/implementation-ready plan and Sol6.1 High for subsequent approved code. No source integration, roadmap reorder, engine selection or accuracy claim is made by this planning return.
+
+Founder priority change 6 November2026: PAUSE PC-21 Astra planning. Preserve the saved draft OFFLINE_PRODUCT_DETAILS_EXPERIMENT_PLAN_20261106.md and same planner for later resumption; final handoff/review is not confirmed. P2-04 is primary. Reminder requested for later; reminder does not authorize automatic resumption.
+
+7 November2026 D-070 physical usability feedback: wide LayoutA guide was awkward for the tall Fanta bottle. Founder repositioned upright and one approved photo proceeded. Retain as a later guided-capture usability issue; no orientation/guide/crop geometry change is authorized or implemented by this note.
+
+7 November2026 additional P2-04 Fanta feedback: two founder-directed rear retakes for incomplete framing then small-print blur/glare; accepted rear still had largely unreadable ingredients text despite visible barcode/shapes. Founder requested consideration of focus/sharpness and flash controls. Record alongside PC-19/PC-21 and prior focus backlog; no OCR-readability claim, enhancement promise, flash/guide/runtime change or resumption of paused OCR planning. Measure actual capture/readability limitations before selecting a remedy.

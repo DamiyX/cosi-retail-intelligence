@@ -1,0 +1,14 @@
+{
+  "run": "p203-orientation-20261026-evidence-v2",
+  "case": "M00-A000",
+  "apk": "0000000000000000000000000000000000000000000000000000000000000000",
+  "source": "0000000000000000000000000000000000000000000000000000000000000000",
+  "displayPixels": [1080, 2340],
+  "hardware": {
+    "serialSha256": "449adc4dd688d46d031896b5445da64ff66c8c569357d5cdc096b256e83dbd17",
+    "model": "SM-A156E",
+    "sdk": "36",
+    "abi": "arm64-v8a"
+  },
+  "sandbox": {"appId": 10264, "ceDataInode": 1674268, "deDataInode": 1670442}
+}

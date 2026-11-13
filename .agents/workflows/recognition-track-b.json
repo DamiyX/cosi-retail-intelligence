@@ -1,10 +1,539 @@
 {
-  "schema_version": 1,
-  "task_id": "recognition-track-b",
-  "workflow_id": "build-feature",
-  "mode": "implement",
-  "status": "in_progress",
-  "current_state": "phone-p2-03-c4-source-static-reviewed-physical-pending-founder",
+  "acceptance_gates": [
+    {
+      "blocker": null,
+      "claim": "Capture/readiness tooling independently accepted",
+      "depends_on": [],
+      "evidence": [
+        {
+          "result": "Independent96 tests, typecheck/lint and actual readiness examples accepted preparation only.",
+          "source": "docs/recognition/reports/R1_INDEPENDENT_REVIEW.md"
+        },
+        {
+          "result": "Shared R0/R1 CLI hardlink overwrite independently reproduced; FA-03 extension pending sequential repair.",
+          "source": "docs/recognition/reports/R1_R4_FINAL_AUDIT.md"
+        },
+        {
+          "result": "Shared R0/R1 FA-03 independently accepted:143 focused passes/7 native file-symlink skips, types/lint0, sentinel preservation and527 protected hashes.",
+          "source": "docs/recognition/reports/R0_R1_FA03_INDEPENDENT_REVIEW.md"
+        }
+      ],
+      "id": "r1-preparation-source",
+      "limitations": [
+        "Synthetic/structural tests do not prove real capture."
+      ],
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "verification": {
+        "kind": "review",
+        "procedure": "Audit RB1-01..03 stopped handoff, lab tests/typecheck/lint and actual readiness CLI",
+        "success_condition": "Correct readiness/gap/label/seal behavior and preserved R0 scope"
+      },
+      "waiver": null
+    },
+    {
+      "blocker": "Independent dataset coverage, rights/curation and sealing evidence remain pending.",
+      "claim": "Real30ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ50-product difficult set curated and sealed",
+      "depends_on": [
+        "r1-preparation-source"
+      ],
+      "evidence": [],
+      "id": "r1-real-dataset",
+      "limitations": [
+        "Authorized forty-photo packet represents the same ten physical products; it is exploratory, not independent formal coverage."
+      ],
+      "owner": "founder and coordinator",
+      "required": true,
+      "status": "pending",
+      "verification": {
+        "kind": "inspection",
+        "procedure": "Inspect authorized real photos/rights and coverage/independence/seal report",
+        "success_condition": "Actual real-data evidence with exact counts and disclosed gaps accepted"
+      },
+      "waiver": null
+    },
+    {
+      "blocker": null,
+      "claim": "Encoder comparison preparation independently accepted",
+      "depends_on": [
+        "r1-preparation-source"
+      ],
+      "evidence": [
+        {
+          "result": "Independent preparation review accepted; actual 172 tests and7 CLI cases.",
+          "source": "docs/recognition/reports/R2_INDEPENDENT_REVIEW.md"
+        },
+        {
+          "result": "Final independent audit reproduced FA-01..03; correction packet prepared, not dispatched. Prior source acceptance conditional on corrections.",
+          "source": "docs/recognition/reports/R1_R4_FINAL_AUDIT.md"
+        },
+        {
+          "result": "R2 FA-03 independently accepted:39 focused tests/2 suites93.11s, types/lint0, historical probe rejects linked destination without overwrite.",
+          "source": "docs/recognition/reports/R2_FA03_INDEPENDENT_REVIEW.md"
+        }
+      ],
+      "id": "r2-preparation-source",
+      "limitations": [
+        "Precomputed toy comparison is not encoder execution."
+      ],
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "verification": {
+        "kind": "review",
+        "procedure": "Audit RB2-01..03 lab source/tests/actual CLI",
+        "success_condition": "Independent actual evidence accepted within the stated scope"
+      },
+      "waiver": null
+    },
+    {
+      "blocker": null,
+      "claim": "Reviewed exact encoders run on actual real dataset",
+      "depends_on": [
+        "r1-real-dataset",
+        "r2-preparation-source"
+      ],
+      "evidence": [],
+      "id": "r2-real-benchmark",
+      "limitations": [
+        "Real photos and exact model artifacts/execution unavailable now."
+      ],
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "verification": {
+        "kind": "review",
+        "procedure": "Review executed model/rights/preprocessing/same-split real comparison",
+        "success_condition": "Independent actual evidence accepted within the stated scope"
+      },
+      "waiver": null
+    },
+    {
+      "blocker": null,
+      "claim": "Benchmark record/equivalence preparation independently accepted",
+      "depends_on": [
+        "r2-preparation-source"
+      ],
+      "evidence": [
+        {
+          "result": "Fresh226 lab tests, types/lint0, independent CLI and477 hashes pass.",
+          "source": "docs/recognition/reports/R3_INDEPENDENT_REVIEW.md"
+        },
+        {
+          "result": "Final independent audit reproduced FA-01..03; correction packet prepared, not dispatched. Prior source acceptance conditional on corrections.",
+          "source": "docs/recognition/reports/R1_R4_FINAL_AUDIT.md"
+        },
+        {
+          "result": "R3 FA-03 independently accepted:32 focused passes/2 explicit native symlink skips, types/lint0, probe rejects overwrite,521 protected hashes unchanged.",
+          "source": "docs/recognition/reports/R3_FA03_INDEPENDENT_REVIEW.md"
+        }
+      ],
+      "id": "r3-preparation-source",
+      "limitations": [
+        "Supplied timing and toy equivalence are not physical measurement."
+      ],
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "verification": {
+        "kind": "review",
+        "procedure": "Audit stopped RB3-01..03 source/tests/actual CLI",
+        "success_condition": "Independent actual evidence accepted within stated scope"
+      },
+      "waiver": null
+    },
+    {
+      "blocker": null,
+      "claim": "Exact candidates measured on Galaxy A15 and lower-spec Android",
+      "depends_on": [
+        "r2-real-benchmark"
+      ],
+      "evidence": [],
+      "id": "r3-real-device-benchmark",
+      "limitations": [
+        "All physical tests pending founder return and reviewed native prerequisites."
+      ],
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "verification": {
+        "kind": "review",
+        "procedure": "Review real hardware latency/memory/disk/sustained/offline/equivalence evidence",
+        "success_condition": "Independent actual evidence accepted within stated scope"
+      },
+      "waiver": null
+    },
+    {
+      "blocker": null,
+      "claim": "Store-local retrieval/cache preparation independently accepted",
+      "depends_on": [
+        "r3-preparation-source"
+      ],
+      "evidence": [
+        {
+          "result": "Independent304 tests, types/lint0,8 CLI/service checks and499 protected hashes.",
+          "source": "docs/recognition/reports/R4_INDEPENDENT_REVIEW.md"
+        },
+        {
+          "result": "Final independent audit reproduced FA-01..03; correction packet prepared, not dispatched. Prior source acceptance conditional on corrections.",
+          "source": "docs/recognition/reports/R1_R4_FINAL_AUDIT.md"
+        },
+        {
+          "result": "FA-01/02/04 independently accepted:110 focused tests/5 suites87.075s, types/lint0, fresh freeze/context/alias probes and519 protected hashes.",
+          "source": "docs/recognition/reports/R4_FINAL_AUDIT_INDEPENDENT_REVIEW.md"
+        }
+      ],
+      "id": "r4-preparation-source",
+      "limitations": [
+        "Recorded/toy retrieval is not an image encoder or real accuracy gate."
+      ],
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "verification": {
+        "kind": "review",
+        "procedure": "Audit stopped RB4-01..03 source/tests/actual CLI",
+        "success_condition": "Actual independent evidence accepted within stated scope"
+      },
+      "waiver": null
+    },
+    {
+      "blocker": null,
+      "claim": "Real calibrated retrieval and independent holdout accepted",
+      "depends_on": [
+        "r1-real-dataset",
+        "r2-real-benchmark",
+        "r3-real-device-benchmark",
+        "r4-preparation-source"
+      ],
+      "evidence": [],
+      "id": "r4-real-quality-holdout",
+      "limitations": [
+        "Actual real data/encoders/device/holdout pending; no thresholds waived."
+      ],
+      "owner": "coordinator",
+      "required": true,
+      "status": "pending",
+      "verification": {
+        "kind": "review",
+        "procedure": "Review frozen real calibration/holdout package/unknown/failure evidence",
+        "success_condition": "Actual independent evidence accepted within stated scope"
+      },
+      "waiver": null
+    },
+    {
+      "blocker": null,
+      "claim": "Founder-requested combined Astra audit performed",
+      "depends_on": [
+        "r4-preparation-source"
+      ],
+      "evidence": [
+        {
+          "result": "Final independent audit reproduced FA-01..03; correction packet prepared, not dispatched. Prior source acceptance conditional on corrections.",
+          "source": "docs/recognition/reports/R1_R4_FINAL_AUDIT.md"
+        },
+        {
+          "result": "Founder-requested Astra final audit performed; all reproduced findings corrected sequentially and independently reviewed using Sol HIGH as authorized.",
+          "source": "docs/recognition/reports/R1_R4_FINAL_AUDIT.md"
+        }
+      ],
+      "id": "r1-r4-founder-final-audit",
+      "limitations": [
+        "Source/preparation audit completed; real dataset, model rights/actual inference, native device and frozen real quality are pending, not waived."
+      ],
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "verification": {
+        "kind": "review",
+        "procedure": "Founder returns, selects Astra and requests final combined source audit",
+        "success_condition": "Actual independent evidence accepted within stated scope"
+      },
+      "waiver": null
+    },
+    {
+      "blocker": null,
+      "claim": "One-shot camera source and four correction findings reviewed for generated/local scope",
+      "depends_on": [],
+      "evidence": [
+        {
+          "result": "Accepted with residual host first-use timing risk; no Kotlin/Android/device claim.",
+          "source": "docs/recognition/reports/PHONE_P2_03_S1_C1_INDEPENDENT_REVIEW_20261016.md"
+        }
+      ],
+      "id": "phone-p2-03-camera-source-g2",
+      "limitations": [
+        "At G2, native build/static APK was pending; G3 exact C3 is now accepted for static scope. Physical camera/durability/geometry remain pending.",
+        "SDK producer cache/total RAM has no proven hard cap under approved D-054.",
+        "Custom cold UI first-case timeout remains unexplained; later full pass is not timing acceptance."
+      ],
+      "owner": "coordinator",
+      "required": true,
+      "status": "met",
+      "verification": {
+        "kind": "review",
+        "procedure": "Stopped C1 exact source review and fresh focused generated/mobile/counterexample checks",
+        "success_condition": "Material four findings closed with remaining native/build/physical uncertainty explicit"
+      },
+      "waiver": null
+    }
+  ],
+  "approvals": [
+    {
+      "by": "founder",
+      "scope": "October4 approves following Astra reconciled exploratory plan, creating implementation chat Sol6.1 HIGH, required bounded local downloads/installations, sequential coordinator audit/corrections and private40-photo experiment after source audit. Coordinator may decide routine details during sleep and record reasons; interactive physical checks deferred. No automatic M12: finish exploratory evidence before new planning. Missing third-party rights, setup gates and plan ceilings remain constraints; no hosted effects/publication or production architecture change."
+    },
+    {
+      "by": "founder",
+      "scope": "Astra Track B planning; explicit begin October2. Subsequent implementation preference Sol6.1 HIGH; not permission to implement this unreviewed packet."
+    },
+    {
+      "by": "founder",
+      "scope": "October2 begin approval: new separate GPT-6.1 Sol HIGH chat implements RB0-01..04, then stops and hands back. Ask founder for Terra MEDIUM coordinator audit switch before audit; Sol6.1 HIGH fallback authorized if no reply after reasonable opportunity. Coordinator cannot switch its own model."
+    },
+    {
+      "by": "founder",
+      "scope": "October2 resume existing implementer Sol6.1 HIGH for R0-A2-01/02 lab metric/reporting corrections, discriminating tests and affected evidence/docs only. Preserve audit reproduction, ranking/config/schema/production source. Stop for review and send one explicitly authorized completion report to coordinator01a098ef-d830-7531-bca7-2d66b0a5b587."
+    },
+    {
+      "by": "founder",
+      "scope": "October2 sequential R1ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œR4 implementation/preparation, Sol6.1 HIGH independent audits and correction loop; final combined Astra audit only after return. Capture tools first; real photos and all physical checks pending until founder returns. Pending physical gates are not waived."
+    },
+    {
+      "kind": "founder-phone-p0-continuation",
+      "observed_at": "2026-10-11T21:58:54.738Z",
+      "result": "Founder switched back to Sol and authorized continuation/agent dispatch with coordinator discretion over old/new agent; explicitly required direct handoff completion report. Existing writer selected; P0 scope only.",
+      "source": "docs/recognition/reports/PHONE_P0_DISPATCH_20261011.md"
+    },
+    {
+      "kind": "founder-phone-download-inspection-build-continuation",
+      "observed_at": "2026-10-11T22:59:01.874Z",
+      "result": "Founder explicitly approved proposed downloads/inspection and subsequent work toward the isolated phone build. Staged source/artifact handoffs and audits persist; no scope reset or repeated permission request for the same actions. Current writer slice is only two-archive inspection.",
+      "source": "docs/recognition/reports/PHONE_P1_INSPECTION_DISPATCH_20261011.md"
+    },
+    {
+      "kind": "coordinator-native-build-dispatch-with-preserved-founder-approval",
+      "observed_at": "2026-10-11T23:20:30.205Z",
+      "result": "Founder prior explicit download/build continuation applied after independent archive audit. Exact bounded local toolchain/source/native build scope and safeguards recorded; device/private inference remains a later exact packet.",
+      "source": "docs/recognition/reports/PHONE_P1_NATIVE_BUILD_DISPATCH_20261012.md"
+    },
+    {
+      "kind": "coordinator-bounded-native-c1-under-founder-continuation",
+      "observed_at": "2026-10-12T07:40:42.961Z",
+      "result": "Existing founder build/resume authority applied to Java-only internal helper and targeted test correction, same pins and isolation. Fresh six-hour lease; current valid holder may renew expiry before expiration and record renewals; no retroactive renewal or waiver of original lapse.",
+      "source": "docs/recognition/reports/PHONE_P1_NATIVE_BUILD_C1_DISPATCH_20261012.md"
+    },
+    {
+      "kind": "founder-phone-p1-generated-device-execution",
+      "observed_at": "2026-10-12T10:41:37.273Z",
+      "result": "Founder: phone connected; Install and run the generated tests. Exact audited APK, selected Galaxy A15; generated3 laptop references/at most9 phone inferences. No private photos/camera/business/cloud/uninstall scope.",
+      "source": "docs/recognition/reports/PHONE_P1_GENERATED_DEVICE_PACKET_20261012.md"
+    },
+    {
+      "kind": "founder-phone-image-pipeline-continuation",
+      "observed_at": "2026-10-12T11:06:36.407Z",
+      "result": "Founder OK PROCEED after verified generated runtime and proposed next image-processing phase. Bounded same-agent source/build, then coordinator audit and exact generated-image device procedure. No private photographs/live camera/production scope.",
+      "source": "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_DISPATCH_20261012.md"
+    },
+    {
+      "kind": "founder-image-reaudit-and-device-resume",
+      "observed_at": "2026-10-12T15:11:47.832Z",
+      "result": "Founder explicitly reconnected phone, requested fresh audit and also authorized running the phone test afterward. Existing exact generated-only image packet applies.",
+      "source": "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_REAUDIT_20261012.md"
+    },
+    {
+      "approved_by": "founder",
+      "at": "2026-10-12T18:29:29.480775+01:00",
+      "scope": "Explicit 2026-10-12 prepare/build/audit missing phone replay tool; High for implementation/audit, notify before Low physical test. No unnecessary dependencies/downloads.",
+      "source": "current chat request"
+    },
+    {
+      "approved_by": "founder",
+      "at": "2026-10-15T17:28:46.680401+01:00",
+      "scope": "P2-03 G0 choice A: isolated camera-only source experiment, installed library, owned256MiB hard cap and separately measured unbounded SDK temporary/total-memory exposure; build/install/physical packets later.",
+      "source": "Async reply: Approve this isolated camera experiment; recorded D-054"
+    },
+    {
+      "approved_by": "founder",
+      "at": "2026-10-16T00:25:04.880414+01:00",
+      "scope": "Continue to next phase after G2 acceptance: bounded G3 LOCAL offline exact-source camera-enabled build/static inspection under explicit dispatch; no install/device/private-image/model/network/download effect.",
+      "source": "2026-10-16 main chat: Okay, you can continue. You can continue to the next phase. For the next step in our flow, or in our project."
+    },
+    {
+      "approved_by": "founder",
+      "at": "2026-10-16T00:53:18.309513+01:00",
+      "scope": "Existing phone-experiment tool/dependency download authorization plus October16 next-phase continuation is applied narrowly to fixed required official prerequisites of already installed ExpoCamera57.0.6 after metadata/terms/provenance/size review; planned new payload ceiling250MiB, no new provider/toolchain/model/runtime scanner or install.",
+      "source": "Earlier direct founder: go ahead and download it ... regarding what we are doing; current direct founder: continue to the next phase. Detailed boundary in G3-C1 dispatch/blocker review."
+    },
+    {
+      "scope": "C6 source/generated checks and stopped coordinator handoff only; D-056; APK/native build and device gates separate",
+      "source": "Founder direct current-chat instruction 2026-10-18: execute coordinator implementation plan"
+    },
+    {
+      "scope": "Rectify discovered recreation issue directly instead of coordinator escalation; scoped source, local checks and replacement APK build.",
+      "source": "Founder current-chat instruction 2026-10-24"
+    }
+  ],
+  "archived": false,
+  "artifacts": [
+    "docs/recognition/TRACK_B_PLAN.md",
+    "docs/recognition/TRACK_B_R0_TICKETS.md",
+    "docs/recognition/reports/R0_BENCHMARK.md",
+    "apps/recognition-lab/README.md",
+    "apps/recognition-lab/DATASET_CAPTURE.md",
+    "docs/recognition/reports/R0_INDEPENDENT_AUDIT.md",
+    "docs/recognition/reports/R0_REAUDIT.md",
+    "docs/recognition/reports/R0_REAUDIT_REPRO.mjs",
+    "docs/recognition/reports/R0_A2_CORRECTIONS.md",
+    "docs/recognition/reports/R0_A2_INDEPENDENT_REVIEW.md",
+    "docs/recognition/TRACK_B_R1_PLAN.md",
+    "docs/recognition/TRACK_B_R1_TICKETS.md",
+    "docs/recognition/reports/R1_PREPARATION.md",
+    "apps/recognition-lab/templates/r1-v1/README.md",
+    "docs/recognition/reports/R1_INDEPENDENT_REVIEW.md",
+    "docs/recognition/TRACK_B_R2_PLAN.md",
+    "docs/recognition/TRACK_B_R2_TICKETS.md",
+    "apps/recognition-lab/ENCODER_COMPARISON.md",
+    "docs/recognition/reports/R2_PREPARATION.md",
+    "docs/recognition/reports/R2_INDEPENDENT_REVIEW.md",
+    "docs/recognition/TRACK_B_R3_PLAN.md",
+    "docs/recognition/TRACK_B_R3_TICKETS.md",
+    "apps/recognition-lab/DEVICE_BENCHMARK.md",
+    "apps/recognition-lab/templates/r3-v1/README.md",
+    "docs/recognition/reports/R3_PREPARATION.md",
+    "docs/recognition/reports/R3_INDEPENDENT_REVIEW.md",
+    "docs/recognition/TRACK_B_R4_PLAN.md",
+    "docs/recognition/TRACK_B_R4_TICKETS.md",
+    "apps/recognition-lab/RETRIEVAL_PREPARATION.md",
+    "docs/recognition/reports/R4_PREPARATION.md",
+    "docs/recognition/reports/R4_INDEPENDENT_REVIEW.md",
+    "docs/recognition/reports/R1_R4_REVIEW_HANDOFF.md",
+    "docs/recognition/reports/EXPLORATORY_EA01_INDEPENDENT_VERIFICATION_20261004.md",
+    "docs/recognition/reports/EXPLORATORY_IR01_IR02_INDEPENDENT_REVIEW_20261004.md",
+    "docs/recognition/reports/EXPLORATORY_DEEP_REAUDIT_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_A1_LAUNCH_FAILURE_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_MANUAL_A2_INDEPENDENT_REVIEW_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_MANUAL_A2_CF_VERIFICATION_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_MANUAL_A2_PUBLICATION_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_MANUAL_A2_WAIT_FAILURE_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_MANUAL_A3_WA01_VERIFICATION_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_MANUAL_A3_PUBLICATION_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_MANUAL_A3_NATIVE_TYPE_FAILURE_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_MANUAL_A4_WA02_VERIFICATION_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_MANUAL_A4_PUBLICATION_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_MANUAL_A4_IMAGE_FORMAT_FAILURE_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_IJ01_INDEPENDENT_REVIEW_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_MANUAL_A5_PUBLICATION_20261010.md",
+    "docs/recognition/reports/EXPLORATORY_MANUAL_A5_RESULT_REVIEW_20261010.md",
+    "docs/recognition/TRACK_B_NEXT_COMPARISON_ASTRA_BRIEF_20261010.md",
+    "docs/recognition/TRACK_B_FRAMING_COMPARISON_PLAN.md",
+    "docs/recognition/TRACK_B_FRAMING_COMPARISON_TICKETS.md",
+    "docs/recognition/reports/FRAMING_COMPARISON_FC04_REVIEW_20261010.md",
+    "docs/recognition/reports/PHONE_P1_NATIVE_BUILD_C1_INDEPENDENT_REVIEW_20261012.md",
+    "docs/recognition/reports/PHONE_P1_GENERATED_DEVICE_PACKET_20261012.md",
+    "docs/recognition/reports/PHONE_P1_GENERATED_DEVICE_RESULT_20261012.md",
+    "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_DISPATCH_20261012.md",
+    "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_INDEPENDENT_REVIEW_20261012.md",
+    "docs/recognition/reports/PHONE_P1_IMAGE_DEVICE_PACKET_20261012.md",
+    "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_REAUDIT_20261012.md",
+    "docs/recognition/reports/PHONE_P1_IMAGE_DEVICE_A1_FAILURE_20261012.md",
+    "docs/recognition/reports/PHONE_P1_IMAGE_LIFECYCLE_C1_DISPATCH_20261012.md",
+    "docs/recognition/reports/PHONE_P1_IMAGE_LIFECYCLE_C1_INDEPENDENT_REVIEW_20261012.md",
+    "docs/recognition/reports/PHONE_P1_IMAGE_LIFECYCLE_C1_DEVICE_PACKET_20261012.md",
+    "docs/recognition/reports/PHONE_P1_IMAGE_LIFECYCLE_C1_DEVICE_RESULT_20261012.md",
+    "docs/recognition/reports/PHONE_P1_PORTABILITY_IMPLEMENTATION_DISPATCH_20261012.md",
+    "docs/recognition/reports/PHONE_P1_PORTABILITY_INDEPENDENT_REVIEW_20261012.md",
+    "docs/recognition/reports/PHONE_P1_PORTABILITY_C1_DISPATCH_20261012.md",
+    "docs/recognition/reports/PHONE_P1_PORTABILITY_C1_INDEPENDENT_REVIEW_20261013.md",
+    "docs/recognition/reports/PHONE_P1_PORTABILITY_EXECUTION_PACKET_20261013.md",
+    "docs/recognition/reports/PHONE_P2_02_C1_INDEPENDENT_AUDIT_20261014.md",
+    "docs/recognition/reports/PHONE_P2_03_CAMERA_PACKET_DISPATCH_20261014.md",
+    "docs/recognition/PHONE_P2_03_CAMERA_REVIEW_PACKET_20261014.md",
+    "docs/recognition/reports/PHONE_P2_03_CAMERA_PACKET_REVIEW_20261015.md",
+    "docs/recognition/reports/PHONE_P2_03_CAMERA_PACKET_A2_HANDOFF_20261014.md",
+    "docs/recognition/reports/PHONE_P2_03_CAMERA_C1_DISPATCH_20261015.md",
+    "docs/recognition/reports/PHONE_P1_PARALLEL_TESTER_PREFLIGHT_20261015.md",
+    "docs/recognition/reports/PHONE_P2_03_CAMERA_C1_REVIEW_20261015.md",
+    "docs/recognition/reports/PHONE_P2_03_S1_SOURCE_DISPATCH_20261015.md",
+    "docs/recognition/PHONE_P2_03_G0_DECISION_20261015.md",
+    "docs/recognition/reports/PHONE_P2_03_S1_SOURCE_REVIEW_20261015.md",
+    "docs/recognition/reports/PHONE_P2_03_S1_C1_DISPATCH_20261015.md",
+    "docs/recognition/reports/PHONE_P2_03_S1_C1_INDEPENDENT_REVIEW_20261016.md",
+    "docs/recognition/TRACK_B_FOUNDER_REUSE_AND_ENROLLMENT_NOTES_20261016.md",
+    "docs/recognition/reports/PHONE_P2_03_G3_BUILD_STATIC_DISPATCH_20261016.md",
+    "docs/recognition/reports/PHONE_P2_03_G3_C1_DISPATCH_20261016.md",
+    "docs/recognition/reports/PHONE_P2_03_G3_BLOCKER_REVIEW_20261016.md",
+    "docs/recognition/reports/PHONE_P2_03_C6_STORAGE_SOURCE_HANDOFF_20261018.md",
+    "docs/recognition/reports/PHONE_P2_03_C6_C1_DURABILITY_HANDOFF_20261018.md",
+    "docs/recognition/reports/PHONE_P2_03_C6_BUILD_STATIC_HANDOFF_20261018.md",
+    "docs/recognition/reports/PHONE_P2_03_C8_STATIONARY_SLOT_SOURCE_HANDOFF_20261022.md",
+    "docs/recognition/reports/PHONE_P2_03_C8_STATIONARY_OBSERVATION_CHECKLIST_20261022.md",
+    "docs/recognition/reports/PHONE_P2_03_C8_BUILD_STATIC_HANDOFF_20261022.md",
+    "docs/recognition/reports/PHONE_P2_03_C8_ARTIFACT_REVIEW_AND_DEVICE_PACKET_20261022.md",
+    "docs/recognition/reports/PHONE_P2_03_C8_DEVICE_PREFLIGHT_STOP_20261022.md",
+    "docs/recognition/reports/PHONE_P2_03_C8_USB_GUARD_REVIEW_AND_CONTINUATION_20261022.md",
+    "docs/recognition/reports/PHONE_P2_03_C8_DEVICE_A2_PREFLIGHT_STOP_20261022.md",
+    "docs/recognition/reports/PHONE_P2_03_C8_HOST_PROBE_REVIEW_AND_A3_CONTINUATION_20261022.md",
+    "docs/recognition/reports/PHONE_P2_03_C8_DEVICE_A3_UPDATE_AND_READINESS_HANDOFF_20261022.md",
+    "docs/recognition/reports/PHONE_P2_03_C8_PHASE_A_AUDIT_AND_PIXEL_GEOMETRY_CONTINUATION_20261022.md",
+    "docs/recognition/reports/PHONE_P2_03_C8_DEVICE_A4_WIRELESS_REQUEST_HANDOFF_20261022.md",
+    "docs/recognition/reports/PHONE_P2_03_C8_WIRELESS_PREPARATION_DISPATCH_20261022.md",
+    "docs/recognition/reports/PHONE_P2_03_C8_WIRELESS_HELPER_ACCEPTANCE_AND_CAPTURE_PACKET_20261022.md",
+    "docs/recognition/PHONE_P2_04_IMPLEMENTATION_PLAN_20261023.md",
+    "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_HELPER_PREPARATION_HANDOFF_20261023.md",
+    "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_PHASE_A_CONNECTION_STOP_20261023.md",
+    "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_PHASE_A2_HOST_BOUND_STOP_20261023.md",
+    "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_PHASE_A3_INSTALL_RECEIPT_STOP_20261023.md",
+    "docs/recognition/reports/PHONE_P2_03_C9_POST_INSTALL_RECEIPT_COLLISION_STOP_20261023.md",
+    "docs/recognition/reports/PHONE_P2_03_C9_SINGLE_LAUNCH_STATUS_HANDOFF_20261023.md",
+    "docs/recognition/reports/PHONE_P2_03_C9_EXPORT_HUMAN_SAVE_UNOBSERVED_HANDOFF_20261023.md",
+    "docs/recognition/reports/PHONE_P2_03_C9_EXISTING_SAVE_READBACK_UI_STOP_20261023.md",
+    "docs/recognition/reports/PHONE_P2_03_C9_ORIGINAL_A6_TRANSFER_VALIDATION_HANDOFF_20261023.md",
+    "docs/recognition/PHONE_TEST_EXECUTION_RECOVERY_20261023.md",
+    "docs/recognition/reports/PHONE_P2_03_C9_ORIGINAL_TRANSFER_INDEPENDENT_REVIEW_20261023.md",
+    "docs/recognition/reports/PHONE_P2_03_A6_ORIGINAL_GEOMETRY_HANDOFF_20261023.md",
+    "docs/recognition/reports/PHONE_P2_03_ZERO_EXPOSURE_LAYOUT_SURVEY_HANDOFF_20261023.md",
+    "apps/recognition-lab/runs/phone-experiment/p203-matrix-export-device-20261023-a1/export-stop-diagnosis.json",
+    "apps/recognition-lab/runs/phone-experiment/p203-preview-audit-20261023-a1/handoff.md",
+    "apps/recognition-lab/runs/phone-experiment/p203-export-recovery-plan-20261023-a1/handoff.md",
+    "docs/recognition/PHONE_P2_03_EXPORT_RECOVERY_PLAN_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_SOURCE_DISPATCH_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_SOURCE_HANDOFF_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_SOURCE_AUDIT_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_BUILD_DISPATCH_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_BUILD_HANDOFF_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_DEPENDENCY_C1_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_DEPENDENCY_C1_HANDOFF_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_DEPENDENCY_C1_REVIEW_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_BUILD_C2_HANDOFF_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_ARTIFACT_AUDIT_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_DEVICE_PREPARATION_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_RECOVERY_RECREATION_REVIEW_AND_S3_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_ORIENTATION_V2_SOURCE_HANDOFF_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_ORIENTATION_V2_C1_CORRECTION_HANDOFF_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_ORIENTATION_V2_OFFLINE_BUILD_FAILURE_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_ORIENTATION_BUILD_C1_MANIFEST_BLOCKER_20261024.md",
+    "docs/recognition/reports/PHONE_P2_03_ORIENTATION_BUILD_C2_STATIC_HANDOFF_20261024.md",
+    "apps/recognition-lab/runs/phone-experiment/p203-orientation-device-preparation-20261024-a1/HANDOFF.md",
+    "apps/recognition-lab/runs/phone-experiment/p203-orientation-device-execution-20261025-a1/HANDOFF.md",
+    "apps/recognition-lab/runs/phone-experiment/p203-orientation-device-execution-20261025-a2/HANDOFF.md",
+    "apps/recognition-lab/runs/phone-experiment/p203-orientation-geometry-device-20261025-a1/HANDOFF.md",
+    "apps/recognition-lab/runs/phone-experiment/p203-orientation-geometry-device-20261025-a1/continuation-01/HANDOFF.md",
+    "apps/recognition-lab/runs/phone-experiment/p203-orientation-ui-readiness-source-20261025-a1/HANDOFF.md",
+    "apps/recognition-lab/runs/phone-experiment/p203-orientation-ui-build-20261025-a1/HANDOFF.md",
+    "apps/recognition-lab/runs/phone-experiment/p203-orientation-ui-device-preparation-20261025-a1/HANDOFF.md",
+    "docs/recognition/PHONE_P2_03_GRAPHICS_ENTRY_INVESTIGATION_PLAN_20261029.md"
+  ],
+  "blockers": [
+    "Formal R1 dataset still lacks independent30ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ50-product coverage and curator/seal evidence; forty authorized same-instance exploratory photos do not fulfill it.",
+    "Actual R2 encoder comparison requires real R1 photos and reviewed exact artifacts/licences/preprocessing/runtime/executed encoders; deferred, not a blocker to RB2-01..03 preparation.",
+    "Actual R3 device benchmark requires reviewed exact exports/runtime and Galaxy A15 plus lower-spec real physical evidence; deferred, not a blocker to RB3-01..03 preparation.",
+    "First actual a1 launch could not keep WLAN offline: automatic profile reconnection confirmed before pixels. E05 NOT RUN; consumed a1 must not be reopened or cleared. Manual-assisted preparation and actual toggle compatibility/offline recovery remain pending.",
+    "A1-a4 remain immutable historical failed/incomplete attempts. A5 completed actual ordinary offline processing and numerical review; no rerun required. Founder photo/identity review pending; recognition first10/20/topthree19/20 is same-instance exploration only. Formal quality/native generalization/crash/unknown-child gates OPEN.",
+    "Generated-export-only stale callback can cancel newer generated request; medium follow-up deferred. Do not use generated exporter in finite private-only replay; general generated-mode readiness unaccepted.",
+    "Replacement recreation-fix APK exists and passes builder host/build/static checks; physical S3 generated lifecycle/grant/process-death proof, S4 saved export recovery and S5 original geometry remain pending."
+  ],
   "completed_states": [
     "repository-and-barcode-contract-inspected",
     "recognition-roadmap-and-evaluation-phases-reconciled",
@@ -95,261 +624,676 @@
     "phone-p2-03-g0-choice-a-founder-approved-D054",
     "phone-p2-03-s1-c1-source-corrections-independently-accepted-with-residual-risk",
     "phone-p2-03-g3-exact-c3-offline-build-static-independently-accepted",
-    "phone-p2-03-g3-c4-import-repair-source-static-accepted-with-cold-render-risk"
+    "phone-p2-03-g3-c4-import-repair-source-static-accepted-with-cold-render-risk",
+    "phone-p2-03-c6-source-generated-checks-stopped",
+    "phone-p2-03-c6-c1-durability-source-generated-checks-stopped",
+    "phone-p2-03-c6-offline-apk-static-closure-stopped",
+    "phone-p2-03-c6-storage-smoke-local-artifact-static-stopped",
+    "phone-p2-03-c7-bounded-export-source-generated-checks-stopped",
+    "phone-p2-03-c7-source-independently-accepted-with-residual-risk",
+    "phone-p2-03-c7-one-offline-build-complete-static-resource-delta-stopped",
+    "phone-p2-03-c7-exact-artifact-build-static-independently-accepted",
+    "phone-p2-03-c7-one-device-update-saved-chart-export-usb-verified-stopped",
+    "phone-p2-03-c7-one-device-update-export-transfer-independently-verified",
+    "phone-p2-03-c8-stationary-slot-source-generated-checks-stopped",
+    "phone-p2-03-c8-stationary-slot-source-independently-accepted-with-residual-risk",
+    "phone-p2-03-c8-one-offline-build-static-stopped",
+    "phone-p2-03-c8-apk-independent-static-review-accepted",
+    "phone-p2-03-c8-fixed-device-preflight-stopped-before-update",
+    "phone-p2-03-c8-host-usb-selection-guard-reviewed",
+    "phone-p2-03-c8-device-a2-usb-identity-package-preflight-then-focus-stop",
+    "phone-p2-03-c8-host-focus-probe-compatibility-reviewed",
+    "phone-p2-03-c8-device-a3-old-idle-and-one-update-new-slot-accounting-verified",
+    "phone-p2-03-c8-device-a3-stopped-before-capture-human-lacks-ruler-support",
+    "phone-p2-03-c8-update-state-preservation-independently-accepted",
+    "phone-p2-03-c8-device-a4-current-idle-slot-revalidated-stopped-for-wireless-amendment",
+    "phone-p2-03-c8-wireless-host-preparation-57-generated-checks-stopped",
+    "phone-p2-03-c8-wireless-host-helpers-independently-accepted",
+    "phone-p2-03-c8-one-normal-preview-reactivation-controls-restored-no-capture",
+    "phone-p2-03-c8-wireless-a5-one-capture-post-saved-human-invalid-scene-stopped",
+    "phone-retake-a5-single-replacement-saved-count5-stopped",
+    "phone-retake-c8-a6-single-replacement-saved-count6-stopped",
+    "phone-c9-fixed-sidecar-shared-budget-source-generated-checks-stopped",
+    "phone-c9-one-offline-arm64-release-static-closure-stopped",
+    "phone-c9-host-only-device-helper-preparation-self-checked-stopped",
+    "phone-c9-device-phase-a-first-preflight-connection-stop",
+    "phone-c9-device-phase-a2-host-input-bound-stop",
+    "phone-c9-phase-a3-preflight-pass-one-install-success-strict-stderr-stop",
+    "phone-c9-post-install-identity-verified-no-launch-packet-collision-stop",
+    "phone-c9-single-launch-and-actual-idle-accounting-pass",
+    "phone-c9-one-export-human-save-reported-no-host-save-window-expired",
+    "phone-c9-existing-save-native-readback-verified-following-ui-stop",
+    "phone-c9-actual-native-idle-selected-original-transfer-nine-role-validation-pass",
+    "phone-a6-frozen-eight-marker-bracket-geometry-and-crop-self-check-pass-with-physical-limits",
+    "phone-zero-exposure-ab-runtime-survey-slot-terminal-a-restored-data-preserved",
+    "phone-p203-matrix-c1-proposal-independently-reviewed-for-founder-approval",
+    "founder-p203-matrix-budget-permission-export-approved-d059",
+    "phone-p203-matrix-source-assignment-prepared",
+    "main-took-over-founder-paused-matrix-source",
+    "matrix-source-fingerprint-kotlin-haptic-layout-corrections-complete",
+    "matrix-r4-offline-build-static-accepted",
+    "matrix-r4-installed-identity-and-six-historical-records-verified",
+    "matrix-d01-founder-setup-requested",
+    "matrix-native-fixed-metadata-publication-corrected-built-installed",
+    "matrix-d01-native-denied-checkpoint-persisted-no-sdk",
+    "matrix-d02-native-grant-and-preview-checkpoint-persisted-no-sdk",
+    "matrix-l01-one-sdk-user-cancel-terminal-advanced-idle",
+    "matrix-l02-one-sdk-background-return-terminal-advanced-idle",
+    "matrix-l03-one-sdk-view-unmount-terminal-advanced-preview-restored",
+    "matrix-l04-manual-permission-loss-exact-old-process-classification-verified",
+    "matrix-d03-manual-regrant-ready-preview-checkpoint-persisted",
+    "matrix-m00-one-geometry-photo-saved-two-preview-brackets",
+    "matrix-m01-one-geometry-photo-saved-two-preview-brackets",
+    "matrix-m02-one-geometry-photo-saved-two-preview-brackets",
+    "matrix-m03-one-geometry-photo-saved-layout-b-converged",
+    "matrix-m04-layout-b-upright-photo-saved-two-preview-brackets",
+    "matrix-m05-layout-b-right-photo-saved-two-preview-brackets",
+    "matrix-m06-layout-b-down-photo-saved-two-preview-brackets",
+    "phone-p203-all12-physical-attempts-completed-not-accepted",
+    "phone-p203-one-export-empty-after-low-memory-process-death-diagnosed",
+    "phone-p203-preview-only-review-124-measured-4-inconclusive-scene-open",
+    "phone-p203-export-recovery-s1-source-generated-compile-checks-stopped",
+    "phone-p203-export-recovery-s1-independent-source-audit-accepted-with-platform-limits",
+    "phone-p203-export-recovery-s2-one-offline-attempt-stopped-no-apk",
+    "phone-p203-export-recovery-dependency-c1-two-file-source-probe-stopped",
+    "phone-p203-export-recovery-s2-c2-one-offline-apk-static-checks-stopped",
+    "phone-p203-fixture-recreation-direct-fix-host-build-static-complete",
+    "phone-p203-replacement-install-s3-generated-device-complete",
+    "phone-p203-s3-generated-lifecycle-independently-verified",
+    "phone-p203-s4-fixed-saved-evidence-recovery-transfer-complete",
+    "phone-p203-s4-actual-archive-recovery-independently-verified",
+    "phone-p203-s5-frozen-original-preview-comparison-rotated-frame-defect-confirmed",
+    "phone-p203-orientation-v2-source-host-checks-builder-stopped",
+    "phone-p203-orientation-v2-c1-requested-actual-correction-builder-stopped",
+    "phone-p203-orientation-v2-offline-build-attempt-stopped-no-apk",
+    "phone-p203-orientation-build-c1-one-release-stopped-manifest-blocked",
+    "phone-p203-orientation-build-c2-one-release-static-checks-builder-stopped",
+    "phone-p203-orientation-generated-device-host-preparation-stopped",
+    "phone-p203-orientation-generated-export-pass-completed-restart-blocked-stopped",
+    "phone-p203-completed-force-stop-relaunch-receipt-preservation-verified-stopped",
+    "phone-p203-M00-setup-browser-tool-guard-stopped-no-photo",
+    "phone-p203-M00-camera-permission-ui-status-null-blocked-stopped",
+    "phone-p203-ui-readiness-source-correction-selfchecked-stopped",
+    "phone-p203-ui-corrected-apk-build-static-verified-stopped",
+    "phone-p203-ui-device-host-preparation-stopped"
   ],
-  "owner": {
-    "agent": "main-coordinator",
-    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
-    "worktree": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning"
-  },
-  "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning",
+  "created_at": "2026-10-02T00:00:00Z",
+  "current_state": "p204-fanta-r03-numerical-verified-native-confirmation-diagnosis-pending",
   "evidence": [
     {
-      "source": "docs/engineering/GITHUB_BACKUP_RESULT_20261018.md",
-      "result": "Founder-authorized source checkpoint f76f0df committed714 paths and pushed; all14 branch tips independently confirmed on origin, including3 separate older dirty-worktree snapshots with original files/index/HEAD unchanged. No merge/force/main/deploy. Private photos/runs/APKs/caches/PDF remain local. Limited credential patterns no findings;109 whitespace warnings retained, no full-project runtime or release claim."
+      "result": "M06saved nextM07 idle count17 owned9736558;11SDKslots/14brackets used. M07prepared noSDK; awaitREADYsessionopen. Original/numeric/scene/annotation qualification pending finalexport; no P203passclaim.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-m06-device-20261023-a1/terminal-status.json"
     },
     {
-      "source": "docs/recognition/reports/PHONE_P2_03_G3_C4_REVIEW_20261018.md",
-      "result": "Stopped handoff independently verified: writer1651/stage2957/helpers8/source972/installed2995+broad9008/assets104/frozen6874/cache866+893/derivative806; exact source51 and graph532+7/map531 bindings, signature/ZIP586/17ELF/10762DEXdefinitions/12208types pass. Fresh targeted real-import/core-hook2 pass,5unselected. Writer6/7 retains first-render5000ms timeout; no warm cure. Repair/static acceptance only; physical startup not checked. APK086ee746...47699c, native/manifest/DEX matchC3 excepttwo GNUbuildIDs; no new native module."
+      "result": "M05saved nextM06 idle count16 owned8913815;10SDKslots/12brackets used. M06prepared after ownappreturn noSDK; awaitREADYsessionopen. Outsideguide desktopUI/automaticannotation ambiguities retained for finalreview; no fullP203acceptance.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-m05-device-20261023-a1/terminal-status.json"
     },
     {
-      "source": "docs/recognition/reports/PHONE_P2_03_G3_C4_STARTUP_DISPATCH_20261018.md",
-      "result": "Actual crash symbolicated against C3 packaged-bundle-bound map: CameraProofPanel -> camera barrel -> Expo.fx -> ExpoAsset. Minimal isolated JS import correction only, no new native module/permission/provider. Fresh baselines plus6874 frozen evidence rows. Same writer finite lease and direct stopped handoff required."
+      "result": "M04saved nextM05 idle count15 owned8120920;9SDKslots/10brackets used. Fullchartvisible; original/numericpending. M05preparednoSDK; awaitREADYsessionopen.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-m04-device-20261023-a1/terminal-status.json"
+    },
+    {
+      "result": "M03saved nextM04 idle count14 owned7376912;8SDKslots/8brackets used. LayoutBconverged415x311 beforeREADY; M04prepared. Original/numericpending; M02automaticring-bound uncertainty retained, noacceptanceclaim.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-m03-device-20261023-a1/terminal-status.json"
+    },
+    {
+      "result": "M02saved nextM03 idle count13 owned6550876. 7of12SDKslots/6of16brackets used. Eightmarker/border visual review; original/numericpending. M03prepared noSDK; awaitREADYsessionopen.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-m02-device-20261023-a1/terminal-status.json"
+    },
+    {
+      "result": "M01saved nextM02 idle count12 owned5841816. Fourpreviewbrackets/6of12SDKslots used. Eightmarker/border visual review; original/numericpending. M02prepared noSDK; awaitREADYsessionopen.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-m01-device-20261023-a1/terminal-status.json"
+    },
+    {
+      "result": "M00saved nextM01 idle count11 owned5077466; pre/postchartROI622x311 PNGs withincap, all8rings/border visible. Original/numeric auditpendingexport. Fiveof12slotsused. M01prepared andphoneverified; awaitREADYsessionopen.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-m00-device-20261023-a1/terminal-status.json"
+    },
+    {
+      "result": "D03persisted nextM00 granted idle count10 owned4364201. M00prepared, fourcontrols used/eightgeometryunused. Blackmattehostpresentations frozen beforefirstgeometry, samecompiledPNG/source/APK. AwaithumanREADYwithsessionopen; noSDKwhilewaiting.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-d03-device-20261023-a1/restored3-status.json"
+    },
+    {
+      "result": "Actual denied; native nextD03 idle count10 owned=claimed4364201. Classification executed once; initial sampling premature, laterread confirmed. No extraSDK. Oldprocess SDKsettlement/drain notproved asapproved. D03manualregrantpending; 8geometry+exportauditremain.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-l04-device-20261023-a1/classification-late-status.json"
+    },
+    {
+      "result": "L04 single button dispatch within READY; native terminal unverified. Founder signal sent to denyCAMERA NOW/reopen app/leave denied. No replay. Prepared loss_recovery.py for subsequent actual inspection.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-l04-device-20261023-a1/capture-intent.json"
+    },
+    {
+      "result": "L03withinREADYwindow: actualunmount, nextL04 idle count9 owned4362555; previewrestoredwithoutSDK. Threeof12used. L04dispatch/recoveryprepared; founder manualrevoke/readinesspending. Noautomaticsettingsnavigation; noattemptreplay.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-l03-device-20261023-a1/terminal-status.json"
+    },
+    {
+      "result": "Single L02 completed within READY window; HOME/own-app return, nextL03 idle count8 owned4360700. Twoof12used; phase/role auditpendingexport. L03prepared noSDK; founderREADYpending.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-l02-device-20261023-a1/terminal-status.json"
+    },
+    {
+      "result": "Single L01 completed within READY window; cancel actualtap, nextL02 idle count7 owned4358847. Oneof12used; phase/role auditpendingexport. L02prepared noSDK; founderREADYpending.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-l01-device-20261023-a1/terminal-status.json"
+    },
+    {
+      "result": "Actual D02 persisted; nextL01 permissiontrue idle count6 bytes4356993; noSDK. First control macro prepared/phone verified; fresh founder READY pending. No late capture.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-publication-fix-20261023-a1/restored-status.json"
+    },
+    {
+      "result": "D01 actual persisted; nextD02 permissionfalse idle count6 bytes4356993 retainedinitializer348; APKb83a2b2d...3512674 source08d1f1f3...6ce19b.144C/495host/16UI/build/static/oneupdate pass.12SDKslots unused; founderpermissionrestore pending. Mainsolewriter; TrackBpaused; P204held/CIdeferred.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-matrix-publication-fix-20261023-a1/denied-status.json"
+    },
+    {
+      "result": "C1 DOC correction only:originalproposal/evidence immutable;12slots/3zeroSDKfacts/D03restore, mandatoryA0;90MiB+192KiB within256MiB logicalpeak235101057, separatephysicalguardR+24MiB.35documentchecks/12prefixexceptions/89protected/18sourceinputs pass. Request envelope binding and heldcontrolphase limits explicit. No implementation/phone/GitCI; STOP/lease release for main review.",
+      "source": "docs/recognition/PHONE_P2_03_REMAINING_MATRIX_PROPOSAL_20261023.md"
+    },
+    {
+      "result": "HOST-only proposal:6 prior admissions/5JPEGgroups/manualtap unknown reconciled;11new attempts(4controls+7rows),2zeroSDKpermission facts;90MiB+192KiB permanent reserve within256MiB incl24MiB headroom margin6481023;20consistency checks/89protected rows pass. No source/helper/target/phone/build/model/GitCI. A6A0credit requires explicit main decision; lease released.",
+      "source": "docs/recognition/PHONE_P2_03_REMAINING_MATRIX_PROPOSAL_20261023.md"
+    },
+    {
+      "result": "Actual A990x453 ->ONEB604x453 ->ONEArestore990x453; genericCaptureenabled/report2336x1080; stationaryCONSUMED_EXPORT_TERMINAL/unavailable. Exactnativecount6/4356993/idle/history preserved, zero photos/screenshots/export/model. Foregroundhumanrecovery+two hostmetadata serialization recoveries retained. STOP/lease release.",
+      "source": "docs/recognition/reports/PHONE_P2_03_ZERO_EXPOSURE_LAYOUT_SURVEY_HANDOFF_20261023.md"
+    },
+    {
+      "result": "Scoped relativealignment accepted withlimits:62hashes/24independentringchecks/16centers/crop/fresh15oracles pass. NotfullP203. Zeroexposure survey assignedMedium.",
+      "source": "docs/recognition/reports/PHONE_P2_03_A6_GEOMETRY_INDEPENDENT_REVIEW_20261023.md"
+    },
+    {
+      "result": "Host-only A6 original measurements frozen first:16 bracket center/16 outeredge/8border comparisons PASS <=1%, uncertainty<=2physicalpx; crop[64,502,1016,938] exact <=1pxrounding.15oraclespass; framing chart-onlyFAIL/continuousstationarityINCONCLUSIVE/sevenmatrixrowsunexercised.83source/sixprotected preserved; STOP/lease release for independent audit.",
+      "source": "docs/recognition/reports/PHONE_P2_03_A6_ORIGINAL_GEOMETRY_HANDOFF_20261023.md"
+    },
+    {
+      "result": "Main86hashes/pure9role/originalJPEG/preview/actualXMLidle verified. Export accepted, geometry not yet measured. Founder routine recovery policy recorded and communicated.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_ORIGINAL_TRANSFER_INDEPENDENT_REVIEW_20261023.md"
+    },
+    {
+      "result": "Reviewedstatus0/transfer0; actual native idle/readback, selected687431/a20fcb77 ZIP copied+fsync/hash validated; nine roles/originalJPEG569276/Exif6/vectorbit/provenance pass. No pixeldecode/model/newSaveexportphoto; STOP/lease release for main original quality/geometry analysis.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_ORIGINAL_A6_TRANSFER_VALIDATION_HANDOFF_20261023.md"
+    },
+    {
+      "result": "Actual A6/C9 READBACK_VERIFIED687431/a20fcb77/nine entries observed; following same-worker status screen dump nullrootstderr stops observeexit1. No transfer/Save/export retry. Partialnative receipt preserved; STOP/lease release for bounded existing idle/status disposition.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_EXISTING_SAVE_READBACK_UI_STOP_20261023.md"
+    },
+    {
+      "result": "ONE begin-export exit0/freshC9idle+newpathabsent; filename confirmation window expired without helperSave. Founder then reports already-filled Downloads picker and manualSave/returntoapp; exact time/path/native result unknown. No replay/transfer/photo; STOP/lease release for read-only existing-export disposition.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_EXPORT_HUMAN_SAVE_UNOBSERVED_HANDOFF_20261023.md"
+    },
+    {
+      "result": "Reviewed launch.py ONCE exit0; fresh C9hash/UID/dataDir/unlock and actual native idle count6/owned=claimed4356993/history/caps pass. No install/photo/export; STOP/lease release for main data audit before founder export readiness.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_SINGLE_LAUNCH_STATUS_HANDOFF_20261023.md"
+    },
+    {
+      "result": "11 read-only device commands exit0; exact installed C9hash/UID/dataDir verified. Packet duplicate post-install-verified put raises FileExistsError after actual success; outerexit1, no launch/reinstall. STOP/lease release for main single-launch disposition.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_POST_INSTALL_RECEIPT_COLLISION_STOP_20261023.md"
+    },
+    {
+      "result": "Fresh preflight/C8identity/idle status pass. ONE C9 install exit0/stdoutSuccess; transfer-progress stderr trips strict guard, update exit1 before post-install checks. No launch/reinstall/export/photo. STOP/lease release; main read-only post-install disposition needed.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_PHASE_A3_INSTALL_RECEIPT_STOP_20261023.md"
+    },
+    {
+      "result": "Main losslessly repaired7 encoding-inflated workflow strings; all history retained, actual unchanged1MiB helper bound passes,103 regression/preservation assertions. No phone command; a3 phase A only assigned Low.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_WORKFLOW_ENCODING_REPAIR_20261023.md"
+    },
+    {
+      "result": "Preflight exit1 before phase intent/ADB: workflow file1895391bytes exceeds exact helper1MiB cap. Zero phone actions; no helper repair/retry.83 sources/six protected inputs unchanged; STOP/lease release for main disposition.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_PHASE_A2_HOST_BOUND_STOP_20261023.md"
+    },
+    {
+      "result": "Only selected get-state exit1: endpoint not found. No retry/update/launch/export/photo. Exact helpers/83 sources/six protected inputs preserved; STOP/lease release. Current phone state unknown.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_PHASE_A_CONNECTION_STOP_20261023.md"
+    },
+    {
+      "result": "Exact helpers independently accepted with runtime limits; fresh30 generated checks pass and zero phone commands. Phase A only assigned Low; export held for founder readiness.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_HELPER_INDEPENDENT_REVIEW_20261023.md"
+    },
+    {
+      "result": "Host-only finite C9 update/saved-A6 export helpers prepared;30 generated checks pass,zero real phone commands;83 source/six protected inputs/six evidence pins unchanged. STOP/lease release for main helper review; no device execution/P2-03 acceptance.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_HELPER_PREPARATION_HANDOFF_20261023.md"
+    },
+    {
+      "result": "Fresh128 evidence/83source/1029oldstage/1031newstage/138external hashes plus signer/SDK/ZIP/ELF/DEX/Metro comparisons PASS_STATIC_ARTIFACT_WITH_RUNTIME_LIMITS. No phone or geometry proof.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_ARTIFACT_INDEPENDENT_REVIEW_20261023.md"
+    },
+    {
+      "result": "One offline release601.255s exit0, C9APK9939439b/39944042bytes/587payloads. Same C8manifest/resources/signer,18libs exact except3GNU buildIDs,8 explainedpayloadchanges,391rows/138externalfiles and graph534+7 verified.83source/old1029stage preserved. No phone/install/export. STOP/lease released for independent artifact audit.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_OFFLINE_BUILD_STATIC_HANDOFF_20261023.md"
+    },
+    {
+      "result": "Main accepts source with residualrisk:1347hashes/83inputs; fresh776native+44UItests pass; exactderivedrender. No phone/build/export proof. One offline build/static assignedHigh, no device.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_A6_EXPORT_SOURCE_INDEPENDENT_REVIEW_20261023.md"
+    },
+    {
+      "result": "C9 fixed A6 profile/sidecar strict originalC7 readback admission; shared existing saved-output16MiB with C91MiB and combined128KiB metadata, no thirdreserve.776 native+23 isolated two-pin fixture assertions,65 TS/UI tests, types/lint/Android API javac/index pass. Seven authorized existing deltas/five new codefiles, historical indexes+84 A6 artifacts unchanged. No build/phone/export; STOP/lease released for independent audit.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_A6_EXPORT_SOURCE_HANDOFF_20261023.md"
+    },
+    {
+      "result": "78 source and12 blocker hashes unchanged; old consumed root confirmed. Fixed C9 sidecar within existing shared reserve: retained C7 actual799317 verified + C9 cap1MiB; old C8 full reserve kept. Source-only High amendment, no device/build/export.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_A6_EXPORT_SCOPE_AMENDMENT_20261023.md"
+    },
+    {
+      "result": "No production edits;78 source inputs unchanged. Existing camera-evidence-export-v1 journal already consumed by prior C7; fixed-pin retarget alone still refused. Need explicit CameraProofFiles/footprint journal namespace amendment outside current ceiling. Source-only STOP/lease released; no tests/build/phone/export.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C9_A6_EXPORT_SCOPE_BLOCKER_20261023.md"
+    },
+    {
+      "result": "84 hashes and single capture/save verified;16.220sec READY-to-tap; bothpreviews correctC8. Original fullresolution/geometry pending. Source-only fixedjob export correction C9 assignedHigh.",
+      "source": "docs/recognition/reports/PHONE_RETAKE_C8_A6_INDEPENDENT_REVIEW_20261023.md"
+    },
+    {
+      "result": "One immediate C8-chart replacement macro exit0; newjob21b9d32b saved count6, original pre/post/numerical/close/status complete. Human PHOTO COMPLETE notice. No retry/export/source change; STOP lease released for independent scene/geometry review.",
+      "source": "docs/recognition/reports/PHONE_RETAKE_C8_A6_SAVED_HANDOFF_20261023.md"
+    },
+    {
+      "result": "Independent84hashes/capture/save pass;20.734sec READY-to-tap. Pre/post previews show older colouredG4 chart, not expectedblackwhiteC8. Geometry/fullresolution pending. No more photos queued.",
+      "source": "docs/recognition/reports/PHONE_RETAKE_A5_INDEPENDENT_REVIEW_20261023.md"
+    },
+    {
+      "result": "One immediate prepared macro exit0; newjob78cf411b saved count5, original pre/post/numerical/close/status complete. No retry/export/source change. Human PHOTO COMPLETE notice delivered; STOP lease released for independent scene/geometry review.",
+      "source": "docs/recognition/reports/PHONE_RETAKE_A5_SAVED_HANDOFF_20261023.md"
+    },
+    {
+      "result": "Interrupted tool macro completed saved joba9d4ffa8/count4/owned2956095,62ms preimage-tap; human reports wrong scene again. No rerun/export/new phone action. Reconciled final receipts/host process, STOP lease release; main owns any future timing/readiness.",
+      "source": "docs/recognition/reports/PHONE_RETAKE_A4_INVALID_SCENE_STOP_20261023.md"
+    },
+    {
+      "result": "Workflow size/freshness/lease passed; selected wireless get-state failed nonzero before any capture/screenshot. One command only, no retry/reconnect. Exact stderr retained locally; stopped/lease released.",
+      "source": "docs/recognition/reports/PHONE_RETAKE_A3_WIRELESS_STATE_REFUSAL_20261023.md"
+    },
+    {
+      "result": "Exact prepared macro failed INPUT_FILE_BOUND_OR_TYPE at ROOT workflow load before any phone action/intent. Actual worktree workflow exists. No retry/source change; stopped/lease released for exact host path disposition.",
+      "source": "docs/recognition/reports/PHONE_RETAKE_A2_HOST_PATH_REFUSAL_20261023.md"
+    },
+    {
+      "result": "Prepared replacement macro refused READINESS_STALE before any phone action/intent. New actual resumed user explicitly confirms camera aligned and requests photo; faithfully refresh records for same accepted macro, no repeated question/rebuild. No retry; lease released.",
+      "source": "docs/recognition/reports/PHONE_RETAKE_STALE_READINESS_STOP_20261023.md"
+    },
+    {
+      "result": "One capture/post saved count3/owned1907814,31ms preimage-tap. Human reports minimized chart/Codex captured and demands retake. One export requested, human save unconfirmed/native drain UNKNOWN; no observe/transfer/second capture/reset. STOP/lease released; coordinator must disposition consumed slot/pending picker for retake.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_WIRELESS_A5_INVALID_SCENE_HANDOFF_20261022.md"
+    },
+    {
+      "result": "Independent recovery acceptance:86 exact evidence files/actual UI idle history+slotAVAILABLE and enabled capture control verified. One authorized foreground reactivation, root cause unproven, no photo. Actual human readiness still pending.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p2-camera-geometry-c8-wireless-execution-review-20261022-a1/preview-recovery-independent-review.json"
+    },
+    {
+      "result": "One authorized normal bring-to-front restored reported2336x1080/enabled camera control; no layout toggles/ACK/photo/export/screenshots. Actual saved idle863381/two and slotAVAILABLE unchanged. Human visual/support/chart READY answer pending in writer; stopped/lease released for main acknowledgement and Low dispatch.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_PREVIEW_REACTIVATION_HANDOFF_20261022.md"
+    },
+    {
+      "result": "Current after-unplug wireless hardware/build/C8 installed hash verified using existing pairing; exact final helpers reviewed/8fileshashed/72sources unchanged; fresh independent57mock tests pass and actual historical receipt schema compatible. Initial shallow test import failure retained. Same writer Low ready for original ONE capture/post/export/public transfer after actual main-question physical support/framing reply. No further implementation/install/re-pair; raw geometry still unverified.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_WIRELESS_HELPER_ACCEPTANCE_AND_CAPTURE_PACKET_20261022.md"
+    },
+    {
+      "result": "Stopped at founder request to end preparation delay.57 generated host tests pass;3 candidate guard failures reproduced/corrected;72 source and38 a4 evidence files unchanged. No actual phone/network/capture/export/transfer. Main review/current wireless verification then physical continuation; no repeat update/startup.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_WIRELESS_PREPARATION_HANDOFF_20261022.md"
+    },
+    {
+      "result": "A4 preserved38 files, no capture. Human requests wireless; enabled by human. Existing pairing/hardware/build/currentC8/UID validated while USB attached. After unplug selected endpoint offline; one targeted disconnect/connect refused. Current port requested; NO current wireless readiness claimed. High host-helper review/preparation only, no phone/network operations; original capture/export unused.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_WIRELESS_PREPARATION_DISPATCH_20261022.md"
+    },
+    {
+      "result": "A4 exact current C8/USB/idle accounting and AVAILABLE slot revalidated, portrait support question pending. Actual human requests wireless switch to remove obstructing USB cable. No radio/pair/connect/ACK/capture/export/screenshots/PhaseA repeat. High transport amendment/instructions needed; lease released.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_DEVICE_A4_WIRELESS_REQUEST_HANDOFF_20261022.md"
+    },
+    {
+      "result": "Current C8 hash/USB/unlocked owning UI idle863381bytes/two captures,slotAVAILABLE,preview990x453 reverified. Relative pixel ruler-free amendment bound; manual chart support/framing question pending after orientation clarification. No ACK/capture/export/screenshots or repeat PhaseA install/launch.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p2-camera-geometry-c8-device-20261022-a4/current-readiness-recheck.json"
+    },
+    {
+      "result": "PhaseA independently accepted:81+9+22+47 evidence files,50 command receipts and actual UI status reconstructed; exact installed C8/UID/dataDir/history preserved. Update/startup ceilings used; capture/export unconsumed. Before capture High explicitly corrects ruler prerequisite for relative pixel registration only: physicalmm unknown/nonblocking, absolute scale uncalibrated, all pixel/timing/motion/provenance criteria unchanged. Human support/chart framing remains required.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_PHASE_A_AUDIT_AND_PIXEL_GEOMETRY_CONTINUATION_20261022.md"
+    },
+    {
+      "result": "Exact C8 update installed/UID-data preserved, old idle863381bytes/two records, new AVAILABLE slot/accounting pass. Current preview990x453 fromUI. No screenshot/ACK/capture/export; browser file-policy rejection retained. Founder no ruler/current support, displaymm/framing unconfirmed. STOP before consuming slot, lease released; High audit/next physical plan needed.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_DEVICE_A3_UPDATE_AND_READINESS_HANDOFF_20261022.md"
+    },
+    {
+      "result": "Exact old C7 saved-state idle pass, one C8 install/update+launch UID/dataDir preserved. New slot AVAILABLE, aggregate34679957/cameraCap234618880 correct; current SurfaceView990x453. Browser local-file opening policy denied; no bypass. Human support/framing/displaymm question pending; zero capture/export/screenshots.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p2-camera-geometry-c8-device-20261022-a3/phase-a-result.json"
+    },
+    {
+      "result": "Default window report exposes focus omitted by windows subsection. Live read-only focus/launcher/UI-help and historical status reviewed;21 focused host parser/tap/status cases pass. Prepared exact helper, original a1/a2 frozen. Fixed Low a3 permits one old-app inspection launch before one update/postlaunch; original capture/export/readiness unchanged. No main phone mutation.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_HOST_PROBE_REVIEW_AND_A3_CONTINUATION_20261022.md"
+    },
+    {
+      "result": "15 read-only ADB commands; USB/identity/unlocked/exact installed C7 APK and owning identity pass. before-focus dumpsys-window grep exit1/empty, no diagnosis/fallback at Low. No phone mutations/UI/screenshots/update/capture/export, lease released. High review needed; not a photo/save failure.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_DEVICE_A2_PREFLIGHT_STOP_20261022.md"
+    },
+    {
+      "result": "Confirmed host guard defect: get-devpath unknown was not transport evidence. Fresh USB-only -d selected expected serial; eight host guard fixture cases pass. Frozen a1 preserved; zero app/capture operations. High task-helper correction prepared, bounded Low device-a2 continuation with original ceilings/readiness.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_USB_GUARD_REVIEW_AND_CONTINUATION_20261022.md"
+    },
+    {
+      "result": "Three selected-serial read-only ADB calls: device online and known serial confirmed, get-devpath unknown caused host helper USB assertion. Stopped before remaining preflight/update, no retries/phone mutation/photo/export. Transport classification unknown, not a camera/save failure. High review required; lease released.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_DEVICE_PREFLIGHT_STOP_20261022.md"
+    },
+    {
+      "result": "Independent exact APK acceptance: signatures/ZIP/ELF/DEX/source/graph/resources/dependencies verified; no phone action. Human remaining-test authorization independently read. Finite Low physical packet requires actual stationary support/display measurements before ONE capture. Geometry/P2-03 remain unverified.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_ARTIFACT_REVIEW_AND_DEVICE_PACKET_20261022.md"
+    },
+    {
+      "result": "One offline9m10s build exit0, exactC8APKfea1596d...58f6c. Static signature/587ZIP/18ELF/C7manifest+resources/R8/DEX/currentpin/graph/dependencies pass.72 source,1029currentstage/1023preservedstage and138artifactfiles verified unchanged. Preparation encoding failure retained, no build retry/source repair/phone/model/GitCI. Independent artifact acceptance pending; writer STOPPED/lease released.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_BUILD_STATIC_HANDOFF_20261022.md"
+    },
+    {
+      "result": "No blocking specification/standards finding. Fresh709 host assertions+12semantic commit-rebound probes and60 app tests pass;72 ready inputs and2255 evidence rows exact. Full Android/physical/lifecycle/provider path unverified. Offline build-only packet prepared, not dispatched.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_SOURCE_REVIEW_AND_BUILD_PACKET_20261022.md"
+    },
+    {
+      "result": "Implementer stopped source/generated handoff: fixed C8 intent/capture/export, two permanent allowances,72-source/target pin.709 JVM assertions/60 app tests and Java/Kotlin/types/lint pass. First failures retained; actual SAF/native durability/geometry unverified. No phone/build/model/Git mutation or new artifact. Independent review pending.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_STATIONARY_SLOT_SOURCE_HANDOFF_20261022.md"
+    },
+    {
+      "result": "Founder approves follow-up correction; coordinator specified fixed new slot, separate durable sidecar,2export allowances within256MiB, unchanged ingress and physical thresholds. Sole writer6.1High source/generated only, finite lease, no phone.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C8_STATIONARY_SLOT_SOURCE_DISPATCH_20261022.md"
+    },
+    {
+      "result": "57 writer receipts,799317byte ZIP,manifest/commit/original JPEG-PNG/semantic JSON/bothvector hashes and unchanged storage independently verified. Crop formula agrees; six nominal residuals within1% but two unmeasured and motion/exposure/display evidence missing. Geometry INCONCLUSIVE, not capture/save failure. Initial measurement-helper limitation retained; no tolerance relaxation or new phone action.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C7_DEVICE_AUDIT_AND_GEOMETRY_READINESS_20261022.md"
+    },
+    {
+      "result": "Exact C7 data-preserving update UID10264; one READBACK_VERIFIED saved-job export and public ZIP USB transfer. Nine STORED allowlist, original JPEG/PNG hashes, semantic numerical/commit/header/EXIF and unchanged final status pass. Initial notification shade manually closed; no retry/export reset. Geometry not measured.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C7_DEVICE_EXPORT_RESULT_20261022.md"
+    },
+    {
+      "result": "Founder reconnected phone and requested continuation. Accepted APK,60 source and artifact-review bindings freshly rehashed unchanged. Fixed one-update/one-export packet dispatched to same writer Low; actual device result pending.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C7_DEVICE_EXPORT_DISPATCH_20261022.md"
+    },
+    {
+      "result": "Independent exact APK static acceptance after37 writer/1023 stage/1015 oldstage/60 source/55 capture/138 dependency artifacts verified; fresh587 ZIP/18 ELF/DEX/pins/signature/manifest/graph checks. One generated resource IP reviewed, no runtime failure inferred. Physical startup/SAF/export unverified; concrete next device packet not executed.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C7_ARTIFACT_REVIEW_AND_EXPORT_DEVICE_PACKET_20261019.md"
+    },
+    {
+      "result": "One offline signed APK4eee45f9...6b6827 built; static acceptance WITHHELD. Signature/manifest/18ELF and service checks pass; JNI-only GNU build-ID counterexample retained. Guard then finds resources.arsc single RN generated dev-server IP192.168.1.3->.13; full decoded diff retained. No third checker/build/source or phone action.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C7_BUILD_STATIC_HANDOFF_20261019.md"
+    },
+    {
+      "result": "Founder authorized next offline build/static only after source audit; both fresh roots absent, exact branch/HEAD confirmed. Same writer finite lease; stopped handoff required, artifact acceptance pending.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C7_BUILD_STATIC_DISPATCH_20261019.md"
+    },
+    {
+      "result": "No blocking specification/standards finding. Independent627 JVM assertions and48 app tests pass;1444 writer/308 current/298 snapshots/60 source/55 frozen inputs verified. Real original-image/SAF/device path unrun. Build-only packet prepared, not dispatched.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C7_SOURCE_REVIEW_AND_BUILD_PACKET_20261019.md"
+    },
+    {
+      "result": "Approved D057 one saved-chart export implemented source-only; permanent16908288 allowance/camera251527168 sub-budget, exact profile/hash allowlist, bounded STORED ZIP/local Downloads descriptor/readback, durable one-shot sidecar/shared owner. Source60 and derivative bound; generated checks pass within host scope. Independent audit and native/provider runtime remain pending.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C7_SAVED_EVIDENCE_EXPORT_SOURCE_HANDOFF_20261019.md"
+    },
+    {
+      "result": "Founder approved bounded export correction. Coordinator specified accounting/ownership amendment before coding; source/generated-check dispatch only, not implementation acceptance or actual export.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C7_SAVED_EVIDENCE_EXPORT_DISPATCH_20261019.md"
+    },
+    {
+      "result": "Fixed saved-evidence checks pass within scope; original preview/candidate visually upright with eight markers. Quantitative geometry remains INCONCLUSIVE; no new device or measurement execution. STOP for coordinator High.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C6_FIXED_VERIFICATION_TRACK_B_RESULT_20261019.md"
+    },
+    {
+      "result": "Concrete separate permissionless APK prepared; exact native reuse and nine production Java copies, source14/production51 hashes and10 SDK receipts verified. Five ZIP entries include explicitly parsed empty AAPT resources table; initial checker error preserved. Ten planned generated cases not executed. Install approval absent; independent review pending.",
+      "source": "docs/recognition/reports/PHONE_P2_03_STORAGE_SMOKE_C6_ARTIFACT_HANDOFF_20261018.md"
+    },
+    {
+      "result": "Offline one release and exact static closure pass, APK80e71788...2d86713.18 libs with exact one newJNI, old17 onlytwo buildIDs; R8 service metadata semantic/mapping proof. Source/signature/manifest/dependency/assets verified. Device/native runtime unverified.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C6_BUILD_STATIC_HANDOFF_20261018.md"
+    },
+    {
+      "result": "Reviewer fsync counterexample fails before correction; fresh537 generated assertions and Android Java pass. Persistent barrier failure blocks all consumers/new process; success acknowledges existing bytes. Native/phone runtime not verified.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C6_C1_DURABILITY_HANDOFF_20261018.md"
+    },
+    {
+      "result": "C6 source repair stopped: no-replace JNI publication and narrow staged-reservation interrupted classification;215+134 generated host assertions and36 UI/protocol tests pass, Java/types/lint/8 syntax pass. Android syscall/physical proof not executed; independent review requested.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C6_STORAGE_SOURCE_HANDOFF_20261018.md"
+    },
+    {
+      "result": "C5 data-preserving diagnostic update exposes CAMERA_READ_BOUND. Probe built locally only; founder paused this writer to request coordinator investigation with Astra. No successful photo or fix claimed.",
+      "source": "docs/recognition/reports/PHONE_P2_03_C5_STORAGE_DIAGNOSTIC_RESULT_20261018.md"
+    },
+    {
+      "result": "Founder deferred confirmed CI repair until camera test success. Seven historical branches fail Expo compatibility on Windows/Ubuntu; current checkout also fails; plan/** absent from push coverage and checkpoint374286d has zero checks. Diagnosis only, no remediation/CI rerun/push; newer camera reports remain local.",
+      "source": "docs/engineering/PROJECT_STATE.md#deferred-github-validation-repair"
+    },
+    {
+      "result": "Founder-authorized source checkpoint f76f0df committed714 paths and pushed; all14 branch tips independently confirmed on origin, including3 separate older dirty-worktree snapshots with original files/index/HEAD unchanged. No merge/force/main/deploy. Private photos/runs/APKs/caches/PDF remain local. Limited credential patterns no findings;109 whitespace warnings retained, no full-project runtime or release claim.",
+      "source": "docs/engineering/GITHUB_BACKUP_RESULT_20261018.md"
+    },
+    {
+      "result": "Stopped handoff independently verified: writer1651/stage2957/helpers8/source972/installed2995+broad9008/assets104/frozen6874/cache866+893/derivative806; exact source51 and graph532+7/map531 bindings, signature/ZIP586/17ELF/10762DEXdefinitions/12208types pass. Fresh targeted real-import/core-hook2 pass,5unselected. Writer6/7 retains first-render5000ms timeout; no warm cure. Repair/static acceptance only; physical startup not checked. APK086ee746...47699c, native/manifest/DEX matchC3 excepttwo GNUbuildIDs; no new native module.",
+      "source": "docs/recognition/reports/PHONE_P2_03_G3_C4_REVIEW_20261018.md"
+    },
+    {
+      "result": "Actual crash symbolicated against C3 packaged-bundle-bound map: CameraProofPanel -> camera barrel -> Expo.fx -> ExpoAsset. Minimal isolated JS import correction only, no new native module/permission/provider. Fresh baselines plus6874 frozen evidence rows. Same writer finite lease and direct stopped handoff required.",
+      "source": "docs/recognition/reports/PHONE_P2_03_G3_C4_STARTUP_DISPATCH_20261018.md"
     },
     {
       "kind": "phone-p2-03-g4-first-physical-launch-failure",
-      "source": "docs/recognition/reports/PHONE_P2_03_G4_FIRST_LAUNCH_RESULT_20261018.md",
-      "result": "Founder Medium+USB readiness. SM-A156E Android16/API36. OldAPK preserved; exactC3 installed once/device SHA verified, UID/data directory retained, no clear/uninstall. One cold launch Statusok then target PID17573 exit4/AndroidRuntime Cannot find native module ExpoAsset. Capture0/model0/radio0/retry0. Static facts do not prove startup closure; High investigation/correction required per founder model policy. No source edit or relaunch; G4/P2-04 held."
+      "result": "Founder Medium+USB readiness. SM-A156E Android16/API36. OldAPK preserved; exactC3 installed once/device SHA verified, UID/data directory retained, no clear/uninstall. One cold launch Statusok then target PID17573 exit4/AndroidRuntime Cannot find native module ExpoAsset. Capture0/model0/radio0/retry0. Static facts do not prove startup closure; High investigation/correction required per founder model policy. No source edit or relaunch; G4/P2-04 held.",
+      "source": "docs/recognition/reports/PHONE_P2_03_G4_FIRST_LAUNCH_RESULT_20261018.md"
     },
     {
       "kind": "phone-p2-03-g3-c3-independent-static-acceptance",
-      "source": "docs/recognition/reports/PHONE_P2_03_G3_C3_REVIEW_20261018.md",
-      "result": "G3 verified exact BUILD/STATIC scope. SignedAPK6097b9d5...d0a99, exact4manifest removals, signature/ZIP/17ELF/586payloads/10762definitions/12208types and8fresh overlay negatives pass.326writer/2955stage/972source/2995installed/9008broad/104assets/6486frozen/866original/893shortcache/806derivative verified. C2/C3 DEX/model/bundle/assets exact;2native libraries differ only20-byte GNU buildIDs. STOP C2-template label low metadata issue retained. No physical/native-loading/offline/privacy/accuracy acceptance; G4/p2-04 held; writer stopped/lease released."
+      "result": "G3 verified exact BUILD/STATIC scope. SignedAPK6097b9d5...d0a99, exact4manifest removals, signature/ZIP/17ELF/586payloads/10762definitions/12208types and8fresh overlay negatives pass.326writer/2955stage/972source/2995installed/9008broad/104assets/6486frozen/866original/893shortcache/806derivative verified. C2/C3 DEX/model/bundle/assets exact;2native libraries differ only20-byte GNU buildIDs. STOP C2-template label low metadata issue retained. No physical/native-loading/offline/privacy/accuracy acceptance; G4/p2-04 held; writer stopped/lease released.",
+      "source": "docs/recognition/reports/PHONE_P2_03_G3_C3_REVIEW_20261018.md"
     },
     {
       "kind": "phone-p2-03-g3-c2-independent-review-c3-correction",
-      "source": "docs/recognition/reports/PHONE_P2_03_G3_C2_REVIEW_20261018.md",
-      "result": "C2 audit COMPLETE/CHANGES_REQUIRED: signed offline release confirmed; fresh signature/ZIP/17ELF/586entries/10762DEXdefinitions/12208types and3original config tests pass.543writer/2955stage/966source/2995installed/9008broad/104assets/2984frozen/866original/893shortcache/806derivative verified. One optional device-library/vendor-query manifest condition remains. Exact C3 generated-manifest-only correction dispatched to same writer under existing original G3 boundary; no native source logic/dependency/phone/model changes. G3 not accepted; G4/P2-04 held."
+      "result": "C2 audit COMPLETE/CHANGES_REQUIRED: signed offline release confirmed; fresh signature/ZIP/17ELF/586entries/10762DEXdefinitions/12208types and3original config tests pass.543writer/2955stage/966source/2995installed/9008broad/104assets/2984frozen/866original/893shortcache/806derivative verified. One optional device-library/vendor-query manifest condition remains. Exact C3 generated-manifest-only correction dispatched to same writer under existing original G3 boundary; no native source logic/dependency/phone/model changes. G3 not accepted; G4/P2-04 held.",
+      "source": "docs/recognition/reports/PHONE_P2_03_G3_C2_REVIEW_20261018.md"
     },
     {
       "kind": "phone-p2-03-g3-c2-founder-approval-dispatch",
-      "source": "docs/recognition/reports/PHONE_P2_03_G3_C2_DISPATCH_20261017.md",
-      "result": "Founder approved exact camera-only task derivative and internal signature receiver guard amendment; D-055. Same writer Sol6.1High, fresh C2 stage/evidence, offline compile/R8/static with original inputs preserved. No scanner runtime/suppression/provider/version/production-source/phone/model effects. C1 remains blocked/noAPK; C2 not accepted, G4/P2-04 held."
+      "result": "Founder approved exact camera-only task derivative and internal signature receiver guard amendment; D-055. Same writer Sol6.1High, fresh C2 stage/evidence, offline compile/R8/static with original inputs preserved. No scanner runtime/suppression/provider/version/production-source/phone/model effects. C1 remains blocked/noAPK; C2 not accepted, G4/P2-04 held.",
+      "source": "docs/recognition/reports/PHONE_P2_03_G3_C2_DISPATCH_20261017.md"
     },
     {
       "kind": "phone-p2-03-g3-c1-independent-blocker-review",
-      "source": "docs/recognition/reports/PHONE_P2_03_G3_C1_REVIEW_20261017.md",
-      "result": "BLOCKED/NO APK confirmed after stopped handoff.467 writer/2413 stage exact paths and hashes,961 source/2995 installed/104 assets/102 frozen/866 original/892 short-cache rows verified. Offline a5 actual R8 fails27 missing scanner classes. AndroidX exact signature receiver guard is not another Android capability but literal only-CAMERA assertion failed. Native derivative/criterion amendment proposed, not approved or dispatched; writer lease released. G2 stands, G4/P2-04 held."
+      "result": "BLOCKED/NO APK confirmed after stopped handoff.467 writer/2413 stage exact paths and hashes,961 source/2995 installed/104 assets/102 frozen/866 original/892 short-cache rows verified. Offline a5 actual R8 fails27 missing scanner classes. AndroidX exact signature receiver guard is not another Android capability but literal only-CAMERA assertion failed. Native derivative/criterion amendment proposed, not approved or dispatched; writer lease released. G2 stands, G4/P2-04 held.",
+      "source": "docs/recognition/reports/PHONE_P2_03_G3_C1_REVIEW_20261017.md"
     },
     {
       "kind": "phone-p2-03-g3-blocker-independent-review",
-      "source": "docs/recognition/reports/PHONE_P2_03_G3_BLOCKER_REVIEW_20261016.md",
-      "result": "CONFIRMED_NO_APK:539 writer/213 stage/955 source/2995 installed/104 assets/75 frozen exact. Gradle1 task-selection only, camera publication default verified in installed SettingsManager and prohibited runtime declarations. Main actual autolinking loader accepts staged ^expo-camera$ only, deps unchanged, no real Gradle selection yet.12 official POMs/HEAD14,821,158 bytes, zero binary artifacts; full closure unknown. C1 follows bounded review/acquisition/source route, G3 not passed."
+      "result": "CONFIRMED_NO_APK:539 writer/213 stage/955 source/2995 installed/104 assets/75 frozen exact. Gradle1 task-selection only, camera publication default verified in installed SettingsManager and prohibited runtime declarations. Main actual autolinking loader accepts staged ^expo-camera$ only, deps unchanged, no real Gradle selection yet.12 official POMs/HEAD14,821,158 bytes, zero binary artifacts; full closure unknown. C1 follows bounded review/acquisition/source route, G3 not passed.",
+      "source": "docs/recognition/reports/PHONE_P2_03_G3_BLOCKER_REVIEW_20261016.md"
     },
     {
       "kind": "phone-p2-03-g3-offline-build-static-dispatch",
-      "source": "docs/recognition/reports/PHONE_P2_03_G3_BUILD_STATIC_DISPATCH_20261016.md",
-      "result": "Exact approved G2 source35-row36004274...b9d0e/24copies verified. Fresh shadow/cache/evidence, existing cached toolchain and signer only; no production/installed source edits or download. Compile Kotlin/Java/R8 and inspect exact permissions/dependency/registration/JS/native/assets/signature/alignment. Same writer Sol6.1High; six-hour finite lease; STOP and direct handoff before coordinator audit. G3 not passed."
+      "result": "Exact approved G2 source35-row36004274...b9d0e/24copies verified. Fresh shadow/cache/evidence, existing cached toolchain and signer only; no production/installed source edits or download. Compile Kotlin/Java/R8 and inspect exact permissions/dependency/registration/JS/native/assets/signature/alignment. Same writer Sol6.1High; six-hour finite lease; STOP and direct handoff before coordinator audit. G3 not passed.",
+      "source": "docs/recognition/reports/PHONE_P2_03_G3_BUILD_STATIC_DISPATCH_20261016.md"
     },
     {
       "kind": "phone-p2-03-s1-c1-independent-source-acceptance",
-      "source": "docs/recognition/reports/PHONE_P2_03_S1_C1_INDEPENDENT_REVIEW_20261016.md",
-      "result": "G2 ACCEPTED_WITH_RESIDUAL_RISK. Fresh48/10 mobile, original7 unchanged UI flow,86 production durable-finalization checks and original cancellation/restart probe pass. One preceding custom focused UI first-case5s timeout retained, cause unknown; later pass is not timing repair.1486 writer inventory entries/936 baseline13 allowed deltas/24 source copies/66 freezes verified. Writer717 JVM/types/lint/API compilation reviewed source-bound, not rerun; Kotlin/Android/device unproved. No build/phone/model; G3/G4/P2-04 pending."
+      "result": "G2 ACCEPTED_WITH_RESIDUAL_RISK. Fresh48/10 mobile, original7 unchanged UI flow,86 production durable-finalization checks and original cancellation/restart probe pass. One preceding custom focused UI first-case5s timeout retained, cause unknown; later pass is not timing repair.1486 writer inventory entries/936 baseline13 allowed deltas/24 source copies/66 freezes verified. Writer717 JVM/types/lint/API compilation reviewed source-bound, not rerun; Kotlin/Android/device unproved. No build/phone/model; G3/G4/P2-04 pending.",
+      "source": "docs/recognition/reports/PHONE_P2_03_S1_C1_INDEPENDENT_REVIEW_20261016.md"
     },
     {
       "kind": "phone-p2-03-s1-independent-source-review",
-      "source": "docs/recognition/reports/PHONE_P2_03_S1_SOURCE_REVIEW_20261015.md",
-      "result": "CHANGES_REQUIRED: fresh production Store/Lifecycle restart probe failed acknowledged-cancel read refusal; real panel with injected preflight fails no-capture-after-cancel and same-layout readiness; uncaught Kotlin finally failure source finding. Five existing UI cases and300/37/108 unchanged JVM controls pass;4167 inventory entries/917 baseline/17 freezes/28 G0 preserved. Full stress replay stopped not passed; setup/path errors retained. No device/model. Four scoped corrections to same writer."
+      "result": "CHANGES_REQUIRED: fresh production Store/Lifecycle restart probe failed acknowledged-cancel read refusal; real panel with injected preflight fails no-capture-after-cancel and same-layout readiness; uncaught Kotlin finally failure source finding. Five existing UI cases and300/37/108 unchanged JVM controls pass;4167 inventory entries/917 baseline/17 freezes/28 G0 preserved. Full stress replay stopped not passed; setup/path errors retained. No device/model. Four scoped corrections to same writer.",
+      "source": "docs/recognition/reports/PHONE_P2_03_S1_SOURCE_REVIEW_20261015.md"
     },
     {
       "kind": "phone-p2-03-s1-source-dispatch",
-      "source": "docs/recognition/reports/PHONE_P2_03_S1_SOURCE_DISPATCH_20261015.md",
-      "result": "Exact same writer/source-only ceiling published after approved D-054/G0 and accepted P1 G1. Focused generated checks only; no APK/build/install/phone/inference. Coordinator baseline and four-hour exclusive writer lease; stopped handoff before main audit."
+      "result": "Exact same writer/source-only ceiling published after approved D-054/G0 and accepted P1 G1. Focused generated checks only; no APK/build/install/phone/inference. Coordinator baseline and four-hour exclusive writer lease; stopped handoff before main audit.",
+      "source": "docs/recognition/reports/PHONE_P2_03_S1_SOURCE_DISPATCH_20261015.md"
     },
     {
       "kind": "phone-p2-03-g0-concrete-decision-preparation",
-      "source": "docs/recognition/PHONE_P2_03_G0_DECISION_20261015.md",
-      "result": "Proposed only:camera-only isolated opt-in,current-job/canonical-file ingress,4MP/12MiB admission,unchanged CPU recipe,separate private camera store. ChoiceA owned256MiB with unbounded SDK producer exposure measured;choiceB prove bounded producer first. Actual installed resolver/config/plugin rechecked.24P1source copies exact/8result hashes preserved. Founder selection pending; no security-boundary/native/phone effect."
+      "result": "Proposed only:camera-only isolated opt-in,current-job/canonical-file ingress,4MP/12MiB admission,unchanged CPU recipe,separate private camera store. ChoiceA owned256MiB with unbounded SDK producer exposure measured;choiceB prove bounded producer first. Actual installed resolver/config/plugin rechecked.24P1source copies exact/8result hashes preserved. Founder selection pending; no security-boundary/native/phone effect.",
+      "source": "docs/recognition/PHONE_P2_03_G0_DECISION_20261015.md"
     },
     {
       "kind": "phone-p1-b1-scoped-physical-offline-and-numerical-confirmation",
-      "source": "docs/recognition/reports/PHONE_P1_OFFLINE_CONFIRMATION_RESULT_20261015.md",
-      "result": "ACCEPTED_FOR_FROZEN_PACKET:411 actual-OFF samples,max read1.437s/gap1.063s;80/80vectors,40/40runtimeparity,control17/20,phone19/20,both20/20top3. One restart/recovery/export hash matched; comparator agrees. Prior490files and failed-a1 257files preserved; all24sources unchanged. No photo/box/label/model/recipe/radio changes; no formal/live/device-generalization acceptance. G1 closed for scope; G0 and actual camera proof open."
+      "result": "ACCEPTED_FOR_FROZEN_PACKET:411 actual-OFF samples,max read1.437s/gap1.063s;80/80vectors,40/40runtimeparity,control17/20,phone19/20,both20/20top3. One restart/recovery/export hash matched; comparator agrees. Prior490files and failed-a1 257files preserved; all24sources unchanged. No photo/box/label/model/recipe/radio changes; no formal/live/device-generalization acceptance. G1 closed for scope; G0 and actual camera proof open.",
+      "source": "docs/recognition/reports/PHONE_P1_OFFLINE_CONFIRMATION_RESULT_20261015.md"
     },
     {
       "kind": "phone-p1-c2-actual-device-numerical-result-with-offline-evidence-gap",
-      "source": "docs/recognition/reports/PHONE_P1_C2_DEVICE_RESULT_20261015.md",
-      "result": "80/80 vectors, normalized control parity40/40; control17/20, phone19/20, top3both20/20. Restart result hash/counts unchanged; one numerical export48607330bytes/161entries/zeroimages matched. Physical actual-state monitor gap50.952s; no complete offline acceptance, no rerun. One host UI observer failed; second concurrent UI inspection was an execution defect/possible interference, exact cause unconfirmed. All24candidate sources unchanged."
+      "result": "80/80 vectors, normalized control parity40/40; control17/20, phone19/20, top3both20/20. Restart result hash/counts unchanged; one numerical export48607330bytes/161entries/zeroimages matched. Physical actual-state monitor gap50.952s; no complete offline acceptance, no rerun. One host UI observer failed; second concurrent UI inspection was an execution defect/possible interference, exact cause unconfirmed. All24candidate sources unchanged.",
+      "source": "docs/recognition/reports/PHONE_P1_C2_DEVICE_RESULT_20261015.md"
     },
     {
       "kind": "phone-p1-c2-three-physical-offline-diagnostics",
-      "source": "apps/recognition-lab/runs/phone-experiment/p1-private-portability-device-20261013-a1/offline-gate-c2-replacement/parallel-offline-diagnostics-review-20261015-a1/coordinator-review.json",
-      "result": "ACCEPTED3 planned native status calls: eligibleOFF, refusedBluetoothON, restoredeligibleOFF. Fresh actual live Wi-Fi/BT/cell/default/tether observations <=3s; no private import/replay/model calls. UI+accepted source binding, not raw native telemetry/atomic OS barrier. UI/navigation pre-call pauses retained, no extra nativecalls."
+      "result": "ACCEPTED3 planned native status calls: eligibleOFF, refusedBluetoothON, restoredeligibleOFF. Fresh actual live Wi-Fi/BT/cell/default/tether observations <=3s; no private import/replay/model calls. UI+accepted source binding, not raw native telemetry/atomic OS barrier. UI/navigation pre-call pauses retained, no extra nativecalls.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p1-private-portability-device-20261013-a1/offline-gate-c2-replacement/parallel-offline-diagnostics-review-20261015-a1/coordinator-review.json"
     },
     {
       "kind": "phone-p1-c2-first-positive-physical-diagnostic",
-      "source": "apps/recognition-lab/runs/phone-experiment/p1-private-portability-device-20261013-a1/offline-gate-c2-replacement/parallel-positive-review-20261015-a1/coordinator-review.json",
-      "result": "One native status call; live550.34ms current actual Wi-Fi/BT/cell3-3/default/tether OFF accepted. Exact eligible UI/source-bound validator, no import/replay; no raw native telemetry/atomic barrier claim. Fresh human BT ON reply authorizes ordinal2 negative only. Separate Low executor owns phone. P2 document C1 audit PASS, camera implementation/G0 still open."
+      "result": "One native status call; live550.34ms current actual Wi-Fi/BT/cell3-3/default/tether OFF accepted. Exact eligible UI/source-bound validator, no import/replay; no raw native telemetry/atomic barrier claim. Fresh human BT ON reply authorizes ordinal2 negative only. Separate Low executor owns phone. P2 document C1 audit PASS, camera implementation/G0 still open.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p1-private-portability-device-20261013-a1/offline-gate-c2-replacement/parallel-positive-review-20261015-a1/coordinator-review.json"
     },
     {
       "kind": "phone-p2-03-c1-document-independent-review",
-      "source": "docs/recognition/reports/PHONE_P2_03_CAMERA_C1_REVIEW_20261015.md",
-      "result": "PASS for CP-D1/CP-D2 documentation only. Same writer STOPPED;96lines/3links/conditional253-265-241-1380 arithmetic/59 protected rows/17 prior markers/15 frozen entries verified. Explicit no budget waiver; G0 policy/security and P1 result review open. P2 ends at P2-06; P2-03 actual camera proof not passed; P2-04 held. Separate Low executor sole phone owner, first positive diagnostic authorized after fresh founder independent internet+offline replies; no source/build changes."
+      "result": "PASS for CP-D1/CP-D2 documentation only. Same writer STOPPED;96lines/3links/conditional253-265-241-1380 arithmetic/59 protected rows/17 prior markers/15 frozen entries verified. Explicit no budget waiver; G0 policy/security and P1 result review open. P2 ends at P2-06; P2-03 actual camera proof not passed; P2-04 held. Separate Low executor sole phone owner, first positive diagnostic authorized after fresh founder independent internet+offline replies; no source/build changes.",
+      "source": "docs/recognition/reports/PHONE_P2_03_CAMERA_C1_REVIEW_20261015.md"
     },
     {
       "kind": "founder-p1-resume-connectivity-update",
-      "source": "Founder message2026-10-15 in coordinator chat",
-      "result": "Founder reports back home and asks to resume offline P1 alongside P2 review. No fresh USB/APK/input/radio observation yet. Coordinator recommends main-chat LOW execution after camera document review, which is complete; same Track B writer stays stopped. No need for parallel native implementation or another agent. Laptop independent connection must be verified before manual phone offline preparation."
+      "result": "Founder reports back home and asks to resume offline P1 alongside P2 review. No fresh USB/APK/input/radio observation yet. Coordinator recommends main-chat LOW execution after camera document review, which is complete; same Track B writer stays stopped. No need for parallel native implementation or another agent. Laptop independent connection must be verified before manual phone offline preparation.",
+      "source": "Founder message2026-10-15 in coordinator chat"
     },
     {
       "kind": "phone-p2-03-camera-document-independent-review",
-      "source": "docs/recognition/reports/PHONE_P2_03_CAMERA_PACKET_REVIEW_20261015.md",
-      "result": "Document preparation/review complete; saved A2 draft retained exact, writer STOPPED INCOMPLETE due interruption/lease expiry. Coordinator completed33 local-link/source checks/57 protected-source/14 prior marker and12 current evidence entry verification. No code/build/phone effects. CP-D1: stock SDK writes JPEG before consumer bound; proposed256MiB total incl SDK cannot be guaranteed by12MiB post-capture admission/reservation. Requires explicit G0 policy/security decision; P1 G1 still founder-hotspot-deferred. Same writer retained; leaseNULL; native undispatched."
+      "result": "Document preparation/review complete; saved A2 draft retained exact, writer STOPPED INCOMPLETE due interruption/lease expiry. Coordinator completed33 local-link/source checks/57 protected-source/14 prior marker and12 current evidence entry verification. No code/build/phone effects. CP-D1: stock SDK writes JPEG before consumer bound; proposed256MiB total incl SDK cannot be guaranteed by12MiB post-capture admission/reservation. Requires explicit G0 policy/security decision; P1 G1 still founder-hotspot-deferred. Same writer retained; leaseNULL; native undispatched.",
+      "source": "docs/recognition/reports/PHONE_P2_03_CAMERA_PACKET_REVIEW_20261015.md"
     },
     {
       "kind": "phone-p2-03-document-lease-expiry",
-      "source": "docs/recognition/reports/PHONE_P2_03_CAMERA_PACKET_HANDOFF_20261014.md",
-      "result": "STOPPED INCOMPLETE, expired finite lease. Seven indexed files and marker/inventory preserved;57 protected source and12 prior marker bindings verified. Reviewer grants fresh90-minute same-writer document-only lease/new exclusive a2 evidence, old root frozen; no native or phone authorization."
+      "result": "STOPPED INCOMPLETE, expired finite lease. Seven indexed files and marker/inventory preserved;57 protected source and12 prior marker bindings verified. Reviewer grants fresh90-minute same-writer document-only lease/new exclusive a2 evidence, old root frozen; no native or phone authorization.",
+      "source": "docs/recognition/reports/PHONE_P2_03_CAMERA_PACKET_HANDOFF_20261014.md"
     },
     {
       "kind": "phone-p2-02-c1-independent-audit",
-      "source": "docs/recognition/reports/PHONE_P2_02_C1_INDEPENDENT_AUDIT_20261014.md",
-      "result": "ACCEPTED generated laptop scope. Fresh20 enrollment/39.68s +34 session functional/4.552s/one explicit historical CLI skip/types-lint0; original actual-source oracle preserves2 frames/1 vector. Independent14 trials/56arms/80candidates and20 runtime source bindings pass.143 baseline unchanged/4 allowed deltas;22 snapshots; seven frozen roots verified. Stale STOP preservation hash independently resolved by correctly bound frozen inventory; prior EPERM refusal retained. Same writer stopped/leaseNULL; P1 hotspot-deferred, no P2-03/native/camera dispatch."
+      "result": "ACCEPTED generated laptop scope. Fresh20 enrollment/39.68s +34 session functional/4.552s/one explicit historical CLI skip/types-lint0; original actual-source oracle preserves2 frames/1 vector. Independent14 trials/56arms/80candidates and20 runtime source bindings pass.143 baseline unchanged/4 allowed deltas;22 snapshots; seven frozen roots verified. Stale STOP preservation hash independently resolved by correctly bound frozen inventory; prior EPERM refusal retained. Same writer stopped/leaseNULL; P1 hotspot-deferred, no P2-03/native/camera dispatch.",
+      "source": "docs/recognition/reports/PHONE_P2_02_C1_INDEPENDENT_AUDIT_20261014.md"
     },
     {
       "kind": "phone-p1-image-actual-device-failure",
-      "source": "docs/recognition/reports/PHONE_P1_IMAGE_DEVICE_A1_FAILURE_20261012.md",
-      "result": "Exact new APK installed. One42-case image batch completed,8,087,458-byte ZIP hash87d56ecf39b9cc85cb76b64f90de9309d0d507d2eb959555ecebe714541bb23c displayed, zero model calls. App killed LOW_MEMORY while external picker open; returns initial state; selected generated file0bytes/empty SHA. No full export/independent pixel comparison; stage acceptance withheld, no rerun/deletion. Need durable generated bundle/recovery before picker."
+      "result": "Exact new APK installed. One42-case image batch completed,8,087,458-byte ZIP hash87d56ecf39b9cc85cb76b64f90de9309d0d507d2eb959555ecebe714541bb23c displayed, zero model calls. App killed LOW_MEMORY while external picker open; returns initial state; selected generated file0bytes/empty SHA. No full export/independent pixel comparison; stage acceptance withheld, no rerun/deletion. Need durable generated bundle/recovery before picker.",
+      "source": "docs/recognition/reports/PHONE_P1_IMAGE_DEVICE_A1_FAILURE_20261012.md"
     },
     {
       "kind": "phone-p1-image-fresh-reaudit",
-      "source": "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_REAUDIT_20261012.md",
-      "result": "Fresh audit CONFIRMED4suites8tests40.956s/300 Java/10 negatives/9 comparator tests45.863s/types-lint0;1551 frozen/800 current implementation/802 snapshots/79176 protected/25929 inputs; signed exact APK/assets/native/dependency pins verified. Fixture outputs redirected before setup. Android image/export runtime remains pending."
+      "result": "Fresh audit CONFIRMED4suites8tests40.956s/300 Java/10 negatives/9 comparator tests45.863s/types-lint0;1551 frozen/800 current implementation/802 snapshots/79176 protected/25929 inputs; signed exact APK/assets/native/dependency pins verified. Fixture outputs redirected before setup. Android image/export runtime remains pending.",
+      "source": "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_REAUDIT_20261012.md"
     },
     {
       "kind": "phone-p1-image-independent-source-build-review",
-      "source": "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_INDEPENDENT_REVIEW_20261012.md",
-      "result": "Source/build ACCEPTED only: fresh4 suites8 tests38.63s/300 Java assertions/10 admission negatives/9 comparator counterexamples, types/lint0; exact signed APK/104 assets/15 unchanged native/6 graphs/44 JNI/bundle/ordinary config;79176 protected/25929 installed/802 source/1551 frozen checks pass. Coordinator synthetic timestamp rewrite restored by exact whole-file frozen SHA; diagnostics retained. Phone pipeline/export remains unexecuted."
+      "result": "Source/build ACCEPTED only: fresh4 suites8 tests38.63s/300 Java assertions/10 admission negatives/9 comparator counterexamples, types/lint0; exact signed APK/104 assets/15 unchanged native/6 graphs/44 JNI/bundle/ordinary config;79176 protected/25929 installed/802 source/1551 frozen checks pass. Coordinator synthetic timestamp rewrite restored by exact whole-file frozen SHA; diagnostics retained. Phone pipeline/export remains unexecuted.",
+      "source": "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_INDEPENDENT_REVIEW_20261012.md"
     },
     {
       "kind": "phone-p1-generated-device-execution",
-      "source": "docs/recognition/reports/PHONE_P1_GENERATED_DEVICE_RESULT_20261012.md",
-      "result": "Galaxy A15 SM-A156E/Android16/arm64:3 laptop references and9 phone inferences executed, all complete1024 vectors/hashes/norms match frozen numerical tolerance. Canonical comparator agrees with independent calculation. Inference11.14-39.38ms/native total66-272.76ms descriptive only; not full scanning latency/budget. Initial install host30s timeout preserved, resolved by exact installed APK hash without reinstall. No private photos/camera/business/cloud/Git. Image pipeline and later quality gates OPEN."
+      "result": "Galaxy A15 SM-A156E/Android16/arm64:3 laptop references and9 phone inferences executed, all complete1024 vectors/hashes/norms match frozen numerical tolerance. Canonical comparator agrees with independent calculation. Inference11.14-39.38ms/native total66-272.76ms descriptive only; not full scanning latency/budget. Initial install host30s timeout preserved, resolved by exact installed APK hash without reinstall. No private photos/camera/business/cloud/Git. Image pipeline and later quality gates OPEN.",
+      "source": "docs/recognition/reports/PHONE_P1_GENERATED_DEVICE_RESULT_20261012.md"
     },
     {
       "kind": "phone-p1-c1-apk-independent-review",
-      "source": "docs/recognition/reports/PHONE_P1_NATIVE_BUILD_C1_INDEPENDENT_REVIEW_20261012.md",
-      "result": "ACCEPTED source/build/static APK only. Exact signed arm64 release hash verified; fresh3tests/3suites24.051s/types/lint0;1152 frozen artifacts/782 source snapshots/77920 protected records/311 cached artifacts pass. Cold host setup10291ms not speed acceptance; JNI/parity/camera/image pipeline/private/quality/device budgets/legal remain OPEN."
+      "result": "ACCEPTED source/build/static APK only. Exact signed arm64 release hash verified; fresh3tests/3suites24.051s/types/lint0;1152 frozen artifacts/782 source snapshots/77920 protected records/311 cached artifacts pass. Cold host setup10291ms not speed acceptance; JNI/parity/camera/image pipeline/private/quality/device budgets/legal remain OPEN.",
+      "source": "docs/recognition/reports/PHONE_P1_NATIVE_BUILD_C1_INDEPENDENT_REVIEW_20261012.md"
     },
     {
       "kind": "phone-p1-native-stopped-independent-review",
-      "source": "docs/recognition/reports/PHONE_P1_NATIVE_BUILD_INDEPENDENT_REVIEW_20261012.md",
-      "result": "NO APK. Kotlin2.3 module header independently verified versus pinned2.1 compiler/a9 log. Protected76808/unchanged baseline748 records and frozen27/1106 records verified; runtime111/288 no Play and41 assets checked. Intermediate521-source bundle/merged manifest isolated; not final APK. Fresh types0; Jest2pass/1root timeout/16.045s; earlier3pass historical. Lease expired before stopped, recorded without waiver. Changes required NB-C1/C2; fresh task-specific C1 lease/renewal addresses C3."
+      "result": "NO APK. Kotlin2.3 module header independently verified versus pinned2.1 compiler/a9 log. Protected76808/unchanged baseline748 records and frozen27/1106 records verified; runtime111/288 no Play and41 assets checked. Intermediate521-source bundle/merged manifest isolated; not final APK. Fresh types0; Jest2pass/1root timeout/16.045s; earlier3pass historical. Lease expired before stopped, recorded without waiver. Changes required NB-C1/C2; fresh task-specific C1 lease/renewal addresses C3.",
+      "source": "docs/recognition/reports/PHONE_P1_NATIVE_BUILD_INDEPENDENT_REVIEW_20261012.md"
     },
     {
       "kind": "phone-p1-archive-independent-audit",
-      "source": "docs/recognition/reports/PHONE_P1_INSPECTION_INDEPENDENT_AUDIT_20261012.md",
-      "result": "Actual archives/hash/CRC/manifests/84 Java17 classes and independent24+reflective25 Interpreter closure verified; no observed direct Play edge. Independent9ELF/27 load alignment verified; generated bounds12/ELF8 pass. Protected76764/source746/frozen3+38 records match. Static inspection ACCEPTED; actual minSDK24 and foreground permissions carried. Native exclusion/build/runtime unproved."
+      "result": "Actual archives/hash/CRC/manifests/84 Java17 classes and independent24+reflective25 Interpreter closure verified; no observed direct Play edge. Independent9ELF/27 load alignment verified; generated bounds12/ELF8 pass. Protected76764/source746/frozen3+38 records match. Static inspection ACCEPTED; actual minSDK24 and foreground permissions carried. Native exclusion/build/runtime unproved.",
+      "source": "docs/recognition/reports/PHONE_P1_INSPECTION_INDEPENDENT_AUDIT_20261012.md"
     },
     {
       "kind": "phone-p0-independent-audit",
-      "source": "docs/recognition/reports/PHONE_P0_INDEPENDENT_AUDIT_20261011.md",
-      "result": "Direct STOPPED/leaseNULL handoff verified. Fresh29 Jest/four suites28.632s, typecheck/zero-warning lint0; independent300 rank/score/actionable rows and four boundary cases0. All76292 protected and731 old source/config plus13/404 frozen inventory records match. Two primary POM re-fetches match. P0 source/generated prep ACCEPTED; Play-delivery exclusion and native build/device unverified. No binary/download/native/device effect."
+      "result": "Direct STOPPED/leaseNULL handoff verified. Fresh29 Jest/four suites28.632s, typecheck/zero-warning lint0; independent300 rank/score/actionable rows and four boundary cases0. All76292 protected and731 old source/config plus13/404 frozen inventory records match. Two primary POM re-fetches match. P0 source/generated prep ACCEPTED; Play-delivery exclusion and native build/device unverified. No binary/download/native/device effect.",
+      "source": "docs/recognition/reports/PHONE_P0_INDEPENDENT_AUDIT_20261011.md"
     },
     {
       "kind": "phone-p0-dispatch",
-      "source": "docs/recognition/reports/PHONE_P0_DISPATCH_20261011.md",
-      "result": "send_message_to_thread accepted by existing writer01a1051f-0777-7573-ad09-0e550a4bd56a with explicit gpt-6.1-sol/high override; P0 only and direct coordinator completion required. Native/phone work not dispatched."
+      "result": "send_message_to_thread accepted by existing writer01a1051f-0777-7573-ad09-0e550a4bd56a with explicit gpt-6.1-sol/high override; P0 only and direct coordinator completion required. Native/phone work not dispatched.",
+      "source": "docs/recognition/reports/PHONE_P0_DISPATCH_20261011.md"
     },
     {
       "kind": "astra-phone-experiment-planning",
-      "source": "docs/recognition/TRACK_B_PHONE_EXPERIMENT_PLAN_20261011.md",
-      "result": "Integrated proposal and rolling P0 handoff completed from source/primary documentation. Existing MobileNet TFLite CPU baseline, isolated entry requirement, Android camera-source limitation, generated equivalence before private device packet, four paired view arms, conditional OCR/specifications/local cues, budgets and equal-evidence AI comparison. No native compatibility, live accuracy, device latency or production pass claimed. No dispatch; founder model-switch/review pause."
+      "result": "Integrated proposal and rolling P0 handoff completed from source/primary documentation. Existing MobileNet TFLite CPU baseline, isolated entry requirement, Android camera-source limitation, generated equivalence before private device packet, four paired view arms, conditional OCR/specifications/local cues, budgets and equal-evidence AI comparison. No native compatibility, live accuracy, device latency or production pass claimed. No dispatch; founder model-switch/review pause.",
+      "source": "docs/recognition/TRACK_B_PHONE_EXPERIMENT_PLAN_20261011.md"
     },
     {
       "kind": "founder-photo-review-and-astra-task-brief",
-      "source": "docs/recognition/TRACK_B_NEXT_COMPARISON_ASTRA_BRIEF_20261010.md",
-      "result": "Founder viewed local report and confirmed p02-explore-2 actual Airpro query identity; observed line/CWAY size confusion/brush image acceptable/lip-gloss third placement. Line effect and other reference/label correctness not universally confirmed. Prepared factual Astra brief only, no selected new experiment or dispatch. Two references plus two queries per product; no product-specific training."
+      "result": "Founder viewed local report and confirmed p02-explore-2 actual Airpro query identity; observed line/CWAY size confusion/brush image acceptable/lip-gloss third placement. Line effect and other reference/label correctness not universally confirmed. Prepared factual Astra brief only, no selected new experiment or dispatch. Two references plus two queries per product; no product-specific training.",
+      "source": "docs/recognition/TRACK_B_NEXT_COMPARISON_ASTRA_BRIEF_20261010.md"
     },
     {
       "kind": "actual-a5-processing-and-result-review",
-      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A5_RESULT_REVIEW_20261010.md",
-      "result": "Actual native OFF followed by40 vectors/20 scored queries, exit0/no failure;3 jobs drained0active then manual ON/original WLANroute restored. Session/package/source/model/setup/software/original40 hash bindings verified.120 candidate traces independently recomputed in diagnosis;116 saved artifact hashes retained. Full10-identity stored-vector ranks:10 first/4 second/5 third/1 ninth. Founder photo/label review PENDING. No production/unknown/Android quality gate passed."
+      "result": "Actual native OFF followed by40 vectors/20 scored queries, exit0/no failure;3 jobs drained0active then manual ON/original WLANroute restored. Session/package/source/model/setup/software/original40 hash bindings verified.120 candidate traces independently recomputed in diagnosis;116 saved artifact hashes retained. Full10-identity stored-vector ranks:10 first/4 second/5 third/1 ninth. Founder photo/label review PENDING. No production/unknown/Android quality gate passed.",
+      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A5_RESULT_REVIEW_20261010.md"
     },
     {
       "kind": "manual-a5-exact-conditional-publication",
-      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A5_PUBLICATION_20261010.md",
-      "result": "Fresh a5 source/runtime/setup/model/software/study/40asset package strictly validated without execution; connected read-only radioON/source/runtime native checks pass. NEW Desktop-a5 prepared, no launch or toggle. Native a5 OFF/private successful processing/retrieval/E05 and broader gates PENDING."
+      "result": "Fresh a5 source/runtime/setup/model/software/study/40asset package strictly validated without execution; connected read-only radioON/source/runtime native checks pass. NEW Desktop-a5 prepared, no launch or toggle. Native a5 OFF/private successful processing/retrieval/E05 and broader gates PENDING.",
+      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A5_PUBLICATION_20261010.md"
     },
     {
       "kind": "ij01-independent-source-acceptance",
-      "source": "docs/recognition/reports/EXPLORATORY_IJ01_INDEPENDENT_REVIEW_20261010.md",
-      "result": "88 fresh generated passes/zero skips plus4 actual unpublished operational rejections. Actual40 original HEADER-ONLY compatibility/hash checks pass without private pixels;664 baseline/661 unchanged,682 frozen writer artifacts and67277 protected hashes checked. Numeric recipe/model/software unchanged; declared bounded scalar SEF107 input policy accepted with fresh source bindings. Historical a1-a4 and original photos preserved."
+      "result": "88 fresh generated passes/zero skips plus4 actual unpublished operational rejections. Actual40 original HEADER-ONLY compatibility/hash checks pass without private pixels;664 baseline/661 unchanged,682 frozen writer artifacts and67277 protected hashes checked. Numeric recipe/model/software unchanged; declared bounded scalar SEF107 input policy accepted with fresh source bindings. Historical a1-a4 and original photos preserved.",
+      "source": "docs/recognition/reports/EXPLORATORY_IJ01_INDEPENDENT_REVIEW_20261010.md"
     },
     {
       "kind": "actual-a4-incomplete-execution-and-image-container-diagnosis",
-      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A4_IMAGE_FORMAT_FAILURE_20261010.md",
-      "result": "Native OFF observed, three jobs drained/zero active, original WLAN route restored; producer model loaded but40 DECODE_ERROR/no vectors,20 unscored query rows. Pure header inspection40 SEFT trailers143..182bytes; STRICT_JPEG EOF rejection confirmed by generated differential. All40 original hashes/291freeze/29actualattempt artifacts preserved. No recognition-quality result."
+      "result": "Native OFF observed, three jobs drained/zero active, original WLAN route restored; producer model loaded but40 DECODE_ERROR/no vectors,20 unscored query rows. Pure header inspection40 SEFT trailers143..182bytes; STRICT_JPEG EOF rejection confirmed by generated differential. All40 original hashes/291freeze/29actualattempt artifacts preserved. No recognition-quality result.",
+      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A4_IMAGE_FORMAT_FAILURE_20261010.md"
     },
     {
       "kind": "manual-a4-wa02-independent-review-and-publication",
-      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A4_WA02_VERIFICATION_20261010.md",
-      "result": "Fresh118 generated passes; actual raw UInt32 same-object old-rejects/new-waits and current connected/radioON checks pass, strict40asset published package validated without execution. Protected66860/old845+854+276/14a1+19a2+19a3/photo hashes preserved. New a4 conditional approval/Desktop prepared. Actual OFF/recovery/private E05 UNRUN."
+      "result": "Fresh118 generated passes; actual raw UInt32 same-object old-rejects/new-waits and current connected/radioON checks pass, strict40asset published package validated without execution. Protected66860/old845+854+276/14a1+19a2+19a3/photo hashes preserved. New a4 conditional approval/Desktop prepared. Actual OFF/recovery/private E05 UNRUN.",
+      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A4_WA02_VERIFICATION_20261010.md"
     },
     {
       "kind": "actual-a3-failure-and-native-type-causal-reproduction",
-      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A3_NATIVE_TYPE_FAILURE_20261010.md",
-      "result": "Actual preflight passed; WAIT malformed before offline marker/private output,1job drained/0active and restoration recorded. Actual connected UInt32 native classifier fails, only index representation counterfactual permits waiting. Type-preserving native regression missing in prior71 generated tests;19failed/package hashes and40photo hashes preserved."
+      "result": "Actual preflight passed; WAIT malformed before offline marker/private output,1job drained/0active and restoration recorded. Actual connected UInt32 native classifier fails, only index representation counterfactual permits waiting. Type-preserving native regression missing in prior71 generated tests;19failed/package hashes and40photo hashes preserved.",
+      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A3_NATIVE_TYPE_FAILURE_20261010.md"
     },
     {
       "kind": "manual-a3-wa01-independent-review-and-publication",
-      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A3_WA01_VERIFICATION_20261010.md",
-      "result": "Fresh71 checks pass; old22 differential12 expected failures/10 controls, current read-only connected/radioON/source/runtime and actual strict40asset package validation pass. 66343 protected/original845/a2 854/14a1/19a2/photo hashes match. Exact a3 conditional approval and NEW Desktop prepared, NO actual launch/toggle/private inference. Actual native manual OFF/helper/recovery/E05 remain PENDING."
+      "result": "Fresh71 checks pass; old22 differential12 expected failures/10 controls, current read-only connected/radioON/source/runtime and actual strict40asset package validation pass. 66343 protected/original845/a2 854/14a1/19a2/photo hashes match. Exact a3 conditional approval and NEW Desktop prepared, NO actual launch/toggle/private inference. Actual native manual OFF/helper/recovery/E05 remain PENDING.",
+      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A3_WA01_VERIFICATION_20261010.md"
     },
     {
       "kind": "actual-manual-a2-failure-causal-replay",
-      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A2_WAIT_FAILURE_20261010.md",
-      "result": "a2 stopped OTHER_USABLE_IP_INTERFACE about1.154s after OFF prompt; preflight passed, privateExit null, no offline marker/private output, forty hashes preserved. Actual drained receipt0children and original association/route restored. Current actual connected snapshot has only boundWiFi18 outside offline allowed indices; replay actual WAIT_OFF fails0.147s. Waiting-state bug confirmed, actual historical offending index not captured.19 failed/package digests frozen; a2 consumed."
+      "result": "a2 stopped OTHER_USABLE_IP_INTERFACE about1.154s after OFF prompt; preflight passed, privateExit null, no offline marker/private output, forty hashes preserved. Actual drained receipt0children and original association/route restored. Current actual connected snapshot has only boundWiFi18 outside offline allowed indices; replay actual WAIT_OFF fails0.147s. Waiting-state bug confirmed, actual historical offending index not captured.19 failed/package digests frozen; a2 consumed.",
+      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A2_WAIT_FAILURE_20261010.md"
     },
     {
       "kind": "manual-a2-independent-correction-verification-publication",
-      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A2_CF_VERIFICATION_20261010.md",
-      "result": "Fresh63 meaningful checks pass; exact original CF probes pass; actual read-only connected/radioON/runtime/source check passes. Original845/corrected854/protected65172/a1fourteen hashes match. Source corrections accepted; exact conditional manual method approval effb592556c3f0bcfc778d90bc87a9aa33d6467cc3e9b69f7cccffbe542e9f0a and new Desktop prepared, no launch. Actual strict40asset package validation passes without execution. Native OFF/helper/recovery/E05 remain PENDING; source tests are not native proof."
+      "result": "Fresh63 meaningful checks pass; exact original CF probes pass; actual read-only connected/radioON/runtime/source check passes. Original845/corrected854/protected65172/a1fourteen hashes match. Source corrections accepted; exact conditional manual method approval effb592556c3f0bcfc778d90bc87a9aa33d6467cc3e9b69f7cccffbe542e9f0a and new Desktop prepared, no launch. Actual strict40asset package validation passes without execution. Native OFF/helper/recovery/E05 remain PENDING; source tests are not native proof.",
+      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A2_CF_VERIFICATION_20261010.md"
     },
     {
       "kind": "manual-a2-independent-review",
-      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A2_INDEPENDENT_REVIEW_20261010.md",
-      "result": "Acceptance/publication withheld. Fresh six generated probes: three controls pass and three expected assertions fail, reproducing incomplete exit mapping, explicit publication bypass and expired-work stopped-recovery rejection. 845 frozen artifacts, 64291 protected entries, 14 a1 digests match; 648/650 source entries unchanged with only permitted workflow/state deltas. No native toggle/helper launch/private inference; actual manual compatibility and E05 pending."
+      "result": "Acceptance/publication withheld. Fresh six generated probes: three controls pass and three expected assertions fail, reproducing incomplete exit mapping, explicit publication bypass and expired-work stopped-recovery rejection. 845 frozen artifacts, 64291 protected entries, 14 a1 digests match; 648/650 source entries unchanged with only permitted workflow/state deltas. No native toggle/helper launch/private inference; actual manual compatibility and E05 pending.",
+      "source": "docs/recognition/reports/EXPLORATORY_MANUAL_A2_INDEPENDENT_REVIEW_20261010.md"
     },
     {
       "kind": "actual-offline-launch-diagnosis",
-      "source": "docs/recognition/reports/EXPLORATORY_A1_LAUNCH_FAILURE_20261010.md",
-      "result": "First a1 launch stopped OFFLINE_STATE_NOT_CONFIRMED before private work. Bound WLAN automatically reconnected after1.10449s. Fourteen original failed/launcher artifacts match; owned PIDs absent/children-stopped receipt; original association and route present now. Repeat launch refused. No E05/inference or network settings change. New manual-assisted utility preparation needs stopped independent review and new exact approval, not a1 reuse."
+      "result": "First a1 launch stopped OFFLINE_STATE_NOT_CONFIRMED before private work. Bound WLAN automatically reconnected after1.10449s. Fourteen original failed/launcher artifacts match; owned PIDs absent/children-stopped receipt; original association and route present now. Repeat launch refused. No E05/inference or network settings change. New manual-assisted utility preparation needs stopped independent review and new exact approval, not a1 reuse.",
+      "source": "docs/recognition/reports/EXPLORATORY_A1_LAUNCH_FAILURE_20261010.md"
     },
     {
       "kind": "visible-launcher-independent-review-publication",
-      "source": "docs/recognition/reports/EXPLORATORY_VISIBLE_LAUNCHER_INDEPENDENT_REVIEW_20261010.md",
-      "result": "54 focused generated checks pass;26 frozen digests/646 source/64112 protected/49 private files match. Exact one-attempt authorization f5031d9eaabef711667da8d3ffcb09a44ca575e8d301ddc6d238f73c6043d54b published; approved read-only Preview passes and exact Desktop launcher copy verified. Actual WiFi/private E05 NOT RUN."
+      "result": "54 focused generated checks pass;26 frozen digests/646 source/64112 protected/49 private files match. Exact one-attempt authorization f5031d9eaabef711667da8d3ffcb09a44ca575e8d301ddc6d238f73c6043d54b published; approved read-only Preview passes and exact Desktop launcher copy verified. Actual WiFi/private E05 NOT RUN.",
+      "source": "docs/recognition/reports/EXPLORATORY_VISIBLE_LAUNCHER_INDEPENDENT_REVIEW_20261010.md"
     },
     {
       "kind": "standalone-readiness-runtime-review",
-      "source": "docs/recognition/reports/EXPLORATORY_STANDALONE_READINESS_VERIFICATION_20261010.md",
-      "result": "Two standalone generated helpers outside Windows jobs survive parent exit; no Wi-Fi effect. Host-configured signed Python reviewed as new exact snapshot; fresh software inventory and generated model vector/pixels/tensor match;13 producer tests pass/1 host symlink skip. E05 NOT RUN."
+      "result": "Two standalone generated helpers outside Windows jobs survive parent exit; no Wi-Fi effect. Host-configured signed Python reviewed as new exact snapshot; fresh software inventory and generated model vector/pixels/tensor match;13 producer tests pass/1 host symlink skip. E05 NOT RUN.",
+      "source": "docs/recognition/reports/EXPLORATORY_STANDALONE_READINESS_VERIFICATION_20261010.md"
     },
     {
       "kind": "offline-preparation-independent-review",
-      "source": "docs/recognition/reports/EXPLORATORY_OFFLINE_INDEPENDENT_REVIEW_20261010.md",
-      "result": "Fresh93 checks pass; actual generated recovery remains in host job and is terminated before network effects.23 frozen digests/642 baseline source/63930 protected/49 private files match. Wi-Fi unchanged, E05 NOT RUN; current Python signature valid but binary equivalence unresolved."
+      "result": "Fresh93 checks pass; actual generated recovery remains in host job and is terminated before network effects.23 frozen digests/642 baseline source/63930 protected/49 private files match. Wi-Fi unchanged, E05 NOT RUN; current Python signature valid but binary equivalence unresolved.",
+      "source": "docs/recognition/reports/EXPLORATORY_OFFLINE_INDEPENDENT_REVIEW_20261010.md"
     },
     {
       "kind": "account-switch-recovery",
-      "source": "docs/recognition/reports/EXPLORATORY_ACCOUNT_RESUME_20261009.md",
-      "result": "Existing writer accessible/idle/completed.639 baseline paths checked:637 unchanged/two documented coordinator edits/no unexpected changes;49 private and14 frozen artifacts/handoff match. Existing Python imports work. Medium token/no IPv6 default route persist; E05 NOT RUN."
+      "result": "Existing writer accessible/idle/completed.639 baseline paths checked:637 unchanged/two documented coordinator edits/no unexpected changes;49 private and14 frozen artifacts/handoff match. Existing Python imports work. Medium token/no IPv6 default route persist; E05 NOT RUN.",
+      "source": "docs/recognition/reports/EXPLORATORY_ACCOUNT_RESUME_20261009.md"
     },
     {
       "kind": "isolation-independent-review",
-      "source": "docs/recognition/reports/EXPLORATORY_IR01_IR02_INDEPENDENT_REVIEW_20261004.md",
-      "result": "Fresh45+60 checks pass;14 frozen artifacts/handoff/639 source/49 private hashes match. IR01 recovery+IR02 lifetime preparation reviewed. Actual native IPv4 controls pass both executables; IPv6 fails error10051, no IPv6 default route. No administrative mutation or private inference."
+      "result": "Fresh45+60 checks pass;14 frozen artifacts/handoff/639 source/49 private hashes match. IR01 recovery+IR02 lifetime preparation reviewed. Actual native IPv4 controls pass both executables; IPv6 fails error10051, no IPv6 default route. No administrative mutation or private inference.",
+      "source": "docs/recognition/reports/EXPLORATORY_IR01_IR02_INDEPENDENT_REVIEW_20261004.md"
     },
     {
       "kind": "exploratory-restart-recovery",
@@ -363,12 +1307,12 @@
     },
     {
       "kind": "exploratory-e04-review",
-      "result": "Stopped E01\u00c3\u0192\u00c2\u00a2\u00c3\u00a2\u00e2\u20ac\u0161\u00c2\u00ac\u00c3\u00a2\u00e2\u201a\u00ac\u00c5\u201cE03 source reviewed by main coordinator: fresh11 Node cases and11 Python passes/1 host skip; types/lint0;616/617 originals and49 private files preserved, all17 additions match. EA-01 load failure loses reason/timing reproduced with generated-only spawned failure; expected-cause assertion fails. Scoped correction to same writer; native-egress gate false/private inference blocked. No source/model/private recognition acceptance.",
+      "result": "Stopped E01ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œE03 source reviewed by main coordinator: fresh11 Node cases and11 Python passes/1 host skip; types/lint0;616/617 originals and49 private files preserved, all17 additions match. EA-01 load failure loses reason/timing reproduced with generated-only spawned failure; expected-cause assertion fails. Scoped correction to same writer; native-egress gate false/private inference blocked. No source/model/private recognition acceptance.",
       "source": "docs/recognition/reports/EXPLORATORY_E04_AUDIT_20261004.md"
     },
     {
       "kind": "exploratory-planning",
-      "result": "October4 Astra formed independent source-grounded notes before opening old proposal, preserved its exact archive, and reconciled one laptop-tool/experiment plan plus E01\u00c3\u0192\u00c2\u00a2\u00c3\u00a2\u00e2\u20ac\u0161\u00c2\u00ac\u00c3\u00a2\u00e2\u201a\u00ac\u00c5\u201cE05 tickets. Proposed LiteRT CPU replaces MediaPipe Tasks after current metrics notice; exact export rights/normalization/network and execution approval remain gates. Same-item only, code audit before private inference. Documentation only; no installs/downloads/implementation/model run/agent dispatch.",
+      "result": "October4 Astra formed independent source-grounded notes before opening old proposal, preserved its exact archive, and reconciled one laptop-tool/experiment plan plus E01ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œE05 tickets. Proposed LiteRT CPU replaces MediaPipe Tasks after current metrics notice; exact export rights/normalization/network and execution approval remain gates. Same-item only, code audit before private inference. Documentation only; no installs/downloads/implementation/model run/agent dispatch.",
       "source": "docs/recognition/TRACK_B_EXPLORATORY_EXECUTION_PLAN.md"
     },
     {
@@ -451,7 +1395,7 @@
     },
     {
       "kind": "implementation-self-check",
-      "result": "RB3-01..03 supplied benchmark/equivalence/CLI preparation only. Fresh226 tests/14 suites113.848s, lab types/zero-warning lint0; corrected focused54/three20.746s;17 standalone actual CLI expected exits/deterministic/failure/binding/junction checks pass. True file-symlink creation denied EPERM: executable case unverified.477 protected baseline file hashes unchanged, no R0\u00c3\u0192\u00c2\u00a2\u00c3\u00a2\u00e2\u20ac\u0161\u00c2\u00ac\u00c3\u00a2\u00e2\u201a\u00ac\u00c5\u201cR2/production/package/schema/native/model/ranking/threshold effects. No actual Android work/encoder/native runner or automatic acceptance. Stop all commands/edits before one authorized report-back; R3 independent source and all real photos/rights/execution/two-device/quality gates remain pending.",
+      "result": "RB3-01..03 supplied benchmark/equivalence/CLI preparation only. Fresh226 tests/14 suites113.848s, lab types/zero-warning lint0; corrected focused54/three20.746s;17 standalone actual CLI expected exits/deterministic/failure/binding/junction checks pass. True file-symlink creation denied EPERM: executable case unverified.477 protected baseline file hashes unchanged, no R0ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œR2/production/package/schema/native/model/ranking/threshold effects. No actual Android work/encoder/native runner or automatic acceptance. Stop all commands/edits before one authorized report-back; R3 independent source and all real photos/rights/execution/two-device/quality gates remain pending.",
       "source": "docs/recognition/reports/R3_PREPARATION.md"
     },
     {
@@ -461,7 +1405,7 @@
     },
     {
       "kind": "implementation-self-check",
-      "result": "RB4-01..03 gallery/recorded-query/cache/evaluation CLI preparation. Final304 tests/18 suites176.308s, lab types/zero-warning lint0;25 standalone actual CLI expected exits and deterministic/cache/failure/freeze/path assertions pass. All499 protected hashes unchanged. True file-symlink creation EPERM unverified; junction/hardlink rejection passed. Index/active workflow Ajv2020+formats and diff check0; protected pre-existing M2 workflow enum issue found, not repaired. No R0\u00c3\u0192\u00c2\u00a2\u00c3\u00a2\u00e2\u20ac\u0161\u00c2\u00ac\u00c3\u00a2\u00e2\u201a\u00ac\u00c5\u201cR3/production/schema/dependency/native/model/ranking/threshold effects, no encoder/device/real quality acceptance. Stop all commands/edits before one authorized STOPPED report-back; delivery and independent source acceptance are coordinator/tool evidence. All real/physical gates remain pending.",
+      "result": "RB4-01..03 gallery/recorded-query/cache/evaluation CLI preparation. Final304 tests/18 suites176.308s, lab types/zero-warning lint0;25 standalone actual CLI expected exits and deterministic/cache/failure/freeze/path assertions pass. All499 protected hashes unchanged. True file-symlink creation EPERM unverified; junction/hardlink rejection passed. Index/active workflow Ajv2020+formats and diff check0; protected pre-existing M2 workflow enum issue found, not repaired. No R0ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œR3/production/schema/dependency/native/model/ranking/threshold effects, no encoder/device/real quality acceptance. Stop all commands/edits before one authorized STOPPED report-back; delivery and independent source acceptance are coordinator/tool evidence. All real/physical gates remain pending.",
       "source": "docs/recognition/reports/R4_PREPARATION.md"
     },
     {
@@ -470,550 +1414,194 @@
       "source": "docs/recognition/reports/R4_INDEPENDENT_REVIEW.md"
     },
     {
-      "source": "docs/recognition/reports/EXPLORATORY_DEEP_REAUDIT_20261010.md",
-      "result": "Coordinator repeat review: 23 fresh generated checks pass, including 2 real local job/descendant observations. Read-only connected host preflight matches. No new blocking defect confirmed; actual offline recovery/private inference NOT RUN. Exact published authorization unchanged."
+      "result": "Coordinator repeat review: 23 fresh generated checks pass, including 2 real local job/descendant observations. Read-only connected host preflight matches. No new blocking defect confirmed; actual offline recovery/private inference NOT RUN. Exact published authorization unchanged.",
+      "source": "docs/recognition/reports/EXPLORATORY_DEEP_REAUDIT_20261010.md"
     },
     {
-      "source": "docs/recognition/TRACK_B_FRAMING_COMPARISON_PLAN.md",
-      "result": "Planning only: same forty photos/model, frozen manual product boxes, FF versus CC primary paired comparison; FC/CF diagnostics reuse vectors. Six pending tickets, no implementation, dispatch or inference; no formal gate accepted."
+      "result": "Planning only: same forty photos/model, frozen manual product boxes, FF versus CC primary paired comparison; FC/CF diagnostics reuse vectors. Six pending tickets, no implementation, dispatch or inference; no formal gate accepted.",
+      "source": "docs/recognition/TRACK_B_FRAMING_COMPARISON_PLAN.md"
     },
     {
-      "source": "docs/recognition/reports/FRAMING_COMPARISON_FC04_REVIEW_20261010.md",
-      "result": "Coordinator fresh62Python/24Node/30preparation/types/lint pass; independent160generated query rows/3160reference scores agree; reviewed source/intake/consumed/evidence hashes match. Actual browser file navigation explicitly blocked; FC01/FC04 acceptance incomplete, no private approval."
+      "result": "Coordinator fresh62Python/24Node/30preparation/types/lint pass; independent160generated query rows/3160reference scores agree; reviewed source/intake/consumed/evidence hashes match. Actual browser file navigation explicitly blocked; FC01/FC04 acceptance incomplete, no private approval.",
+      "source": "docs/recognition/reports/FRAMING_COMPARISON_FC04_REVIEW_20261010.md"
     },
     {
-      "source": "docs/recognition/reports/FRAMING_COMPARISON_FC04_REVIEW_20261010.md",
-      "result": "October11 founder-assisted all8orientations plus pointer/full-frame/padding/keyboard/save/import/issue controls; complete generated export strictly validated40entries hash69f0d7e51a1bc93ef81510ab5e5c3dbf52a23ff830337674b77af635024ed5eb. Responsive browser check pending; no private approval/inference."
+      "result": "October11 founder-assisted all8orientations plus pointer/full-frame/padding/keyboard/save/import/issue controls; complete generated export strictly validated40entries hash69f0d7e51a1bc93ef81510ab5e5c3dbf52a23ff830337674b77af635024ed5eb. Responsive browser check pending; no private approval/inference.",
+      "source": "docs/recognition/reports/FRAMING_COMPARISON_FC04_REVIEW_20261010.md"
     },
     {
+      "observed_at": "2026-10-12T18:12:23.78094+01:00",
       "result": "Fresh independent lifecycle C1 source/build acceptance: 4 suites10 tests,4701+300 host assertions/types/lint/APK and preservation passed; new device packet preflight has zero USB devices, no install/batch/export attempted. Physical acceptance pending.",
-      "source": "docs/recognition/reports/PHONE_P1_IMAGE_LIFECYCLE_C1_INDEPENDENT_REVIEW_20261012.md",
-      "observed_at": "2026-10-12T18:12:23.78094+01:00"
+      "source": "docs/recognition/reports/PHONE_P1_IMAGE_LIFECYCLE_C1_INDEPENDENT_REVIEW_20261012.md"
     },
     {
+      "observed_at": "2026-10-12T18:18:53.026519+01:00",
       "result": "Actual A15: one42-case/211-entry generated batch, restart recovery, orphan40001 session rejected/recovered, complete40000/40002 exports byte-identical, independent42/42 stage comparison; zero model/private/camera calls. Deliberate kill, not general low-memory/accuracy/memory/live acceptance.",
-      "source": "docs/recognition/reports/PHONE_P1_IMAGE_LIFECYCLE_C1_DEVICE_RESULT_20261012.md",
-      "observed_at": "2026-10-12T18:18:53.026519+01:00"
+      "source": "docs/recognition/reports/PHONE_P1_IMAGE_LIFECYCLE_C1_DEVICE_RESULT_20261012.md"
     },
     {
+      "observed_at": "2026-10-12T19:52:15.243175+01:00",
       "result": "Independent portability audit: fresh18 tests/20Java/27store/35host/61controller/types/lint/APK/preservation passed, but source-bound cross-queue stale cancellation counterexample blocks readiness. Medium correction sent to same HIGH writer; no private/phone work.",
-      "source": "docs/recognition/reports/PHONE_P1_PORTABILITY_INDEPENDENT_REVIEW_20261012.md",
-      "observed_at": "2026-10-12T19:52:15.243175+01:00"
+      "source": "docs/recognition/reports/PHONE_P1_PORTABILITY_INDEPENDENT_REVIEW_20261012.md"
     },
     {
+      "observed_at": "2026-10-13T00:40:41.584972+01:00",
       "result": "C1 independent private source/build accepted for finite private-only procedure: actual production37 before/after assertions,20Java/27store/35host/61controller, compiled helper/native consumers/APK and preservation verified. Separate unchanged generated stale cancellation confirmed and deferred; private operation IDs/gate isolated and generated controls prohibited in next packet. No phone/private/radio/approval publication.",
-      "source": "docs/recognition/reports/PHONE_P1_PORTABILITY_C1_INDEPENDENT_REVIEW_20261013.md",
-      "observed_at": "2026-10-13T00:40:41.584972+01:00"
+      "source": "docs/recognition/reports/PHONE_P1_PORTABILITY_C1_INDEPENDENT_REVIEW_20261013.md"
     },
     {
       "kind": "phone-p1-c2-exact-install-and-offline-preparation",
-      "source": "apps/recognition-lab/runs/phone-experiment/p1-private-portability-device-20261013-a1/offline-gate-c2-replacement/install-checkpoint.json",
-      "result": "One -r installation and installed SHA verified. Exact24 source pins and existing accepted input hash/bytes pass. Initial live observation: airplane OFF/Bluetooth ON/current cellular and tether upstream present. Stopped BEFORE first native diagnostic/import/replay. Await founder manual offline preparation; no app/gate failure inferred."
+      "result": "One -r installation and installed SHA verified. Exact24 source pins and existing accepted input hash/bytes pass. Initial live observation: airplane OFF/Bluetooth ON/current cellular and tether upstream present. Stopped BEFORE first native diagnostic/import/replay. Await founder manual offline preparation; no app/gate failure inferred.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p1-private-portability-device-20261013-a1/offline-gate-c2-replacement/install-checkpoint.json"
     },
     {
       "kind": "founder-hotspot-deferral-and-p2-preparation",
-      "source": "docs/recognition/PHONE_P2_PREPARATION_BRIEF_20261014.md",
-      "result": "P2 factual preparation brief saved; Astra detailed plan/tickets next, no writer dispatch or camera work. Founder deferral and immutable installed/input checkpoint recorded in same device run/offline-gate-c2-replacement/hotspot-deferral.json."
+      "result": "P2 factual preparation brief saved; Astra detailed plan/tickets next, no writer dispatch or camera work. Founder deferral and immutable installed/input checkpoint recorded in same device run/offline-gate-c2-replacement/hotspot-deferral.json.",
+      "source": "docs/recognition/PHONE_P2_PREPARATION_BRIEF_20261014.md"
     },
     {
       "kind": "p2-planning-complete",
-      "source": "docs/recognition/PHONE_P2_PLAN_20261014.md",
-      "result": "Source-inspected generated-only evaluator/camera-excluded build; P2-01/02 detailed with stopped handoffs and meaningful verification, later camera slices gated. All24 current P1 source pins and exact C2 APK verified unchanged; new allowlist paths absent. Docs-only planning, no execution or acceptance claim."
+      "result": "Source-inspected generated-only evaluator/camera-excluded build; P2-01/02 detailed with stopped handoffs and meaningful verification, later camera slices gated. All24 current P1 source pins and exact C2 APK verified unchanged; new allowlist paths absent. Docs-only planning, no execution or acceptance claim.",
+      "source": "docs/recognition/PHONE_P2_PLAN_20261014.md"
     },
     {
       "kind": "p2-01-founder-authorization-dispatch",
-      "source": "docs/recognition/reports/PHONE_P2_01_DISPATCH_20261014.md",
-      "result": "Explicit begin P2-01 implementation; exact finite allowlist and same stopped writer. Actual delivery receipt will be in the new run."
+      "result": "Explicit begin P2-01 implementation; exact finite allowlist and same stopped writer. Actual delivery receipt will be in the new run.",
+      "source": "docs/recognition/reports/PHONE_P2_01_DISPATCH_20261014.md"
     },
     {
       "kind": "p2-01-independent-findings-and-c1",
-      "source": "docs/recognition/reports/PHONE_P2_01_INDEPENDENT_AUDIT_20261014.md",
-      "result": "Scope124/15/171 preserved; exact shadow authored24 tests pass, actual types/lint0. Two original-source independent failures retained plus synchronous-positive control. C1 charter limited to correction, no acceptance yet."
+      "result": "Scope124/15/171 preserved; exact shadow authored24 tests pass, actual types/lint0. Two original-source independent failures retained plus synchronous-positive control. C1 charter limited to correction, no acceptance yet.",
+      "source": "docs/recognition/reports/PHONE_P2_01_INDEPENDENT_AUDIT_20261014.md"
     },
     {
       "kind": "p2-01-c1-independent-acceptance",
-      "source": "docs/recognition/reports/PHONE_P2_01_C1_INDEPENDENT_AUDIT_20261014.md",
-      "result": "Fresh35 original+regression tests/unchanged3 actual-source challenges/types/lint/independent48 numerical rows/11 CLI receipts and102+173+45 artifacts/124 protected records accepted generated scope only. P1 offline and native/camera gates pending."
+      "result": "Fresh35 original+regression tests/unchanged3 actual-source challenges/types/lint/independent48 numerical rows/11 CLI receipts and102+173+45 artifacts/124 protected records accepted generated scope only. P1 offline and native/camera gates pending.",
+      "source": "docs/recognition/reports/PHONE_P2_01_C1_INDEPENDENT_AUDIT_20261014.md"
     },
     {
       "kind": "p2-02-authorized-dispatch",
-      "source": "docs/recognition/reports/PHONE_P2_02_DISPATCH_20261014.md",
-      "result": "Founder proceed to proposed generated enrollment/recovery after P2-01 acceptance. Same stopped writer; finite scope/lease and direct handoff contract. Actual tool trace proves dispatch."
+      "result": "Founder proceed to proposed generated enrollment/recovery after P2-01 acceptance. Same stopped writer; finite scope/lease and direct handoff contract. Actual tool trace proves dispatch.",
+      "source": "docs/recognition/reports/PHONE_P2_02_DISPATCH_20261014.md"
     },
     {
       "kind": "p2-02-recovery-independent-finding",
-      "source": "docs/recognition/reports/PHONE_P2_02_INDEPENDENT_AUDIT_20261014.md",
-      "result": "Actual generated persisted partial DRAINING record becomes empty INTERRUPTED record on explicit resume.2->0 frames/1->0 vectors; original16/34(types/lint) positive checks retained. Bounded C1 correction required; no acceptance."
+      "result": "Actual generated persisted partial DRAINING record becomes empty INTERRUPTED record on explicit resume.2->0 frames/1->0 vectors; original16/34(types/lint) positive checks retained. Bounded C1 correction required; no acceptance.",
+      "source": "docs/recognition/reports/PHONE_P2_02_INDEPENDENT_AUDIT_20261014.md"
+    },
+    {
+      "kind": "p203-export-recovery-s1-source-stopped",
+      "result": "Implementer DONE source only;709 JVM assertions/28 UI tests/types/lint/offline Java-Kotlin-C syntax passed;9 allowed existing edits+13 additions,567 baseline inputs unchanged; historical pins unchanged; independent review and Android lifecycle/grant/output proof pending.",
+      "source": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_SOURCE_HANDOFF_20261024.md"
+    },
+    {
+      "kind": "p203-recovery-s2-offline-build-blocked",
+      "result": "One offline attempt exit1 in3m1s; no APK; exact AndroidX runtime dependency/cache failure;600 frozen inputs/derived source/1043 old-stage source files preserved. No fix, retry, download or phone effect.",
+      "source": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_BUILD_HANDOFF_20261024.md"
+    },
+    {
+      "kind": "recovery-dependency-c1-source-probe-stopped",
+      "result": "Two permitted existing file deltas only;606 bound inputs; one offline actual artifact probe exit0/8 configurations/409 rows. ModuleCore-KTX1.17/app-camera1.18; unchanged app/camera artifact sets; exact cached Tracing1.2 hash matches older accepted lifecycle packet. No APK or phone effect.",
+      "source": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_DEPENDENCY_C1_HANDOFF_20261024.md"
+    },
+    {
+      "kind": "recovery-build-c2-stopped",
+      "result": "One offline release exit0/323 tasks. APK11f23281 39972034bytes; same signer/package/version; canonical binary manifest differs only recovery Activity.409 artifact rows/8 configs equal accepted C1,18 aligned ARM64 libraries/one meaningful publisher delta.606 inputs and109 old evidence files preserved. No phone effect.",
+      "source": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_BUILD_C2_HANDOFF_20261024.md"
+    },
+    {
+      "kind": "recreation-direct-fix-local-build-stopped",
+      "result": "One implementation pass;748 distinct host assertions; one offline release exit0. APKcd910adf1ada194f748860a01792f7aa99c51264cde7ccb617e1e1eb02fa944a;617 bound inputs; static checks pass. No phone/Git/CI/coordinator effect.",
+      "source": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_RECREATION_FIX_20261024.md"
+    },
+    {
+      "kind": "recovery-s3-device-stopped",
+      "result": "Installed cd910adf in place; appId/data inodes preserved. One same-process Activity recreation at25683, one pending-picker kill, callback27955 READBACK_VERIFIED638bytes, one completed restart29142 retained identical receipt/inode/hash without new selection/write. Main review pending; no S4.",
+      "source": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_S3_DEVICE_RESULT_20261024.md"
+    },
+    {
+      "kind": "recovery-s4-device-stopped",
+      "result": "One fixed existing r1 ZIP selection/write reached native READBACK_VERIFIED6168761bytes/f2c899be; one transfer native/device/host match.124 entries/123 manifest rows/333 archive checks;8 image/4 control profiles. Old capture and exporter provenance separate; no new capture/restart/Git. Main S4/S5 review pending.",
+      "source": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_S4_DEVICE_RESULT_20261024.md"
+    },
+    {
+      "kind": "orientation-v2-source-host-handoff",
+      "result": "Exact696 source index a44ce08a84ffcdd32797f9fbdbbd32942ccf98c49a82d7696d554ec20164abf8;75 Jest/9 suites,types/lint,offline native compile/syntax pass;1975 scoped generated assertions.115-row stress timed out/unverified. No build/device/Git. Builder stopped; independent review pending.",
+      "source": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_V2_SOURCE_HANDOFF_20261024.md"
+    },
+    {
+      "kind": "orientation-v2-c1-source-host-stopped",
+      "result": "Observed requested2336x1080/actual1440x1080 accepted;369 geometry/364 export and17 unchanged native token assertions,77 Jest/9 suites,types/lint/Java pass. New700-input pin5df65a511d61d63cb798a7a844628a49d636306bb8a82b2967c8741282c19716. Prior storage timeout remains unverified; no APK/device/Git.",
+      "source": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_V2_C1_CORRECTION_HANDOFF_20261024.md"
+    },
+    {
+      "kind": "orientation-v2-offline-build-failure-stopped",
+      "result": "Two offline Gradle invocations: initial included-build helper setup failure, one bounded helper correction, then missing expo-camera project at task selection. No app compilation/assembly/APK.700 source/private-stage/protected old inputs preserved;138 baseline cached artifacts verified. No third invocation/source/dependency/phone/Git change.",
+      "source": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_V2_OFFLINE_BUILD_FAILURE_20261024.md"
+    },
+    {
+      "kind": "orientation-build-c1-apk-manifest-blocked-stopped",
+      "result": "APK35991c9d655ccbf0e558023c331e0568fa122785eed826e426fbd6572094a62a/40031070 bytes built once offline. Autolink/project/dependency graph pass. CAMERA absent/vendor declarations returned: BLOCKED. Corrected actual R8/JS/model18-libs16KiB/signer checks pass scoped. No source/dependency/phone/Git or rebuild. Source700/private/old artifacts preserved.",
+      "source": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_BUILD_C1_MANIFEST_BLOCKER_20261024.md"
+    },
+    {
+      "kind": "orientation-build-c2-static-handoff-stopped",
+      "result": "C2 APKba5cffdb4b143e89e2412637dc8670e3ece40090ba7493836801cb5f4a3710c2/40030950 bytes, one offline release0/6m36s. Full merged manifest passed before assembly and packaged CAMERA/isolation,364 checks/R8/V2/HBC/model18-libs16KiB/signer all pass scoped. Source700/private/old artifacts preserved; no device/Git/new dependencies. Independent artifact review pending.",
+      "source": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_BUILD_C2_STATIC_HANDOFF_20261024.md"
+    },
+    {
+      "kind": "orientation-generated-device-host-preparation-stopped",
+      "result": "Exact2796-byte generated fixture171420cd; helper3fc1a996;16 host checks pass; all700 source inputs/C2 APK unchanged. No ADB/device/build/photo/model/Git/CI. Disabled execution charter. Main helper review before Medium execution; no fresh readiness claimed.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-orientation-device-preparation-20261024-a1/HANDOFF.md"
+    },
+    {
+      "kind": "orientation-device-generated-export-pass-restart-blocked-stopped",
+      "result": "One in-place C2 install actual APK/sandbox verified. Generated prefix0 native TERMINAL/readback/grants released/unmounted/model0; one2796B transfer exact expected ZIP. One completed HOME/am kill client settled but oldPID persisted through2 read-only reconciliations; no retry/force-stop/reopen. No photo or implementation. Lease released.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-orientation-device-execution-20261025-a1/HANDOFF.md"
+    },
+    {
+      "kind": "completed-force-stop-continuation-verified-stopped",
+      "result": "One explicit completed-app force-stop oldPID24276 absent, one Main launch newPID26241 and one exact read-only inspect tap. Same TERMINAL receipt/sandbox/output inode1801091/2796B/SHA171420cd; no second selection/write/transfer/photo. All46 a1 indexed files preserved; original am-kill remains failed. Lease released; main audit pending.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-orientation-device-execution-20261025-a2/HANDOFF.md"
+    },
+    {
+      "kind": "M00-preparation-tool-guard-stopped",
+      "result": "Known hardware/C2/sandbox/target hash pass. Chrome Ctrl+T blocked by Computer Use URL policy guard; no further UI action. Zero phone UI effects/photos/preview screenshots/cases consumed. Native readiness/capacity not yet checked. Lease released.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-orientation-geometry-device-20261025-a1/HANDOFF.md"
+    },
+    {
+      "kind": "M00-manual-setup-readiness-ui-blocked",
+      "result": "Manual full-screen chart confirmed; known hardware/C2/sandbox fresh. Android CAMERA granted=true but React UI says unavailable. One Inspect run tap updates Next then displays null; handler returns null overwriting native status. No preview/ack/photo/export/model. High diagnosis/correction needed; zero budgets consumed. Lease released.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-orientation-geometry-device-20261025-a1/continuation-01/HANDOFF.md"
+    },
+    {
+      "kind": "ui-readiness-source-correction-stopped",
+      "result": "Source709/9ca177d3; async permission/status overwrite corrected. Fresh fixed namespace and exact prior empty/settled retention charge inside256MiB; no owner weakening. Final33 tests/types/touched lint,29 history assertions/Android-JNI syntax pass. Generated364/126 earlier pass; old historical archive120s timeout unverified. No build/device/photo; lease released.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-orientation-ui-readiness-source-20261025-a1/HANDOFF.md"
+    },
+    {
+      "kind": "ui-readiness-apk-build-static-stopped",
+      "result": "APK6112b1a6/40047586B from source709/9ca177d3; one offline release0/613.87s.366 artifact+32 namespace/UI,7 actual R8 bindings, C2 fullmanifest/graph/signature/model,18arm64/16KiB/CRC pass. Local checker normalization/computed-recipe proof corrected without source/release repeat. No phone/photo/Git. Lease released; independent review pending.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-orientation-ui-build-20261025-a1/HANDOFF.md"
+    },
+    {
+      "kind": "ui-device-coherent-host-preparation-stopped",
+      "result": "New expected2796B fixture2c780895 from actual UI6112 compiled serializer. BaselineC2ba5,source709/9ca unchanged.28 host checks; prefix0 helper rebound/no restart; pure permission/status/reservation/free-space/READY/M00-control/first-export guards. No device/source/build. Lease released; main helper review before coherent Medium slice.",
+      "source": "apps/recognition-lab/runs/phone-experiment/p203-orientation-ui-device-preparation-20261025-a1/HANDOFF.md"
     }
   ],
-  "artifacts": [
-    "docs/recognition/TRACK_B_PLAN.md",
-    "docs/recognition/TRACK_B_R0_TICKETS.md",
-    "docs/recognition/reports/R0_BENCHMARK.md",
-    "apps/recognition-lab/README.md",
-    "apps/recognition-lab/DATASET_CAPTURE.md",
-    "docs/recognition/reports/R0_INDEPENDENT_AUDIT.md",
-    "docs/recognition/reports/R0_REAUDIT.md",
-    "docs/recognition/reports/R0_REAUDIT_REPRO.mjs",
-    "docs/recognition/reports/R0_A2_CORRECTIONS.md",
-    "docs/recognition/reports/R0_A2_INDEPENDENT_REVIEW.md",
-    "docs/recognition/TRACK_B_R1_PLAN.md",
-    "docs/recognition/TRACK_B_R1_TICKETS.md",
-    "docs/recognition/reports/R1_PREPARATION.md",
-    "apps/recognition-lab/templates/r1-v1/README.md",
-    "docs/recognition/reports/R1_INDEPENDENT_REVIEW.md",
-    "docs/recognition/TRACK_B_R2_PLAN.md",
-    "docs/recognition/TRACK_B_R2_TICKETS.md",
-    "apps/recognition-lab/ENCODER_COMPARISON.md",
-    "docs/recognition/reports/R2_PREPARATION.md",
-    "docs/recognition/reports/R2_INDEPENDENT_REVIEW.md",
-    "docs/recognition/TRACK_B_R3_PLAN.md",
-    "docs/recognition/TRACK_B_R3_TICKETS.md",
-    "apps/recognition-lab/DEVICE_BENCHMARK.md",
-    "apps/recognition-lab/templates/r3-v1/README.md",
-    "docs/recognition/reports/R3_PREPARATION.md",
-    "docs/recognition/reports/R3_INDEPENDENT_REVIEW.md",
-    "docs/recognition/TRACK_B_R4_PLAN.md",
-    "docs/recognition/TRACK_B_R4_TICKETS.md",
-    "apps/recognition-lab/RETRIEVAL_PREPARATION.md",
-    "docs/recognition/reports/R4_PREPARATION.md",
-    "docs/recognition/reports/R4_INDEPENDENT_REVIEW.md",
-    "docs/recognition/reports/R1_R4_REVIEW_HANDOFF.md",
-    "docs/recognition/reports/EXPLORATORY_EA01_INDEPENDENT_VERIFICATION_20261004.md",
-    "docs/recognition/reports/EXPLORATORY_IR01_IR02_INDEPENDENT_REVIEW_20261004.md",
-    "docs/recognition/reports/EXPLORATORY_DEEP_REAUDIT_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_A1_LAUNCH_FAILURE_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_MANUAL_A2_INDEPENDENT_REVIEW_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_MANUAL_A2_CF_VERIFICATION_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_MANUAL_A2_PUBLICATION_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_MANUAL_A2_WAIT_FAILURE_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_MANUAL_A3_WA01_VERIFICATION_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_MANUAL_A3_PUBLICATION_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_MANUAL_A3_NATIVE_TYPE_FAILURE_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_MANUAL_A4_WA02_VERIFICATION_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_MANUAL_A4_PUBLICATION_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_MANUAL_A4_IMAGE_FORMAT_FAILURE_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_IJ01_INDEPENDENT_REVIEW_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_MANUAL_A5_PUBLICATION_20261010.md",
-    "docs/recognition/reports/EXPLORATORY_MANUAL_A5_RESULT_REVIEW_20261010.md",
-    "docs/recognition/TRACK_B_NEXT_COMPARISON_ASTRA_BRIEF_20261010.md",
-    "docs/recognition/TRACK_B_FRAMING_COMPARISON_PLAN.md",
-    "docs/recognition/TRACK_B_FRAMING_COMPARISON_TICKETS.md",
-    "docs/recognition/reports/FRAMING_COMPARISON_FC04_REVIEW_20261010.md",
-    "docs/recognition/reports/PHONE_P1_NATIVE_BUILD_C1_INDEPENDENT_REVIEW_20261012.md",
-    "docs/recognition/reports/PHONE_P1_GENERATED_DEVICE_PACKET_20261012.md",
-    "docs/recognition/reports/PHONE_P1_GENERATED_DEVICE_RESULT_20261012.md",
-    "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_DISPATCH_20261012.md",
-    "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_INDEPENDENT_REVIEW_20261012.md",
-    "docs/recognition/reports/PHONE_P1_IMAGE_DEVICE_PACKET_20261012.md",
-    "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_REAUDIT_20261012.md",
-    "docs/recognition/reports/PHONE_P1_IMAGE_DEVICE_A1_FAILURE_20261012.md",
-    "docs/recognition/reports/PHONE_P1_IMAGE_LIFECYCLE_C1_DISPATCH_20261012.md",
-    "docs/recognition/reports/PHONE_P1_IMAGE_LIFECYCLE_C1_INDEPENDENT_REVIEW_20261012.md",
-    "docs/recognition/reports/PHONE_P1_IMAGE_LIFECYCLE_C1_DEVICE_PACKET_20261012.md",
-    "docs/recognition/reports/PHONE_P1_IMAGE_LIFECYCLE_C1_DEVICE_RESULT_20261012.md",
-    "docs/recognition/reports/PHONE_P1_PORTABILITY_IMPLEMENTATION_DISPATCH_20261012.md",
-    "docs/recognition/reports/PHONE_P1_PORTABILITY_INDEPENDENT_REVIEW_20261012.md",
-    "docs/recognition/reports/PHONE_P1_PORTABILITY_C1_DISPATCH_20261012.md",
-    "docs/recognition/reports/PHONE_P1_PORTABILITY_C1_INDEPENDENT_REVIEW_20261013.md",
-    "docs/recognition/reports/PHONE_P1_PORTABILITY_EXECUTION_PACKET_20261013.md",
-    "docs/recognition/reports/PHONE_P2_02_C1_INDEPENDENT_AUDIT_20261014.md",
-    "docs/recognition/reports/PHONE_P2_03_CAMERA_PACKET_DISPATCH_20261014.md",
-    "docs/recognition/PHONE_P2_03_CAMERA_REVIEW_PACKET_20261014.md",
-    "docs/recognition/reports/PHONE_P2_03_CAMERA_PACKET_REVIEW_20261015.md",
-    "docs/recognition/reports/PHONE_P2_03_CAMERA_PACKET_A2_HANDOFF_20261014.md",
-    "docs/recognition/reports/PHONE_P2_03_CAMERA_C1_DISPATCH_20261015.md",
-    "docs/recognition/reports/PHONE_P1_PARALLEL_TESTER_PREFLIGHT_20261015.md",
-    "docs/recognition/reports/PHONE_P2_03_CAMERA_C1_REVIEW_20261015.md",
-    "docs/recognition/reports/PHONE_P2_03_S1_SOURCE_DISPATCH_20261015.md",
-    "docs/recognition/PHONE_P2_03_G0_DECISION_20261015.md",
-    "docs/recognition/reports/PHONE_P2_03_S1_SOURCE_REVIEW_20261015.md",
-    "docs/recognition/reports/PHONE_P2_03_S1_C1_DISPATCH_20261015.md",
-    "docs/recognition/reports/PHONE_P2_03_S1_C1_INDEPENDENT_REVIEW_20261016.md",
-    "docs/recognition/TRACK_B_FOUNDER_REUSE_AND_ENROLLMENT_NOTES_20261016.md",
-    "docs/recognition/reports/PHONE_P2_03_G3_BUILD_STATIC_DISPATCH_20261016.md",
-    "docs/recognition/reports/PHONE_P2_03_G3_C1_DISPATCH_20261016.md",
-    "docs/recognition/reports/PHONE_P2_03_G3_BLOCKER_REVIEW_20261016.md"
-  ],
-  "approvals": [
-    {
-      "by": "founder",
-      "scope": "October4 approves following Astra reconciled exploratory plan, creating implementation chat Sol6.1 HIGH, required bounded local downloads/installations, sequential coordinator audit/corrections and private40-photo experiment after source audit. Coordinator may decide routine details during sleep and record reasons; interactive physical checks deferred. No automatic M12: finish exploratory evidence before new planning. Missing third-party rights, setup gates and plan ceilings remain constraints; no hosted effects/publication or production architecture change."
-    },
-    {
-      "by": "founder",
-      "scope": "Astra Track B planning; explicit begin October2. Subsequent implementation preference Sol6.1 HIGH; not permission to implement this unreviewed packet."
-    },
-    {
-      "by": "founder",
-      "scope": "October2 begin approval: new separate GPT-6.1 Sol HIGH chat implements RB0-01..04, then stops and hands back. Ask founder for Terra MEDIUM coordinator audit switch before audit; Sol6.1 HIGH fallback authorized if no reply after reasonable opportunity. Coordinator cannot switch its own model."
-    },
-    {
-      "by": "founder",
-      "scope": "October2 resume existing implementer Sol6.1 HIGH for R0-A2-01/02 lab metric/reporting corrections, discriminating tests and affected evidence/docs only. Preserve audit reproduction, ranking/config/schema/production source. Stop for review and send one explicitly authorized completion report to coordinator01a098ef-d830-7531-bca7-2d66b0a5b587."
-    },
-    {
-      "by": "founder",
-      "scope": "October2 sequential R1\u00c3\u0192\u00c2\u00a2\u00c3\u00a2\u00e2\u20ac\u0161\u00c2\u00ac\u00c3\u00a2\u00e2\u201a\u00ac\u00c5\u201cR4 implementation/preparation, Sol6.1 HIGH independent audits and correction loop; final combined Astra audit only after return. Capture tools first; real photos and all physical checks pending until founder returns. Pending physical gates are not waived."
-    },
-    {
-      "kind": "founder-phone-p0-continuation",
-      "source": "docs/recognition/reports/PHONE_P0_DISPATCH_20261011.md",
-      "result": "Founder switched back to Sol and authorized continuation/agent dispatch with coordinator discretion over old/new agent; explicitly required direct handoff completion report. Existing writer selected; P0 scope only.",
-      "observed_at": "2026-10-11T21:58:54.738Z"
-    },
-    {
-      "kind": "founder-phone-download-inspection-build-continuation",
-      "source": "docs/recognition/reports/PHONE_P1_INSPECTION_DISPATCH_20261011.md",
-      "result": "Founder explicitly approved proposed downloads/inspection and subsequent work toward the isolated phone build. Staged source/artifact handoffs and audits persist; no scope reset or repeated permission request for the same actions. Current writer slice is only two-archive inspection.",
-      "observed_at": "2026-10-11T22:59:01.874Z"
-    },
-    {
-      "kind": "coordinator-native-build-dispatch-with-preserved-founder-approval",
-      "source": "docs/recognition/reports/PHONE_P1_NATIVE_BUILD_DISPATCH_20261012.md",
-      "result": "Founder prior explicit download/build continuation applied after independent archive audit. Exact bounded local toolchain/source/native build scope and safeguards recorded; device/private inference remains a later exact packet.",
-      "observed_at": "2026-10-11T23:20:30.205Z"
-    },
-    {
-      "kind": "coordinator-bounded-native-c1-under-founder-continuation",
-      "source": "docs/recognition/reports/PHONE_P1_NATIVE_BUILD_C1_DISPATCH_20261012.md",
-      "result": "Existing founder build/resume authority applied to Java-only internal helper and targeted test correction, same pins and isolation. Fresh six-hour lease; current valid holder may renew expiry before expiration and record renewals; no retroactive renewal or waiver of original lapse.",
-      "observed_at": "2026-10-12T07:40:42.961Z"
-    },
-    {
-      "kind": "founder-phone-p1-generated-device-execution",
-      "source": "docs/recognition/reports/PHONE_P1_GENERATED_DEVICE_PACKET_20261012.md",
-      "result": "Founder: phone connected; Install and run the generated tests. Exact audited APK, selected Galaxy A15; generated3 laptop references/at most9 phone inferences. No private photos/camera/business/cloud/uninstall scope.",
-      "observed_at": "2026-10-12T10:41:37.273Z"
-    },
-    {
-      "kind": "founder-phone-image-pipeline-continuation",
-      "source": "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_DISPATCH_20261012.md",
-      "result": "Founder OK PROCEED after verified generated runtime and proposed next image-processing phase. Bounded same-agent source/build, then coordinator audit and exact generated-image device procedure. No private photographs/live camera/production scope.",
-      "observed_at": "2026-10-12T11:06:36.407Z"
-    },
-    {
-      "kind": "founder-image-reaudit-and-device-resume",
-      "source": "docs/recognition/reports/PHONE_P1_IMAGE_PIPELINE_REAUDIT_20261012.md",
-      "result": "Founder explicitly reconnected phone, requested fresh audit and also authorized running the phone test afterward. Existing exact generated-only image packet applies.",
-      "observed_at": "2026-10-12T15:11:47.832Z"
-    },
-    {
-      "approved_by": "founder",
-      "scope": "Explicit 2026-10-12 prepare/build/audit missing phone replay tool; High for implementation/audit, notify before Low physical test. No unnecessary dependencies/downloads.",
-      "source": "current chat request",
-      "at": "2026-10-12T18:29:29.480775+01:00"
-    },
-    {
-      "approved_by": "founder",
-      "scope": "P2-03 G0 choice A: isolated camera-only source experiment, installed library, owned256MiB hard cap and separately measured unbounded SDK temporary/total-memory exposure; build/install/physical packets later.",
-      "source": "Async reply: Approve this isolated camera experiment; recorded D-054",
-      "at": "2026-10-15T16:28:46.680401+00:00"
-    },
-    {
-      "approved_by": "founder",
-      "scope": "Continue to next phase after G2 acceptance: bounded G3 LOCAL offline exact-source camera-enabled build/static inspection under explicit dispatch; no install/device/private-image/model/network/download effect.",
-      "source": "2026-10-16 main chat: Okay, you can continue. You can continue to the next phase. For the next step in our flow, or in our project.",
-      "at": "2026-10-15T23:25:04.880414+00:00"
-    },
-    {
-      "approved_by": "founder",
-      "scope": "Existing phone-experiment tool/dependency download authorization plus October16 next-phase continuation is applied narrowly to fixed required official prerequisites of already installed ExpoCamera57.0.6 after metadata/terms/provenance/size review; planned new payload ceiling250MiB, no new provider/toolchain/model/runtime scanner or install.",
-      "source": "Earlier direct founder: go ahead and download it ... regarding what we are doing; current direct founder: continue to the next phase. Detailed boundary in G3-C1 dispatch/blocker review.",
-      "at": "2026-10-15T23:53:18.309513+00:00"
-    }
-  ],
-  "blockers": [
-    "Formal R1 dataset still lacks independent30\u00c3\u0192\u00c2\u00a2\u00c3\u00a2\u00e2\u20ac\u0161\u00c2\u00ac\u00c3\u00a2\u00e2\u201a\u00ac\u00c5\u201c50-product coverage and curator/seal evidence; forty authorized same-instance exploratory photos do not fulfill it.",
-    "Actual R2 encoder comparison requires real R1 photos and reviewed exact artifacts/licences/preprocessing/runtime/executed encoders; deferred, not a blocker to RB2-01..03 preparation.",
-    "Actual R3 device benchmark requires reviewed exact exports/runtime and Galaxy A15 plus lower-spec real physical evidence; deferred, not a blocker to RB3-01..03 preparation.",
-    "First actual a1 launch could not keep WLAN offline: automatic profile reconnection confirmed before pixels. E05 NOT RUN; consumed a1 must not be reopened or cleared. Manual-assisted preparation and actual toggle compatibility/offline recovery remain pending.",
-    "A1-a4 remain immutable historical failed/incomplete attempts. A5 completed actual ordinary offline processing and numerical review; no rerun required. Founder photo/identity review pending; recognition first10/20/topthree19/20 is same-instance exploration only. Formal quality/native generalization/crash/unknown-child gates OPEN.",
-    "Generated-export-only stale callback can cancel newer generated request; medium follow-up deferred. Do not use generated exporter in finite private-only replay; general generated-mode readiness unaccepted."
-  ],
-  "next_action": "Await founder return for P2-03 G4 camera test: USB/unlocked phone plus human aiming/stabilizing/moving at existing target-a2. Follow C4 resume and original bounded packet; exact APK086ee746...47699c and external source30223e6d...cadb9, legacy native source field separate. No unattended phone/radio/capture action. Source/static repair accepted with unresolved cold-render5000ms timeout; physical startup/geometry and P2-04/05/06 pending. GitHub source backup verified; local private datasets/build artifacts not included. No new planning beyond approved scope.",
-  "created_at": "2026-10-02T00:00:00Z",
-  "updated_at": "2026-10-18T03:28:16.775608+00:00",
-  "archived": false,
-  "acceptance_gates": [
-    {
-      "id": "r1-preparation-source",
-      "claim": "Capture/readiness tooling independently accepted",
-      "owner": "coordinator",
-      "required": true,
-      "status": "met",
-      "depends_on": [],
-      "verification": {
-        "kind": "review",
-        "procedure": "Audit RB1-01..03 stopped handoff, lab tests/typecheck/lint and actual readiness CLI",
-        "success_condition": "Correct readiness/gap/label/seal behavior and preserved R0 scope"
-      },
-      "evidence": [
-        {
-          "result": "Independent96 tests, typecheck/lint and actual readiness examples accepted preparation only.",
-          "source": "docs/recognition/reports/R1_INDEPENDENT_REVIEW.md"
-        },
-        {
-          "result": "Shared R0/R1 CLI hardlink overwrite independently reproduced; FA-03 extension pending sequential repair.",
-          "source": "docs/recognition/reports/R1_R4_FINAL_AUDIT.md"
-        },
-        {
-          "result": "Shared R0/R1 FA-03 independently accepted:143 focused passes/7 native file-symlink skips, types/lint0, sentinel preservation and527 protected hashes.",
-          "source": "docs/recognition/reports/R0_R1_FA03_INDEPENDENT_REVIEW.md"
-        }
-      ],
-      "limitations": [
-        "Synthetic/structural tests do not prove real capture."
-      ],
-      "blocker": null,
-      "waiver": null
-    },
-    {
-      "id": "r1-real-dataset",
-      "claim": "Real30\u00c3\u0192\u00c2\u00a2\u00c3\u00a2\u00e2\u20ac\u0161\u00c2\u00ac\u00c3\u00a2\u00e2\u201a\u00ac\u00c5\u201c50-product difficult set curated and sealed",
-      "owner": "founder and coordinator",
-      "required": true,
-      "status": "pending",
-      "depends_on": [
-        "r1-preparation-source"
-      ],
-      "verification": {
-        "kind": "inspection",
-        "procedure": "Inspect authorized real photos/rights and coverage/independence/seal report",
-        "success_condition": "Actual real-data evidence with exact counts and disclosed gaps accepted"
-      },
-      "evidence": [],
-      "limitations": [
-        "Authorized forty-photo packet represents the same ten physical products; it is exploratory, not independent formal coverage."
-      ],
-      "blocker": "Independent dataset coverage, rights/curation and sealing evidence remain pending.",
-      "waiver": null
-    },
-    {
-      "id": "r2-preparation-source",
-      "claim": "Encoder comparison preparation independently accepted",
-      "owner": "coordinator",
-      "required": true,
-      "status": "met",
-      "depends_on": [
-        "r1-preparation-source"
-      ],
-      "verification": {
-        "kind": "review",
-        "procedure": "Audit RB2-01..03 lab source/tests/actual CLI",
-        "success_condition": "Independent actual evidence accepted within the stated scope"
-      },
-      "evidence": [
-        {
-          "result": "Independent preparation review accepted; actual 172 tests and7 CLI cases.",
-          "source": "docs/recognition/reports/R2_INDEPENDENT_REVIEW.md"
-        },
-        {
-          "result": "Final independent audit reproduced FA-01..03; correction packet prepared, not dispatched. Prior source acceptance conditional on corrections.",
-          "source": "docs/recognition/reports/R1_R4_FINAL_AUDIT.md"
-        },
-        {
-          "result": "R2 FA-03 independently accepted:39 focused tests/2 suites93.11s, types/lint0, historical probe rejects linked destination without overwrite.",
-          "source": "docs/recognition/reports/R2_FA03_INDEPENDENT_REVIEW.md"
-        }
-      ],
-      "limitations": [
-        "Precomputed toy comparison is not encoder execution."
-      ],
-      "blocker": null,
-      "waiver": null
-    },
-    {
-      "id": "r2-real-benchmark",
-      "claim": "Reviewed exact encoders run on actual real dataset",
-      "owner": "coordinator",
-      "required": true,
-      "status": "pending",
-      "depends_on": [
-        "r1-real-dataset",
-        "r2-preparation-source"
-      ],
-      "verification": {
-        "kind": "review",
-        "procedure": "Review executed model/rights/preprocessing/same-split real comparison",
-        "success_condition": "Independent actual evidence accepted within the stated scope"
-      },
-      "evidence": [],
-      "limitations": [
-        "Real photos and exact model artifacts/execution unavailable now."
-      ],
-      "blocker": null,
-      "waiver": null
-    },
-    {
-      "id": "r3-preparation-source",
-      "claim": "Benchmark record/equivalence preparation independently accepted",
-      "owner": "coordinator",
-      "required": true,
-      "status": "met",
-      "depends_on": [
-        "r2-preparation-source"
-      ],
-      "verification": {
-        "kind": "review",
-        "procedure": "Audit stopped RB3-01..03 source/tests/actual CLI",
-        "success_condition": "Independent actual evidence accepted within stated scope"
-      },
-      "evidence": [
-        {
-          "result": "Fresh226 lab tests, types/lint0, independent CLI and477 hashes pass.",
-          "source": "docs/recognition/reports/R3_INDEPENDENT_REVIEW.md"
-        },
-        {
-          "result": "Final independent audit reproduced FA-01..03; correction packet prepared, not dispatched. Prior source acceptance conditional on corrections.",
-          "source": "docs/recognition/reports/R1_R4_FINAL_AUDIT.md"
-        },
-        {
-          "result": "R3 FA-03 independently accepted:32 focused passes/2 explicit native symlink skips, types/lint0, probe rejects overwrite,521 protected hashes unchanged.",
-          "source": "docs/recognition/reports/R3_FA03_INDEPENDENT_REVIEW.md"
-        }
-      ],
-      "limitations": [
-        "Supplied timing and toy equivalence are not physical measurement."
-      ],
-      "blocker": null,
-      "waiver": null
-    },
-    {
-      "id": "r3-real-device-benchmark",
-      "claim": "Exact candidates measured on Galaxy A15 and lower-spec Android",
-      "owner": "coordinator",
-      "required": true,
-      "status": "pending",
-      "depends_on": [
-        "r2-real-benchmark"
-      ],
-      "verification": {
-        "kind": "review",
-        "procedure": "Review real hardware latency/memory/disk/sustained/offline/equivalence evidence",
-        "success_condition": "Independent actual evidence accepted within stated scope"
-      },
-      "evidence": [],
-      "limitations": [
-        "All physical tests pending founder return and reviewed native prerequisites."
-      ],
-      "blocker": null,
-      "waiver": null
-    },
-    {
-      "id": "r4-preparation-source",
-      "claim": "Store-local retrieval/cache preparation independently accepted",
-      "owner": "coordinator",
-      "required": true,
-      "status": "met",
-      "depends_on": [
-        "r3-preparation-source"
-      ],
-      "verification": {
-        "kind": "review",
-        "procedure": "Audit stopped RB4-01..03 source/tests/actual CLI",
-        "success_condition": "Actual independent evidence accepted within stated scope"
-      },
-      "evidence": [
-        {
-          "result": "Independent304 tests, types/lint0,8 CLI/service checks and499 protected hashes.",
-          "source": "docs/recognition/reports/R4_INDEPENDENT_REVIEW.md"
-        },
-        {
-          "result": "Final independent audit reproduced FA-01..03; correction packet prepared, not dispatched. Prior source acceptance conditional on corrections.",
-          "source": "docs/recognition/reports/R1_R4_FINAL_AUDIT.md"
-        },
-        {
-          "result": "FA-01/02/04 independently accepted:110 focused tests/5 suites87.075s, types/lint0, fresh freeze/context/alias probes and519 protected hashes.",
-          "source": "docs/recognition/reports/R4_FINAL_AUDIT_INDEPENDENT_REVIEW.md"
-        }
-      ],
-      "limitations": [
-        "Recorded/toy retrieval is not an image encoder or real accuracy gate."
-      ],
-      "blocker": null,
-      "waiver": null
-    },
-    {
-      "id": "r4-real-quality-holdout",
-      "claim": "Real calibrated retrieval and independent holdout accepted",
-      "owner": "coordinator",
-      "required": true,
-      "status": "pending",
-      "depends_on": [
-        "r1-real-dataset",
-        "r2-real-benchmark",
-        "r3-real-device-benchmark",
-        "r4-preparation-source"
-      ],
-      "verification": {
-        "kind": "review",
-        "procedure": "Review frozen real calibration/holdout package/unknown/failure evidence",
-        "success_condition": "Actual independent evidence accepted within stated scope"
-      },
-      "evidence": [],
-      "limitations": [
-        "Actual real data/encoders/device/holdout pending; no thresholds waived."
-      ],
-      "blocker": null,
-      "waiver": null
-    },
-    {
-      "id": "r1-r4-founder-final-audit",
-      "claim": "Founder-requested combined Astra audit performed",
-      "owner": "coordinator",
-      "required": true,
-      "status": "met",
-      "depends_on": [
-        "r4-preparation-source"
-      ],
-      "verification": {
-        "kind": "review",
-        "procedure": "Founder returns, selects Astra and requests final combined source audit",
-        "success_condition": "Actual independent evidence accepted within stated scope"
-      },
-      "evidence": [
-        {
-          "result": "Final independent audit reproduced FA-01..03; correction packet prepared, not dispatched. Prior source acceptance conditional on corrections.",
-          "source": "docs/recognition/reports/R1_R4_FINAL_AUDIT.md"
-        },
-        {
-          "result": "Founder-requested Astra final audit performed; all reproduced findings corrected sequentially and independently reviewed using Sol HIGH as authorized.",
-          "source": "docs/recognition/reports/R1_R4_FINAL_AUDIT.md"
-        }
-      ],
-      "limitations": [
-        "Source/preparation audit completed; real dataset, model rights/actual inference, native device and frozen real quality are pending, not waived."
-      ],
-      "blocker": null,
-      "waiver": null
-    },
-    {
-      "id": "phone-p2-03-camera-source-g2",
-      "claim": "One-shot camera source and four correction findings reviewed for generated/local scope",
-      "owner": "coordinator",
-      "required": true,
-      "status": "met",
-      "depends_on": [],
-      "verification": {
-        "kind": "review",
-        "procedure": "Stopped C1 exact source review and fresh focused generated/mobile/counterexample checks",
-        "success_condition": "Material four findings closed with remaining native/build/physical uncertainty explicit"
-      },
-      "evidence": [
-        {
-          "source": "docs/recognition/reports/PHONE_P2_03_S1_C1_INDEPENDENT_REVIEW_20261016.md",
-          "result": "Accepted with residual host first-use timing risk; no Kotlin/Android/device claim."
-        }
-      ],
-      "limitations": [
-        "At G2, native build/static APK was pending; G3 exact C3 is now accepted for static scope. Physical camera/durability/geometry remain pending.",
-        "SDK producer cache/total RAM has no proven hard cap under approved D-054.",
-        "Custom cold UI first-case timeout remains unexplained; later full pass is not timing acceptance."
-      ],
-      "blocker": null,
-      "waiver": null
-    }
-  ],
-  "lease": null
+  "lease": {"holder": "01a18b1c-dddc-76f3-b147-610604e47e08", "expires_at": "2026-11-12T19:10:52.043277+00:00"},
+  "mode": "implement",
+  "next_action": "D087 source681 APK3329a2b2 independently accepted; all writers stopped. Await founder decision already requested for exact R03 numerical continuation and proposed extra finalR06 report. No new device/report/photo effects or consumed-attempt reset. Installed4ab23d93 last known. See p204-export-verifier-apk-review-20261109-a1/REVIEW.md.",
+  "owner": {
+    "agent": "main-coordinator",
+    "thread": "01a098ef-d830-7531-bca7-2d66b0a5b587",
+    "worktree": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning"
+  },
+  "schema_version": 1,
+  "status": "in_progress",
+  "task_id": "recognition-track-b",
+  "updated_at": "2026-11-08T22:45:40.882723+00:00",
+  "workflow_id": "build-feature",
+  "workspace": "C:\\Users\\doyew\\Documents\\DEV 2\\COSI-m8-planning"
 }

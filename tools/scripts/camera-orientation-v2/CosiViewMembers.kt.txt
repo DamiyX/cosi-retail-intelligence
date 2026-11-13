@@ -1,0 +1,98 @@
+  // V2 is explicit, experiment-only and owned by this native view instance.
+  private val onCosiGeometryReady by EventDispatcher<Map<String, Any>>()
+  private val cosiPreviewReadiness = CosiPreviewReadiness()
+  var cosiPreviewGeneration: Int = 0
+    set(value) {
+      check(value >= 0) { "CAMERA_PREVIEW_GENERATION" }
+      if (field != value) {
+        field = value
+        cosiPreviewReadiness.begin()
+        cosiGeometry.beginReadiness()
+        shouldCreateCamera = true
+      }
+    }
+  private val cosiGeometry by lazy { CosiSameFrame(this, previewView, { cosiSnapshot() }, { cosiSynchronizeRotation() }) }
+  var cosiSameFrame: Boolean = false
+    set(value) {
+      cosiGeometry.enable(value)
+      field = value
+      if (value) cosiSynchronizeRotation()
+    }
+
+  private fun cosiSynchronizeRotation() {
+    if (!cosiSameFrame) return
+    check(android.os.Looper.myLooper() == android.os.Looper.getMainLooper())
+    val rotation = previewView.display?.rotation ?: return
+    if (imageCaptureUseCase?.targetRotation != rotation || cosiPreviewUseCase?.targetRotation != rotation) {
+      cosiGeometry.invalidate()
+      imageCaptureUseCase?.targetRotation = rotation
+      cosiPreviewUseCase?.targetRotation = rotation
+    }
+  }
+
+  @OptIn(ExperimentalCamera2Interop::class)
+  private fun cosiSnapshot(): android.os.Bundle {
+    val display = requireNotNull(previewView.display) { "CAMERA_GEOMETRY_DISPLAY" }
+    val capture = requireNotNull(imageCaptureUseCase) { "CAMERA_GEOMETRY_USE_CASE" }
+    val preview = requireNotNull(cosiPreviewUseCase) { "CAMERA_GEOMETRY_USE_CASE" }
+    val info = requireNotNull(camera?.cameraInfo) { "CAMERA_GEOMETRY_CAMERA" }
+    val linearZoom = requireNotNull(info.zoomState.value) { "CAMERA_GEOMETRY_ZOOM" }.linearZoom
+    val position = IntArray(2); previewView.getLocationOnScreen(position)
+    return android.os.Bundle().apply {
+      putInt("displayId", display.displayId); putInt("displayRotation", display.rotation)
+      putInt("captureTargetRotation", capture.targetRotation); putInt("previewTargetRotation", preview.targetRotation)
+      putInt("previewWidth", previewView.width); putInt("previewHeight", previewView.height)
+      putInt("previewLeft", position[0]); putInt("previewTop", position[1]); putString("scale", previewView.scaleType.name)
+      putString("lens", if (info.lensFacing == CameraSelector.LENS_FACING_BACK && lensFacing == CameraType.BACK) "BACK" else "UNSUPPORTED")
+      putString("cameraId", Camera2CameraInfo.from(info).cameraId)
+      putBoolean("mirror", mirror); putFloat("zoom", if (zoom == 0f) linearZoom else zoom)
+      putInt("sensorOrientation", info.getSensorRotationDegrees(Surface.ROTATION_0))
+      putInt("sensorToTarget", info.getSensorRotationDegrees(capture.targetRotation))
+      putBoolean("streaming", previewView.previewStreamState.value == PreviewView.StreamState.STREAMING && !previewPaused)
+    }
+  }
+
+  private fun cosiTakePicture(options: PictureOptions, promise: Promise, cacheDirectory: File, runtimeContext: RuntimeContext) {
+    val once = CosiOncePromise(promise)
+    val callbackClaimed = java.util.concurrent.atomic.AtomicBoolean(false)
+    val admission = try { cosiGeometry.admit(options) } catch (error: Exception) {
+      once.reject("CAMERA_GEOMETRY_ADMISSION", "Native same-frame admission refused before exposure.", error); return
+    }
+    val capture = imageCaptureUseCase ?: run { once.reject("CAMERA_GEOMETRY_USE_CASE", "No native image capture use case.", null); return }
+    try {
+      capture.takePicture(ContextCompat.getMainExecutor(context), object : ImageCapture.OnImageCapturedCallback() {
+        override fun onCaptureStarted() {
+          if (options.shutterSound) {
+            val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            if (audio.getStreamVolume(AudioManager.STREAM_MUSIC) != 0) MediaActionSound().play(MediaActionSound.SHUTTER_CLICK)
+          }
+        }
+        override fun onCaptureSuccess(image: ImageProxy) {
+          if (!callbackClaimed.compareAndSet(false, true) || once.isSettled) {
+            try { image.close() } catch (error: Exception) { once.reject("CAMERA_CAPTURE_DRAIN_UNKNOWN", "Duplicate image closure is unconfirmed.", error) }
+            return
+          }
+          val captured: Pair<CosiCaptured, ByteArray>
+          try {
+            captured = cosiReadAndClose({ admission.captured(image) to image.planes.toByteArray() }, { image.close() })
+          } catch (error: Exception) {
+            if (error is CosiClosureUnconfirmed) {
+              once.reject("CAMERA_CAPTURE_DRAIN_UNKNOWN", "Image resource closure is unconfirmed.", error); return
+            }
+            once.reject("CAMERA_GEOMETRY_CALLBACK", "Native image geometry refused after closing its resource.", error); return
+          }
+          val task = scope.launch {
+            ResolveTakenPicture(captured.second, once, options, false, runtimeContext, cacheDirectory, captured.first)
+              { response: Bundle -> onPictureSaved(response) }.resolve()
+          }
+          task.invokeOnCompletion { error ->
+            if (error != null) once.reject("CAMERA_GEOMETRY_FINALIZATION", "Image callback settled; native saving was cancelled.", error)
+          }
+        }
+        override fun onError(exception: ImageCaptureException) { if (callbackClaimed.compareAndSet(false, true) && !once.isSettled) once.reject(CameraExceptions.ImageCaptureFailed()) }
+      })
+    } catch (error: Exception) {
+      once.reject("CAMERA_CAPTURE_DRAIN_UNKNOWN", "Native invocation did not attest SDK settlement.", error)
+    }
+  }
+

@@ -7,6 +7,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /** Actual native task boundary: finalization precedes settlement; no finally IO can escape. */
 public final class CameraProofFinalizer {
   private CameraProofFinalizer(){}
+  public enum IoStage { STAT, READ, WRITE_NEW, PUBLISH, LINK, UNLINK, DIRECTORY_OPEN, DIRECTORY_STAT, DIRECTORY_SYNC, DIRECTORY_CLOSE, WRITE_AT, RENAME, FILE_SYNC, FILE_CLOSE }
+  /** Diagnostic code only: never include an OS message/path; preserve the actual cause. */
+  public static java.io.IOException ioFailure(IoStage stage,int errno,String name,Throwable cause){
+    String safe=name!=null&&name.matches("E[A-Z0-9_]{1,30}")?name:"ERRNO_"+Math.abs((long)errno);
+    return new java.io.IOException("CAMERA_IO_"+(stage==null?"UNKNOWN":stage.name())+"_"+safe,cause);
+  }
   public interface Work<T> {T run()throws Throwable;}
   public interface Completion<T> {
     /** true publishes/acknowledges the value; false is a durably rejected cancellation. */

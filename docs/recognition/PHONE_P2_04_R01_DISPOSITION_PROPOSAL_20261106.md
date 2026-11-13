@@ -1,0 +1,26 @@
+# R01 unfinished preflight — proposed evidence disposition
+
+6 November2026. **APPROVED by founder:** selected “Approve provisional baseline and initialization (Recommended)” in the explicit coordinator card. D-066 records this evidence-plan amendment and one roster initialization after verification. No code/APK/phone change performed by coordinator. Diagnosis/proposal applies the debugging skill; evidence is the stopped p204-evidence-roster-20261106-a1 handoff and accounting-observation.json plus accepted source659 EnrollmentReports/Control/Owner. Approval supersedes the proposal-only wording below only for the recommended no-code route; later physical/report/export counts remain unapproved.
+
+## Established facts and limits
+
+Before the agent's accounting inspection the UI already displayed an unverified evidence-action message. Founder is unsure whether an evidence control was tapped and recalls a phone call/background transition. Neither the initiating action nor the exception/cause is established. Do not attribute this to the call, founder error, the latest inspection or a camera crash.
+
+The authorized app accounting inspection returned CLASSIFIED_METADATA_ONLY, R01 CONSUMED_UNCERTAIN/transfer NOT_VERIFIED and R02–R05 NOT_PREPARED. Integrated measured26115903, reserved22316630, external8388608, total56821141 bytes. Retained private metadata26115778 plus fixed remainder18056915 are preserved. Free1771360256 bytes. Measured historical381732881 is separate from historical logical claim253602084; it is not added to or silently rebudgeted inside the integrated pool. This observation does not verify historical image content or every private file.
+
+Native charge arithmetic agrees: nonproof measured125 plus the report's remaining reservation4259715 and external8388608, with retained44172693, gives56821141. This strongly supports an unfinished report-preparation record; it does not identify exact private leaf names/content or prove a transfer occurred. Do not infer an export from conservative external charges. No successful immutable R01 body/result or host transfer was presented.
+
+EnrollmentReports.prepare refuses already-consumed slot identities and requires initialized state for numbers other than1. EnrollmentControl retains stages/intents and conservatively charges uncertain outcomes. Thus automatic R01 retry and selecting R02 as another uninitialized preflight are both incompatible with current protocol. The UI draft remains editable/present; full ten-entry verification remains pending. Slot07 is observed Freshglow Bar soap / Milk & papaya; 06/09 practical descriptions are allowed.
+
+## Recommended no-code route, only upon founder approval
+
+1. Preserve the existing read-only accounting observation as a **provisional metadata pre-initialization baseline**, explicitly replacing the unavailable canonical R01 preflight evidence for this session. R01 stays permanently consumed/uncertain with all records/reservations/external charges; no refund, cleanup, reset, rearm, substitute slot, new reader or export. Do not label R01 passed.
+2. Same agent verifies all ten live draft identities and confirmation, current session/source/uninitialized state and bounded current accounting before the already founder-authorized one initialization. If the app closes/draft is lost or any state/descriptor is uncertain, reconcile rather than initialize twice. No initialization while this proposal remains unapproved.
+3. Retain the original later report allocation R02–R05. The originally planned R02 after first-real-product interruption/recovery becomes the first full canonical report and MUST include host-validated descriptor/journal/inventory/accounting and retained R01 records before proceeding to subsequent photos. A failed R02 stops the physical run, with no automatic retry, slot substitution or changed assertion. Do not grant unconditional P2-04 acceptance based on the provisional baseline.
+4. The broader physical scope, first photo, explicit process-stop/recovery, R02 preparation/local export/readback/host transfer still require their exact later approval; this disposition alone permits none of them. Fresh human READY remains mandatory for each authorized shutter.
+
+Trade-off: we permanently lack a full canonical report from before initialization. The available baseline is app-reported classified accounting metadata; the later full report can validate later retained state but cannot recreate the missing earlier cut. This is an explicit evidence-plan amendment, not recovery of missing R01 or a claimed repair of its unknown failure cause. Existing quotas, five consumed report IDs, old evidence and live draft remain.
+
+Alternative: retain the original canonical-preflight requirement and request founder-selected Astra planning for a bounded amended report/recovery protocol. That could require source/build/update work and preservation of the live draft; no such implementation/build/extra slot is authorized here. Do not automatically select this route or broaden data access.
+
+Any recurrence, unclassifiable state or actual code defect follows the existing bounded repair/escalation policy. No camera problem has been observed in this preflight.

@@ -1,0 +1,363 @@
+"""Bounded capture tail. Imports and fake-transport checks never access a phone.
+
+Execution requires a separately reviewed, pinned packet and a fresh human READY.
+An effect intent is irrevocable even when its command fails or its outcome is unknown.
+"""
+from dataclasses import dataclass
+from pathlib import Path
+import datetime
+import hashlib
+import importlib.util
+import json
+import math
+import re
+import struct
+import time
+import uuid
+import zlib
+import xml.etree.ElementTree as ET
+import os
+
+ROOT = Path(__file__).resolve().parents[3]
+RUN = "p203-orientation-20261026-evidence-v2"
+PKG = "com.damiyx.retailintelligence.recognitionverification"
+MARKER = "ORIENTATION_CAPTURE_V1 "
+CASES = tuple(f"M{i:02d}-{'A' if i < 4 else 'B'}{(i % 4) * 90:03d}" for i in range(8))
+LABELS = {"ack": "Acknowledge current chart and supported phone", "capture": "Capture this geometry row once", "close": "Close idle or settled preview"}
+PUMP = ROOT / "apps/recognition-lab/runs/phone-experiment/p203-orientation-ui-device-preparation-20261025-a1/fixture_device.py"
+PUMP_SHA = "15f863aff51d5c4a944750ef919a4fce4ab30762e63978c5943b3315f87d4c03"
+
+
+def require(ok, code):
+    if not ok:
+        raise ValueError(code)
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def canonical(value):
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+
+
+def unique_pairs(pairs):
+    result = {}
+    for key, value in pairs:
+        require(key not in result, "DUPLICATE_JSON_KEY")
+        result[key] = value
+    return result
+
+
+def valid_uuid(value):
+    return isinstance(value, str) and re.fullmatch(r"[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}", value) is not None
+
+
+def png_dimensions(data):
+    require(24 <= len(data) <= 4 * 1024 * 1024 and data.startswith(b"\x89PNG\r\n\x1a\n"), "PNG_BOUND")
+    offset, first, ended, dimensions, image_data = 8, True, False, None, False
+    while offset < len(data):
+        require(offset + 12 <= len(data), "PNG_TRUNCATED")
+        size = struct.unpack(">I", data[offset:offset + 4])[0]
+        end = offset + 12 + size
+        require(end <= len(data), "PNG_CHUNK_BOUND")
+        kind, body = data[offset + 4:offset + 8], data[offset + 8:offset + 8 + size]
+        require(zlib.crc32(kind + body) & 0xffffffff == struct.unpack(">I", data[end - 4:end])[0], "PNG_CRC")
+        if first:
+            require(kind == b"IHDR" and size == 13, "PNG_IHDR")
+            dimensions = struct.unpack(">II", body[:8])
+            require(body[8] == 8 and body[9] in (2, 6) and body[10:] == b"\0\0\0", "PNG_SCREEN_FORMAT")
+            first = False
+        else:
+            require(kind != b"IHDR", "PNG_DUPLICATE_HEADER")
+        if kind == b"IDAT" and size > 0:
+            image_data = True
+        if kind == b"IEND":
+            require(size == 0 and end == len(data), "PNG_IEND")
+            ended = True
+            break
+        offset = end
+    require(ended and dimensions is not None and image_data, "PNG_INCOMPLETE")
+    return dimensions
+
+
+def load(path, cap=65536):
+    raw = Path(path).read_bytes()
+    require(len(raw) <= cap, "PACKET_CAP")
+    return json.loads(raw, object_pairs_hook=unique_pairs)
+
+
+def exclusive(path, data):
+    require(not Path(path).is_symlink(), "OUTPUT_LINK")
+    with Path(path).open("xb") as stream:
+        stream.write(data)
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
+class Journal:
+    def __init__(self, path, now=time.monotonic):
+        self.path, self.now = Path(path), now
+        require(self.path.is_dir() and not self.path.is_symlink(), "OWN_EXISTING_OUTPUT_DIRECTORY")
+
+    def save(self, name, value):
+        require(re.fullmatch(r"[A-Za-z0-9-]+", name), "FIXED_JOURNAL_NAME")
+        exclusive(self.path / (name + ".json"), canonical(value))
+
+    def once(self, name, operation):
+        self.save(name + "-intent", {"state": "CONSUMED_BEFORE_DISPATCH", "monotonic": self.now()})
+        # A failure leaves the intent in place; there is no automatic retry/resume.
+        result = operation()
+        self.save(name + "-done", {"monotonic": self.now(), "result": result})
+        return result
+
+
+def marker_from_tree(tree):
+    values = []
+    for node in tree.iter("node"):
+        if node.get("package") != PKG:
+            continue
+        for field in ("content-desc", "text"):
+            text = node.get(field, "")
+            if text.startswith(MARKER):
+                require(len(text) <= 4096, "MARKER_CAP")
+                values.append(json.loads(text[len(MARKER):], object_pairs_hook=unique_pairs))
+    require(len(values) == 1, "ONE_CURRENT_VISIBLE_MARKER")
+    return values[0]
+
+
+@dataclass(frozen=True)
+class Binding:
+    case: str
+    job: str
+    source: str
+    apk: str
+    process: str
+    lifecycle: int
+    generation: int
+    nonce: str
+    layout: str
+    viewport: dict
+
+    @classmethod
+    def from_snapshot(cls, observed, packet):
+        m = observed["marker"]
+        require(packet["case"] in CASES, "FIXED_CASE")
+        expected = str(uuid.UUID(bytes=hashlib.md5((RUN + ":" + packet["case"]).encode()).digest(), version=3))
+        require(type(m.get("version")) is int and m["version"] == 1 and m.get("run") == RUN and m.get("caseId") == packet["case"] and m.get("jobId") == expected, "ROW_BINDING")
+        require(m.get("source") == packet["source"] and m.get("apk") == packet["apk"], "ARTIFACT_BINDING")
+        require(valid_uuid(m.get("process")), "PROCESS_BINDING")
+        require(type(m.get("lifecycle")) is int and m["lifecycle"] >= 0, "LIFECYCLE_BINDING")
+        require(type(m.get("viewGeneration")) is int and m["viewGeneration"] > 0, "VIEW_GENERATION_BINDING")
+        layout = "A" if packet["case"] in CASES[:4] else "B"
+        require(m.get("layout") == layout and m.get("previewMounted") is True and m.get("idle") is True and m.get("busy") is False and m.get("phase") == "IDLE", "PREVIEW_READY_IDLE")
+        require(valid_uuid(m.get("nonce")), "FRESH_NATIVE_NONCE")
+        return cls(packet["case"], expected, packet["source"], packet["apk"], m["process"], m["lifecycle"], m["viewGeneration"], m["nonce"], layout, observed["viewport"])
+
+    def check(self, observed):
+        m = observed["marker"]
+        require(type(m.get("version")) is int and m["version"] == 1 and m.get("run") == RUN and m.get("caseId") == self.case and m.get("jobId") == self.job and m.get("source") == self.source and m.get("apk") == self.apk and m.get("process") == self.process and type(m.get("lifecycle")) is int and m["lifecycle"] == self.lifecycle and m.get("layout") == self.layout, "CAPTURE_BINDING_CHANGED")
+        require(observed["viewport"] == self.viewport and m.get("viewGeneration") == self.generation and m.get("previewMounted") is True, "CAPTURE_VIEW_CHANGED")
+
+
+class CaptureTail:
+    """Adapter has only preflight/observe/tap/screenshot. No inference or arbitrary command API."""
+    def __init__(self, adapter, packet, output, now=time.monotonic, pause=time.sleep):
+        self.adapter, self.packet, self.now, self.pause = adapter, packet, now, pause
+        self.journal = Journal(output, now)
+        self.binding = None
+        self.pre = None
+
+    def window(self, ready):
+        require(type(ready) in (int, float) and math.isfinite(ready) and 0 <= self.now() - ready < 120, "NO_LATE_SHUTTER")
+
+    def screenshot(self, name, state):
+        def save():
+            data = self.adapter.screenshot()
+            dimensions = png_dimensions(data)
+            require(dimensions == tuple(self.packet["displayPixels"]), "PNG_DISPLAY_SIZE")
+            exclusive(self.journal.path / (name + ".png"), data)
+            proof = {"sha256": digest(data), "bytes": len(data), "viewport": state["viewport"], "marker": state["marker"], "monotonic": self.now()}
+            self.journal.save(name, proof)
+            return proof
+        return self.journal.once(name, save)
+
+    def prepare(self, ready):
+        self.window(ready)
+        self.adapter.preflight()
+        state = self.adapter.observe()
+        self.binding = Binding.from_snapshot(state, self.packet)
+        self.pre = self.screenshot("pre", state)
+        return self.pre  # Stop here for the agent's real visual scene qualification.
+
+    def run(self, ready, qualified_pre_sha):
+        require(self.binding is not None and self.pre is not None and qualified_pre_sha == self.pre["sha256"], "PRE_SCENE_NOT_QUALIFIED")
+        self.window(ready)
+        require(0 <= self.now() - self.pre["monotonic"] <= 30, "PRE_SCENE_STALE")
+        state = self.adapter.observe()
+        self.binding.check(state)
+        require(state["marker"].get("phase") == "IDLE" and state["marker"].get("idle") is True and state["marker"].get("busy") is False, "PRE_DISPATCH_STATE")
+        def fresh_dispatch(observed):
+            self.window(ready)
+            self.binding.check(observed)
+            require(observed["marker"].get("nonce") == self.binding.nonce and observed["marker"].get("phase") == "IDLE", "PRE_DISPATCH_NONCE_OR_STATE_CHANGED")
+        self.journal.once("ack", lambda: self.adapter.tap("ack", before_dispatch=fresh_dispatch))
+        self.window(ready)
+        def dispatch_guard(observed):
+            fresh_dispatch(observed)
+            require(0 <= self.now() - self.pre["monotonic"] <= 30, "PRE_SCENE_STALE")
+        self.journal.once("capture", lambda: self.adapter.tap("capture", before_dispatch=dispatch_guard))
+        deadline = self.now() + 20
+        terminal = None
+        while self.now() < deadline:
+            try:
+                observed = self.adapter.observe(deadline=deadline)
+            except ValueError as error:
+                if str(error) not in {"OBSERVATION_DEADLINE", "HOST_ADB_CLIENT_TIMEOUT_PHONE_DRAIN_UNKNOWN"}:
+                    raise
+                break
+            self.binding.check(observed)
+            m = observed["marker"]
+            if m.get("phase") in ("PUBLISHED", "REFUSED") and m.get("idle") is True and m.get("busy") is False:
+                require(m.get("published") is (m["phase"] == "PUBLISHED"), "TERMINAL_PUBLICATION_BINDING")
+                terminal = observed
+                break
+            require(m.get("phase") in ("IDLE", "CAPTURING"), "NATIVE_OUTCOME_UNKNOWN")
+            self.pause(min(0.25, max(0, deadline - self.now())))
+        if terminal is None:
+            # An unconfirmed screenshot is preserved once, never promoted to a pass.
+            observed = self.adapter.observe()
+            self.binding.check(observed)
+            self.screenshot("post", observed)
+            self.journal.save("outcome", {"status": "UNCONFIRMED", "reason": "TERMINAL_NOT_OBSERVED_IN_20_SECONDS", "noReplay": True})
+            return "UNCONFIRMED"
+        self.screenshot("post", terminal)  # No status scrolling/memory/export before this fsync.
+        self.journal.once("close", lambda: self.adapter.tap("close", before_dispatch=self.binding.check))
+        close_deadline = self.now() + 10
+        closed = False
+        while self.now() < close_deadline:
+            observed = self.adapter.observe(deadline=close_deadline)
+            m = observed["marker"]
+            require(m.get("run") == RUN and m.get("caseId") == self.binding.case and m.get("jobId") == self.binding.job and m.get("source") == self.binding.source and m.get("apk") == self.binding.apk and m.get("process") == self.binding.process and m.get("lifecycle") == self.binding.lifecycle, "CLOSE_BINDING_CHANGED")
+            if m.get("previewMounted") is False and m.get("idle") is True and m.get("busy") is False:
+                closed = True
+                break
+            self.pause(min(0.25, max(0, close_deadline - self.now())))
+        self.journal.save("outcome", {"status": terminal["marker"]["phase"], "postSaved": True, "previewCloseDispatched": True, "previewUnmountedObserved": closed, "physicalDrainProven": False, "cameraProofAccepted": False})
+        require(closed, "PREVIEW_CLOSE_UNVERIFIED_NO_FURTHER_ROW")
+        return terminal["marker"]["phase"]
+
+
+class PinnedAdb:
+    """Fixed own-app transport adapter. No installation, launch, export, reset or pairing."""
+    UI = "/data/local/tmp/p203-evidence-capture-ui.xml"
+
+    def __init__(self, packet_path, charter_path):
+        self.packet = load(packet_path)
+        self.charter = load(charter_path)
+        require(self.charter.get("executionApproved") is True and self.charter.get("packetSha256") == digest(Path(packet_path).read_bytes()), "REVIEWED_EXECUTION_PACKET_REQUIRED")
+        require(self.packet.get("run") == RUN and self.packet.get("case") in CASES and all(isinstance(self.packet.get(k), str) and re.fullmatch(r"[a-f0-9]{64}", self.packet[k]) and self.packet[k] != "0" * 64 for k in ("apk", "source")), "FROZEN_ARTIFACT_PINS_REQUIRED")
+        require(digest(PUMP.read_bytes()) == PUMP_SHA, "BOUNDED_TRANSPORT_CHANGED")
+        spec = importlib.util.spec_from_file_location("reviewed_p203_bounded_transport", PUMP)
+        self.transport = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.transport)
+        self.endpoint = self.transport.transport(self.charter["transport"])
+        self.pid = None
+        self.live()
+
+    def live(self):
+        lease = self.charter["lease"]
+        current = load(ROOT / ".agents/workflows/recognition-track-b.json", 1024 * 1024)["lease"]
+        now = datetime.datetime.now(datetime.timezone.utc)
+        require(current == lease and lease["holder"] == self.transport.HOLDER and now < datetime.datetime.fromisoformat(lease["expires_at"]) <= now + datetime.timedelta(hours=3), "CURRENT_EXECUTION_LEASE_REQUIRED")
+
+    def _run(self, args, cap=131072, deadline=None):
+        self.live()
+        expiry = (datetime.datetime.fromisoformat(self.charter["lease"]["expires_at"]) - datetime.datetime.now(datetime.timezone.utc)).total_seconds()
+        timeout = min(expiry, 20 if deadline is None else min(20, deadline - time.monotonic()))
+        require(timeout > 0, "OBSERVATION_DEADLINE")
+        chunks = []
+        rc, error, _ = self.transport._pump([self.transport.ADB, "-s", self.endpoint, *args], timeout, cap, chunks.append, {})
+        require(rc == 0 and not error.strip(), "ADB_REFUSAL_OR_UNKNOWN")
+        return b"".join(chunks)
+
+    def _own_focus(self, deadline=None):
+        # Reuse the exact previously reviewed single-line window observation.
+        raw = self._run(["shell", "dumpsys window | grep -E '^[[:space:]]*mCurrentFocus='"], 8192, deadline).decode()
+        matches = re.findall(r"\bu0 ([A-Za-z0-9_.]+)/", raw)
+        require(len(matches) == 1 and matches[0] == PKG, "OWN_FOREGROUND_REQUIRED")
+
+    def preflight(self):
+        p = self.packet
+        keys = ["ro.serialno", "ro.boot.serialno", "ro.product.model", "ro.build.version.sdk", "ro.product.cpu.abi"]
+        identity = {k: self._run(["shell", "getprop", k], 4096).decode().strip() for k in keys}
+        path = self._run(["shell", "pm", "path", PKG], 8192).decode().strip()
+        require(path.startswith("package:") and "\n" not in path, "ONE_APK")
+        path = path[8:]
+        require(re.fullmatch(r"/data/app/[A-Za-z0-9_~+=./-]+/base.apk", path) and "/" + PKG + "-" in path and ".." not in path, "APK_PATH")
+        checksum = self._run(["shell", "sha256sum", path], 8192).decode().split()
+        require(checksum == [p["apk"], path], "INSTALLED_EXACT_APK")
+        proof = self.transport.preflight_values(identity, self._run(["shell", "dumpsys", "package", PKG]).decode(), path, p["apk"], {"hardware": p["hardware"], "sandbox": p["sandbox"], "oldApkSha256": p["apk"]})
+        self.pid = self._run(["shell", "pidof", PKG], 4096).decode().strip()
+        require(re.fullmatch(r"[1-9][0-9]{0,8}", self.pid), "ONE_EXISTING_PROCESS")
+        return proof
+
+    def observe(self, deadline=None):
+        pid = self._run(["shell", "pidof", PKG], 4096, deadline).decode().strip()
+        require(self.pid is not None and pid == self.pid, "OWN_PROCESS_CHANGED_OR_EXITED")
+        self._own_focus(deadline)
+        self._run(["shell", "uiautomator", "dump", self.UI], 8192, deadline)
+        raw = self._run(["exec-out", "cat", self.UI], 131072, deadline)
+        require(b"<!DOCTYPE" not in raw and b"<!ENTITY" not in raw, "UI_XML_DECLARATION_REFUSED")
+        tree = ET.fromstring(raw)
+        marker = marker_from_tree(tree)
+        boxes = [n.get("bounds") for n in tree.iter("node") if n.get("package") == PKG and n.get("resource-id", "").split("/")[-1] == "orientation-viewport"]
+        require(len(boxes) == 1, "ONE_PHYSICAL_VIEWPORT")
+        match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", boxes[0])
+        require(match is not None, "VIEWPORT_BOUNDS")
+        left, top, right, bottom = map(int, match.groups())
+        require(0 <= left < right <= self.packet["displayPixels"][0] and 0 <= top < bottom <= self.packet["displayPixels"][1], "VIEWPORT_DISPLAY_BOUND")
+        self.tree = tree
+        return {"marker": marker, "viewport": dict(left=left, top=top, right=right, bottom=bottom)}
+
+    def tap(self, action, before_dispatch=None):
+        require(action in LABELS, "FIXED_OWN_ACTION")
+        observed = self.observe()
+        parents = {child: parent for parent in self.tree.iter() for child in parent}
+        points = set()
+        for node in self.tree.iter("node"):
+            if node.get("package") != PKG or node.get("text") != LABELS[action]:
+                continue
+            while node is not None and node.get("clickable") != "true":
+                node = parents.get(node)
+            if node is None or node.get("package") != PKG or node.get("enabled") != "true":
+                continue
+            m = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", node.get("bounds", ""))
+            require(m is not None, "OWN_CONTROL_BOUNDS")
+            left, top, right, bottom = map(int, m.groups())
+            require(0 <= left < right <= self.packet["displayPixels"][0] and 0 <= top < bottom <= self.packet["displayPixels"][1], "VISIBLE_OWN_CONTROL")
+            points.add(((left + right) // 2, (top + bottom) // 2))
+        require(len(points) == 1, "ONE_ENABLED_OWN_CONTROL")
+        x, y = next(iter(points))
+        self._own_focus()
+        if before_dispatch is not None:
+            before_dispatch(observed)
+        output = self._run(["shell", "input", "tap", str(x), str(y)], 8192)
+        return {"clientSettled": True, "responseSha256": digest(output), "nativeOutcomeNeedsObservation": True}
+
+    def screenshot(self):
+        require(self._run(["shell", "pidof", PKG], 4096).decode().strip() == self.pid, "OWN_PROCESS_CHANGED_OR_EXITED")
+        self._own_focus()
+        return self._run(["exec-out", "screencap", "-p"], 4 * 1024 * 1024)
+
+    def memory_sample(self):
+        """Outside the capture tail only; own package and aggregate fields, no app inventory."""
+        require(self.pid is not None, "PREFLIGHT_REQUIRED")
+        own = self._run(["shell", "dumpsys", "meminfo", PKG]).decode()
+        keep = ("TOTAL", "TOTAL PSS", "TOTAL RSS", "Java Heap:", "Native Heap:", "Graphics:", "EGL mtrack", "GL mtrack")
+        summary = [line.strip() for line in own.splitlines() if any(k in line for k in keep)]
+        raw = self._run(["shell", "cat", "/proc/meminfo"], 16384).decode()
+        aggregate = {}
+        for key, value in re.findall(r"^(MemTotal|MemAvailable|MemFree):\s+(\d+) kB$", raw, re.M):
+            aggregate[key + "KiB"] = int(value)
+        return {"ownPid": int(self.pid), "ownSummary": summary, "aggregate": aggregate, "missingFieldsAreNotZero": True}

@@ -1,0 +1,73 @@
+{
+  "version": 2,
+  "package": "expo-camera",
+  "packageVersion": "57.0.6",
+  "files": [
+    {
+      "path": "ExpoCameraView.kt",
+      "variants": [
+        {
+          "before": "614172f7567dcf2e71699db61b910d4a1b8e3d9c3dfb0b0beb085f8dbb4dbd10",
+          "after": "f2ee7cb749508f5fd5ca862175ca6dc21e922773f6c74c729a440bd654214b1c"
+        },
+        {
+          "before": "2d376e8d0325b8b324dd9c822c004db5bfe4c7e1f29ccb35ac72649f471445e6",
+          "after": "ee04fbfaae254141838fe0b8156cb166e148211eeff3f31af20431974e7e90bd"
+        }
+      ]
+    },
+    {
+      "path": "CameraViewModule.kt",
+      "variants": [
+        {
+          "before": "0aee230cb5709770aded06b2f3b99655857876233cc376279529bbccaae54afd",
+          "after": "f1c548907cfa0eb90c4f5fd8e782051b3c00b4806ba84234cd928d518f6b0a01"
+        },
+        {
+          "before": "b0f647fd3453d11e0e1ce91bea36d17505e04e30753eafa70193ae1b2b68de14",
+          "after": "469329b7ed72c9f7e502ddb868d76c9bf51e825e2ea688cc4c7d73750346dd4d"
+        }
+      ]
+    },
+    {
+      "path": "Options.kt",
+      "variants": [
+        {
+          "before": "c05dc9b72eaf887652ffc8b68b6a0dffffafd7f52088e8204c3c2a80cb9f6db9",
+          "after": "e38285898f6559fa157a8896717f71369e0bc1aeda01b226c73f91c45d31873a"
+        }
+      ]
+    },
+    {
+      "path": "tasks/ResolveTakenPicture.kt",
+      "variants": [
+        {
+          "before": "4bf1d61c55c8a19b938e8553a1c50bfcbc2713a9894454fb7053a4aa01e59286",
+          "after": "070ef74911951b6be93922ce35ee4cc622607eb6e36d0ac996c97abed3b39d73"
+        }
+      ]
+    }
+  ],
+  "templates": [
+    {
+      "path": "CosiSameFrame.kt",
+      "sha256": "bca1be6dc6e0791c2acc79f5b23d106390c717b9e2042c7e017a332f6a40b793"
+    },
+    {
+      "path": "CosiImageOwnership.kt",
+      "sha256": "70b7821814f79ffc3ccccc71ec37b63d15df93d0252224d69c070f864a2770f4"
+    },
+    {
+      "path": "CosiGeometryRegistry.kt",
+      "sha256": "20c16c995841f3c3e4aa9845b0b2d1023adf278aa933868367583d074d40e801"
+    },
+    {
+      "path": "CosiViewMembers.kt.txt",
+      "sha256": "3e91f2b60a1b4273a811cd82fa1baf141909e9c42097c47922383d5dca338579"
+    },
+    {
+      "path": "CosiPreviewReadiness.kt",
+      "sha256": "4bad2ab7c9609946ae0d19d6d2b37db357b969b58606fe5fbc67e1db384c73ef"
+    }
+  ]
+}

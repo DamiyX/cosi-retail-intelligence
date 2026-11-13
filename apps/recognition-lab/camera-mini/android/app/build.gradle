@@ -1,0 +1,23 @@
+plugins { id 'com.android.application' }
+def sourcePin = providers.gradleProperty('sourceSha').getOrElse('')
+def signerPin = 'fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c'
+if (!(sourcePin ==~ /[a-f0-9]{64}/)) throw new GradleException('Explicit frozen sourceSha required')
+android {
+ namespace 'local.cameraprobe'
+ compileSdk 36
+ buildToolsVersion '36.0.0'
+ ndkVersion '27.1.12297006'
+ defaultConfig {
+  applicationId 'com.damiyx.retailintelligence.cameracomponentprobe'
+  minSdk 30; targetSdk 36; versionCode 1; versionName '0.2-candidate'
+  ndk { abiFilters 'arm64-v8a' }
+  buildConfigField 'String', 'SOURCE_SHA', '"'+sourcePin+'"'
+  buildConfigField 'String', 'SIGNER_SHA', '"'+signerPin+'"'
+ }
+ signingConfigs { reviewedLab { storeFile file('C:/Users/doyew/.cache/cosi-p203-collector-c2-a1/x/apps/mobile/android/app/debug.keystore'); storePassword 'android'; keyAlias 'androiddebugkey'; keyPassword 'android' } }
+ buildTypes { release { minifyEnabled true; shrinkResources true; signingConfig signingConfigs.reviewedLab; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),'proguard-rules.pro' } }
+ buildFeatures { buildConfig true }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+dependencies { implementation project(':camera-component'); implementation 'androidx.activity:activity:1.8.0' }
+dependencyLocking { lockAllConfigurations() }

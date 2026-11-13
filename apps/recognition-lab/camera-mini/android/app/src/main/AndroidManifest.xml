@@ -1,0 +1,13 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+ <uses-permission android:name="android.permission.CAMERA"/>
+ <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove"/>
+ <uses-permission android:name="android.permission.INTERNET" tools:node="remove"/>
+ <application android:name=".ProbeApplication" android:allowBackup="false" android:label="Camera Component Probe" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+  <activity android:name=".ProbeActivity" android:screenOrientation="portrait" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity>
+  <provider android:name="androidx.startup.InitializationProvider" android:authorities="${applicationId}.androidx-startup" tools:node="merge">
+   <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer" tools:node="remove"/>
+   <meta-data android:name="androidx.profileinstaller.ProfileInstallerInitializer" tools:node="remove"/>
+  </provider>
+  <receiver android:name="androidx.profileinstaller.ProfileInstallReceiver" tools:node="remove"/>
+ </application>
+</manifest>

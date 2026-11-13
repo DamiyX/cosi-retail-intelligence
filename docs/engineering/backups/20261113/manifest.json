@@ -1,0 +1,3342 @@
+{
+  "label": "m8-working-copy",
+  "branch": "plan/m8-unified-scanner",
+  "head": "374286dd87e22703ea90f1cd7a978020e32a8903",
+  "staged_paths": [],
+  "files": [
+    {
+      "path": ".agents/contexts/project-context.md",
+      "status": " M",
+      "bytes": 11359,
+      "sha256": "779059e86170c55714c23c96193b9e121ab098a41ed360aa1378dbb482e3d579"
+    },
+    {
+      "path": ".agents/workflows/index.json",
+      "status": " M",
+      "bytes": 859,
+      "sha256": "d5000e5354fce2eded2082190f1117a1fafcd0cc8a8207a655730d95e2ec90c5"
+    },
+    {
+      "path": ".agents/workflows/recognition-track-b.json",
+      "status": " M",
+      "bytes": 138348,
+      "sha256": "d1c9081f175ca24cd216353f3f51275e5217c7137ad451ecb824f0765aa91bb2"
+    },
+    {
+      "path": ".gitignore",
+      "status": " M",
+      "bytes": 1167,
+      "sha256": "98d18440aee1b5bb86aaff68829daeb058bd2506558ffbceaf4e52f82385077f"
+    },
+    {
+      "path": "AGENTS.md",
+      "status": " M",
+      "bytes": 17242,
+      "sha256": "791b36ea588076cce321ceed6b7675221e9eec2138f62e175bbbdc9d37b2c9ff"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraProof.test.ts",
+      "status": " M",
+      "bytes": 10651,
+      "sha256": "874b742f3ce7b136d85fea090b9de379c6bccf3d363fa75773b40e557dd98352"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraProofUi.test.tsx",
+      "status": " M",
+      "bytes": 16832,
+      "sha256": "383c1e05ff36540bfa97652c5dcf9b85edbbe2ade04f7f4ca81d732030d01d19"
+    },
+    {
+      "path": "apps/mobile/app.config.ts",
+      "status": " M",
+      "bytes": 4374,
+      "sha256": "29e7fe89289821f2f5d11bbc80184792179f3d474f6a5586880689272fe28628"
+    },
+    {
+      "path": "apps/mobile/plugins/withRecognitionExperiment.js",
+      "status": " M",
+      "bytes": 11620,
+      "sha256": "26c9533bd114123e2a593461738d3a776ba1bbbddee62967f7d9ddaf03274d3d"
+    },
+    {
+      "path": "apps/mobile/recognition-entry.js",
+      "status": " M",
+      "bytes": 560,
+      "sha256": "9c70a9165ee8b5463772a7b08932211d38ae818c7ccc44f4725fa27ffa8dd197"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/build.gradle",
+      "status": " M",
+      "bytes": 4370,
+      "sha256": "f8897e740ac01e01520963ff627585ea48b819a4584fbde87ae9ff85b435d287"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/build.gradle",
+      "status": " M",
+      "bytes": 1381,
+      "sha256": "9e84137ed89363699211cb6660cb19f1bf0a30194c2be1c9497be9d78af22777"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraProofAndroid.java",
+      "status": " M",
+      "bytes": 18407,
+      "sha256": "eff3e9a491aaf9277f34119f8c5a9b5bdbd0b51fc765867917e681c1c49f2613"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraProofFiles.java",
+      "status": " M",
+      "bytes": 19474,
+      "sha256": "f6537e4e05cd3e29a348cdb721f8ecf5ebd9f6677b0ced57d7e196b9fb754cdf"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraProofFinalizer.java",
+      "status": " M",
+      "bytes": 5767,
+      "sha256": "20d25979aa2d817a1d1c3a3169ec4523f46b9ffd27af26d045d40056379986b1"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraProofStore.java",
+      "status": " M",
+      "bytes": 29930,
+      "sha256": "232584c3932f3563a7ced5b6f83cce32cd2afb22e37899407d8ac24a191f03c7"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraProofChecks.java",
+      "status": " M",
+      "bytes": 20101,
+      "sha256": "fe37ce1084d7a083e171f22a5864acfb087f460d17fcb1c463f93a6f0a40e4be"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraProofFinalizationChecks.java",
+      "status": " M",
+      "bytes": 16523,
+      "sha256": "c4548004d0b4dd86050f7a9ba2d5f770bf0919a7aeb2a1c5a86287aeacaf84eb"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/main/AndroidManifest.xml",
+      "status": " M",
+      "bytes": 980,
+      "sha256": "e81be66bb9e061c8bc49b46913e722006cb8a24e7563e8b9a43da3813dfaadeb"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/main/java/expo/modules/recognitionexperiment/RecognitionExperimentModule.kt",
+      "status": " M",
+      "bytes": 59488,
+      "sha256": "41ef2188050a253f939a788ca8c68909e567b93bd0f96f1b4f5c757651d67fe0"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/CameraProofPanel.tsx",
+      "status": " M",
+      "bytes": 29924,
+      "sha256": "64665ed902aca4c952157ec15b2bb8ecacdcff3d06032c7ca2334f9d58911f9e"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/ExperimentRoot.tsx",
+      "status": " M",
+      "bytes": 10307,
+      "sha256": "2a44b1dcdabccc49d1bf62c2a384d3bfe38e77a9cfe441754fc09e8dc91ca8ac"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/cameraProof.ts",
+      "status": " M",
+      "bytes": 12433,
+      "sha256": "bb8fd10cadc3c198ca53b76321ee5139fa0cd850290b6b03f468b9af888259b2"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/nativeAdapter.ts",
+      "status": " M",
+      "bytes": 11350,
+      "sha256": "da920161b500e223b9f649c629ab9cdec627a50d06924044603874060e9b2c0e"
+    },
+    {
+      "path": "docs/decisions/DECISION_LOG.md",
+      "status": " M",
+      "bytes": 135296,
+      "sha256": "5ed0cdf640cd67b0a372469a2c0e9c61f9083c340b4049b48bfc515bcc247dec"
+    },
+    {
+      "path": "docs/engineering/MULTI_AGENT_WORKFLOW.md",
+      "status": " M",
+      "bytes": 28189,
+      "sha256": "5ebe034726475ed6b69ac97ae1dc1c950743cc84ba026aeaac8703eaac2c90dc"
+    },
+    {
+      "path": "docs/engineering/PROJECT_STATE.md",
+      "status": " M",
+      "bytes": 43624,
+      "sha256": "b4879bf8b151180c682c240b329d6d3e95f19b7821cc1f465513c0271e9e58f3"
+    },
+    {
+      "path": "docs/product/PRODUCT_CHANGE_BACKLOG.md",
+      "status": " M",
+      "bytes": 47584,
+      "sha256": "4023b520116cf9b6484d97650f750c648e0cecd7502af13199d3b16f11bebfcf"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_TICKETS_20261014.md",
+      "status": " M",
+      "bytes": 13531,
+      "sha256": "e28db3755c85f92134b6415fd3642d80e3b1e1a8bb6a9bc1d0f12361e50abe2f"
+    },
+    {
+      "path": "apps/mobile/__tests__/enrollmentReadDiagnostic.test.tsx",
+      "status": "??",
+      "bytes": 4835,
+      "sha256": "69204a1f4d109743765ebd0ad4cc8826c706c6198fc38219ed1338737907aed8"
+    },
+    {
+      "path": "apps/mobile/__tests__/enrollmentReportCompletion.test.ts",
+      "status": "??",
+      "bytes": 5634,
+      "sha256": "4ddbf0c38f721a66eec6df3b224a7a794776d456c4d55e1ad8b011ef10d1e45d"
+    },
+    {
+      "path": "apps/mobile/__tests__/enrollmentT3.test.ts",
+      "status": "??",
+      "bytes": 5278,
+      "sha256": "c1ebe339ad8ac071011d3a6e4852400860dc8e2f591ec45c341da877256c07af"
+    },
+    {
+      "path": "apps/mobile/__tests__/initializationRecovery.test.tsx",
+      "status": "??",
+      "bytes": 5991,
+      "sha256": "cc650af54c404d7f583cca9eba476aaa2489036c68669b4317c01131abbd1a12"
+    },
+    {
+      "path": "apps/mobile/__tests__/observedEnrollment.test.tsx",
+      "status": "??",
+      "bytes": 9891,
+      "sha256": "180a7d1e9f67a19a7c700b4a6eb79d4c0758bca4d5d1dbd54cabe8b8e9c0dd39"
+    },
+    {
+      "path": "apps/mobile/__tests__/observedEnrollmentEntry.test.tsx",
+      "status": "??",
+      "bytes": 14968,
+      "sha256": "b167327365b88164cc3bed171455932bcc85c5fe11c8629fa6a76209c8780300"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraEvidenceExport.test.ts",
+      "status": "??",
+      "bytes": 1782,
+      "sha256": "75a77edead54129af150c86df010739ed21a0601df3d56208cb71a0b427faacb"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraMatrixProof.test.ts",
+      "status": "??",
+      "bytes": 9499,
+      "sha256": "d2c4b00e19192e2d7d202c2df845d68a8275444f061d95c8a2104abc834778ae"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraMatrixProofUi.test.tsx",
+      "status": "??",
+      "bytes": 4636,
+      "sha256": "b7da0a1e30dea7d136924eab4aa5a37e0dc2515b2cc9d58c91349da7b4e5200a"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraMatrixRecovery.test.ts",
+      "status": "??",
+      "bytes": 639,
+      "sha256": "d146f4f6d9f2cb217cd558a11561afb2c42e1439f478ed174af2babc8526bd3f"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraMatrixRecoveryUi.test.tsx",
+      "status": "??",
+      "bytes": 2950,
+      "sha256": "2c4f39d94626661366db281b0fc76be138abe4fc19f7d41ba728401ae7390217"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraOrientation.test.ts",
+      "status": "??",
+      "bytes": 9315,
+      "sha256": "bf982054a2193b0f0dd39a608e6ac16930c63ce069da7b31b7705e0a7097a33c"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraOrientationEvidenceUi.test.tsx",
+      "status": "??",
+      "bytes": 17843,
+      "sha256": "f56b64efd4e2d43dcfb84ce1d176b3d1b7298d5f10e0c049b82b8eb102813f1c"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraOrientationReadiness.test.tsx",
+      "status": "??",
+      "bytes": 9911,
+      "sha256": "ccb5e60fd3f64f8e686b206a184f99eefae7ea487de3832dd79314c42a924ece"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraOrientationRepeatProfile.test.ts",
+      "status": "??",
+      "bytes": 1464,
+      "sha256": "3529f553ba92b0104b9bfc8c40084b4a0421ee10bcf277364c2a22b5d24ad748"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraOrientationStartup.test.js",
+      "status": "??",
+      "bytes": 9403,
+      "sha256": "62a5aad7623916d4491985464a5605263c870abde2e96a5ae6e1a33efcfb874c"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraOrientationUi.test.tsx",
+      "status": "??",
+      "bytes": 3785,
+      "sha256": "a0414c0a908fe0004fedf9343f5856b2655de3e1aac151737fe7ba21293de5a6"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentCameraStationary.test.ts",
+      "status": "??",
+      "bytes": 3805,
+      "sha256": "07d5617fa09f927a256c52a8dac0c2948b711a2fea93660836680e31e7dcbf21"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentComponentIntegration.test.ts",
+      "status": "??",
+      "bytes": 3016,
+      "sha256": "c74d62a1b1ae255c3210c60a1cc60078b4bf5d17a9886c9a088ea4e61aaf6301"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentGraphicsEntryUi.test.tsx",
+      "status": "??",
+      "bytes": 2691,
+      "sha256": "4368538507334913bb007a6a8313482e0003203e970fbf05bf27c3d31cfe3b51"
+    },
+    {
+      "path": "apps/mobile/__tests__/recognitionExperimentSetupMetadataUi.test.tsx",
+      "status": "??",
+      "bytes": 2824,
+      "sha256": "dd1c637e9a3f9f81ac1942189f2a3dd3ebdf797f0aa549447ad582c8257315ea"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/consumer-rules.pro",
+      "status": "??",
+      "bytes": 508,
+      "sha256": "271b2039495f5eb39f4e303c539d9e2e369c344239416a2216507e4049a6ac6c"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/CameraBatchSlots.java",
+      "status": "??",
+      "bytes": 528,
+      "sha256": "1cb93d51689027246f2856a80dff324769104d1fb62fed28a49cb7db7e5ad4f5"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/CameraIntegrationDisk.java",
+      "status": "??",
+      "bytes": 14538,
+      "sha256": "eee093d8f9e21f31dbf062c4830267bfdb1a0c3abf80810d0006dc95578d2f7e"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/CameraIntegrationLease.java",
+      "status": "??",
+      "bytes": 7076,
+      "sha256": "36ec68fbca5e9574756f9fb009edc6685185dd1c7d72ed5bb8be2ec58f1557e1"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/CameraIntegrationNamespace.java",
+      "status": "??",
+      "bytes": 1670,
+      "sha256": "045f6cdcf1614bc19f59c5a95e95d8ea2db1378f7fd83949db77805338999369"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/CameraIntegrationOwner.java",
+      "status": "??",
+      "bytes": 12254,
+      "sha256": "0d52a10f31c5aab0eb79876fb671304afdd368f32c48de912eb10bbf56fa1ae2"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentAccounting.java",
+      "status": "??",
+      "bytes": 7641,
+      "sha256": "b334a0b50a17db6a8483ed5042a251262f1309c090b59f352c38d558e8f54d56"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentBarcodeSession.java",
+      "status": "??",
+      "bytes": 5782,
+      "sha256": "a024f19015c87d1986058991f1f4132222b9e52f8f85987fb30f28fbd16d181b"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentControl.java",
+      "status": "??",
+      "bytes": 11059,
+      "sha256": "b1eec584e6450d8d5f0a6f210de1d189b19314d288fc69be54cf6d30469662bd"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentDescriptor.java",
+      "status": "??",
+      "bytes": 4181,
+      "sha256": "b3cb9bc18e0172c3ddccc5f4f05fb25b242ca285d9034387bca5200f8b9a2c93"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentDisk.java",
+      "status": "??",
+      "bytes": 12744,
+      "sha256": "1a4736c371dac57161e07347faa19ad30e822882306627c8abce89bbfc55bed9"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentDrain.java",
+      "status": "??",
+      "bytes": 686,
+      "sha256": "7c46b93231ededc6e52429ccfaacf68600f135ec0ae1441b729ca04a1c0106b8"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentEvidence.java",
+      "status": "??",
+      "bytes": 4805,
+      "sha256": "92b8f5449c7114b12949b20a1da35f4ce7f804b685f01dcc007edd6c697a938e"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentExportMetadata.java",
+      "status": "??",
+      "bytes": 2065,
+      "sha256": "6b5a2a96fe449c9a4be2c9a7b0823147abe9e1d277312c2ae77aabdde19515f6"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentGate.java",
+      "status": "??",
+      "bytes": 3763,
+      "sha256": "9acd085ec1197a35e9bc192bf72130106197ae5ab48a6638caaf7731c29d0ac2"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentIdentity.java",
+      "status": "??",
+      "bytes": 965,
+      "sha256": "acfd2c0fda505864eb377529729116b9f1ca5a42f846a7556ad5e1aa3ae08c67"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentInitialization.java",
+      "status": "??",
+      "bytes": 9757,
+      "sha256": "9b022318c470865b7c4b50719dc6c35aee109e868a88f907ed9b3327aea8a079"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentInitializationDisk.java",
+      "status": "??",
+      "bytes": 9889,
+      "sha256": "b3184ef3131a45ee1478c8a2e80eb8e0c43b9f33f386528e3819b278bcdb8c27"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentOwner.java",
+      "status": "??",
+      "bytes": 26779,
+      "sha256": "c3c95b59e9d9b04d22c1f0c319995841cc6bcacdbb0484fbcb65e30fceab51ea"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentProofInventory.java",
+      "status": "??",
+      "bytes": 6582,
+      "sha256": "b44fe0aa7e6aa089c1ed9eef2680a835c83a6f9e4db26733742aa83fea39b7af"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReadAdapter.java",
+      "status": "??",
+      "bytes": 12382,
+      "sha256": "c9f297554f9f9f70a17fc9a8a4962f9a9d1810eebee4b45fd48ccf078af61a46"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReadBinding.java",
+      "status": "??",
+      "bytes": 4116,
+      "sha256": "f68ce00415fcbf55230873ca44a6999a25f9c101a2b7d02976e2399633fd18e0"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReadBytes.java",
+      "status": "??",
+      "bytes": 979,
+      "sha256": "6e8888f01ee4543bc52377ab509dcc64d4341da97217bbab307037a7e5197455"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReadDiagnostic.java",
+      "status": "??",
+      "bytes": 5491,
+      "sha256": "9e30415a43843f9d97ca5d955f728207a1aa44b87533fcb56b7839812940e28f"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReadProbe.java",
+      "status": "??",
+      "bytes": 2545,
+      "sha256": "e5fd62c72a7fe8acc1b0340896180434792c0c0848d888235c4bafe564027c21"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReadState.java",
+      "status": "??",
+      "bytes": 1229,
+      "sha256": "e289f5df0f69fe013aba782fba31c08d9ec07e1458edaf59df2bdbedc30d64ce"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReferenceCompatibility.java",
+      "status": "??",
+      "bytes": 2407,
+      "sha256": "b0fb81f2b5801b2c10c9c41c46e69b0e08d46e4aac1238a8746234fd88d4a6fc"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReportBudget.java",
+      "status": "??",
+      "bytes": 2028,
+      "sha256": "1782fe94ea911575353812455e4711b62f425704a749af36cd3cc161cf5aa1f0"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReportDecision.java",
+      "status": "??",
+      "bytes": 9468,
+      "sha256": "b73219d32f6e75273f35b0d875ccb08abd70e40cddbf8a35d86b96c427af77b9"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReportPurpose.java",
+      "status": "??",
+      "bytes": 1864,
+      "sha256": "033dce9ffe7d6e28c9db7d78407e01e21d820b3ad5fe830191dd34e2b7f6b91e"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReportReadback.java",
+      "status": "??",
+      "bytes": 2985,
+      "sha256": "1a817da54f23e621ddedcac8bfb7994f5e8f9e4b30f9acc555475b0b28a52738"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReportRecords.java",
+      "status": "??",
+      "bytes": 3881,
+      "sha256": "a4f6995f1339854dee1523298e437a77f41e57bb8ead5bbc5f4ee483a8a1a825"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReportTransfer.java",
+      "status": "??",
+      "bytes": 18692,
+      "sha256": "d8b59fc7b9a021b439bee169d3407bddb6622d9ee51de1b5574e2a4a1209d998"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentReports.java",
+      "status": "??",
+      "bytes": 15969,
+      "sha256": "5983615eeaa63ab6e58c9c62a34a4178ec7cc53c01886451bac11d7c930bae35"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentRootRegistry.java",
+      "status": "??",
+      "bytes": 13370,
+      "sha256": "d21b8892a906ad1d07338dda268a99d6a796dac00914f2e8bf87a6104217ceeb"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentStore.java",
+      "status": "??",
+      "bytes": 6694,
+      "sha256": "c4c03fef940f87bfd23d21f5ac0d9875c87ab96b5bca88d508c345350342d6a9"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentTransferDiagnostic.java",
+      "status": "??",
+      "bytes": 7366,
+      "sha256": "d170f3b5ac8951a25a242a1d55d64298845712ef0b5de4221d27907674e5b128"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentTransferPolicy.java",
+      "status": "??",
+      "bytes": 1001,
+      "sha256": "db3a93827ce21adf5340b7a6d3bb16ea29ea01af1dab71e296f0401e19f0f06d"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/EnrollmentTransferState.java",
+      "status": "??",
+      "bytes": 1257,
+      "sha256": "c54f72441243bd61e489fc063e4f45aa75d1fecdba4f86aeaf2ecac49fbe5359"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/ObservedEnrollment.java",
+      "status": "??",
+      "bytes": 17099,
+      "sha256": "bf93319344e4851a30601ae67d86180242a2992fdb219f25f7fae5374223a986"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/integration/java/expo/modules/recognitioncpu/RetainedI00Policy.java",
+      "status": "??",
+      "bytes": 8872,
+      "sha256": "df45798ed92016b049d3774a019a2bafa6c127f6b6b66c4d14cf5009050e9fa5"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/cpp/CMakeLists.txt",
+      "status": "??",
+      "bytes": 415,
+      "sha256": "e61d2bbc64cbe183ed080e9201194bf25ce104de0c616e53911f5035c2ec2bbb"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/cpp/camera_proof_publish.c",
+      "status": "??",
+      "bytes": 12007,
+      "sha256": "aa0f83223c3dfd38de19038bf7e29f87564a9ced7f0d6bd283fa49dfa732ec7d"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticDelivery.java",
+      "status": "??",
+      "bytes": 1664,
+      "sha256": "1ce8b950bbbc2b2ad6f9e99abfd392a947d92d9006867941c83ce8529da984ce"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticProfile.java",
+      "status": "??",
+      "bytes": 1613,
+      "sha256": "c20b024790732bc2a6c7fa8323e0527ee23c00db90d68396eaf4bab7186c494e"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticReservation.java",
+      "status": "??",
+      "bytes": 770,
+      "sha256": "226593fec2bbc3cba184a2f4a15d9acbbc21c6a8dd7cf3fded1d0dcb1e7f80fb"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticSession.java",
+      "status": "??",
+      "bytes": 4927,
+      "sha256": "c9b878803bf439db140df026fa06dfe016355fab2c2c5d09e0f402926bc135f3"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticSetup.java",
+      "status": "??",
+      "bytes": 7216,
+      "sha256": "88166ef417aa9bc28a892f7f9b32b27746b965dbfa09ec148ba87cf7c864d076"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticSetupSnapshot.java",
+      "status": "??",
+      "bytes": 6034,
+      "sha256": "5827576628c2cb15d883361d142e09530c1c89f1c67dfa100707de7dbbb6f33b"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticSnapshot.java",
+      "status": "??",
+      "bytes": 6127,
+      "sha256": "f35ff4a60d676493fe3911324bf7f43affd5114f34a352b5e030f063f2ffa33c"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticSource.java",
+      "status": "??",
+      "bytes": 269,
+      "sha256": "3a597e5052eed4f1184b3d77a0413dd494a54163a99a5b0f1b9267d8670c7d4f"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraDirectoryPath.java",
+      "status": "??",
+      "bytes": 860,
+      "sha256": "b0a2aeb22966fb258cb8938836a7129939cc094c560496730765385a2ca20ae6"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraEvidenceAndroid.java",
+      "status": "??",
+      "bytes": 4537,
+      "sha256": "eb7980f6d331d6691be172f22e5ece5b394a48ab021f0172921b547f32bd3969"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraEvidenceC9.java",
+      "status": "??",
+      "bytes": 4858,
+      "sha256": "6a3d35e98f7fa75c768d5f3a7c93c5e7fb6dfc908e2245df9ea933a19d96a839"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraEvidenceExport.java",
+      "status": "??",
+      "bytes": 8913,
+      "sha256": "820119084f333eb074501b50778fb3a5ccbb3a33a3a02c937851b4c957a22124"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraEvidenceExportSource.java",
+      "status": "??",
+      "bytes": 332,
+      "sha256": "97ae67ac939d733d07f25121924697c793ca114dc34be7dd25cbc6535d16bb8c"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraEvidenceJournal.java",
+      "status": "??",
+      "bytes": 1766,
+      "sha256": "7fb977fdbec844375907279f3d25d85c85ff3c9a61e3c551f202ef283f2f3b7f"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraEvidenceSession.java",
+      "status": "??",
+      "bytes": 3065,
+      "sha256": "55c352d0f54ccf58ddbd3379f94039e2744fdaa485a1b146d5bb3d81b294bb97"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraMatrixAndroid.java",
+      "status": "??",
+      "bytes": 8953,
+      "sha256": "6994b5b64c1a9bb243ac4ba878a0587b3851df9f56d4f4092fd6a5b5dccb2626"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraMatrixEvidence.java",
+      "status": "??",
+      "bytes": 10813,
+      "sha256": "636fffb20e2f7e174b0b1b59b3d201f7e972ca39b2484d55ef32a85e659c0faf"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraMatrixFixtureLifecycle.java",
+      "status": "??",
+      "bytes": 8853,
+      "sha256": "8df092c1a921ddc690393ddcd6cd7690fa0cf13c66ba4676346e73b6211e7b57"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraMatrixHistoricalReader.java",
+      "status": "??",
+      "bytes": 6629,
+      "sha256": "ee8ef91a8f3fdbfd1e43411cc6e03892319ab5208658dbf5c9525d9202de75d4"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraMatrixPlan.java",
+      "status": "??",
+      "bytes": 8777,
+      "sha256": "3bb49b4dc7e0f50993b413e0c296262389bf83879f495f099e3aabb48a84f614"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraMatrixRecoveryAndroid.java",
+      "status": "??",
+      "bytes": 19468,
+      "sha256": "371dcad23a082c0de2012de775971d7ef840917cd21022660d07787c0256f1cb"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraMatrixRecoveryEngine.java",
+      "status": "??",
+      "bytes": 6863,
+      "sha256": "480a5da37d3cce746d7753ae69fbafe91bb974d8bb23c4dfb7a5f58314d97348"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraMatrixRecoveryPlan.java",
+      "status": "??",
+      "bytes": 9450,
+      "sha256": "811be4794845360dce7a1cd774b5df4fc023981ea3a47da784950b2d11f308ae"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraMatrixRecoverySource.java",
+      "status": "??",
+      "bytes": 311,
+      "sha256": "47c3e9134b33dd45a09f3eb80b8f79690e6295e0456f9901758cf223ec1bcf33"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraMatrixRecoveryStore.java",
+      "status": "??",
+      "bytes": 11827,
+      "sha256": "b09237e843a81349292d561c8c183e8f02d0ca110eccae0cafac05a071f05724"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraMatrixSource.java",
+      "status": "??",
+      "bytes": 283,
+      "sha256": "d25300b75d508ae22ca5aec98eabfc3030643ae801ea32dc050ac37216080e42"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraMatrixStore.java",
+      "status": "??",
+      "bytes": 12892,
+      "sha256": "c761d9f06bff0701c542549eb4423ae9f38808740e70ff099074c1ae78f58f7b"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationAndroid.java",
+      "status": "??",
+      "bytes": 5793,
+      "sha256": "0da7332250073786461c8cdc5245e3840365ad5ca5a795283d2651c9fbba61db"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationArchive.java",
+      "status": "??",
+      "bytes": 10292,
+      "sha256": "442551ebfcd64b94a48cfc682fd679d1bbd88a6c5ef32dc9238ecc99e572dfe9"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationAttestation.java",
+      "status": "??",
+      "bytes": 1084,
+      "sha256": "f51e966e57f5ccdd136da756a124fa5837cf9ce6501829afdbd292aa4ecb7c50"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationErrors.java",
+      "status": "??",
+      "bytes": 885,
+      "sha256": "d13061bad896c11c5fdf973bc50cab973cd2cad6802f6d756e0a1338bd2b4cc5"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationEvidenceRetained.java",
+      "status": "??",
+      "bytes": 4842,
+      "sha256": "d1661de4dac62e16126a985afb8bb04dbd04b7fda167b8081f6f48afb8a18fd4"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationExportAndroid.java",
+      "status": "??",
+      "bytes": 12271,
+      "sha256": "a78630362bb6cfea3e0e3550ac203ab288a10510b43146e4e10a88e8734c2b24"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationFiles.java",
+      "status": "??",
+      "bytes": 9550,
+      "sha256": "1c33440c3ba444d963624dc6f738a3b9995e99790fba45bd20f0e938f767a047"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationFixture.java",
+      "status": "??",
+      "bytes": 2606,
+      "sha256": "1c03992815ee9db2438e0842751dcfc08c05b9830472603a43d2053345257a3d"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationGeometry.java",
+      "status": "??",
+      "bytes": 6165,
+      "sha256": "bb5ba5498859dddce679ed951004baa3a8d76e9002b69e57b6f62160a3760708"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationPlan.java",
+      "status": "??",
+      "bytes": 2264,
+      "sha256": "548fc3f64fb9ee6bcc83ac759abd1f578c2157adad7c606755dfa6c0129a62d5"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationPreviewRetained.java",
+      "status": "??",
+      "bytes": 6021,
+      "sha256": "6dcdc8360806f4f11f8ea032942886646980dae844a227df8d667b4238e2bcbf"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationReader.java",
+      "status": "??",
+      "bytes": 3628,
+      "sha256": "71912ebe6fd43c845cd36d928200563a5a373cd173f55aca444a34faa11f247f"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationReadinessRetained.java",
+      "status": "??",
+      "bytes": 4989,
+      "sha256": "5e7bca12df1f49577a2a6ed47bdeb462e8ae4a45ce161d206f9fd07f17c9bf73"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationRepeatRetained.java",
+      "status": "??",
+      "bytes": 10900,
+      "sha256": "e12c058ef61a2ed14e22b0afa20a66e343573f670f3f535f1d1de3d2d5d861cb"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationRepeatSetupRetained.java",
+      "status": "??",
+      "bytes": 5905,
+      "sha256": "d40e410544fbbcf0beb3256d70e015bfb96615f72b684d363278e6c681f65e38"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationResultBinding.java",
+      "status": "??",
+      "bytes": 2084,
+      "sha256": "e563d04a8f851892ba31541a6f87fa9182dbee77ada521d6153aaf16a5de8f70"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationRetained.java",
+      "status": "??",
+      "bytes": 4691,
+      "sha256": "3a997e64c9a943eaf1275465ad85a2fca5cd7c9675f273a93fb94a5694ec8dc5"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationSource.java",
+      "status": "??",
+      "bytes": 328,
+      "sha256": "9467a980594ca2d3cc618ab5bafcc609e1fdc15ee3031e095b796fb41aeb4b0a"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationStore.java",
+      "status": "??",
+      "bytes": 8696,
+      "sha256": "2ab8e1c95337e49e6d2ec6d855840b6463b5871191366c01b1efe47e0461e60e"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraOrientationUiRetained.java",
+      "status": "??",
+      "bytes": 5987,
+      "sha256": "c12e2f6f29e1cc7ac17c3eb47ed3f943408f3a6e3ba2b7e16f6e8920f93e9d8a"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraProofRename.java",
+      "status": "??",
+      "bytes": 1896,
+      "sha256": "7efdcd2bc0be866d16b0f2e9342beee7ba092509fe0f6e2c5c1cbe0cc8bdb8f1"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraStationaryAndroid.java",
+      "status": "??",
+      "bytes": 6531,
+      "sha256": "18ddf34b4a9cd43e11bfd1e1be0951defa9c8ebdd531dd87ec649da566905d34"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraStationarySlot.java",
+      "status": "??",
+      "bytes": 14646,
+      "sha256": "d8bb0f0c4daa87b9b896357891ae56d617db4b9d9361660d6db13261bf323563"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/CameraStationarySource.java",
+      "status": "??",
+      "bytes": 306,
+      "sha256": "9ef681d1069911952661ea351fb2ca72f7755e5ccedc3b01d67577018ef56bfa"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/GraphicsAdmissionTrace.java",
+      "status": "??",
+      "bytes": 2802,
+      "sha256": "89e7bbca36df09161811bd506f1167746a6ccfb461db4aa49e3427ad6a74fc36"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/GraphicsEntryProtocol.java",
+      "status": "??",
+      "bytes": 2498,
+      "sha256": "f1e0bfce89502f3ee4105656f92e6a901e7ef377c17ca5ebedc70b8d26d75c8d"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/main/java/expo/modules/recognitioncpu/GraphicsEntryRetained.java",
+      "status": "??",
+      "bytes": 1621,
+      "sha256": "85becb7bec0b571129f2716ecf6e1a1344e2cf5edd2964053d2875ab8954100b"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticChecks.java",
+      "status": "??",
+      "bytes": 4006,
+      "sha256": "76bffdc464fe4d646dee3d5bbd7f255b75f262093a506e340552c697e148ea28"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticLifecycleChecks.java",
+      "status": "??",
+      "bytes": 4697,
+      "sha256": "3ad80ff257ff63d224899676c3da11d4993f7a7efec3ff527508961f63d97210"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticProfileChecks.java",
+      "status": "??",
+      "bytes": 3057,
+      "sha256": "e355f67d3d21965c87bb78cc351cba9b20116f1906be5c79ea1f47774985bd26"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticRecoveryChecks.java",
+      "status": "??",
+      "bytes": 5611,
+      "sha256": "dd5c159250d32d36dc88a260273055c4a5b7f5f77233bfcc5f352ca69ff6b1ef"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticSetupChecks.java",
+      "status": "??",
+      "bytes": 7698,
+      "sha256": "88b4567c4946e14271a02d78c016fc2342720c621aa8fe36c405657706e99541"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraCaptureDiagnosticStartedDispatchChecks.java",
+      "status": "??",
+      "bytes": 1302,
+      "sha256": "a33fdb3a593f44983606cdec91aef594d6f71557cb95cdfd92fff526a8f25c8b"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraDirectoryPathChecks.java",
+      "status": "??",
+      "bytes": 1898,
+      "sha256": "80770a912813e6f50ac1e619bf9785f9c3e117ea4361e216a4c50836217a1891"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraEvidenceC9Checks.java",
+      "status": "??",
+      "bytes": 9251,
+      "sha256": "6d877b11a09a0ee35815e19dc2ab553f9680e5b30226ad5cb463898c420c0c98"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraEvidenceExportChecks.java",
+      "status": "??",
+      "bytes": 12317,
+      "sha256": "45433def6be91e433bb2a83cd144480a91d9d305cb91bf6af72f8cc474540e38"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraMatrixChecks.java",
+      "status": "??",
+      "bytes": 5876,
+      "sha256": "315465c31feeb44b56b0e281dcdd1bc02e3430e90f95e376b28ae949654909ca"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraMatrixEvidenceChecks.java",
+      "status": "??",
+      "bytes": 3454,
+      "sha256": "1d6e5d967d6d997dba53072fa4b5ff67512fc93f1d7715573b3f230dc9287770"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraMatrixFixtureLifecycleChecks.java",
+      "status": "??",
+      "bytes": 6729,
+      "sha256": "2fbeef095e1a6fe6b8db4320e509951536043b0f8a73cf87c5f84499d7435ee9"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraMatrixLifecycleChecks.java",
+      "status": "??",
+      "bytes": 2192,
+      "sha256": "9108e8afae92e712c33c34f07f2e06785474d64da6d000d6d5e37b2144dd92f0"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraMatrixRecoveryChecks.java",
+      "status": "??",
+      "bytes": 9527,
+      "sha256": "e8b0ef253ae63a79a7ea7959d75027c668cb7e38bbe398cedf48d3378a10e703"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraMatrixRecoveryHistoricalChecks.java",
+      "status": "??",
+      "bytes": 7512,
+      "sha256": "26b0d23f397c16c2907c3985518826058f1c21cbd8e4731ba288005cbd235c78"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraMatrixRecoveryLifecycleChecks.java",
+      "status": "??",
+      "bytes": 3415,
+      "sha256": "2ed92b0b2ea4d78d74e8cb19816fb475be2fc1ab7d13857bffb9178184763d09"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraMatrixStoreChecks.java",
+      "status": "??",
+      "bytes": 4418,
+      "sha256": "8522e90ce886004ebeb1b7d930d0ee3f4f6cffbf847a9b915a938a6bc0e5f4cd"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraOrientationErrorsChecks.java",
+      "status": "??",
+      "bytes": 2759,
+      "sha256": "f530334c2a4079c2db026fce748cf3c9d1b61e3cf5ca51f375bc2263a676739d"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraOrientationEvidenceChecks.java",
+      "status": "??",
+      "bytes": 13376,
+      "sha256": "e3167cb00ee948e0e8895f0faee21dd0a31d15f9e40df446a03f1af96c9fc1dc"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraOrientationEvidenceRetainedChecks.java",
+      "status": "??",
+      "bytes": 13426,
+      "sha256": "327f5e25e268779776fb5463b5c94df575d6230f2b1599567a3ddd617329f40a"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraOrientationGeometryChecks.java",
+      "status": "??",
+      "bytes": 8025,
+      "sha256": "86203408d950062932c4c1fd4af9825b90fc3365dfd21b702cdd684fbf83a5ee"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraOrientationPreviewRetainedChecks.java",
+      "status": "??",
+      "bytes": 12460,
+      "sha256": "92e3ef6028d414e5c20d2c53e16765035dab62d7f90629d1e3aafc1058541b61"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraOrientationReadinessRetainedChecks.java",
+      "status": "??",
+      "bytes": 13725,
+      "sha256": "4ea852550d9aad0dc6f75da0af0c94b09ddd98f9fe981cbcc56bd966a0cb5550"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraOrientationRepeatChecks.java",
+      "status": "??",
+      "bytes": 9814,
+      "sha256": "c5de368a71e123580956c9e353b981c3136d82461ef853876f23d92a288b113e"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraOrientationRepeatSetupChecks.java",
+      "status": "??",
+      "bytes": 6138,
+      "sha256": "b4ea4a771e51be12e3bc1f06d5344657b5fb418d909286985b05cd30c8d0895a"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraOrientationResultBindingChecks.java",
+      "status": "??",
+      "bytes": 4395,
+      "sha256": "cf7ad53972d3b91a82e7b233b06970238618c569b85d7728376ea08abf3a94da"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraOrientationRetainedChecks.java",
+      "status": "??",
+      "bytes": 8245,
+      "sha256": "e40d39e03edc6792f065a8ad2c7a198fa83fc614f89bb39ef1f81383b3dbf9bd"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraOrientationRetainedInitializationChecks.java",
+      "status": "??",
+      "bytes": 3939,
+      "sha256": "de67afb659030a85688f4286c00622fc437684b56c52be4dfb55d62e55bf0399"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraOrientationStatusChecks.java",
+      "status": "??",
+      "bytes": 5149,
+      "sha256": "181fd984f87fd87a6e521c4f6677cc7b2c7c515479d1bc5d00690e6e541f2d37"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraOrientationUiRetainedChecks.java",
+      "status": "??",
+      "bytes": 13935,
+      "sha256": "49d5cd94d182d829fb39368b1712a0f60dbbad7732f727c1bb748fc94ddfbfa5"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraProofDurabilityChecks.java",
+      "status": "??",
+      "bytes": 7980,
+      "sha256": "c4438bdcc116aa6ac0b09b557a26865c3cd71707c7090af0d4caec9a7506130c"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraProofRecoveryChecks.java",
+      "status": "??",
+      "bytes": 11972,
+      "sha256": "100d145d472c07b259d3745f299ae1c126ce87484b30c467c1241f6353a19e6a"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/CameraStationaryChecks.java",
+      "status": "??",
+      "bytes": 10936,
+      "sha256": "4f979ed0d8ff07f21aba72c8e20a75c9731e218ac726ceab0fa1a8390fe92c22"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/EnrollmentBarcodeChecks.java",
+      "status": "??",
+      "bytes": 10525,
+      "sha256": "145e37a5f81e0a37ab22138937f332804dd43126035e8d199ef8738b90bf5342"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/EnrollmentEvidenceChecks.java",
+      "status": "??",
+      "bytes": 28915,
+      "sha256": "b8835a8f0c949067323c1f5b78140f7420e1976290de0862ece8f9a616d94089"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/EnrollmentInitializationChecks.java",
+      "status": "??",
+      "bytes": 10073,
+      "sha256": "0a8c64e5b62f1458fb3307bc163376cccbe707c99266cd1e13d59e2eec205eb8"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/EnrollmentReadChecks.java",
+      "status": "??",
+      "bytes": 9086,
+      "sha256": "7791ae548fc0cd97ddfac86879f919115f4f773e893d31db7fc87b3925d48fb3"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/EnrollmentReportDecisionChecks.java",
+      "status": "??",
+      "bytes": 8971,
+      "sha256": "60943991303d045498a37d4701cbd8d1cde2a0ca4ab4594531493be9a1b97946"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/EnrollmentReportReadbackChecks.java",
+      "status": "??",
+      "bytes": 2961,
+      "sha256": "af08354805efa577eb2806eaac74d2e256b4cf091dccfe98c95f41b04f166874"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/EnrollmentT3Checks.java",
+      "status": "??",
+      "bytes": 9732,
+      "sha256": "4f1da762a1a140b61b545fde64b67d86afeec39e785b4f9288a944423c2c8e37"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/EnrollmentTransferDiagnosticChecks.java",
+      "status": "??",
+      "bytes": 4661,
+      "sha256": "c32065aa5cafe4b385bed40237ea4610ab594b770eb83abda9ec7f11b29c051e"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/GraphicsAdmissionTraceChecks.java",
+      "status": "??",
+      "bytes": 2528,
+      "sha256": "5919ccd198b38223cb6a722fdbb86fa39ab69cd5eb6a0d240d2c3ff4ff244e00"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/GraphicsEntryProtocolChecks.java",
+      "status": "??",
+      "bytes": 1729,
+      "sha256": "799a49300220a60dccdaaf02061660095b9386677a5564f03686684e7dd3b158"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/cpu-runtime/src/test/java/expo/modules/recognitioncpu/GraphicsEntryRetainedChecks.java",
+      "status": "??",
+      "bytes": 1609,
+      "sha256": "ca6088482a45a86d2c6b15b407be2df9478423624da25b7365a669e045177aa3"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/enrollment/assets/zxing-3.5.4/LICENSE",
+      "status": "??",
+      "bytes": 13320,
+      "sha256": "3f62881f0566227a24b12e5a754cc79f39aaa94883038e95c94812e1f50af42f"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/enrollment/assets/zxing-3.5.4/NOTICE",
+      "status": "??",
+      "bytes": 664,
+      "sha256": "4db4b60aace29ec6c5c4f13ca9cac1930d3c0c54bcc67dceead0c10771120e66"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/enrollment/java/expo/modules/recognitionexperiment/EnrollmentBarcodeActivity.java",
+      "status": "??",
+      "bytes": 8223,
+      "sha256": "04319d308a50dd591ef9a3949cb87de4c8391e02ff97feabbfc591a4469e29bc"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/enrollment/java/expo/modules/recognitionexperiment/EnrollmentBarcodeDecoder.java",
+      "status": "??",
+      "bytes": 1989,
+      "sha256": "5b274571ee100d5338e5467e120d5a3f9bf22bc94425c7feb1d91b07b9d961e0"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/integration/AndroidManifest.xml",
+      "status": "??",
+      "bytes": 1788,
+      "sha256": "264e4a613d403a1efe047dcfbaec3f077851b470382aaa05d9a2bae31597801a"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/integration/java/expo/modules/recognitionexperiment/CameraComponentIntegrationActivity.java",
+      "status": "??",
+      "bytes": 14728,
+      "sha256": "b0b55581f55b503579020aee1289728191078312d79821b885bec524faab1de6"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/integration/java/expo/modules/recognitionexperiment/CameraIntegrationProvenance.java",
+      "status": "??",
+      "bytes": 1762,
+      "sha256": "34b8fc772cd91657995085bdb0228abe238b2cd3ab2df6775c994fbc75c0dbed"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/integration/java/expo/modules/recognitionexperiment/EnrollmentActivity.java",
+      "status": "??",
+      "bytes": 7719,
+      "sha256": "8f6167882ad150c32a771bde3861d25649f8e3a6efcaa463eafa178c86bd0e64"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/integration/java/expo/modules/recognitionexperiment/EnrollmentProvenance.java",
+      "status": "??",
+      "bytes": 2272,
+      "sha256": "52bf2877d93a387d4d9275d8c386c30221924c2fb36458839697f8355a9dc3c6"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/integration/java/expo/modules/recognitionexperiment/PreviewFrame.java",
+      "status": "??",
+      "bytes": 545,
+      "sha256": "f9938608cb67e0993ecc744c33135fa33992affd0ffea606d84d840026c351af"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/main/java/expo/modules/recognitionexperiment/CameraCaptureDiagnosticActivity.kt",
+      "status": "??",
+      "bytes": 22095,
+      "sha256": "6e3314f761ec4a437dff4809113f19d357bcdd15943ad3cdbef848a9f5aa8fc3"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/main/java/expo/modules/recognitionexperiment/CameraCaptureDiagnosticBinding.kt",
+      "status": "??",
+      "bytes": 6024,
+      "sha256": "c511a828e01f4cc5f8b32758dfb403c2e4f0f28da743ad259e9d6360fee33535"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/main/java/expo/modules/recognitionexperiment/CameraCaptureDiagnosticEpochIO.kt",
+      "status": "??",
+      "bytes": 7398,
+      "sha256": "4bd35e8ae806f71e43f9998aaeade5cec0b91422dcb4ce7e6f0b8464628a31c1"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/main/java/expo/modules/recognitionexperiment/CameraMatrixRecoveryActivity.kt",
+      "status": "??",
+      "bytes": 7819,
+      "sha256": "e9498a2da14237ac192ee1582881906326c6d0cdc52ba1716dba9228dd3a35b5"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/main/java/expo/modules/recognitionexperiment/CameraOrientationRecoveryActivity.kt",
+      "status": "??",
+      "bytes": 5990,
+      "sha256": "da87cddf583da9493d3c8b6c28b5c5a965b9c84f39f4184fdd343927d5a25c30"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/main/java/expo/modules/recognitionexperiment/GraphicsEntryController.kt",
+      "status": "??",
+      "bytes": 11285,
+      "sha256": "f1bcc61335af9356add39005bcdfdeb80f773a97ace3d3af6c69bb3a1702c912"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/main/java/expo/modules/recognitionexperiment/GraphicsEntryProbe.kt",
+      "status": "??",
+      "bytes": 16225,
+      "sha256": "5aabd0028e7f40724c71c1f16238a423760c8fbd945ed2819498b2206202a313"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/main/java/expo/modules/recognitionexperiment/OrientationResultState.kt",
+      "status": "??",
+      "bytes": 968,
+      "sha256": "aefa82cf8f0216745d3d9602cfba90bf65075260d2e7acde00c76252721a1d99"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/test/java/expo/modules/recognitioncpu/CameraOrientationReceiveChecks.kt",
+      "status": "??",
+      "bytes": 6969,
+      "sha256": "9379fa92578a88ddef31b9d30a91a8023f7346bdd3539030780f815378b31628"
+    },
+    {
+      "path": "apps/mobile/recognition-native/recognition-experiment/android/src/test/java/expo/modules/recognitionexperiment/OrientationResultStateChecks.kt",
+      "status": "??",
+      "bytes": 1347,
+      "sha256": "25b15d88f5b77065c355eb9c993e372c86ab7dfa9b975e4e765bf7eff523abb0"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/CameraComponentIntegrationPanel.tsx",
+      "status": "??",
+      "bytes": 2506,
+      "sha256": "1cb1422dba1f21c222e4db9a8a02ddbb39bd7881f577e1fa1256fb51a4e5b3f7"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/CameraOrientationPanel.tsx",
+      "status": "??",
+      "bytes": 20998,
+      "sha256": "39022476c34461c1effd16969837cd57ee398a6399e47dae5b1d74a6a5599574"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/cameraEvidenceExport.ts",
+      "status": "??",
+      "bytes": 1095,
+      "sha256": "9487903caade99856fa9c4c76476c9a80a8d459941501bf1e70a0ba07e158b32"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/cameraMatrixProof.ts",
+      "status": "??",
+      "bytes": 6890,
+      "sha256": "e0ee6b7c39c2d1a19e0f7252d84718b086708836fb18e6b7f9defce5bbcf9a07"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/cameraMatrixRecovery.ts",
+      "status": "??",
+      "bytes": 1078,
+      "sha256": "f93d034df1fb209383ea3edd8b87799f98b089bbc0ba3f261b90486959286c65"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/cameraOrientationEvidence.ts",
+      "status": "??",
+      "bytes": 2296,
+      "sha256": "3413d16d3c5078045449434c87acc9d7476bc8c98c6f08a990af36b7c386d2c1"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/cameraOrientationGeometry.ts",
+      "status": "??",
+      "bytes": 4464,
+      "sha256": "ee75ff9fd565efa3520218434ef5f322e8aa8556b006e6001f7f4057b387d557"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/cameraOrientationProof.ts",
+      "status": "??",
+      "bytes": 4087,
+      "sha256": "bc070bbcae1f4b1b4a9a5c9e71ac50bd0c4778519a93cc136cadb3789a2dae53"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/cameraStationary.ts",
+      "status": "??",
+      "bytes": 2397,
+      "sha256": "d1690c8facf4d18755be71d822a1f5c8a148a0d459cc5847adb1025b31c6bfdf"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/enrollment/EnrollmentEntry.tsx",
+      "status": "??",
+      "bytes": 21129,
+      "sha256": "119c83dbffb851a6387331dc641edc77e4d11f4a4c62bb78524270ff0d9a9148"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/enrollment/EnrollmentPanel.tsx",
+      "status": "??",
+      "bytes": 7378,
+      "sha256": "636872d9e23579528dac2f9febd42396ac37831a196289384b54f70204642f22"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/enrollment/exportMetadata.ts",
+      "status": "??",
+      "bytes": 1642,
+      "sha256": "5d588745a0a86880096b36e3636bb8d3da4e79bb2d9ead3acb4c2272fdc2bd04"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/enrollment/initializationRecovery.ts",
+      "status": "??",
+      "bytes": 6225,
+      "sha256": "73b775561037c88bdfa16ac138d28593af249338ca66bb815291a419151939d9"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/enrollment/protocol.ts",
+      "status": "??",
+      "bytes": 6540,
+      "sha256": "d5b333516f55da065adb17479abb5f8cc31ce572511e116b3184c18bf560cc1a"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/enrollment/readDiagnostic.ts",
+      "status": "??",
+      "bytes": 3849,
+      "sha256": "8342719d0be6117d1e1925905fec225ac937a6c697eab98d899a01f362656aed"
+    },
+    {
+      "path": "apps/mobile/src/recognitionExperiment/enrollment/reportCompletion.ts",
+      "status": "??",
+      "bytes": 8352,
+      "sha256": "6e8e6a87998c96d882c3ba182e8d177c233dee0c542da91c1ae46d724f60896c"
+    },
+    {
+      "path": "apps/recognition-lab/__tests__/enrollmentEvidence.test.ts",
+      "status": "??",
+      "bytes": 15617,
+      "sha256": "2326f5ec550b6c612e3eec130d38ce0bf4ced1ca93a221e3da91330a5430f47c"
+    },
+    {
+      "path": "apps/recognition-lab/__tests__/enrollmentEvidenceCli.test.ts",
+      "status": "??",
+      "bytes": 2898,
+      "sha256": "72795281d391b159744a0450eca9bd6316601c44c71647dc7354fd1fb6f12137"
+    },
+    {
+      "path": "apps/recognition-lab/__tests__/fixtures/generated-enrollment-evidence.json",
+      "status": "??",
+      "bytes": 849998,
+      "sha256": "3efbbd097f31e881d61678c66d3552511b8c7479a64ba822f2adea143c3727b1"
+    },
+    {
+      "path": "apps/recognition-lab/__tests__/fixtures/observed-barcode-codec.json",
+      "status": "??",
+      "bytes": 258,
+      "sha256": "26401d995823f9b5637d62eaa69889e7c732e865e6716295e1f90263d7a0ff6f"
+    },
+    {
+      "path": "apps/recognition-lab/__tests__/fixtures/observed-enrollment-codec.json",
+      "status": "??",
+      "bytes": 215609,
+      "sha256": "88f7959d1e96b86fc871c24f46c14a53d3fc59b66e3e6d70fec733c01b4c5761"
+    },
+    {
+      "path": "apps/recognition-lab/__tests__/observedEnrollment.test.ts",
+      "status": "??",
+      "bytes": 4635,
+      "sha256": "c3c3cc4d38284b33a1b42ece6dfa60844b8f512af81a4e89f30999f728aaf13b"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/README.md",
+      "status": "??",
+      "bytes": 11715,
+      "sha256": "9285273ac9c2a6cf931456bd5aee957d940b14f17ca9cd1e322393ca55e1fd07"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/app/build.gradle",
+      "status": "??",
+      "bytes": 1467,
+      "sha256": "0f7c87bce71e1187738a7916974c6d5f7601dfa0ac72554191dff3122b1c4d7f"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/app/gradle.lockfile",
+      "status": "??",
+      "bytes": 5869,
+      "sha256": "3913f63fa16cc225b7991a5a92f8b86dff2f3cf11452c841eeacb7f30d4d94fc"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/app/proguard-rules.pro",
+      "status": "??",
+      "bytes": 59,
+      "sha256": "4f2f1eb2aa4312296476924cb6897415d208130b3e073898e4a8379749b78b80"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/app/src/main/AndroidManifest.xml",
+      "status": "??",
+      "bytes": 1287,
+      "sha256": "bb1581d87d439a048869b2b74a5109049fb5e13f7dacc72f4e8404fd883a4ca9"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/app/src/main/java/local/cameraprobe/PreviewFrame.java",
+      "status": "??",
+      "bytes": 510,
+      "sha256": "f1f758ffad420801b70d4a2ff471e4ed3e2180953fe36e58ecfb6b6e19d7cc10"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/app/src/main/java/local/cameraprobe/ProbeActivity.java",
+      "status": "??",
+      "bytes": 9931,
+      "sha256": "41412dee9c160a12d1c2c4f3180b2f52031c07504878aa7e9c4d698cdd868db2"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/app/src/main/java/local/cameraprobe/ProbeApplication.java",
+      "status": "??",
+      "bytes": 190,
+      "sha256": "4ed74ffcddcd1dadec223f390fe2284a8e07f41bbc44ae2381d487fe32afdeeb"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/build-local.py",
+      "status": "??",
+      "bytes": 1777,
+      "sha256": "f59cc2902ae2a4831ce9c435010df077ce767ad674cc529c70420777a92caa86"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/build.gradle",
+      "status": "??",
+      "bytes": 1547,
+      "sha256": "02ea68116c786f9c891a911b9c1e10fbd8c1ea55eddd923ba26791b7189e1d16"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/build.gradle",
+      "status": "??",
+      "bytes": 1040,
+      "sha256": "2d83bc38b8607bbf8e85ff544f55adcf216fd52394dcda4a74ac1ae59614dda3"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/gradle.lockfile",
+      "status": "??",
+      "bytes": 5876,
+      "sha256": "d29cbbe4169ee4af1828a5c1294dc5c977efcbab68a0111704e799032241b8d1"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/AndroidManifest.xml",
+      "status": "??",
+      "bytes": 13,
+      "sha256": "6ffce38a2b1abc5f552b2114873ae38f67de915ca64e5a123e322c4821a552b0"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/cpp/CMakeLists.txt",
+      "status": "??",
+      "bytes": 249,
+      "sha256": "0ccc24c169647bad0fefe4a471d75e70ca03d57572595381ba2b7837bcc4e7f6"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/cpp/publish.c",
+      "status": "??",
+      "bytes": 1416,
+      "sha256": "1b91f668e56aaee67fb4f0eca1eccdf62ef2dd12b5928ee98f9b875836ef115c"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/java/local/cameracomponent/AndroidDisk.java",
+      "status": "??",
+      "bytes": 5709,
+      "sha256": "3794a5d7b938c0c148457a374f4d643179a4566c113dc2e4943cffbb47fb4ee2"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/java/local/cameracomponent/AndroidOwner.java",
+      "status": "??",
+      "bytes": 1111,
+      "sha256": "4a2d42b35867613449033568bc9fb78110c1105a1801ccb0cb03ed7e036cd68c"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/java/local/cameracomponent/CameraComponent.java",
+      "status": "??",
+      "bytes": 12032,
+      "sha256": "fc7cc2f702e79263460f03f441581368cb2c619448ab826abb73103ba979dcdd"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/java/local/cameracomponent/CropGeometry.java",
+      "status": "??",
+      "bytes": 5978,
+      "sha256": "3f20d9a1473aa06c2bec313de60331adbc45faa77e5bf49565f3699cdfc32fdb"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/java/local/cameracomponent/Delivery.java",
+      "status": "??",
+      "bytes": 1018,
+      "sha256": "7aad80569340b16fb0edfd7f006a3854ffb9046b2bd2c99f6b96922784541086"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/java/local/cameracomponent/Evidence.java",
+      "status": "??",
+      "bytes": 8170,
+      "sha256": "e8e89ac82fac465ed75b18a4dca4611d40288efdbfda4e65147f90b1d8ec50cd"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/java/local/cameracomponent/Failure.java",
+      "status": "??",
+      "bytes": 1419,
+      "sha256": "e81250660f9b70a17f8355f0ae75c88fc08e5c8179021e905b30b2cf36ee4948"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/java/local/cameracomponent/FixedSlots.java",
+      "status": "??",
+      "bytes": 6082,
+      "sha256": "dfa194c44ce8559345a51b765ef4991cf0233db024f0dddd1fd885d7c5689cf7"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/java/local/cameracomponent/Geometry.java",
+      "status": "??",
+      "bytes": 3098,
+      "sha256": "9ec9c0c765d04fa119ea3fe14b999fe9038a86d343256ee6fc5d4cb928496777"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/java/local/cameracomponent/PreviewSnapshot.java",
+      "status": "??",
+      "bytes": 1943,
+      "sha256": "40c1486199896e7054f14bed4be61330b68fa91d51e2d0fff7a9b06ecbb28e2a"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/java/local/cameracomponent/Provenance.java",
+      "status": "??",
+      "bytes": 1612,
+      "sha256": "57b693a10c18387f39bbacf52ed9677d303482da05aa5669c1fb07a44faca888"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/java/local/cameracomponent/RecordOwner.java",
+      "status": "??",
+      "bytes": 795,
+      "sha256": "b34c961b331da34fb1d716aeaeb4e044103d64ac9aac7fc1c4233154558bf7ee"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/camera-component/src/main/java/local/cameracomponent/Session.java",
+      "status": "??",
+      "bytes": 3581,
+      "sha256": "369751ee4f83afa679d365584d381b876aeff052035ce5c83e4a542d84f69bb5"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/gradle.properties",
+      "status": "??",
+      "bytes": 224,
+      "sha256": "29c192436ebd15ce8d227d944bee2b6d7b701ed748800f8770227268b58c5ad3"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/settings.gradle",
+      "status": "??",
+      "bytes": 534,
+      "sha256": "48fda2e18d92c12e976d7c9d93899d8f15eb171aabd456babc2800f7224c9c76"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/tests/CorrectionChecks.java",
+      "status": "??",
+      "bytes": 2378,
+      "sha256": "6a2b7819f02c53b103847d4d20cdac651de7474f9876f9f4704b83c696d82310"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/tests/CropChecks.java",
+      "status": "??",
+      "bytes": 5942,
+      "sha256": "3ff8f547977df2cb1bbc0e36163d5aa028c58961ecfdd1327386fdfcd1b27fcb"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/tests/DiagnosticChecks.java",
+      "status": "??",
+      "bytes": 3600,
+      "sha256": "50af4a89000849b9a0e1c7bf936b80e0c4b30becb1455df129026550b649d336"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/tests/MechanismChecks.java",
+      "status": "??",
+      "bytes": 4963,
+      "sha256": "ba3df41a08e13a29df08b081c0517ca6c6f8ae82ab9f5cfb03233711ef25bed5"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/tests/ReviewRegressions.java",
+      "status": "??",
+      "bytes": 6327,
+      "sha256": "e41c52d34d7e7ada622391b011c1c75dd78a739b82650facac77f865d342a160"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/tests/SlotChecks.java",
+      "status": "??",
+      "bytes": 11721,
+      "sha256": "4474db98ecab2acbd838c46bf083dc3bea9e299898668970cd3ef9dae125bc97"
+    },
+    {
+      "path": "apps/recognition-lab/camera-mini/android/verify-local.py",
+      "status": "??",
+      "bytes": 3878,
+      "sha256": "d5df07a4cbdf8bf6c1b1fbaa9fad7c8e2eeca4bceddb9ba616cdfcc11bfd858a"
+    },
+    {
+      "path": "apps/recognition-lab/src/phoneCapture/enrollmentEvidence.ts",
+      "status": "??",
+      "bytes": 12439,
+      "sha256": "f13401a45da5947f30512e7239b5a10d276405baac1e51e746c26e502d8f8479"
+    },
+    {
+      "path": "apps/recognition-lab/src/phoneCapture/enrollmentEvidenceCli.ts",
+      "status": "??",
+      "bytes": 4839,
+      "sha256": "0d92e2759565d120d8de7d558480fcf120aae6d2f7894349a2187d1e37b910bb"
+    },
+    {
+      "path": "apps/recognition-lab/src/phoneCapture/enrollmentInventory.ts",
+      "status": "??",
+      "bytes": 15722,
+      "sha256": "3a6a9c07c5313f61b3ec5aecd88dd7ca338870a1ad7893164170430115c5fd74"
+    },
+    {
+      "path": "apps/recognition-lab/src/phoneCapture/enrollmentReferenceCompatibility.ts",
+      "status": "??",
+      "bytes": 2073,
+      "sha256": "ec38bfbef75d3d36d98618469a8b7953501bd145ff1d5c2569a4a5cae0dba4ae"
+    },
+    {
+      "path": "apps/recognition-lab/src/phoneCapture/enrollmentRetainedFacts.ts",
+      "status": "??",
+      "bytes": 3374,
+      "sha256": "3f3c2c505a4ba1e3633b2815f51a76edc54c26a948c83e8e355cf9e10e83125e"
+    },
+    {
+      "path": "apps/recognition-lab/src/phoneCapture/observedEnrollment.ts",
+      "status": "??",
+      "bytes": 12299,
+      "sha256": "e889b41077c8d8ba29a17a0de524d0f102fbe8a4aab0b7629217fe3cb7b1e290"
+    },
+    {
+      "path": "docs/engineering/PROJECT_PROGRESS_SNAPSHOT_20261106.md",
+      "status": "??",
+      "bytes": 10352,
+      "sha256": "82a2b9cd21130785d65d9a3efe5d95607a5ed0955b200b26d3b70c9e21f18dc8"
+    },
+    {
+      "path": "docs/recognition/OFFLINE_PRODUCT_DETAILS_EXPERIMENT_PLAN_20261106.md",
+      "status": "??",
+      "bytes": 43660,
+      "sha256": "89c7b0b06cc536adadb8ba27aeb48fbcfc88295c11133be247b42029dafa12bf"
+    },
+    {
+      "path": "docs/recognition/OFFLINE_PRODUCT_DETAILS_PLAN_REVIEW_20261109.md",
+      "status": "??",
+      "bytes": 3218,
+      "sha256": "dfa8c68b629c69ad73b4545a88bb0c68f81a8a79c26df89e23e7738cd5d06a24"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_03_EXPORT_RECOVERY_PLAN_20261024.md",
+      "status": "??",
+      "bytes": 14626,
+      "sha256": "19b4bfce66a42bf9a044db64e08d712e7b4e730db89dacafd799f4aa436eea07"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_03_GRAPHICS_AND_EVIDENCE_RECOVERY_PLAN_20261026.md",
+      "status": "??",
+      "bytes": 14993,
+      "sha256": "0c7cfd6ae585ab53af2ae1f6872710c0574711e2a9eb9aa4d128f08d7181d72d"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_03_GRAPHICS_ENTRY_INVESTIGATION_PLAN_20261029.md",
+      "status": "??",
+      "bytes": 13746,
+      "sha256": "8056bead66dafb8fd3fc10c03b545460e43b6c0f6c95ff0d2d1de4b9e62076a7"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_03_MINI_APP_CROP_ALIGNMENT_PLAN_20261030.md",
+      "status": "??",
+      "bytes": 15619,
+      "sha256": "471aa9ff99f476dd71273dfd5ff23248172bfe826717c1eef09897ba2b8ce05a"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_03_MINI_APP_WORKFLOW_20261030.md",
+      "status": "??",
+      "bytes": 4282,
+      "sha256": "dfbad5528a405adaf8145f12280adf8dd3be6dfeb2cf3d135c37051b26988d48"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_03_ORIENTATION_CORRECTION_PLAN_20261024.md",
+      "status": "??",
+      "bytes": 11021,
+      "sha256": "5bc5e361f17d0313ef26ee390c9880312890a0b3bb56565f64d408f60f7c63dd"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_03_PREFIX0_LOST_ROUTE_ASTRA_REVIEW_20261028.md",
+      "status": "??",
+      "bytes": 12382,
+      "sha256": "98bda87cf00dd8be3b581665036adfc0be7ecaab215efb6ea5520393f6dd70d4"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_03_READINESS_RECOVERY_PLAN_20261027.md",
+      "status": "??",
+      "bytes": 12912,
+      "sha256": "c28e13006c7bda14d96c126b287ff4c931dea814a0e2bab34ebde27cc9b314a2"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_03_REMAINING_MATRIX_PROPOSAL_20261023.md",
+      "status": "??",
+      "bytes": 35595,
+      "sha256": "f3107a23cbf3cc93207046bac53c016497651e635ceb9802e145554f4a62ce83"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_03_SESSION_CONTROL_REDESIGN_PLAN_20261027.md",
+      "status": "??",
+      "bytes": 12999,
+      "sha256": "2c0828637d6a9a3f9e55fae0d1bd1a932ad87cec3fd7c7bfe94a5c37ee260dbd"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_03_STANDALONE_CAMERA_PLAN_20261030.md",
+      "status": "??",
+      "bytes": 14355,
+      "sha256": "099526e19914c6a6b9cbe3b208189a25a9cc448d10b5a7e7fa9c86f1a3320170"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_A4_INTERRUPTION_CONTINUATION_20261104.md",
+      "status": "??",
+      "bytes": 4204,
+      "sha256": "5cb12cdf827e55661c54a3367ad22657b04ed101011e10a012d27ede7eac112a"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_ASTRA_ACCOUNTING_REVIEW_20261112.md",
+      "status": "??",
+      "bytes": 11179,
+      "sha256": "7b8e69c6d6abfa7284f9623e0a3e860b270016f3b994f011e225f586b06fe549"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_ASTRA_CTIME_REVIEW_20261109.md",
+      "status": "??",
+      "bytes": 9190,
+      "sha256": "c4e9296fdcf2704fdb9c1ac3c10eea47963aac35f6a702ce99849b939b034780"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_ASTRA_EXPORT_REVIEW_20261109.md",
+      "status": "??",
+      "bytes": 4218,
+      "sha256": "95fc82a1337eeec888b087d51e98c6399b58ab2e553d4496ddde32ce52cde784"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_ASTRA_PUBLICATION_REVIEW_20261109.md",
+      "status": "??",
+      "bytes": 5997,
+      "sha256": "0d44efafaf2d15917ee623ca1e38795e7fd74c0d4ba5dbb624c0175c8f3a6f64"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_BARCODE_INTEGRATION_DECISION_20261102.md",
+      "status": "??",
+      "bytes": 4265,
+      "sha256": "c74c707a49dd33d0bf0434140257b9f17a1e00c9bd0b986079ec03a8ba5dc95b"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_CONTROL_PUBLICATION_RECOVERY_BRIEF_20261106.md",
+      "status": "??",
+      "bytes": 5737,
+      "sha256": "9425659aa2705f0169419026b80152ec9a26c60779937445a5c29384d5544d67"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_CONTROL_PUBLICATION_RECOVERY_PLAN_20261106.md",
+      "status": "??",
+      "bytes": 12478,
+      "sha256": "802d057057d90b8ab423fd477c0b1752fee63d24087ceae3736a95f2df68320f"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_CONTROL_RECOVERY_BUILD_OBSERVE_PACKET_20261106.md",
+      "status": "??",
+      "bytes": 3793,
+      "sha256": "acd46e089acb07ad5bb40b62ae18fdf8929ddedb00cc15723a8499c67bdb1eff"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_CTIME_CHECKPOINT_PROPOSAL_20261109.md",
+      "status": "??",
+      "bytes": 2853,
+      "sha256": "3896d6f8aa939da1042be04259a4b2af769e1ea19e237a0277e8f6c5f3009f49"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_DECODER_RETRIEVAL_PROPOSAL_20261102.md",
+      "status": "??",
+      "bytes": 5014,
+      "sha256": "97dd1cbee6d1341f813b9c8dcf3352e8bf4f1f08389bbdca919de34b1396dd30"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_EVIDENCE_BOUNDARY_PLAN_20261105.md",
+      "status": "??",
+      "bytes": 25714,
+      "sha256": "d5701e8127df8ff56e8d685b48d5d8745e90fe2f2f11452fa6890ad07a905be1"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_EVIDENCE_BUILD_SETUP_PACKET_20261106.md",
+      "status": "??",
+      "bytes": 6434,
+      "sha256": "0f64adbdf79465317d896908e743dff453a363cebe853c156bd87d0b78f611de"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_EXPORT_DIAGNOSTICS_BUILD_PACKET_20261107.md",
+      "status": "??",
+      "bytes": 2242,
+      "sha256": "73c39824faf71b18b32a34f664bb193e23dd23a0d835243611f1dd652517e2f1"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_EXPORT_DIAGNOSTICS_DEVICE_PACKET_20261108.md",
+      "status": "??",
+      "bytes": 8898,
+      "sha256": "5b7f6510a90f4e844baf0d9ad5f52cd2b3d8910219433de377d72c7f6bcfd442"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_EXPORT_DIAGNOSTICS_SOURCE_DISPATCH_20261107.md",
+      "status": "??",
+      "bytes": 8175,
+      "sha256": "e3dc69b201ebe638065aeb884b2d89d20176dba9e15eb4a6cb0e12cd36d8d733"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_EXPORT_VERIFIER_BUILD_20261109.md",
+      "status": "??",
+      "bytes": 2343,
+      "sha256": "3584877f152eb2592f14500c53a6a42f403f3aad91659064ed8d4c5c605bc2c6"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_FANTA_COMPLETION_PACKET_20261107.md",
+      "status": "??",
+      "bytes": 5461,
+      "sha256": "acab4cd35f115657a7c453bebfd83300fbf306936c99ffac1e5ec50feff4fcd3"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_FIRST_PRODUCT_PHYSICAL_PACKET_20261107.md",
+      "status": "??",
+      "bytes": 6030,
+      "sha256": "f8a9e0f0739f01c3d146b9813fa9f6c656d511449b970681aefb797eafa6f13c"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_FIXED_R04_DIAGNOSTIC_BUILD_PACKET_20261108.md",
+      "status": "??",
+      "bytes": 3695,
+      "sha256": "a3feca1833e7dc44da1ce09fa3f91cb768405e4c9d41dab922878ed4b3128763"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_FIXED_R04_READ_DEVICE_PACKET_20261109.md",
+      "status": "??",
+      "bytes": 4517,
+      "sha256": "7762c9fe39a35703814888627b9c08b2fa52b7994f841ff1ade0e351e0d67d4c"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_IMPLEMENTATION_PLAN_20261023.md",
+      "status": "??",
+      "bytes": 14831,
+      "sha256": "e2899771c8f18065ebf2b57080b8cb8205bf01b4c4ae68d6c559ae81b89e7d0f"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_MATCHING_INITIALIZATION_CONTINUATION_PACKET_20261107.md",
+      "status": "??",
+      "bytes": 3410,
+      "sha256": "11ab7b8a9cc1b576b114aabb4264c5107b3ecb42cd6d43fc3881f54d7b3695e5"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_NATIVE_BASELINE_DISPATCH_20261102.md",
+      "status": "??",
+      "bytes": 7255,
+      "sha256": "94f15164483a0c9fabb5e5dc29d9f6867a375ab429e0afef55a5209a4b3235c0"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_OVERNIGHT_CONTINUATION_20261108.md",
+      "status": "??",
+      "bytes": 3376,
+      "sha256": "4e4ada930fbc52cf50a915370ae23f07cd643508d4109f1d9f50fee0f5d9b53e"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_PHYSICAL_EVIDENCE_REVIEW_BRIEF_20261105.md",
+      "status": "??",
+      "bytes": 4962,
+      "sha256": "3815550718f5a2b64dc1726dcb8016f43b7ad8f1e3ea81a6f99f2d4be1b8054f"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_R01_DISPOSITION_PROPOSAL_20261106.md",
+      "status": "??",
+      "bytes": 5216,
+      "sha256": "f67e2deafb6ad7c551db4f17c5e1c0c8ed5f8a22649fb1204eab282912320d25"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_R04_ATOMIC_BUILD_DISPATCH_20261108.md",
+      "status": "??",
+      "bytes": 3332,
+      "sha256": "28a47885c406fd20e83be6e553ed633be7e8225ac4bfb595c287fbac16f7680b"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_R04_BUILD_RECOVERY_PACKET_20261108.md",
+      "status": "??",
+      "bytes": 5116,
+      "sha256": "668282609569a62909ca84545ba0d1209e3ff1eb0b508463731c7e2133449662"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_R04_COMPOSITE_CHECK_INVESTIGATION_20261108.md",
+      "status": "??",
+      "bytes": 4073,
+      "sha256": "1d7d677d9fffd3831c743fe0cb20510aabafcfd8b03c3fcaa176f17957fd7826"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_R04_FIXED_READ_DIAGNOSTIC_SOURCE_20261108.md",
+      "status": "??",
+      "bytes": 10826,
+      "sha256": "b156cb321e7b075b6ffe64a385981b53daca8bf578e0a4317359e2d4db7e9e5f"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_R04_READBACK_DIAGNOSIS_PACKET_20261108.md",
+      "status": "??",
+      "bytes": 5135,
+      "sha256": "8bc51420c8e68d317a6e14ba1bb23a3e8c2d4f633eadbe8748514181619d4dc7"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_R04_SAVED_STATUS_DEVICE_PACKET_20261108.md",
+      "status": "??",
+      "bytes": 4160,
+      "sha256": "fcf71ab09eb9fbfdf6e12316ba129d84bdc8018875b084c08b6f8deea76ac3e3"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_R04_VISIBILITY_BUILD_PACKET_20261108.md",
+      "status": "??",
+      "bytes": 2512,
+      "sha256": "6750853a8e27930e29b4077af6722d40204eb9bbb6e2b617abb6a925f436f723"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_R05_ORIGINAL_EXPORT_TEST_20261109.md",
+      "status": "??",
+      "bytes": 4679,
+      "sha256": "53c09bd7e0cd81330dc4829f43fc1ffe7dc742dbc811a7f98f0c46c0e8c3d880"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_R06_QUALIFICATION_DEVICE_20261109.md",
+      "status": "??",
+      "bytes": 6744,
+      "sha256": "c288bafa500258719157179520e86bdd5de7042034326c211853cf9c7972789e"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_T3_RECONCILIATION_BUILD_20261109.md",
+      "status": "??",
+      "bytes": 3356,
+      "sha256": "cf5f0ce638421a35be3f456cc72a551e33ce71b928ce1e4b0940cb17a442ea0a"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_ZXING_BUILD_ASTRA_REVIEW_BRIEF_20261103.md",
+      "status": "??",
+      "bytes": 4602,
+      "sha256": "98c20eeb007ab16e3686f92614da88550077e06ef80bb2bb3a482b0451bd957a"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_ZXING_BUILD_RECOVERY_PLAN_20261103.md",
+      "status": "??",
+      "bytes": 9577,
+      "sha256": "8a57676e59fb17015e31b17da0ff57a9ca425acc0145c70ed734e8721e086b97"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_ZXING_BUILD_SETUP_PACKET_20261103.md",
+      "status": "??",
+      "bytes": 5956,
+      "sha256": "0c85704bf56cfa9680e1a8f823805b05b8bca73a5bbcd8e5242c09c564b3f422"
+    },
+    {
+      "path": "docs/recognition/PHONE_P2_04_ZXING_LONG_PATH_RECOVERY_20261103.md",
+      "status": "??",
+      "bytes": 8198,
+      "sha256": "67e838fd9676eac1b9d829e1d8fe180a320374534df6c93addc723af8e26471f"
+    },
+    {
+      "path": "docs/recognition/PHONE_TEST_EXECUTION_RECOVERY_20261023.md",
+      "status": "??",
+      "bytes": 3797,
+      "sha256": "932229c449d1c110e5e296848f591bca971832b4429e79fbd8bbd8ed845c42a5"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_A6_GEOMETRY_INDEPENDENT_REVIEW_20261023.md",
+      "status": "??",
+      "bytes": 3384,
+      "sha256": "d2c59b967092baecec526e51ec14349ad3751b582ea3a4050cfe2a07cec83fa9"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_A6_ORIGINAL_GEOMETRY_ANALYSIS_DISPATCH_20261023.md",
+      "status": "??",
+      "bytes": 8493,
+      "sha256": "0ac321c2fc7476e70cd3a11376f9d3d9be1dc715eebadc205f5e64b74576215c"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_A6_ORIGINAL_GEOMETRY_HANDOFF_20261023.md",
+      "status": "??",
+      "bytes": 15932,
+      "sha256": "3aa975441e963f3cc651e6fbea9b45b2bb6efce3f221c96d033bf2173fc3f44d"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C5_STORAGE_DIAGNOSTIC_RESULT_20261018.md",
+      "status": "??",
+      "bytes": 6758,
+      "sha256": "1cf8d5d5036a93878121af0cf020ee9e4eb46dc28adcaaa96081270b7c1fb30e"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C6_BUILD_REVIEW_AND_STORAGE_SMOKE_PREPARATION_20261018.md",
+      "status": "??",
+      "bytes": 6763,
+      "sha256": "fd35dc14d1a9f8fb6f4b887019b60d318de07fe95af6580886d3009c926e28da"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C6_BUILD_STATIC_HANDOFF_20261018.md",
+      "status": "??",
+      "bytes": 8241,
+      "sha256": "11380f40487be31eec77c3c34efff8af72e2e71f871733e1407374c18a3a923e"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C6_C1_DURABILITY_HANDOFF_20261018.md",
+      "status": "??",
+      "bytes": 7463,
+      "sha256": "33ce79d7409b000f744268a0e5e026913aa50c5d19ea83fb9b41c50b59e5e6cb"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C6_C1_SOURCE_ACCEPTANCE_AND_BUILD_PACKET_20261018.md",
+      "status": "??",
+      "bytes": 7358,
+      "sha256": "57de3bc202285145509977d5e54e9f2e524eb58c4566577a070044ff3e6c4674"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C6_CAPTURE_PERSISTENCE_AND_TRACK_B_HANDOFF_20261019.md",
+      "status": "??",
+      "bytes": 6410,
+      "sha256": "27016d54f375eb017c2ef2e112dcaf33b9ff363d8801f3ca3fab0764e9076fbe"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C6_FIXED_VERIFICATION_TRACK_B_RESULT_20261019.md",
+      "status": "??",
+      "bytes": 3634,
+      "sha256": "798cf8bf670e5a55a6181ba2b3dc080542ba9eb5bf2e020f5a4088995e35f165"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C6_GATE_C_DEVICE_PACKET_20261018.md",
+      "status": "??",
+      "bytes": 3000,
+      "sha256": "0ff424295a5b81d2dbfc1026b1be6438e77a834da9590e4814a7ec81ba58d749"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C6_GATE_C_DEVICE_RESULT_20261018.md",
+      "status": "??",
+      "bytes": 4191,
+      "sha256": "0f1e2f0b542152078b57d8211bc165981737e72020050b11b43bf97bf36d21f7"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C6_GEOMETRY_GAP_REVIEW_AND_EVIDENCE_EXPORT_PROPOSAL_20261019.md",
+      "status": "??",
+      "bytes": 7011,
+      "sha256": "78b8ce5d67db38729bd55ff08598fdd71df0fa21502650009b8cca6614092f03"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C6_STORAGE_SOURCE_HANDOFF_20261018.md",
+      "status": "??",
+      "bytes": 9527,
+      "sha256": "106e2e290f94425b9dce06915bc72194b303eac66401a11c12d1f3692a0c4b05"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C6_STORAGE_SOURCE_REVIEW_20261018.md",
+      "status": "??",
+      "bytes": 6172,
+      "sha256": "db93eb77dec1ca450d433ad54e44f030f17ed602137a6ebb3ad3864d4fbf8e41"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C7_ARTIFACT_REVIEW_AND_EXPORT_DEVICE_PACKET_20261019.md",
+      "status": "??",
+      "bytes": 8831,
+      "sha256": "fba1e421f37a6651954c498dadbee93397d531b19a30af96896a5593853bd13b"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C7_BUILD_STATIC_DISPATCH_20261019.md",
+      "status": "??",
+      "bytes": 2655,
+      "sha256": "c0727d86ac6b59776c73d8ebb78a56ac963a5e695a14544b720fdd152c43fe9e"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C7_BUILD_STATIC_HANDOFF_20261019.md",
+      "status": "??",
+      "bytes": 6075,
+      "sha256": "38c17fe5c903b8b676cc04e8d1d3357bab09d7bbba318c6e31d1f4b52e3a1867"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C7_DEVICE_AUDIT_AND_GEOMETRY_READINESS_20261022.md",
+      "status": "??",
+      "bytes": 7600,
+      "sha256": "a2a853657651b87255308de9ff7bd9762ab99d059f6aae0afa865fdfcc89a3dd"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C7_DEVICE_EXPORT_DISPATCH_20261022.md",
+      "status": "??",
+      "bytes": 3606,
+      "sha256": "698443c99de7294155d96c2e1119b0aaae0f3e3483276aeec9b590df102d0aed"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C7_DEVICE_EXPORT_RESULT_20261022.md",
+      "status": "??",
+      "bytes": 4630,
+      "sha256": "25aec038f7767a04b8ddfbe20e0767a49537097901800ed85ed3ebf88af539c4"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C7_SAVED_EVIDENCE_EXPORT_DISPATCH_20261019.md",
+      "status": "??",
+      "bytes": 8450,
+      "sha256": "f85cfa2e6ff50f4ca03aab71e8ca8e95d94c4c55e8f49cb99f3a72c5eed19d13"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C7_SAVED_EVIDENCE_EXPORT_SOURCE_HANDOFF_20261019.md",
+      "status": "??",
+      "bytes": 9313,
+      "sha256": "ff0ef95b3bd041d99c86b94782801ebb25d2ca2374ba064cf6aa5a9ceaf7f22a"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C7_SOURCE_REVIEW_AND_BUILD_PACKET_20261019.md",
+      "status": "??",
+      "bytes": 7336,
+      "sha256": "6bdf0ba0327be88230ec3accee175dbfb03768e6828782c6ed79d099e92b6fc7"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_ARTIFACT_REVIEW_AND_DEVICE_PACKET_20261022.md",
+      "status": "??",
+      "bytes": 11247,
+      "sha256": "93216d54c474fd2d03dc4ab68ae28a27d03a134d44714d2c88ffe2cd6dc82c46"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_BUILD_STATIC_HANDOFF_20261022.md",
+      "status": "??",
+      "bytes": 9791,
+      "sha256": "4a290b61c77c7684f9c7e9fa72676b07ef4c3efe6247c02ce843b4d9e5b35e88"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_DEVICE_A2_PREFLIGHT_STOP_20261022.md",
+      "status": "??",
+      "bytes": 3399,
+      "sha256": "6291e218becde8cd9f3e623c1f4f5ff2b22735918aa1ac33126f6cf10716b12a"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_DEVICE_A3_UPDATE_AND_READINESS_HANDOFF_20261022.md",
+      "status": "??",
+      "bytes": 7698,
+      "sha256": "df2dca709783be73f2a5f78487183f3e453a0f8259245a7577915ef137802388"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_DEVICE_A4_WIRELESS_REQUEST_HANDOFF_20261022.md",
+      "status": "??",
+      "bytes": 5106,
+      "sha256": "48af989530b9934cd19e0d6396469ae59af94d62f6a7b7d82b05de5ab45a8211"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_DEVICE_PREFLIGHT_STOP_20261022.md",
+      "status": "??",
+      "bytes": 3340,
+      "sha256": "48cfc1f7fd6d9f009355f497b5864ef2165dc9882a9971e01d7e1fe2790c42b8"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_HOST_PROBE_REVIEW_AND_A3_CONTINUATION_20261022.md",
+      "status": "??",
+      "bytes": 6216,
+      "sha256": "4a23978cb4dd17f2ec4979738d0b4573f3c0e7008b14151f47a3484b14a052f0"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_PHASE_A_AUDIT_AND_PIXEL_GEOMETRY_CONTINUATION_20261022.md",
+      "status": "??",
+      "bytes": 7768,
+      "sha256": "e1918e411d2152bf67b1e4c2ba315c1507e37d95094e1aeafe57e093601b0f7d"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_PREVIEW_REACTIVATION_HANDOFF_20261022.md",
+      "status": "??",
+      "bytes": 2363,
+      "sha256": "65ad064cea97bfd8fb78574f5e3a4af356f8364c19bde69f06f9a68ae176e8b7"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_SOURCE_REVIEW_AND_BUILD_PACKET_20261022.md",
+      "status": "??",
+      "bytes": 9015,
+      "sha256": "149e93d97a848ff310ab9980992b659e944a490af89be116a910300f56712b43"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_STATIONARY_OBSERVATION_CHECKLIST_20261022.md",
+      "status": "??",
+      "bytes": 4123,
+      "sha256": "3e94cf77ea0dcd30506841038e3311130175112f005269aef7a8a8ba69a17cec"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_STATIONARY_SLOT_SOURCE_DISPATCH_20261022.md",
+      "status": "??",
+      "bytes": 12595,
+      "sha256": "16b97a36b9a374a4ecaaca699ec077ea57a140cf2fd4f7984e5808afdcbd70c5"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_STATIONARY_SLOT_SOURCE_HANDOFF_20261022.md",
+      "status": "??",
+      "bytes": 14791,
+      "sha256": "6fb685ec510daac9cdf9104bdfd9635834eadb0f342fb67f160f3961bd5a1e7b"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_USB_GUARD_REVIEW_AND_CONTINUATION_20261022.md",
+      "status": "??",
+      "bytes": 4236,
+      "sha256": "03ef33604f506d4b30d3660797463107a77dfecb9ada523621d8ad4442055650"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_WIRELESS_A5_INVALID_SCENE_HANDOFF_20261022.md",
+      "status": "??",
+      "bytes": 2410,
+      "sha256": "8c4f6d833f1d73376c4dd3ab5cf08d44fb6283545499b2b877dfa225cb5a2f83"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_WIRELESS_HELPER_ACCEPTANCE_AND_CAPTURE_PACKET_20261022.md",
+      "status": "??",
+      "bytes": 6717,
+      "sha256": "90722c166e5f069825e3748a65ceb6d4f769101ab95230572943356cb557caff"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_WIRELESS_PREPARATION_DISPATCH_20261022.md",
+      "status": "??",
+      "bytes": 8136,
+      "sha256": "6d590b91e8f6158862751ad0e01a9a00ad3a2249737c41cedeb3f3b1de23f7c5"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C8_WIRELESS_PREPARATION_HANDOFF_20261022.md",
+      "status": "??",
+      "bytes": 6410,
+      "sha256": "fae2022399c1ea46b6a5ac4e4c3d7c05c4c36b2addb0a68971ec6af508e27c9f"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_A3_RECEIPT_REVIEW_AND_POST_INSTALL_DISPATCH_20261023.md",
+      "status": "??",
+      "bytes": 3697,
+      "sha256": "0334689ba5cc2eb3247d472144f49ae9fba410b74fc7e56a12bbbc2f51db7135"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_A6_EXPORT_SCOPE_AMENDMENT_20261023.md",
+      "status": "??",
+      "bytes": 4331,
+      "sha256": "b70a6cfc8321a8e15dadf74ab7bdca49ce1f3584766c30a28958c2d09968bfe0"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_A6_EXPORT_SCOPE_BLOCKER_20261023.md",
+      "status": "??",
+      "bytes": 3455,
+      "sha256": "92e279e7d789dbcda8d7fdac5a75a0021e03d65bb418585159d57b2dfdbe31da"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_A6_EXPORT_SOURCE_DISPATCH_20261023.md",
+      "status": "??",
+      "bytes": 2376,
+      "sha256": "48933d813c1a0eab969bfe83dc37b6384221a9f980b26441a5b40ae22ba5a3e7"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_A6_EXPORT_SOURCE_HANDOFF_20261023.md",
+      "status": "??",
+      "bytes": 6941,
+      "sha256": "a19fcb83997571c373244257761a891f7e48f85a075b809b7656b8eada00d883"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_A6_EXPORT_SOURCE_INDEPENDENT_REVIEW_20261023.md",
+      "status": "??",
+      "bytes": 2498,
+      "sha256": "a505c2e9d60fb6fa5522ecec25a7723d5d240c0ce609f85242686d018806e9c9"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_ARTIFACT_INDEPENDENT_REVIEW_20261023.md",
+      "status": "??",
+      "bytes": 3560,
+      "sha256": "39118405081a3386dd2b663bbf640a9ab403f70103b365c09afda7851fdaea0e"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_CONNECTION_STOP_INDEPENDENT_REVIEW_20261023.md",
+      "status": "??",
+      "bytes": 925,
+      "sha256": "cb0a96ca8e52f085e64d1234b804498216ba75a92ad6fbf3e7b9b65ae3c80470"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_HELPER_INDEPENDENT_REVIEW_20261023.md",
+      "status": "??",
+      "bytes": 2752,
+      "sha256": "0e0124ed1bef7568c06fa9c545c478d96c6f9f60d63dd130a368d1e639cedba4"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_HELPER_PREPARATION_DISPATCH_20261023.md",
+      "status": "??",
+      "bytes": 4652,
+      "sha256": "fd4fde98dd11e27907eabc4b0e79b736761861964f65e2423c901d9f49b2894f"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_HELPER_PREPARATION_HANDOFF_20261023.md",
+      "status": "??",
+      "bytes": 6782,
+      "sha256": "8066ef7a0d3536ec1df673985dec82f5b3f7373c177d773ace63a5e573d59f76"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_PHASE_A2_HOST_BOUND_STOP_20261023.md",
+      "status": "??",
+      "bytes": 2205,
+      "sha256": "a0dd0236a61490179d9326d65bdf1c0a3c0513b27de4c5f992c56c5a2e105bb2"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_PHASE_A3_INSTALL_RECEIPT_STOP_20261023.md",
+      "status": "??",
+      "bytes": 2624,
+      "sha256": "8ce03c1928fee50796aca6d0289df0c23e50142c558f2add5eb250a9a0476f6e"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_PHASE_A_CONNECTION_STOP_20261023.md",
+      "status": "??",
+      "bytes": 2407,
+      "sha256": "c98621090ddb2f4cb913186a99d47f6262f87b1eee90911ae1073cd4db2a8986"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_DEVICE_PHASE_A_DISPATCH_20261023.md",
+      "status": "??",
+      "bytes": 3180,
+      "sha256": "aad234938736a92f4c58dd20273c1bff4b5bd9d764bc72b57109359e011216ac"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_EXISTING_HUMAN_SAVE_DISPOSITION_20261023.md",
+      "status": "??",
+      "bytes": 3780,
+      "sha256": "360606a3aaa9fc12fa01761132811da4ea345d3e041afa1b04d1698e0f13686c"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_EXISTING_SAVE_READBACK_UI_STOP_20261023.md",
+      "status": "??",
+      "bytes": 2291,
+      "sha256": "6f9b0b203eceb32f4f26ed52f0fdb2ff0dea93d88d36462df75ce3651c94e084"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_EXPORT_HUMAN_SAVE_UNOBSERVED_HANDOFF_20261023.md",
+      "status": "??",
+      "bytes": 2424,
+      "sha256": "b4e3d0537432e207a5095e3f56dc90a2ccb5c85fd4f73011a0ce1c61d8d8e21c"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_OFFLINE_BUILD_STATIC_DISPATCH_20261023.md",
+      "status": "??",
+      "bytes": 3672,
+      "sha256": "7f265b87ed57ca5885639f45e2d0c5e72d13d05d6e822221f3615d26f93bbcbb"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_OFFLINE_BUILD_STATIC_HANDOFF_20261023.md",
+      "status": "??",
+      "bytes": 9312,
+      "sha256": "51c9763b17a4bd11186cb14c0058e182e18cbfa0e882e3d5caf65690beb377ab"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_ORIGINAL_A6_TRANSFER_VALIDATION_HANDOFF_20261023.md",
+      "status": "??",
+      "bytes": 2931,
+      "sha256": "ababd95408d0c0f82c4f9938a833eca07e1218013e989b152baf612909b3cbd9"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_ORIGINAL_TRANSFER_INDEPENDENT_REVIEW_20261023.md",
+      "status": "??",
+      "bytes": 1915,
+      "sha256": "c47325f786a02319631165ca59f51516705191510c15ad29d1066401c7e83516"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_PHASE_A_NEW_ENDPOINT_CONTINUATION_20261023.md",
+      "status": "??",
+      "bytes": 1635,
+      "sha256": "4774c835ea0e34d5b41ad8db54a92696c8a976cf2557ab111d3b0113ba82081e"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_POST_INSTALL_RECEIPT_COLLISION_STOP_20261023.md",
+      "status": "??",
+      "bytes": 2079,
+      "sha256": "cd410d84d5eecf72e02f9d949e3a0b0c594d2dbb2b3c670ac483e1520541756d"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_READBACK_ACCEPTANCE_STATUS_CONTINUATION_20261023.md",
+      "status": "??",
+      "bytes": 2871,
+      "sha256": "d2e932eb4909439dd21353f6bdcab9aba4214c93aa06ab899e2cd7bb9e5ad853"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_SAVED_A6_EXPORT_CONTINUATION_20261023.md",
+      "status": "??",
+      "bytes": 2760,
+      "sha256": "c83bfc60e5d3857fb1e5861ddac790b465ff358c1bd86d5d5cd17ea5d6e91340"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_SINGLE_LAUNCH_INDEPENDENT_REVIEW_20261023.md",
+      "status": "??",
+      "bytes": 1152,
+      "sha256": "22d408ef98df628a06187540696de6e6839cfbc09f04697026273c67f17df7a5"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_SINGLE_LAUNCH_STATUS_HANDOFF_20261023.md",
+      "status": "??",
+      "bytes": 2554,
+      "sha256": "897d8b224b0d66dec377af270367e601584595062190a373759eea782af12375"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_VERIFIED_IDENTITY_SINGLE_LAUNCH_20261023.md",
+      "status": "??",
+      "bytes": 2746,
+      "sha256": "98144f58e79c05999e70bf21af8b9c2835bcd702bd85aaf78fb44757b5d521ad"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_C9_WORKFLOW_ENCODING_REPAIR_20261023.md",
+      "status": "??",
+      "bytes": 3232,
+      "sha256": "fe1916a206d88fdad1644dae3b8a2dd7d806b8834f41f68eadd45eaa9559d715"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EVIDENCE_SOURCE_REVIEW_AND_BUILD_20261026.md",
+      "status": "??",
+      "bytes": 4200,
+      "sha256": "d157b081b6dbae4a2b700bfce5c0349227dc6e5316c2ac091c258318f3fdaa02"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_ARTIFACT_AUDIT_20261024.md",
+      "status": "??",
+      "bytes": 3953,
+      "sha256": "00684fcd48efceda942e7e2ed9a8140d8c6d2da91641ec0076dd3c710fa8b611"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_BUILD_C2_HANDOFF_20261024.md",
+      "status": "??",
+      "bytes": 7949,
+      "sha256": "f6d0696f14dea677a2fa4a03748f1af10423b954d982ad5b9393942627e07984"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_BUILD_DISPATCH_20261024.md",
+      "status": "??",
+      "bytes": 3992,
+      "sha256": "c04c99c95726f2c78dcbb10176536dca27f4bac5d5b84839d4bd3ce366a5abda"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_BUILD_HANDOFF_20261024.md",
+      "status": "??",
+      "bytes": 5650,
+      "sha256": "87027265c9cbe026798b4eb070796bef0ea02e6765331ba8809f81594fff593b"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_DEPENDENCY_C1_20261024.md",
+      "status": "??",
+      "bytes": 4512,
+      "sha256": "524bbb24603c501547228952884e24ef7c9f5677c1a9caa1c733d60de5145092"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_DEPENDENCY_C1_HANDOFF_20261024.md",
+      "status": "??",
+      "bytes": 6404,
+      "sha256": "8c2f51334607f8572fadfe72512277fa51f6e89833fa35a7978f91d4bb0d8e0e"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_DEPENDENCY_C1_REVIEW_20261024.md",
+      "status": "??",
+      "bytes": 4593,
+      "sha256": "03531810c0640b2d8af49dc89c4d056b69a85aef4c8edab350ec1193822b0c59"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_DEVICE_PREPARATION_20261024.md",
+      "status": "??",
+      "bytes": 4184,
+      "sha256": "c9d49ffa569a282679a6f330d33d62654ba1f4b280a8bd33d65c595d786c3de2"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_RECREATION_FIX_20261024.md",
+      "status": "??",
+      "bytes": 5004,
+      "sha256": "660490e205be70a0dc63f978ed9c09fa6cf25a78b427e3db08bebfc8e895095b"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_S3_DEVICE_RESULT_20261024.md",
+      "status": "??",
+      "bytes": 5138,
+      "sha256": "f7ee80379429ed7f4c4bb50fd4dee60508e51739d3ec628fdc16441b214f1bbb"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_S4_DEVICE_RESULT_20261024.md",
+      "status": "??",
+      "bytes": 5653,
+      "sha256": "33e14235679451df5b790ee7aeb9f48c9c41bfe10714d62624e7e567c155bdb3"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_SOURCE_AUDIT_20261024.md",
+      "status": "??",
+      "bytes": 4810,
+      "sha256": "cbcb728b9b26da93f22c890961900ceb25bb3a4488ff24f74b1ec6e8833ae5b7"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_SOURCE_DISPATCH_20261024.md",
+      "status": "??",
+      "bytes": 4444,
+      "sha256": "c2d7b963712ce8f927849afff1910b6ec1efa83b7c65a43dd8a17cf6447f9eec"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_EXPORT_RECOVERY_SOURCE_HANDOFF_20261024.md",
+      "status": "??",
+      "bytes": 9926,
+      "sha256": "365660932e82b8022a031755cef00653ff5be1bfd696bc3edb5863e7d393e8ec"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_G4_C4_DEVICE_RESULT_20261018.md",
+      "status": "??",
+      "bytes": 9547,
+      "sha256": "057bdbaea710a70b45282a4199942e3e0c240d71c9c9b7dd8da721218126087d"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_G4_STORAGE_DIAGNOSTIC_PROPOSAL_20261018.md",
+      "status": "??",
+      "bytes": 5437,
+      "sha256": "38f5c727a3dc04e696060eeafcca0eeae0cd9bd6c7b7144d313d2ca7a129bea7"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_LAYOUT_SURVEY_INDEPENDENT_REVIEW_20261023.md",
+      "status": "??",
+      "bytes": 2000,
+      "sha256": "bd191f51bd99be6dc9b444a914aa43aa47620ba6fcf1bde0e12cd327629d33b2"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_M00_EXPORTED_IMAGE_REVIEW_20261026.md",
+      "status": "??",
+      "bytes": 2513,
+      "sha256": "d7429def406e389bf33b4311e684a0250d69c5ba2067fd177292dd45753999cf"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_MATRIX_C1_ACCEPTANCE_REVIEW_20261023.md",
+      "status": "??",
+      "bytes": 3994,
+      "sha256": "63d107709c9d91e6fc0a9a80632daa0881911c7ffcbd606107c1439df2c36da7"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_MATRIX_PROPOSAL_INDEPENDENT_REVIEW_C1_20261023.md",
+      "status": "??",
+      "bytes": 4325,
+      "sha256": "ebfd8956df651e0ff0c19f965bd786689f7ca556ea16fbd0df37867d0d6f2cae"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_MATRIX_SOURCE_DISPATCH_20261023.md",
+      "status": "??",
+      "bytes": 6665,
+      "sha256": "16f28a0ce868d3160acee9a81f3cc58b89f4ca1fd19f274ce5ebf14515b17be9"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_MATRIX_SOURCE_HANDOFF_20261023.md",
+      "status": "??",
+      "bytes": 4591,
+      "sha256": "bd475f8dad4f1b0fd74bd75addbfefd123ec90d5152b3a9cc628cd9783a11e6d"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_BUILD_C1_MANIFEST_BLOCKER_20261024.md",
+      "status": "??",
+      "bytes": 2300,
+      "sha256": "5d2b3c43184c448c2dc32c90d3cb19600f4ab9b25c47fdaca4da5bf402fbcb98"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_BUILD_C2_STATIC_HANDOFF_20261024.md",
+      "status": "??",
+      "bytes": 2194,
+      "sha256": "db7e44c14c4cd95a14460ad8f36f78ee8855b56253320606755b08177a9799d2"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_BUILD_MANIFEST_C2_20261024.md",
+      "status": "??",
+      "bytes": 3504,
+      "sha256": "25683ae398f755d9f81ad0b777bf7069926b8be3207de30669d44c0b533e3c72"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_C2_ARTIFACT_AUDIT_20261024.md",
+      "status": "??",
+      "bytes": 2831,
+      "sha256": "a15eb8e4c680b81a8cc83364e31d339c17ff933afb2f8b293142603f44cc7262"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_DEVICE_PREPARATION_20261024.md",
+      "status": "??",
+      "bytes": 3583,
+      "sha256": "836915a2747e3ba4dc489428a9a55115884da4f9ec3d985d03010c594c45ffc7"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_GENERATED_DEVICE_PACKET_20261025.md",
+      "status": "??",
+      "bytes": 4373,
+      "sha256": "7b02186d066cd4df7a3256000ca0570b2e71939c453030e82dab0a0590ddb50a"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_GENERATED_PARTIAL_AUDIT_AND_RESTART_20261025.md",
+      "status": "??",
+      "bytes": 4638,
+      "sha256": "31073dcddb3f713c117c2547d6dfa2f925267db0b637f0abd92fe2da2075510a"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_PHYSICAL_PACKET_20261025.md",
+      "status": "??",
+      "bytes": 6924,
+      "sha256": "b7f427055e7c7b995e7196a275bd88dedc85df9181b33a7aa3d462379f15d805"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_UI_READINESS_CORRECTION_20261025.md",
+      "status": "??",
+      "bytes": 5416,
+      "sha256": "8c8e881efb9e3f4c26e64c7a166c2d68972d7b203432f5a070aa660014bcdf9f"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_V2_BUILD_AUTOLINK_C1_20261024.md",
+      "status": "??",
+      "bytes": 3011,
+      "sha256": "f186e0c8eff0f81df7942a6ee33124bb8cd6800db88527a4e046792a25adc73b"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_V2_BUILD_PACKET_20261024.md",
+      "status": "??",
+      "bytes": 4878,
+      "sha256": "702ec811d9e06faa59fb443c0be69d6dc00ced71ecee0a70627306445d2a9cd3"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_V2_C1_CORRECTION_HANDOFF_20261024.md",
+      "status": "??",
+      "bytes": 1811,
+      "sha256": "7a21af543ed5e552ab64721b6f7195868fb3c58263c7224687d88b1c14fb0076"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_V2_C1_INDEPENDENT_REVIEW_20261024.md",
+      "status": "??",
+      "bytes": 3796,
+      "sha256": "6ba18907c8f4292f59c5e66f30722743a2ddb7c751fef12cabe310b938385602"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_V2_OFFLINE_BUILD_FAILURE_20261024.md",
+      "status": "??",
+      "bytes": 1500,
+      "sha256": "36b69117c97ad5ddd18d19a58006551aec801d5b69e41047ba753c32f15e2fea"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_V2_SOURCE_HANDOFF_20261024.md",
+      "status": "??",
+      "bytes": 2172,
+      "sha256": "83b89fa47126153aebb572ffcec98fde511d9b2a720f29f835f89305f93a777c"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ORIENTATION_V2_SOURCE_REVIEW_C1_20261024.md",
+      "status": "??",
+      "bytes": 3985,
+      "sha256": "68743a299252782568488c6e50e1a81232247967ac93a79acd41c19fdfff7824"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_PROCESS_EXIT_REVIEW_AND_ROW_INSPECTION_20261026.md",
+      "status": "??",
+      "bytes": 6613,
+      "sha256": "66f87e7461d513f9bae6b46e42e76d66b9d172096ffbf4621a98a633b29c4566"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_READINESS_SOURCE_AUDIT_20261027.md",
+      "status": "??",
+      "bytes": 2055,
+      "sha256": "b7c102767885cca1cff865b1edb2e2714ddbf43041b3d3f4864b4d8a72ffdc7f"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_RECOVERY_RECREATION_REVIEW_AND_S3_20261024.md",
+      "status": "??",
+      "bytes": 7227,
+      "sha256": "9d50e814b1f0a2c1a86d8a753b7dcbf1a02a72080e30537ed452689fd93b1a08"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_REMAINING_MATRIX_TOOL_PROPOSAL_DISPATCH_20261023.md",
+      "status": "??",
+      "bytes": 5575,
+      "sha256": "f0a0943f0f4c37527ce28e697cf85c877f96b3d420dc49f6a46f8e0c046d6729"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_S3_REVIEW_AND_S4_EXECUTION_20261024.md",
+      "status": "??",
+      "bytes": 5982,
+      "sha256": "e93131a216413d97c82236e497c6516003813f131c50ce251d43894a2e535b65"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_S4_S5_INDEPENDENT_DISPOSITION_20261024.md",
+      "status": "??",
+      "bytes": 6335,
+      "sha256": "2447f4b674bb820d7670790fae1c550f508f1e7676e828abc94d4616d85ada2e"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_STANDALONE_PLAN_REVIEW_20261030.md",
+      "status": "??",
+      "bytes": 3316,
+      "sha256": "1f451abd294544df0ea01e1098dbeca2d12802c15f2b2c2445a4c57d5c0e7ff9"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_STORAGE_CAUSE_AND_REPAIR_PLAN_20261018.md",
+      "status": "??",
+      "bytes": 10884,
+      "sha256": "f6c3d0083c7e67c4e81ef39d7c9c2fd8ebd088c29752bdc0462b2d3006ac54a7"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_STORAGE_SMOKE_C6_ARTIFACT_HANDOFF_20261018.md",
+      "status": "??",
+      "bytes": 10135,
+      "sha256": "21ac84f1c2daa9f67a3aeecb1e689320069e5b42d4bd8c6e30676d2e6bdb09d0"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_STORAGE_SMOKE_C6_DEVICE_RESULT_20261018.md",
+      "status": "??",
+      "bytes": 4969,
+      "sha256": "9eb722061ef242d1d52ddff2e829cd529729e42ed901dc82758550a5b2e91eea"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_STORAGE_SMOKE_C6_REVIEW_AND_DEVICE_PACKET_20261018.md",
+      "status": "??",
+      "bytes": 6569,
+      "sha256": "9f10a54f3e04d1d04cf9202954b5968e9f3f477a2a7296c6fca44b65ae8db941"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_UI_APK_AUDIT_AND_DEVICE_PREPARATION_20261025.md",
+      "status": "??",
+      "bytes": 5034,
+      "sha256": "6cc4389581900a5b3505d6371d9949fe027c107f0e80fabeb4f5bc86f58dd867"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_UI_DEVICE_HELPER_REVIEW_AND_EXECUTION_20261025.md",
+      "status": "??",
+      "bytes": 5194,
+      "sha256": "3a264121a4b04ee09fc098da4ef8e5dced0a66139d7cf035265610b7374102fe"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_UI_READINESS_SOURCE_AUDIT_AND_BUILD_20261025.md",
+      "status": "??",
+      "bytes": 5132,
+      "sha256": "d6d0e4dfc0d44946683e0ee88e04c58ec2fd643f607a5de610308477505cff21"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ZERO_EXPOSURE_LAYOUT_SURVEY_20261023.md",
+      "status": "??",
+      "bytes": 4082,
+      "sha256": "ecbdafe7fb225c22c1e371c856dfb9d5b0b0d6372bec1dafc3e08ffc6d4cc5d2"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_03_ZERO_EXPOSURE_LAYOUT_SURVEY_HANDOFF_20261023.md",
+      "status": "??",
+      "bytes": 6252,
+      "sha256": "87bbfc2a036a1913bbef6cfe301b8a15cebc5fb7982633b4e48acb188d6fe46f"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_P2_04_ZXING_A3_BUILD_REVIEW_20261103.md",
+      "status": "??",
+      "bytes": 5927,
+      "sha256": "7cb8f0018aff91e731c9eba751dbcb9f42fa7d2ff0387193e73103e1b9cc5805"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_RETAKE_A2_HOST_PATH_REFUSAL_20261023.md",
+      "status": "??",
+      "bytes": 801,
+      "sha256": "694febe0c736121974e1cf33f9d15d8cf34d3fcb5208b9d290cefdf728691471"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_RETAKE_A3_WIRELESS_STATE_REFUSAL_20261023.md",
+      "status": "??",
+      "bytes": 853,
+      "sha256": "8ece36a515216dcc96b925df0a050a840089301a155f713892529e1dd9df6971"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_RETAKE_A4_INVALID_SCENE_STOP_20261023.md",
+      "status": "??",
+      "bytes": 1705,
+      "sha256": "8a6d437d4aeb2a87d0e4df7bf180b2def6bc2b464e8fdb634f6eb904e0f105cf"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_RETAKE_A5_INDEPENDENT_REVIEW_20261023.md",
+      "status": "??",
+      "bytes": 1279,
+      "sha256": "439739e91a402d23405489fe4425d812a0eddd51af29fd0887c40026388b2768"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_RETAKE_A5_SAVED_HANDOFF_20261023.md",
+      "status": "??",
+      "bytes": 1271,
+      "sha256": "2fa03deb96616b12ea61caf625ed8089faf56f420043a4f1c91dc40aebb9c15a"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_RETAKE_C8_A6_INDEPENDENT_REVIEW_20261023.md",
+      "status": "??",
+      "bytes": 1174,
+      "sha256": "2b5d2a1e3d5a70cab5c831bfd9eca6036c41c503d556282100fcd3767c4cc9f8"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_RETAKE_C8_A6_SAVED_HANDOFF_20261023.md",
+      "status": "??",
+      "bytes": 1180,
+      "sha256": "7af2be3184466f0d3482779c6af49741883eb2011776c998a4e500690a4deb8b"
+    },
+    {
+      "path": "docs/recognition/reports/PHONE_RETAKE_STALE_READINESS_STOP_20261023.md",
+      "status": "??",
+      "bytes": 1131,
+      "sha256": "17c26fc5e47f2a9547b2085c624c778324aab3bb3edc7a1c09c725c044c8576c"
+    },
+    {
+      "path": "output/finalize-camera-export-c7-build.py",
+      "status": "??",
+      "bytes": 10155,
+      "sha256": "b4c2e3d77cfe6e6187bfedffd6488e25563a5948fddbd237e4dd3f7263ccb97a"
+    },
+    {
+      "path": "output/finalize-camera-export-c7.py",
+      "status": "??",
+      "bytes": 7104,
+      "sha256": "3c9370bd08fa4a29f9233d721ecb44a91afc8037912d93c5e7dfe492101b9e5f"
+    },
+    {
+      "path": "output/finalize-storage-smoke-handoff.py",
+      "status": "??",
+      "bytes": 5699,
+      "sha256": "e2b42fd2b612c7b08bb6c1567dbf0d17849e21118b88ce6fdbc0cae1c1f8afb4"
+    },
+    {
+      "path": "output/p203-bound-epoch-bootstrap.py",
+      "status": "??",
+      "bytes": 1819,
+      "sha256": "6c3aec7091da44fb525c0717a650edf0f76d99bfb8e43e71808d3914448cc74a"
+    },
+    {
+      "path": "output/p203-corrective-bootstrap-prepare.py",
+      "status": "??",
+      "bytes": 3272,
+      "sha256": "8ef56107f9f77ebc0f15f0063aa78c61ba3bbc5a4fe0308b77439b8d3b38217e"
+    },
+    {
+      "path": "output/p203-epoch-corrective-start.py",
+      "status": "??",
+      "bytes": 2357,
+      "sha256": "d09d6be40fa8e2ead40066f5aa004a4939ba64c0f50cfe44948e311ce2f11fa4"
+    },
+    {
+      "path": "output/p203-host-controls-bootstrap.py",
+      "status": "??",
+      "bytes": 3217,
+      "sha256": "a8cf9d7c40c706535640a9fa24dccdb8f281d571d411c401682e006904dee4d7"
+    },
+    {
+      "path": "output/p203-pre-ready-recovery-bootstrap.py",
+      "status": "??",
+      "bytes": 3394,
+      "sha256": "021f9ae634fe22894c46486156b2592ae5eb0db8c77313e8eb9e8b167819448c"
+    },
+    {
+      "path": "output/prepare-camera-export-c7-build-helpers.py",
+      "status": "??",
+      "bytes": 6003,
+      "sha256": "25574cc5e26d897b4cc1ba70ca1bdb21469048e411002e4d921e170b69334b3c"
+    },
+    {
+      "path": "output/stop-camera-export-c7-build-review.py",
+      "status": "??",
+      "bytes": 11266,
+      "sha256": "4e8b2c22e706aa937892881dd70346c0cb8ccd329703f5b16f4f1b06a6f2656b"
+    },
+    {
+      "path": "output/track-b-fixed-verification-20261019.py",
+      "status": "??",
+      "bytes": 9691,
+      "sha256": "a9ec18fe787ddb6d52dd21a4a9d4b1904e4810937a1a0ee097ca82d4ebe3df0f"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence-v2/controller_v2.py",
+      "status": "??",
+      "bytes": 5387,
+      "sha256": "e836980d3ab93bcdaad0d97a759b4f14450977ece6fc176bc404b17b478b61df"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence-v2/session.py",
+      "status": "??",
+      "bytes": 2331,
+      "sha256": "1706fcdbc01434fdfff59afeb8e7018db0c1bb7855d4a1500ecd637f762a5477"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence-v2/test_controller_v2.py",
+      "status": "??",
+      "bytes": 19446,
+      "sha256": "7c015c67f69ff7c77cf505fa8aac74c27b78d5760dde1acbcf06ce1fd31a8ae0"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence-v3/README.md",
+      "status": "??",
+      "bytes": 822,
+      "sha256": "bef1b8555cff73c239f0f44b2513c247423985ac70321bd5484478994e02d2c5"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence-v3/controller_v3.py",
+      "status": "??",
+      "bytes": 24832,
+      "sha256": "2dc1ac70c98a0205ebae5c4f3147a7b4bb6cb4441801aac147c08c7c0f4ffcf9"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence-v3/session.py",
+      "status": "??",
+      "bytes": 2218,
+      "sha256": "7624fd132be8978296f98e8aa47cbf303b911c2495517f04cc706fffa0930fc7"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence-v3/test_controller_v3.py",
+      "status": "??",
+      "bytes": 20237,
+      "sha256": "8fd22ae61c0bdea3326245860bab30d0db9e57fb5408df7b560cf7901a29f645"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence-v4/controller_v4.py",
+      "status": "??",
+      "bytes": 27961,
+      "sha256": "0072142cd09c955626adeb1234859051a926bcc0faf141fc9e0195b44bc838d5"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence-v4/main_session.py",
+      "status": "??",
+      "bytes": 4713,
+      "sha256": "0ec1d80f2738106f5799a3c798a1d6c47bd0ddf92de57738fb1422e74a3e6722"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence-v4/test_controller_v4.py",
+      "status": "??",
+      "bytes": 20321,
+      "sha256": "825bfac29f0d757253900e3720d644fde7df1f85eab11cb90112404b57dc7201"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence-v4/test_main_session.py",
+      "status": "??",
+      "bytes": 2940,
+      "sha256": "95b6a30b5a4513a6f1cbb54f9e84963b79cd14cf564bcf67f9a350d04eaa3219"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence-v4/test_pending_controls.py",
+      "status": "??",
+      "bytes": 5023,
+      "sha256": "73c2a978f3f64a47f416e0961edd90b031f8714da4712f1e07f09c3d375ff65a"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence/README.md",
+      "status": "??",
+      "bytes": 2385,
+      "sha256": "3f1ac5a04426ca58cd1fd9f61b7c269032447a13579d3b750532090037d16f24"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence/charter.example.json",
+      "status": "??",
+      "bytes": 203,
+      "sha256": "3f29d108f76930c0769c2b7bcd4b60f89b8481eec8fdeb32f82a2dcc4537041c"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence/controller.py",
+      "status": "??",
+      "bytes": 19471,
+      "sha256": "89257163307e476fcb0c243d6c69e4f9a7a222347cca2aa04ebea49e2580670a"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence/packet.example.json",
+      "status": "??",
+      "bytes": 518,
+      "sha256": "e490efb765aef9afaab3c574d095b5897690e64fd5f3ba2f34ec21a3694d8781"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence/session.py",
+      "status": "??",
+      "bytes": 1888,
+      "sha256": "076bc50bc7bd5849f9c6c46de06d34dc4fe7a19f23e4e3a1518c769e765fc21e"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-evidence/test_controller.py",
+      "status": "??",
+      "bytes": 25371,
+      "sha256": "43da011b710123092a941e96a88dbe86986d184c6c9d5e3702f15265fc06b486"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-session-v5/controller_v5.py",
+      "status": "??",
+      "bytes": 28392,
+      "sha256": "b6c5952656f5c1f42add4a1ff768cc8318c60d32a5882abe3be0f6a967c1b724"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-session-v5/jest-session.config.cjs",
+      "status": "??",
+      "bytes": 630,
+      "sha256": "6a79e20067a7c0d8bcedb2038bca159c02618225ae31d1b6cd7b67c6ac5db0bb"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-session-v5/main_session.py",
+      "status": "??",
+      "bytes": 8311,
+      "sha256": "e5b78800313186b82b63eade01720a5262367a5c569f46c83e92a1fafb55f4c5"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-session-v5/panel-session.test.js",
+      "status": "??",
+      "bytes": 6719,
+      "sha256": "0630b84137cf6cef75de495351b9d60e3a1a7cfe0b2539375e5c6337357a46b4"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-session-v5/prepare_disabled.py",
+      "status": "??",
+      "bytes": 3543,
+      "sha256": "ed6b990451d1c4c7a88437227624d26d772afe9d9247a8c2a4fa39055feb4eb9"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-session-v5/test_packet.py",
+      "status": "??",
+      "bytes": 5536,
+      "sha256": "59d0feb9d99fb65f2ed8d71ce87e599b1a07d24da2093548ae450419abff8a53"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-session-v5/test_session.py",
+      "status": "??",
+      "bytes": 25877,
+      "sha256": "693b003954da4996ad78137b0fa4b21795be2169a01485303ba4523685e0c4c0"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-session-v5/test_timing_correction.py",
+      "status": "??",
+      "bytes": 15167,
+      "sha256": "bd681448a53be7315bbc19371365a19f02ac383eaf3409dba264d82112a3ec5e"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-session-v5/verify_local.py",
+      "status": "??",
+      "bytes": 1616,
+      "sha256": "15ee43f3708adf4822b4f2796755732fe01b54b0b633c8f7124069a0acd4e932"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-session-v6/base_v6.py",
+      "status": "??",
+      "bytes": 28472,
+      "sha256": "3fc48324205c0631c55da06dca983f541390e7bb7cb2444306fb19eb6075c2ad"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-session-v6/controller_v6.py",
+      "status": "??",
+      "bytes": 28918,
+      "sha256": "5907e78e780c7e6f8dda29aa5425a12e914f1f7ca3a22e656a7a5fb137c0c52e"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-session-v6/main_session.py",
+      "status": "??",
+      "bytes": 8770,
+      "sha256": "7ad6a79974923f73a008c5a86f9acdc90838931c6125958f8f648b85be9b571c"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-session-v6/test_preview_v3.py",
+      "status": "??",
+      "bytes": 3560,
+      "sha256": "de6ca69b497f9b2f6e87efc07bcbcac2cc71f3b54eed069261216222b1a690b1"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-v2/CosiGeometryRegistry.kt",
+      "status": "??",
+      "bytes": 1360,
+      "sha256": "20c16c995841f3c3e4aa9845b0b2d1023adf278aa933868367583d074d40e801"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-v2/CosiImageOwnership.kt",
+      "status": "??",
+      "bytes": 1063,
+      "sha256": "70b7821814f79ffc3ccccc71ec37b63d15df93d0252224d69c070f864a2770f4"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-v2/CosiOwnershipChecks.kt",
+      "status": "??",
+      "bytes": 2983,
+      "sha256": "ae688e88ee37f63b86497b1a36f62842ee8c027527494996cf67f22bb5181f4e"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-v2/CosiPreviewReadiness.kt",
+      "status": "??",
+      "bytes": 1002,
+      "sha256": "4bad2ab7c9609946ae0d19d6d2b37db357b969b58606fe5fbc67e1db384c73ef"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-v2/CosiPreviewReadinessChecks.kt",
+      "status": "??",
+      "bytes": 1573,
+      "sha256": "437a9e834a5fb9b0e8cc0753f29bc7f5a4a5bbe227001f896b7ba174191d2ba1"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-v2/CosiSameFrame.kt",
+      "status": "??",
+      "bytes": 9978,
+      "sha256": "bca1be6dc6e0791c2acc79f5b23d106390c717b9e2042c7e017a332f6a40b793"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-v2/CosiViewMembers.kt.txt",
+      "status": "??",
+      "bytes": 5604,
+      "sha256": "3e91f2b60a1b4273a811cd82fa1baf141909e9c42097c47922383d5dca338579"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-v2/apply.cjs",
+      "status": "??",
+      "bytes": 8739,
+      "sha256": "e952f95c8bc86d24077206dd3507aa7e712fa55ccc60d011787d008939d3bff4"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-v2/apply.test.cjs",
+      "status": "??",
+      "bytes": 4370,
+      "sha256": "1540eafecdc96bd233ff502a9e59ede84613b601a898773b2f9a21a75afad663"
+    },
+    {
+      "path": "tools/scripts/camera-orientation-v2/manifest.json",
+      "status": "??",
+      "bytes": 2266,
+      "sha256": "4d8af4bce5320678872f222301e359393941fed17df82240bc68e7ef07a0b64d"
+    },
+    {
+      "path": "tools/scripts/camera-publish-namespace-checks.py",
+      "status": "??",
+      "bytes": 6784,
+      "sha256": "d090812fd051bff0e4b4f371746c1c9bd48bd140a6216d3debcd9bd5eca50317"
+    },
+    {
+      "path": "tools/scripts/enrollment-control-publication-checks.py",
+      "status": "??",
+      "bytes": 3762,
+      "sha256": "266c866034573008f7c3ff1adbf6cf2f5d15b44014db91940efeb5bcb452bb33"
+    },
+    {
+      "path": "tools/scripts/p203-main-host-wait-scaffold-20261027.py",
+      "status": "??",
+      "bytes": 1777,
+      "sha256": "f841300facbd4bf73e83a35ad9dce5fe21e3eb8daf94122bb65a2aa12c32ca14"
+    },
+    {
+      "path": "tools/scripts/p203-main-host-wait-tests-20261027.py",
+      "status": "??",
+      "bytes": 845,
+      "sha256": "18428cc89296f69cbf2f2422c8cabce7211ac8d1c3a233daa267c494301fa1d7"
+    },
+    {
+      "path": "tools/scripts/p203-preview-v3-freeze-20261027.py",
+      "status": "??",
+      "bytes": 3949,
+      "sha256": "c21d941baffd7b1a741e3cbe60f44de61afc08ae10f4e6593d95c303891124db"
+    },
+    {
+      "path": "tools/scripts/p203-readiness-build-packet-20261027.py",
+      "status": "??",
+      "bytes": 5098,
+      "sha256": "547fa74b835a59a5b7c66e7828caa1748f00e8680f0a2b9f78d28f20154cf525"
+    },
+    {
+      "path": "tools/scripts/p203-readiness-c1-selfcheck-20261027.py",
+      "status": "??",
+      "bytes": 1333,
+      "sha256": "e48e7d37d8be6470b6e14e36c472c43bf8aa6edb0b8b50c94d171a91ff73de8b"
+    },
+    {
+      "path": "tools/scripts/p203-readiness-handoff-20261027.py",
+      "status": "??",
+      "bytes": 1684,
+      "sha256": "ea967f543ca5a0efce0442d424bb2c812289234467329cc3ff8cf33ea94887b3"
+    },
+    {
+      "path": "tools/scripts/p203-readiness-host-scaffold-20261027.py",
+      "status": "??",
+      "bytes": 1809,
+      "sha256": "e5b7e51a5b2e8f665bcc9d74370c99a3d00d7970aa6b4253c13baa665cb0d1a0"
+    },
+    {
+      "path": "tools/scripts/p203-readiness-implementation-20261027.py",
+      "status": "??",
+      "bytes": 1533,
+      "sha256": "57931e6eb141419341b3d11d179da97a501c194fff9fb84351dcc9793fca72f9"
+    },
+    {
+      "path": "tools/scripts/p203-readiness-namespace-20261027.py",
+      "status": "??",
+      "bytes": 5225,
+      "sha256": "677c763c8f86bbf67ecffe75b4fff06aef0efa850f83f80e0a01f59bb5865516"
+    },
+    {
+      "path": "tools/scripts/p203-readiness-selfcheck-20261027.py",
+      "status": "??",
+      "bytes": 2452,
+      "sha256": "e5d3b03b24237cca2fb20fa8ec7b02644d4830be2e55926a8e3f778720ccf319"
+    },
+    {
+      "path": "tools/scripts/p203-readiness-smoke-20261027.py",
+      "status": "??",
+      "bytes": 2342,
+      "sha256": "6ee0a3b5836b9f1da1b6075419fa13a6a8bcd2a9eabf51e754acfcd966582ad2"
+    },
+    {
+      "path": "tools/scripts/phone-camera-export-c7-build-static-a2.py",
+      "status": "??",
+      "bytes": 13681,
+      "sha256": "4c56be416f52598efce7df80c5d834326994be50f55c44bc0da63f80920d9093"
+    },
+    {
+      "path": "tools/scripts/phone-camera-export-c7-build-static.py",
+      "status": "??",
+      "bytes": 13439,
+      "sha256": "503759ce29b5ff2fd127c87a90f9b03ebd87703d98719c04b1568078f5460fc9"
+    },
+    {
+      "path": "tools/scripts/phone-camera-export-c7-build.py",
+      "status": "??",
+      "bytes": 11872,
+      "sha256": "fb8d77bcba3f96e5e4ed2753dff109a5246fdd695164176692d19d173f7faec4"
+    },
+    {
+      "path": "tools/scripts/phone-camera-export-c7-checks.py",
+      "status": "??",
+      "bytes": 6160,
+      "sha256": "b54bb9997b1b85ae55fc523ed266e3bab974b75f2013133de8d3cf46c866dc3f"
+    },
+    {
+      "path": "tools/scripts/phone-camera-export-c7-source.py",
+      "status": "??",
+      "bytes": 3027,
+      "sha256": "bb2b38b91bbc0882b3ee5f6b347b731fd895486000186b5f96c5e624e0ab738f"
+    },
+    {
+      "path": "tools/scripts/phone-camera-export-c9-checks.py",
+      "status": "??",
+      "bytes": 4758,
+      "sha256": "fedccbc017dcb81d7cc00b89795a7a43a77b0fba0d7a63532dfe3364d366add0"
+    },
+    {
+      "path": "tools/scripts/phone-camera-export-c9-fixture.py",
+      "status": "??",
+      "bytes": 6991,
+      "sha256": "84e802d35c526cc867cf8692365ced0533294940cfbe7df6a5a5ef86f4a39709"
+    },
+    {
+      "path": "tools/scripts/phone-camera-export-c9-source.py",
+      "status": "??",
+      "bytes": 3230,
+      "sha256": "6090f2000ff78de9683e758c4cb12c23c0dd6abfbcbd209f8ec1af39f06a7371"
+    },
+    {
+      "path": "tools/scripts/phone-camera-geometry-c8-build-static.py",
+      "status": "??",
+      "bytes": 14228,
+      "sha256": "1332df5919b562698a43b46d2de4790a1fcc8994725fbf7686fb079a3e6b5b04"
+    },
+    {
+      "path": "tools/scripts/phone-camera-geometry-c8-build.py",
+      "status": "??",
+      "bytes": 11929,
+      "sha256": "66b82042c10382be9e5a3c6106e23c292bb782f17cf3b5efb65f367f13d16eb9"
+    },
+    {
+      "path": "tools/scripts/phone-camera-geometry-c8-checks.py",
+      "status": "??",
+      "bytes": 6665,
+      "sha256": "db24e67214a43d9debb73f6f10fab990c76648a77b31f586e2f74538bfd045ff"
+    },
+    {
+      "path": "tools/scripts/phone-camera-geometry-c8-source.py",
+      "status": "??",
+      "bytes": 6458,
+      "sha256": "586475f30c79c0eb717dcf2f258ec4e48df9912450d242aaf1f44515c10b666f"
+    },
+    {
+      "path": "tools/scripts/phone-camera-geometry-c8-target.py",
+      "status": "??",
+      "bytes": 3017,
+      "sha256": "ad2b650bdbbde3c80fb73c8d13e0a4093b2c4933d22cbaf8d91d2cc43823b649"
+    },
+    {
+      "path": "tools/scripts/phone-camera-storage-build-static-a2.py",
+      "status": "??",
+      "bytes": 12758,
+      "sha256": "8bd814945d58d721991bfbd4c3ea6a7160fa33e46ab1b75b39c1ae0e537a2406"
+    },
+    {
+      "path": "tools/scripts/phone-camera-storage-build-static.py",
+      "status": "??",
+      "bytes": 10370,
+      "sha256": "619fadea92dbde769628227fcad4b5978e690d91e2590d6faa9c84351e4090c7"
+    },
+    {
+      "path": "tools/scripts/phone-camera-storage-build.py",
+      "status": "??",
+      "bytes": 11174,
+      "sha256": "a4edc6bdb8d95f6843adf9b75f9883c23f04e629d12322f491787ea86dbd7914"
+    },
+    {
+      "path": "tools/scripts/phone-camera-storage-durability.py",
+      "status": "??",
+      "bytes": 4312,
+      "sha256": "7fcb1946a82f9dc92535f5e854d2858c71dbdb026c72697c405343b849641bba"
+    },
+    {
+      "path": "tools/scripts/phone-camera-storage-repair-checks.py",
+      "status": "??",
+      "bytes": 4453,
+      "sha256": "acc295f2fccbe8f23389ed9e6ee9c45db2ce3b9d5960270038336560bc5c686e"
+    },
+    {
+      "path": "tools/scripts/phone-camera-storage-repair-source.py",
+      "status": "??",
+      "bytes": 2277,
+      "sha256": "b82acec6d2a15dadf6bf08e5d7d3fd894c0f5486f9bd9d6ad4a818bd7be88dc0"
+    },
+    {
+      "path": "tools/scripts/phone-camera-storage-smoke-static.py",
+      "status": "??",
+      "bytes": 5870,
+      "sha256": "423416212da68b62c9a3b5cecdac006c1a49f644cdce9b296a5bdaa9b45d164f"
+    },
+    {
+      "path": "tools/scripts/phone-camera-storage-smoke.py",
+      "status": "??",
+      "bytes": 11653,
+      "sha256": "6874c4d90c2ff07a493db284ef9e014a5c0bb5f2303bb19fa6a889e24ef055d8"
+    }
+  ],
+  "excluded_changed": [
+    "output/pdf/framing-comparison-top-three-20261011.pdf",
+    "tools/scripts/__pycache__/camera-publish-namespace-checks.cpython-312.pyc",
+    "tools/scripts/__pycache__/camera-publish-namespace-checks.cpython-313.pyc",
+    "tools/scripts/camera-orientation-session-v6/__pycache__/base_v6.cpython-313.pyc",
+    "tools/scripts/camera-orientation-session-v6/__pycache__/controller_v6.cpython-313.pyc",
+    "tools/scripts/camera-orientation-session-v6/__pycache__/main_session.cpython-313.pyc"
+  ],
+  "raw_zip_sha256": "df20dbfed02ddc678bdd5ac398d3422000333564364905cb8221326c9e01d94d",
+  "raw_zip_bytes": 2281772
+}

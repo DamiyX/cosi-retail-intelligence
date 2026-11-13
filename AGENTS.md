@@ -47,6 +47,12 @@ matching error. Do not repeatedly launch, reset Docker or erase database data.
 Before agent dispatch or model changes, follow the founder's model/effort and
 sequential handoff policy in `docs/engineering/MULTI_AGENT_WORKFLOW.md` section
 1.1. Older task prompts naming other models do not override that policy.
+All current, new and resumed agents must read section1.1's October25 amendment:
+own ordinary diagnosis and one bounded repair; escalate failed repairs or material
+scope/authority changes; retain the stopped handoff and independent final audit.
+October26 correction: request effort changes directly from the founder first;
+use the coordinator's preauthorized setting-only fallback after60 seconds without
+a response or explicit founder unavailability. Follow section1.1 for details.
 Product/UX inputs and proposals are preserved in
 `docs/product/PRODUCT_CHANGE_BACKLOG.md`; a proposal is not an approved runtime
 contract or proof of implementation.

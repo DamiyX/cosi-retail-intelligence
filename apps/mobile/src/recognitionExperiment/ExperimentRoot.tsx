@@ -6,6 +6,12 @@ import type { ImageProbeResult } from './imageProbes';
 import { PhonePortabilityPanel } from './PhonePortabilityPanel';
 
 export default function ExperimentRoot() {
+  if (process.env.EXPO_PUBLIC_RECOGNITION_CAMERA_COMPONENT_INTEGRATION === '1') {
+    // Load the thin integration route before any legacy camera/history panel.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- Isolated synchronous route.
+    const Panel = require('./CameraComponentIntegrationPanel').default;
+    return <Panel />;
+  }
   if (process.env.EXPO_PUBLIC_RECOGNITION_CAMERA_PROOF === '1') {
     // The zero-camera route must not evaluate expo-camera or mount legacy recovery in camera mode.
     // Metro's synchronous conditional require keeps expo-camera unevaluated in the default route.

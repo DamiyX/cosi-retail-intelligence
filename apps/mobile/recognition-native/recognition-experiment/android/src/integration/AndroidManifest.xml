@@ -1,0 +1,19 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <application>
+    <activity android:name=".EnrollmentBarcodeActivity" android:exported="false" android:enabled="${p204EnrollmentEnabled}" android:screenOrientation="portrait" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+    <meta-data android:name="com.damiyx.recognition.OBSERVED_ENROLLMENT" android:value="${p204EnrollmentEnabled}" />
+    <activity android:name=".EnrollmentActivity" android:exported="false" android:enabled="${p204EnrollmentEnabled}" android:screenOrientation="portrait" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+    <activity android:name=".CameraComponentIntegrationActivity" android:exported="false" android:enabled="${p203IntegrationEnabled}" android:screenOrientation="portrait" android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+    <activity android:name=".CameraCaptureDiagnosticActivity" android:exported="false"
+      android:enabled="${p203DiagnosticEnabled}" android:excludeFromRecents="true" android:screenOrientation="portrait"
+      android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+    <activity android:name=".CameraMatrixRecoveryActivity"
+      android:exported="false" android:enabled="${p203RecoveryEnabled}"
+      android:excludeFromRecents="true" android:label="Saved evidence recovery"
+      android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+    <activity android:name=".CameraOrientationRecoveryActivity"
+      android:exported="false" android:enabled="${p203RecoveryEnabled}"
+      android:excludeFromRecents="true" android:label="V2 geometry evidence"
+      android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+  </application>
+</manifest>

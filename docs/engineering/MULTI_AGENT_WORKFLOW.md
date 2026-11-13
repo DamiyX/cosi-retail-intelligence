@@ -42,10 +42,10 @@ preferences. Apply it to existing and new agents:
   proposed model/effort and purpose. The defaults above are authorized; any
   different model or effort above high requires explicit founder approval first.
   In particular, do not reuse older Astra, Terra, Luna or GPT-5.6 settings.
-- Agents cannot assume they can change their own model. If escalation is needed,
-  stop with the concrete difficulty, attempted checks and recommended setting.
-  The coordinator obtains approval and applies the supported override. Return
-  to the normal task setting after the approved bounded escalation.
+- Agents cannot assume they can change their own model. For a Low/Medium agent's
+  bounded technical correction, the October25 amendment below supplies standing
+  approval for the coordinator to apply Sol6.1 High, then return it to the normal
+  task setting. Other model changes follow the explicit-approval rules above.
 - A usage-limit or model switch resumes the same task branch and unfinished
   work. Inspect current commits/diff and passed evidence; do not restart or
   discard another agent's valid work.
@@ -71,6 +71,143 @@ final review separately. Routine utilities retain the lower-effort policy above.
 This is a project preference, not a new architecture or milestone acceptance
 rule. If the host cannot change the current coordinator model/settings, tell the
 founder to select GPT-6.1 Sol high in the app; do not claim a switch occurred.
+
+### October23 founder amendment — independent test execution and routine recovery
+
+Founder explicitly requested less coordinator involvement in mundane test/setup
+problems and direct interaction between the test agent and the founder. This
+amendment supersedes older task briefs that require coordinator escalation for
+every routine observation, connection or operator mistake. It does not change
+test acceptance criteria, native safety limits or consequential-action approvals.
+
+- Use Sol6.1 Medium for interactive phone testing and routine diagnostic judgement;
+  High for implementation, helper/code corrections and independent code audits.
+  Low remains suitable for fixed utility steps. Model effort does not enlarge
+  authority. Finish an active command before changing execution settings; never
+  restart an effect because the model/effort or chat changed.
+- The assigned test agent owns the complete approved test and routine recovery,
+  communicates directly with the founder and returns one stopped handoff with
+  actual results. The coordinator plans, resolves material scope/code questions
+  and independently audits the completed handoff. Avoid micro-dispatches for each
+  observation or filename. Preserve sequential source ownership.
+- The agent may ask the founder to unlock/foreground the owning app, supply the
+  current Wireless debugging address/port, correct framing before capture, or
+  identify the filename/destination they actually chose. It may connect to that
+  exact already-paired endpoint and verify the same selected hardware/build/app.
+  No random discovery, new pairing/credentials, unrelated devices or radio changes
+  contrary to a test's required online/offline state.
+- A failed read-only UI/status/file-metadata observation may have at most TWO
+  bounded recovery attempts per incident, with fresh identity/readiness checks,
+  distinct intent/receipt names and no concurrent native job. Record the original
+  failure and each attempt. No unbounded polling or retries until green. Repeated
+  failure after those attempts, unavailable tooling or uncertainty escalates.
+- Reconcile an operator action before repeating anything: when the founder has
+  already pressed Save, inspect the existing native receipt and selected local
+  test document. For a prefilled filename, ask the founder directly and inspect
+  only the relevant test-export names. Match exact job/source/APK/count/hash
+  before transfer; no general Downloads/gallery/private-data inventory.
+- Apparent installer success plus ordinary transfer progress permits read-only
+  installed-hash/UID/data checks, not a reinstall. UI observation errors do not
+  establish camera/export failure. Preserve original strict-helper errors and
+  use approved read-only observation procedures; never forge a completion record.
+- Keep at-most-once capture, install, export and Save effects where required.
+  An uncertain effect, consumed native journal, expired human-readiness window or
+  prior Save must NOT be replayed. A replacement capture, evidence deletion/reset,
+  new permission/dependency, code/helper guard change, acceptance-threshold change
+  or material source/privacy/ownership problem still goes to the coordinator.
+  Urgent data-loss/security risk escalates immediately; do not try twice first.
+- Use already authorized tools/commands within the reviewed resource/data scope.
+  Do not modify a frozen helper, bypass native admission checks or expand an
+  export merely to continue. Test procedure may adapt routine read-only command
+  sequencing and direct human setup within this amendment; code changes require
+  the High implementation lane and stopped independent review.
+- If the founder is absent, do independent work and leave only the human-dependent
+  part pending. Do not open a timed picker or trigger a new physical capture while
+  awaiting them. Existing no-late-photo and no-late-Save limits remain.
+- Final handoff briefly lists material recoveries, original failures and their
+  resolution, commands/evidence, remaining uncertainty and STOP/lease release.
+  Routine navigation needs no transcript; failures relevant to interpreting test
+  validity must not be hidden. No coordinator ping is needed for each resolved
+  minor issue. Notify the coordinator directly when complete or truly blocked.
+
+Track B application: see
+`docs/recognition/PHONE_TEST_EXECUTION_RECOVERY_20261023.md`.
+
+### October25 founder amendment — agent-owned diagnosis and correction
+
+**3 November clarification:** founder reaffirmed that an agent finding an ordinary scoped build/self-review defect should diagnose it, apply one evidence-backed correction and verify it before reporting a failure to the coordinator. Do not introduce a coordinator-only permission handoff for each routine build-wrapper/cache mistake. Preserve original failures and distinct effect receipts. A target of one completed APK must not be turned into a coordinator-created ban on ordinary repair; genuine founder-imposed hard attempt/resource limits and at-most-once physical/install/export constraints still apply. If the agent's bounded correction fails, send evidence to the coordinator. If the coordinator-issued recovery also fails, request the founder's Astra selection for diagnosis/planning before another implementation/build experiment. Do not auto-switch to Astra. For the current ZXing build, corrected A2 has failed; further build is held for that review. No source, dependency, permission, test-criteria or physical allowance expansion follows from this clarification.
+
+Founder explicitly approved this workflow for current agents, future agents and
+previous agents when resumed. This supersedes older briefs requiring coordinator
+diagnosis or permission for every ordinary defect within an approved task. It
+changes recovery responsibility, not the task's mutation ceiling, action budget,
+acceptance criteria or host/tool policy.
+
+1. **The assigned agent owns ordinary recovery.** Inspect the evidence, identify
+   the cause, make one bounded correction within the approved scope and run the
+   relevant checks. A coherent repair includes normal compile/lint/test cleanup;
+   it is not permission for unrelated speculative fixes or retries until green.
+   If verified, continue the approved task without a coordinator ping for each
+   resolved issue. Preserve the original failure and meaningful repair evidence.
+2. **Code correction runs at Sol6.1 High; ask the founder first.** October26
+   correction supersedes the earlier coordinator-first setting route. A Low/Medium
+   agent settles active commands, checkpoints, then sends the founder a direct
+   actionable request to switch that same chat to High and resume. Give a brief
+   symptom and say that diagnosis/first repair remains with the agent. Allow at
+   least 60 seconds from delivery for the founder to respond; do not message the
+   coordinator about the setting during that window. A reply that the founder is
+   changing it counts as a response: wait for their completion rather than racing
+   the manual change. If the founder explicitly says they are unavailable, or no
+   response arrives after 60 seconds, request the already-authorized setting-only
+   fallback from the coordinator. Elapsed time is not new consent: fallback applies
+   only to the previously approved effort change, without expanding task authority.
+   Keep the founder question pending while waiting; do not issue duplicate requests.
+   Record that the setting was applied or superseded so neither route changes it
+   twice. Never claim a switch without supported confirmation. Diagnosis/repair
+   stays with that same agent; no new coordinator implementation plan is needed
+   for an ordinary scoped repair. After required repair checks/review, return to
+   Medium for interactive testing or the task's established utility setting.
+3. **Escalate a failed repair with evidence.** When that bounded correction does
+   not solve the problem, stop with the symptom, reproduction/evidence, attempted
+   correction, check results, preserved state and specific remaining question.
+   The coordinator reviews that work and chooses the next approach without
+   restarting diagnosis blindly or repeating consumed effects.
+4. **Astra follows unresolved coordinator recovery.** If the coordinator's next
+   approach also fails, or a larger planning/architecture decision is needed,
+   request the founder's Astra switch for investigation/planning. This is not an
+   automatic model switch and does not authorize architecture changes. Existing
+   M8 Astra planning preferences remain; routine scoped bug correction is High.
+5. **Keep independent final review.** The agent self-checks, then stops/releases
+   ownership and sends the completion handoff. The coordinator independently
+   audits material work and evidence. Self-repair does not waive an established
+   source/artifact review required before device/private-data/external effects.
+
+Routine connection recovery, locating the intended test file, own-app navigation
+and operator setup stay with the executing agent under the October23 bounds.
+Ask the founder directly for missing connection/unlock/framing/file-choice input;
+questions remain pending while they prepare. Do not route mundane questions
+through the coordinator. An effort-setting request is not a technical handover;
+the October26 founder-first/60-second fallback rule above also applies to every
+new or resumed assignment. An agent already at High does not request High again.
+
+Escalate immediately when the action would exceed approved scope or authority:
+data deletion/reset, repeating consumed/uncertain photo/export/install effects,
+new permissions/dependencies, changing test limits/thresholds, architecture or
+ownership changes, or a material security/data-loss risk. Do not try a repair
+first merely to satisfy the one-attempt rule. Host/tool policy stops must be
+respected; no alternate automation to bypass a blocked action. Read-only recovery
+and a code correction do not grant authority to replay the failed physical effect.
+
+Prefer the same agent for repair. Use a separate bounded repair worker only when
+delegation is authorized and the problem is substantial/separable enough to
+justify coordination. Temporary workers do not delegate further. Preserve one
+writer and a clear return contract; never spawn a repair agent for every small bug.
+
+Every new/resumed assignment must reference this amendment and state the approved
+scope, model/effort, ordinary self-repair authority, escalation triggers, required
+checks and stopped handoff. Briefs should cover a coherent useful slice instead of
+forcing micro-handoffs for routine diagnosis/build-staging cleanup. Existing
+milestone, privacy and consequential-action gates remain explicit.
 
 ---
 
@@ -617,3 +754,13 @@ coordinator cannot switch its own model. If the founder does not reply after a
 reasonable opportunity, Sol6.1 HIGH is the explicitly authorized fallback. A reply
 selecting a model controls the audit. This does not authorize auto-escalation or
 change the R0 implementer setting of Sol6.1 HIGH. Maintain sequential ownership.
+
+## Physical test communication — founder instruction October23
+
+For the current12-attempt P2-03 run, main retains execution ownership. Keep the
+session open while waiting for the founder's action selection; use one action
+prompt per acquisition and allow time to read/setup. A capture readiness window
+starts only after the founder selects READY, never when the question is posted.
+After this run, delegate further test execution to the testing agent; coordinator
+owns planning, dispatch, review and audit. This does not expand capture budgets,
+permit late/repeated shutters, or resume the currently paused Track B chat.

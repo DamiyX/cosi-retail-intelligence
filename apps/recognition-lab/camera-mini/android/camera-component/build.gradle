@@ -1,0 +1,22 @@
+plugins { id 'com.android.library' }
+android {
+ namespace 'local.cameracomponent'
+ compileSdk 36
+ buildToolsVersion '36.0.0'
+ ndkVersion '27.1.12297006'
+ defaultConfig { minSdk 30; ndk { abiFilters 'arm64-v8a' }; externalNativeBuild { cmake { arguments '-DANDROID_STL=none' } } }
+ externalNativeBuild { cmake { path 'src/main/cpp/CMakeLists.txt'; version '3.22.1' } }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+dependencies {
+ implementation 'androidx.camera:camera-core:1.6.0'
+ implementation 'androidx.camera:camera-camera2:1.6.0'
+ implementation 'androidx.camera:camera-lifecycle:1.6.0'
+ api 'androidx.camera:camera-view:1.6.0'
+ implementation 'androidx.core:core:1.17.0'
+ api 'androidx.lifecycle:lifecycle-runtime:2.6.1'
+ implementation 'com.google.guava:guava:33.5.0-android'
+ constraints { implementation('androidx.appcompat:appcompat:1.7.1'); implementation('androidx.fragment:fragment:1.5.4') }
+}
+
+dependencyLocking { lockAllConfigurations() }

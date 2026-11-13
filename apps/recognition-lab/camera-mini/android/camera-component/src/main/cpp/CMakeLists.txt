@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.22.1)
+project(mini_publish C)
+add_library(mini_publish SHARED publish.c)
+target_link_libraries(mini_publish dl)
+target_link_options(mini_publish PRIVATE -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384)
